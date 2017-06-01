@@ -3,22 +3,28 @@
   "version": "0.1.0",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
-    "test": "./node_modules/.bin/jasmine-node spec"
+    "test": "jasmine-ts spec/**/*.spec.ts"
   },
   "author": "Antonius Ostermann",
   "license": "ISC",
   "dependencies": {
+    "debug": "2.6",
     "express": "^4.15.3",
     "ioc-container": "../../Masterthesis/ioc-container",
-    "typescript": "^2.3.4"
+    "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
-    "request": "^2.81.0",
-    "tslint": "^5.4.0",
+    "@types/express": "^4.0.35",
+    "@types/jasmine": "^2.5.48",
     "gulp": "^3.9.1",
-    "gulp-typescript": "^3.1.7",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-tslint": "^8.1.0",
-    "@types/jasmine": "^2.5.48"
+    "gulp-typescript": "^3.1.7",
+    "jasmine-ts": "^0.1.3",
+    "request": "^2.34",
+    "request-promise": "^4.1.1",
+    "@types/request-promise": "^4.1.33",
+    "tslint": "^5.4.0",
+    "typescript": "^2.3.4"
   }
 }

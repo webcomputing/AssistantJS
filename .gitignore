@@ -1,2 +1,10 @@
+# Libs
 node_modules
+
+# IDE
 .vscode
+
+# Builds
+dts
+lib
+spec/build
