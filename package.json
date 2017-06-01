@@ -1,0 +1,24 @@
+{
+  "name": "assistant-source",
+  "version": "0.1.0",
+  "description": "A TypeScript framework to create generic voice applications, independet of assistants",
+  "scripts": {
+    "test": "./node_modules/.bin/jasmine-node spec"
+  },
+  "author": "Antonius Ostermann",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.3",
+    "ioc-container": "../../Masterthesis/ioc-container",
+    "typescript": "^2.3.4"
+  },
+  "devDependencies": {
+    "request": "^2.81.0",
+    "tslint": "^5.4.0",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.1.7",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-tslint": "^8.1.0",
+    "@types/jasmine": "^2.5.48"
+  }
+}
