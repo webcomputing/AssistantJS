@@ -7,26 +7,30 @@ import { ResponseCallback, RequestContext } from "./interfaces";
 import { GenericRequestHandler } from "./generic-request-handler";
 
 export class ServerApplication implements MainApplication {
+  private app: express.Express;
   private listeningCallback = (app: ServerApplication) => {};
   private expressRunningInstance;
 
-  constructor (listeningCallback = (app: ServerApplication) => {}) {
+  constructor (listeningCallback = (app: ServerApplication) => {}, expressApp = express(), registerOwnMiddleware = true) {
     this.listeningCallback = listeningCallback;
+    this.app = expressApp;
+
+    if (registerOwnMiddleware) {
+      log("Initializing express instance...");
+      this.configrueExpressApp();
+    }
   }
 
 
   /** Starts express server, calls handleRequest on each request */
   execute(container: Container) {
-    log("Initializing express instance...");
-    const app = this.createExpressApp();
-
     log("Registering express catch all route...");
-    app.all("*", (request, response) => {
+    this.app.all("*", (request, response) => {
       this.handleRequest(request, response, container);
     });
 
     log("Starting express server...");
-    this.expressRunningInstance = app.listen(3000, () => {
+    this.expressRunningInstance = this.app.listen(3000, () => {
       log("Server is running.");
       this.listeningCallback(this);
     });
@@ -67,11 +71,9 @@ export class ServerApplication implements MainApplication {
     }
   }
 
-  /** Returns express app instance */
-  createExpressApp() {
-    const app = express();
-    app.use(bodyParser());
-    return app;
+  /** Configures middleware for express app */
+  configrueExpressApp() {
+    this.app.use(bodyParser());
   }
 
   private getGenericRequestHandler(container: Container) {

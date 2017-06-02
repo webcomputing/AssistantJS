@@ -9,15 +9,15 @@ export class ContextDeriver implements ContextDeriverI {
   private extractors: RequestConversationExtractor[];
 
   constructor(
-    @optional() @multiInject(componentInterfaces["request-processor"]) extractors: RequestConversationExtractor[] = []) {
+    @optional() @multiInject(componentInterfaces.requestProcessor) extractors: RequestConversationExtractor[] = []) {
     this.extractors = extractors;
   }
 
   async derive(context: RequestContext) {
     let extractor = await this.findExtractor(context);
-    
+
     if (extractor !== null) {
-      return [extractor.extract(context), "current|core:unifier:current-extraction"];
+      return [await extractor.extract(context), "current|core:unifier:current-extraction"];
     }
   }
 

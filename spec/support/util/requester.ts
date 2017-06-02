@@ -1,6 +1,8 @@
 import * as request from "request-promise";
 export { RequestPromise } from "request-promise";
 import { Container } from "ioc-container";
+import * as express from "express";
+import * as timeout from "connect-timeout";
 
 import { run } from "../../../src/setup";
 import { ServerApplication } from "../../../src/components/root/app-server";
@@ -16,7 +18,7 @@ export class RequestProxy {
   }
 }
 
-export function withServer(container: Container): Promise<[RequestProxy, Function]> {
+export function withServer(container: Container, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
   return new Promise(resolve => {
     run(new ServerApplication((app) => {
       let stopServer = () => {
@@ -24,6 +26,16 @@ export function withServer(container: Container): Promise<[RequestProxy, Functio
         app.stop();
       }
       resolve([new RequestProxy(), stopServer]);
-    }), container);
+    }, expressApp), container);
   });
+}
+
+export function expressAppWithTimeout(length = "5s") {
+  const app = express();
+  app.use(timeout(length));
+  app.use(function(req, res, next) {
+    next();
+    if (!(req as any).timedout) res.send("");
+  });
+  return app;
 }

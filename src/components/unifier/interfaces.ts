@@ -5,11 +5,7 @@ export declare type intent = string | GenericIntent;
 export declare type userID = string | undefined;
 
 export const componentInterfaces = {
-  "request-processor": Symbol("request-processor"),
-  "platform-handle": Symbol("platform-handle"),
-  "platform-builder": Symbol("platform-builder"),
-  "parameter-mappings": Symbol("core:conversation:parameter-mappings"),
-  "utterance-template-service": Symbol("utterance-template-service")
+  "requestProcessor": Symbol("request-processor"),
 };
 
 export interface ResponseFactory {
@@ -64,7 +60,7 @@ export interface ConversationContext {
 export interface RequestConversationExtractor {
   component: Component;
   fits(context: RequestContext): Promise<boolean>;
-  extract(context: RequestContext): Promise<RequestExtraction>;
+  extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
 
 export enum GenericIntent {
@@ -104,13 +100,11 @@ export interface GenericPlatformHandle {
   forceAuthentication(message: string): void;
 }
 
-export interface RequestExtraction {
-  parsedBody: any;
-  user: { identifier?: string; temporalIdentifier?: string };
-  parameters?: { [name: string]: any; };
+export interface MinimalRequestExtraction {
+  entities?: { [name: string]: any; };
   readonly intent: intent;
   readonly sessionID: string;
-  readonly language: string; // should be "de", "en", ... - do this as enum?
+  readonly language: string;
 }
 
 export interface OptionalConfiguration {
