@@ -8,24 +8,25 @@ import { GenericRequestHandler } from "./generic-request-handler";
 const app = express();
 
 export class ServerApplication implements MainApplication {
-  private listeningCallback = () => {};
+  private listeningCallback = (app: ServerApplication) => {};
+  private expressRunningInstance;
 
-  constructor (listeningCallback = () => {}) {
+  constructor (listeningCallback = (app: ServerApplication) => {}) {
     this.listeningCallback = listeningCallback;
   }
 
 
   /** Starts express server, calls handleRequest on each request */
-  public execute(container: Container) {
+  execute(container: Container) {
     log("Registering express catch all route...");
     app.get("*", (request, response) => {
       this.handleRequest(request, response, container);
     });
 
     log("Starting express server...");
-    app.listen(3000, () => {
+    this.expressRunningInstance = app.listen(3000, () => {
       log("Server is running.");
-      this.listeningCallback();
+      this.listeningCallback(this);
     });
   }
 
@@ -55,6 +56,11 @@ export class ServerApplication implements MainApplication {
 
       response.send(body);
     }
+  }
+
+  /** Stops the server */
+  stop() {
+    if (typeof this.expressRunningInstance !== "undefined") this.expressRunningInstance.close();
   }
 
   private getGenericRequestHandler(container: Container) {

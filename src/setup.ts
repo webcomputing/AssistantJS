@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { injectable, inject, multiInject } from "inversify";
 import { MainApplication } from "ioc-container";
 
