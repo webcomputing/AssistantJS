@@ -1,15 +1,20 @@
 export const componentInterfaces = {
-  "requestHandler": Symbol("request-handler")
+  "contextDeriver": Symbol("request-handler"),
+  "afterContextExtension": Symbol("after-context-extension")
 };
 
 export interface RequestContext {
   method: string;
   path: string;
-  body: string;
+  body: any;
   headers: { [name: string]: string }
   responseCallback: ResponseCallback;
 }
 
 export interface ResponseCallback {
-  (body: string, headers?: { [name: string]: string | string[] });
+  (body: string, headers?: { [name: string]: string | string[] }, statusCode?: number);
+}
+
+export interface ContextDeriver {
+  derive(context: RequestContext): Promise<[any, string]> | Promise<undefined>;
 }

@@ -1,14 +1,17 @@
+import { Container } from "ioc-container";
 import { withServer, RequestProxy } from "../../support/util/requester";
+import { RequestContext } from "../../../src/components/root/interfaces";
 
 describe("GenericRequestHelper", function() {
   describe("resulting context object", function() {
     let request: RequestProxy;
     let stopServer: Function;
-    let response: any;
+    let requestContext: RequestContext;
+    let diContextName = "current|core:root:request-context";
 
     beforeEach(async function(done) {
-      [request, stopServer] = await withServer();
-      response = await request.get("/any-given-route?param=b");
+      [request, stopServer] = await withServer(this.container);
+      await request.post("/any-given-route", {a: "b"}, {"header-a": "b"});
       done();
     });
 
@@ -16,11 +19,20 @@ describe("GenericRequestHelper", function() {
       stopServer();
     });
 
+    it("is fetchable via dependency injection", function() {
+      expect(() => {
+        (this.container as Container).inversifyInstance.get<RequestContext>(diContextName)
+      }).not.toThrow();
+    });
 
-    it("contains correct method", function() {
-      console.log("in here");
-      console.log(request);
-      expect(response.method).toBe("get");
+    it("contains all request information", function() {
+      let requestContext = (this.container as Container).inversifyInstance.get<RequestContext>(diContextName);
+
+      // Multiple expections for performance reasons
+      expect(requestContext.method).toBe("POST");
+      expect(requestContext.headers).toEqual(jasmine.objectContaining({"header-a": "b"}));
+      expect(requestContext.body).toEqual({a: "b"});
+      expect(requestContext.path).toBe("/any-given-route");
     });
   });
 });

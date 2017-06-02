@@ -8,6 +8,7 @@
   "author": "Antonius Ostermann",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "debug": "2.6",
     "express": "^4.15.3",
     "ioc-container": "../../Masterthesis/ioc-container"

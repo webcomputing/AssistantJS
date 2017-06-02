@@ -5,7 +5,8 @@ describe("ServerApplication", function() {
   let stopServer: Function;
 
   beforeEach(async function(done) {
-    [request, stopServer] = await withServer();
+    console.log("current container", this.container.inversifyInstance.guid);
+    [request, stopServer] = await withServer(this.container);
     done();
   });
 
@@ -16,8 +17,6 @@ describe("ServerApplication", function() {
   describe("execute", function() {
     it("responds to empty requests with 404", async function(done) {
       let response = await request.get("/any-given-route");
-      console.log(response);
-      console.log("this was the response");
       expect(response.statusCode).toBe(404);
       done();
     });
