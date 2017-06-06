@@ -17,7 +17,7 @@ export class ServerApplication implements MainApplication {
 
     if (registerOwnMiddleware) {
       log("Initializing express instance...");
-      this.configrueExpressApp();
+      this.configureExpressApp();
     }
   }
 
@@ -72,7 +72,7 @@ export class ServerApplication implements MainApplication {
   }
 
   /** Configures middleware for express app */
-  configrueExpressApp() {
+  configureExpressApp() {
     this.app.use(bodyParser());
   }
 

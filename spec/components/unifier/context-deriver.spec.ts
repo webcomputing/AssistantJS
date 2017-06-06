@@ -8,15 +8,15 @@ describe("ContextDeriver", function() {
   let request: RequestProxy;
   let stopServer: Function;
 
+  afterEach(function() {
+    if (typeof stopServer !== "undefined") stopServer();
+  });
+
   describe("when an invalid request was sent", function() {
     beforeEach(async function(done) {
       [request, stopServer] = await withServer(this.container);
       await request.post("/any-given-route", {a: "b"}, {"header-a": "b"});
       done();
-    });
-
-    afterEach(function() {
-      stopServer();
     });
 
     it("does not set 'current|core:unifier:current-extraction'", function() {
@@ -39,10 +39,6 @@ describe("ContextDeriver", function() {
         // Any request based errors are not reelvant here, we just need the request fired.
         await request.post(MockExtractor.fittingPath(), extractionData);
         done();
-      });
-
-      afterEach(function() {
-        stopServer();
       });
 
 
