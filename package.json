@@ -8,13 +8,15 @@
   "author": "Antonius Ostermann",
   "license": "ISC",
   "dependencies": {
+    "@types/redis": "^2.6.0",
+    "@types/express": "^4.0.35",
     "body-parser": "^1.17.2",
     "debug": "2.6",
     "express": "^4.15.3",
-    "ioc-container": "../../Masterthesis/ioc-container"
+    "ioc-container": "../../Masterthesis/ioc-container",
+    "redis": "^2.7.1"
   },
   "devDependencies": {
-    "@types/express": "^4.0.35",
     "@types/jasmine": "^2.5.48",
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^2.6.0",
