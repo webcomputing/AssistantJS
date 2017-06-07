@@ -1,20 +1,43 @@
+import { Container, MainApplication, ContainerImpl, ComponentDescriptor } from "ioc-container";
+import { debug } from "debug";
 import { injectable, inject, multiInject } from "inversify";
-import { MainApplication, Container } from "ioc-container";
 
-import { container as globalContainer, log } from "./globals";
-import * as components from "./components/index";
+import * as internalComponents from "./components/index";
 
-export const setupContainer = (container: Container = globalContainer) => {
-  // Import all local components and services
-  log("Imported component descriptors: %O", components);
-  Object.keys(components).forEach(k => container.componentRegistry.addFromDescriptor(components[k]));
+export class AssistantJSSetup {
+  static log = debug("assistant.js");
+  static globalContainer = new ContainerImpl();
+
+  container: Container;
+
+  constructor(container: Container = AssistantJSSetup.globalContainer) {
+    this.container = container;
+  }
+
+  run(app: MainApplication) {
+    this.container.setMainApplication(app);
+    this.container.runMain();
+  }
+
+  registerInternalComponents() {
+    Object.keys(internalComponents).forEach(k => this.registerComponent(internalComponents[k]));
+  }
+
+  registerComponent(component: ComponentDescriptor) {
+    this.registerComponents([component]);
+  }
+
+  registerComponents(components: ComponentDescriptor[] | {[name: string]: ComponentDescriptor}) {
+    AssistantJSSetup.log("Importing component descriptors: %O", components);
+    components = typeof components === "object" ? Object.keys(components).map(k => components[k]) : components;
+
+    components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
+  }
+
+  autobind() {
+    this.container.componentRegistry.autobind(this.container.inversifyInstance);
+  }
 }
 
-export const autobindContainer = (container: Container = globalContainer) => {
-  container.componentRegistry.autobind(container.inversifyInstance);
-}
-
-export const run = (app: MainApplication, container: Container = globalContainer) => {
-  container.setMainApplication(app);
-  container.runMain();
-}
+/** Short form of AssistantJS.log */
+export const log = AssistantJSSetup.log;
