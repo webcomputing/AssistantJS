@@ -1,7 +1,7 @@
 import { MainApplication, Container } from "ioc-container";
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import { log } from "../../globals";
+import { log } from "../../setup";
 
 import { ResponseCallback, RequestContext } from "./interfaces";
 import { GenericRequestHandler } from "./generic-request-handler";

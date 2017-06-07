@@ -1,6 +1,6 @@
 import { injectable, inject, multiInject, optional } from "inversify";
 
-import { log } from "../../globals";
+import { log } from "../../setup";
 import { RequestContext, ContextDeriver as ContextDeriverI } from "../root/interfaces";
 import { componentInterfaces, RequestConversationExtractor } from "./interfaces";
 
@@ -17,7 +17,7 @@ export class ContextDeriver implements ContextDeriverI {
     let extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
-      return [await extractor.extract(context), "current|core:unifier:current-extraction"];
+      return [await extractor.extract(context), "core:unifier:current-extraction"];
     }
   }
 

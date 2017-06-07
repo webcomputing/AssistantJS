@@ -4,7 +4,7 @@
  */
 import { Container, ExecutableExtension } from "ioc-container";
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
-import { log } from "../../globals";
+import { log } from "../../setup";
 
 import { RequestContext, ContextDeriver, componentInterfaces } from "./interfaces";
 
@@ -20,7 +20,7 @@ export class GenericRequestHandler {
 
     // Create child container and append this request context to it
     let scopedRequestContainer = this.createChildContainer(container);
-    this.bindContextToContainer(context, scopedRequestContainer, "current|core:root:request-context");
+    this.bindContextToContainer(context, scopedRequestContainer, "core:root:current-request-context");
 
     // Load and execute registered request handlers - including our own handlers.
     // Request handlers have the ability to add something to current di scope.
