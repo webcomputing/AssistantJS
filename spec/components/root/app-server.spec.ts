@@ -5,8 +5,7 @@ describe("ServerApplication", function() {
   let stopServer: Function;
 
   beforeEach(async function(done) {
-    console.log("current container", this.container.inversifyInstance.guid);
-    [request, stopServer] = await withServer(this.container);
+    [request, stopServer] = await withServer(this.assistantJs);
     done();
   });
 

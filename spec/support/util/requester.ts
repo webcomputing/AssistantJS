@@ -4,7 +4,7 @@ import { Container } from "ioc-container";
 import * as express from "express";
 import * as timeout from "connect-timeout";
 
-import { run } from "../../../src/setup";
+import { AssistantJSSetup } from "../../../src/setup";
 import { ServerApplication } from "../../../src/components/root/app-server";
 
 /** Proxy for request-promise to use in combination with running server */
@@ -18,15 +18,14 @@ export class RequestProxy {
   }
 }
 
-export function withServer(container: Container, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
+export function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
   return new Promise(resolve => {
-    run(new ServerApplication((app) => {
+    assistantJs.run(new ServerApplication((app) => {
       let stopServer = () => {
-        container.inversifyInstance.unbindAll();
         app.stop();
       }
       resolve([new RequestProxy(), stopServer]);
-    }, expressApp), container);
+    }, expressApp));
   });
 }
 

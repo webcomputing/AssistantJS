@@ -14,14 +14,14 @@ describe("ContextDeriver", function() {
 
   describe("when an invalid request was sent", function() {
     beforeEach(async function(done) {
-      [request, stopServer] = await withServer(this.container);
+      [request, stopServer] = await withServer(this.assistantJs);
       await request.post("/any-given-route", {a: "b"}, {"header-a": "b"});
       done();
     });
 
-    it("does not set 'current|core:unifier:current-extraction'", function() {
+    it("does not set 'core:unifier:current-extraction'", function() {
       expect(() => {
-        (this.container as Container).inversifyInstance.get<any>("current|core:unifier:current-extraction")
+        (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction")
       }).toThrow();
     });
   });
@@ -35,15 +35,15 @@ describe("ContextDeriver", function() {
       const extractionData = {intent: "MyIntent", furtherExtraction: "MyExtraction"};
 
       beforeEach(async function(done) {
-        [request, stopServer] = await withServer(this.container, expressAppWithTimeout("50ms"));
+        [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
         // Any request based errors are not reelvant here, we just need the request fired.
         await request.post(MockExtractor.fittingPath(), extractionData);
         done();
       });
 
 
-      it("sets 'current|core:unifier:current-extraction' to extraction result", function() {
-        let extraction = (this.container as Container).inversifyInstance.get<any>("current|core:unifier:current-extraction");
+      it("sets 'core:unifier:current-extraction' to extraction result", function() {
+        let extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
         expect(extraction).toEqual(extractionData);
       });
     });

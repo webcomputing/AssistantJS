@@ -7,10 +7,10 @@ describe("GenericRequestHelper", function() {
     let request: RequestProxy;
     let stopServer: Function;
     let requestContext: RequestContext;
-    let diContextName = "current|core:root:request-context";
+    let diContextName = "core:root:current-request-context";
 
     beforeEach(async function(done) {
-      [request, stopServer] = await withServer(this.container);
+      [request, stopServer] = await withServer(this.assistantJs);
       await request.post("/any-given-route", {a: "b"}, {"header-a": "b"});
       done();
     });
