@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 
 
 @injectable()
-export class MainState implements State {
+export class SecondState implements State {
   unhandledIntent() {
   }
 
@@ -11,7 +11,7 @@ export class MainState implements State {
 
   }
 
-  yesGenericIntent() {
+  noGenericIntent() {
     
   }
 }

@@ -71,7 +71,13 @@ export class StateMachineSetup {
   static deriveStateIntents(stateClass: StateConstructor): string[] {
     let prototype = stateClass.prototype;
 
-    return Object.getOwnPropertyNames(prototype)
+    // Return empty set if prototype is undefined - this also breaks recursive calls
+    if (typeof prototype === "undefined") return [];
+    
+    // Get super intents to allow inheritance of state classes
+    const superIntents = StateMachineSetup.deriveStateIntents(Object.getPrototypeOf(stateClass));
+
+    return superIntents.concat(Object.getOwnPropertyNames(prototype)
       .filter(method => method.endsWith("Intent") && method !== "unhandledIntent")
       .map(method => {
 
@@ -83,6 +89,6 @@ export class StateMachineSetup {
           return baseString.charAt(0).toLowerCase() + baseString.slice(1);
         }
 
-      });
+    }));
   }
 }

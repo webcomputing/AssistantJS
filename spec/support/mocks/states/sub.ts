@@ -1,17 +1,11 @@
 import { State } from "../../../../src/components/state-machine/interfaces";
 import { injectable } from "inversify";
 
+import { MainState } from "./main";
 
 @injectable()
-export class MainState implements State {
-  unhandledIntent() {
-  }
+export class SubState extends MainState {
+  helpGenericIntent() {
 
-  testIntent() {
-
-  }
-
-  yesGenericIntent() {
-    
   }
 }
