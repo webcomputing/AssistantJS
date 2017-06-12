@@ -14,7 +14,7 @@ export const componentInterfaces = {
 export const MAIN_STATE_NAME = "MainState";
 
 export interface State {
-  unhandledIntent(intent: string, machine: Transitionable): void;
+  unhandledIntent(machine: Transitionable, originalIntent: string): void;
 }
 
 export interface StateConstructor {

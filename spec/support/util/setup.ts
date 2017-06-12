@@ -8,12 +8,13 @@ import { ChildlessGenericRequestHandler } from "../mocks/root/childless-generic-
 import { StateMachineSetup } from "../../../src/components/state-machine/setup";
 
 import { MainState } from "../mocks/states/main";
+import { SecondState } from "../mocks/states/second";
 import { context } from "../mocks/root/request-context";
 import { extraction } from "../mocks/unifier/extraction";
 
 /**
  * Creates a test assistant js setup
- * @param useMockStates If set to true, mock states (see mock/states) will be added to setup
+ * @param useMockStates If set to true, mock states (see mock/states -> Main and Second) will be added to setup
  * @param useChilds If set to true, child container for requests will be used, else mock/ChildlessGenericRequestHandler will be applied
  * @param autoBind If set to true, assistantJs.autobind() will be called for you
  * @param autoSetup If set to true, assistantJs.registerInternalComponents() will be called for you
@@ -39,11 +40,12 @@ export function bindChildlessRequestHandlerMock(container: Container) {
 
 
 /**
- * Adds mock states to container (see mocks/states)
+ * Adds mock states to container (see mocks/states -> Main and Second)
  */
 export function registerMockStates(assistantJs: AssistantJSSetup) {
   let stateMachineSetup = new StateMachineSetup(assistantJs);
   stateMachineSetup.addState(MainState);
+  stateMachineSetup.addState(SecondState);
   stateMachineSetup.registerStates();
 }
 

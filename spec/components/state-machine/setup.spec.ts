@@ -10,7 +10,7 @@ import { SubState } from "../../support/mocks/states/sub";
 describe("StateMachineSetup", function() {
   const explicitIntents = ["test", GenericIntent.Yes, GenericIntent.No];
   const explicitName = "MySecondState";
-  const implicitMainStateIntents = ["test", GenericIntent.Yes];
+  const implicitMainStateIntents = ["test", "other", GenericIntent.Yes];
 
   beforeEach(function() {
     this.assistantJs = createTestAssistantJsSetup(false);

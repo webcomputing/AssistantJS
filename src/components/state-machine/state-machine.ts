@@ -28,22 +28,28 @@ export class StateMachine implements StateMachineInterface {
 
   async handleIntent(intent: intent, ...args: any[]) {
     let currentState = await this.getCurrentState();
-    await this.getCurrentState();
 
     intent = this.deriveIntentMethod(intent);
     log("Handling intent '" + intent + "' on state " + currentState.name);
 
     // Run beforeIntent-hooks as filter
-    this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runAsFilter(() => {
-      if (typeof(currentState.instance[intent]) !== "undefined") {
-        currentState.instance[intent](this, ...args);
-      } else {
-        this.handleIntent("unhandledIntent", intent, this, ...args);
-      }
-    });
+    return new Promise<void>((resolve, reject) => {
+      this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runAsFilter(() => {
+        if (typeof(currentState.instance[intent]) !== "undefined") {
+          // Call given intent
+          currentState.instance[intent](this, ...args);
 
-    // Run afterIntent-hooks
-    this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runWithResultset(() => {});
+          // Run afterIntent hooks
+          this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runWithResultset(() => {});
+
+          // Done
+          resolve();
+        } else {
+          // -> Intent does not exist on state class, so call unhandledIntent instead
+          this.handleIntent("unhandledIntent", intent, ...args).then(() => resolve());
+        }
+      }, () => resolve());
+    });
   }
 
   async transitionTo(state: string) {
@@ -55,7 +61,7 @@ export class StateMachine implements StateMachineInterface {
 
   async redirectTo(state: string, intent: intent, ...args: any[]) {
     await this.transitionTo(state);
-    await this.handleIntent(intent, ...args);
+    return this.handleIntent(intent, ...args);
   }
 
   /* Private helper methods */
