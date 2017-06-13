@@ -18,3 +18,7 @@ export interface ResponseCallback {
 export interface ContextDeriver {
   derive(context: RequestContext): Promise<[any, string]> | Promise<undefined>;
 }
+
+export interface BuilderExtension {
+  execute(buildPath: string): void;
+}
