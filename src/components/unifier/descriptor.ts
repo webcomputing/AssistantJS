@@ -4,7 +4,8 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { DestroyableSession } from "../services/interfaces";
 import { ContextDeriver as ContextDeriverI } from "../root/interfaces";
 import { ContextDeriver } from "./context-deriver";
-import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration } from "./interfaces";
+import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
+import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
   utterancePath: process.cwd() + "config/locales"
@@ -27,6 +28,8 @@ export const descriptor: ComponentDescriptor = {
           return context.container.get<inversifyInterfaces.Factory<DestroyableSession>>("core:services:session-factory")(currentExtraction.sessionID);
         }
       });
+
+      bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);
     }
   }
 };
