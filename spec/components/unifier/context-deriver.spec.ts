@@ -3,6 +3,7 @@ import { componentInterfaces } from "../../../src/components/unifier/interfaces"
 import { withServer, RequestProxy, expressAppWithTimeout } from "../../support/util/requester";
 
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
+import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
 
 describe("ContextDeriver", function() {
   let request: RequestProxy;
@@ -36,7 +37,6 @@ describe("ContextDeriver", function() {
 
       beforeEach(async function(done) {
         [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
-        // Any request based errors are not reelvant here, we just need the request fired.
         await request.post(MockExtractor.fittingPath(), extractionData);
         done();
       });
@@ -47,5 +47,29 @@ describe("ContextDeriver", function() {
         expect(extraction).toEqual(extractionData);
       });
     });
-  })
+  });
+
+  describe("with two valid extractors registered", function() {
+    describe("with one of them supporting more interfaces", function() {
+      beforeEach(function() {
+        (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
+        (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(SpokenTextExtractor);
+      });
+
+      describe("when a valid request was sent", function() {
+        const extractionData = {intent: "MyIntent", furtherExtraction: "MyExtraction"};
+
+        beforeEach(async function(done) {
+          [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
+          await request.post(MockExtractor.fittingPath(), extractionData);
+          done();
+        });
+
+        it("uses feature richer extractor", function() {
+          let extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
+          expect(extraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
+        });
+      });
+    })
+  });
 });
