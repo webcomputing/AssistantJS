@@ -1,6 +1,6 @@
 import { MessageBus, Message } from "ioc-container";
 import { Session } from "../services/interfaces";
-import { GenericIntent, GenericPlatformHandle, ConversationContext, intent } from "../unifier/interfaces";
+import { GenericIntent, intent } from "../unifier/interfaces";
 
 export const componentInterfaces = {
   "state": Symbol("state"),
