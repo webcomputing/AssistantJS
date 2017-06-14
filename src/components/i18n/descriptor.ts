@@ -20,7 +20,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Hook into beforeIntent and save current state and current intent into I18nContext (see above)
       // Since I18nContext is a singleton in request scope, it will be the same context instance for this request.
-      bindService.bindExtension<Hooks.Hook>(lookupService.lookup("core:state-machine").getInterface("before-intent")).toDynamicValue(context => {
+      bindService.bindExtension<Hooks.Hook>(lookupService.lookup("core:state-machine").getInterface("beforeIntent")).toDynamicValue(context => {
         return (success, failure, mode, state, stateName, intent) => {
           let currentI18nContext = context.container.get<I18nContext>("i18n:current-context");
           currentI18nContext.intent = intent;
