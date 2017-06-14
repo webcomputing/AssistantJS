@@ -103,6 +103,7 @@ export interface RequestConversationExtractor {
 }
 
 export interface MinimalRequestExtraction {
+  component: Component;
   entities?: { [name: string]: any; };
   readonly intent: intent;
   readonly sessionID: string;
