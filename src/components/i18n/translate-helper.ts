@@ -12,8 +12,8 @@ export class TranslateHelper implements TranslateHelperInterface {
   i18n: I18n;
 
   constructor(
-    @inject("i18n:instance") i18n: I18n, 
-    @inject("i18n:current-context") context: I18nContext,
+    @inject("core:i18n:instance") i18n: I18n, 
+    @inject("core:i18n:current-context") context: I18nContext,
     @inject("core:unifier:current-extraction") extraction: MinimalRequestExtraction) 
   {
     this.i18n = i18n;

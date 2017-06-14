@@ -1,3 +1,5 @@
+import * as i18next from "i18next";
+
 export interface TranslateHelper {
   /**
    * Translates the given key using your json translations.
@@ -11,6 +13,6 @@ export interface TranslateHelper {
 }
 
 export interface Configuration {
-  i18nextInstance: any;
+  i18nextInstance: i18next.I18n;
   i18nextAdditionalConfiguration: any;
 }

@@ -12,6 +12,7 @@
     "@types/redis": "^2.6.0",
     "alexa-utterances": "^0.2.1",
     "body-parser": "^1.17.2",
+    "commander": "^2.9.0",
     "debug": "2.6",
     "express": "^4.15.3",
     "i18next": "^6.0.2",

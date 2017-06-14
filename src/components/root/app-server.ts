@@ -1,5 +1,7 @@
 import { MainApplication, Container } from "ioc-container";
 import * as express from "express";
+import { Express } from "express";
+export { Express } from "express";
 import * as bodyParser from "body-parser";
 import { log } from "../../setup";
 
@@ -11,7 +13,7 @@ export class ServerApplication implements MainApplication {
   private listeningCallback = (app: ServerApplication) => {};
   private expressRunningInstance;
 
-  constructor (listeningCallback = (app: ServerApplication) => {}, expressApp = express(), registerOwnMiddleware = true) {
+  constructor (listeningCallback = (app: ServerApplication) => {}, expressApp: Express = express(), registerOwnMiddleware = true) {
     this.listeningCallback = listeningCallback;
     this.app = expressApp;
 

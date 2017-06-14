@@ -2,7 +2,7 @@ import { MinimalRequestExtraction, intent, GenericIntent } from "../../../../src
 import { ResponseHandler } from "./handler";
 import { Component } from "../util/component";
 
-export function createExtraction(intent: intent = GenericIntent.Yes, entities = {}, sessionId = "session-" + Math.random(), language = "de-DE"): MinimalRequestExtraction {
+export function createExtraction(intent: intent = GenericIntent.Yes, entities = {}, sessionId = "session-" + Math.random(), language = "de"): MinimalRequestExtraction {
   return {
     intent: intent,
     sessionID: sessionId,

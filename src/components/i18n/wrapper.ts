@@ -13,7 +13,7 @@ export class I18nextWrapper {
 
   instance: i18next.I18n;
 
-  constructor(@inject("meta:component//i18n") componentMeta: Component) {
+  constructor(@inject("meta:component//core:i18n") componentMeta: Component) {
     this.component = componentMeta;
     this.configuration = componentMeta.configuration as Configuration;
 
@@ -32,6 +32,6 @@ export class I18nextWrapper {
     i18nextConfiguration.postProcess.push("arrayReturnsSample");
     i18nextConfiguration.joinArrays = arraySplitter;
 
-    this.instance.use(i18nextBackend).use(processor).init(i18nextConfiguration);
+    this.instance.use(i18nextBackend).use(processor).init(i18nextConfiguration, err => { if (err) throw err; });
   }
 }

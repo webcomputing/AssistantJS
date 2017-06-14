@@ -11,7 +11,7 @@ gulp.task("lint", function() {
     var config =  { formatter: "verbose", emitError: (process.env.CI) ? true : false };
 
     return gulp.src([
-        "components/**/**.ts",
+        "src/**/**.ts",
         "spec/**/**.spec.ts"
     ])
     .pipe(tslint(config))
@@ -28,7 +28,7 @@ gulp.task('default', ['build-lib', 'build-dts']);
 
 gulp.task("build-lib", function() {
     return gulp.src([
-        "components/**/*.ts"
+        "src/**/*.ts"
     ])
     .pipe(tsLibProject())
     .on("error", function (err) {
@@ -45,7 +45,7 @@ var tsDtsProject = tsc.createProject("tsconfig.json", {
 
 gulp.task("build-dts", function() {
     return gulp.src([
-        "components/**/*.ts"
+        "src/**/*.ts"
     ])
     .pipe(tsDtsProject())
     .on("error", function (err) {
