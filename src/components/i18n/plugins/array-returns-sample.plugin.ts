@@ -9,4 +9,4 @@ export const processor = {
   }
 };
 
-export const arraySplitter = "{{{/||/}}}";
+export const arraySplitter = "||||||||||||||||||||||||||||||";

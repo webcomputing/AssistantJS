@@ -1,5 +1,25 @@
 {
   "mySpecificKeys": {
     "keyOne": "keyOneResult"
-  }
+  },
+  "multiple": ["a", "b"],
+  "var": "a{{var}}",
+  "mainState": {
+    "testIntent": {
+      "ExtractorComponent": {
+        "key": "verySpecific"
+      }
+    },
+    "yesGenericIntent": "yes"
+  },
+  "root": {
+    "testIntent": {
+      "ExtractorComponent": {
+        "key": "root-verySpecific"
+      }
+    },
+    "yesGenericIntent": "root-yes",
+    "rootKey": "root-veryUnspecific"
+  },
+  "noIntentState": "stateOnly"
 }

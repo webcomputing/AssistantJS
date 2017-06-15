@@ -34,23 +34,27 @@ export class TranslateHelper implements TranslateHelperInterface {
     let options = Object.assign({ lng:  this.extraction.language}, locals);
     let extractorName = this.extraction.component.name;
 
-    log("I18N: local resolving key '" + key + "' (language: '" + this.extraction.language + " ') with context: %o", this.context);
+    log("I18N: local resolving key '" + key + "' (language: '" + this.extraction.language + " ') with context: %o and extractor name '"+ extractorName +"'", this.context);
 
     if (typeof(key) === "undefined") {
       key = "";
     }
 
+    let lookupKeys: string[];
     if (key === "" || (key as string).charAt(0) === ".") {
-      return this.i18n.t([
+      lookupKeys = [
         this.context.state + "." + this.context.intent + "." + extractorName + key, 
         this.context.state + "." + this.context.intent + key, 
         this.context.state + key,
         "root" + "." + this.context.intent + "." + extractorName + key, 
         "root" + "." + this.context.intent + key, 
         "root" + key
-      ] as any, options);
+      ];
     } else {
-      return this.i18n.t(key as string, options);
+      lookupKeys = [key as string];
     }
+
+    if (!this.i18n.exists(lookupKeys as any)) throw new Error("I18n key lookup could not be resolved: " + lookupKeys.join(", "));
+    return this.i18n.t(lookupKeys as any, options);
   }
 }
