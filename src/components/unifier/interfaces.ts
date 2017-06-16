@@ -67,7 +67,7 @@ export interface OptionalConfiguration {
 }
 export interface Configuration extends OptionalConfiguration {}
 
-export interface ParameterDictionary {
+export interface EntityDictionary {
   store: {[name: string]: any};
   contains(name: string): boolean;
   get(name: string): any | undefined;
@@ -79,7 +79,7 @@ export interface ParameterDictionary {
 export interface BuildIntentConfiguration {
   intent: intent;
   utterances: string[];
-  parameters: string[];
+  entities: string[];
 }
 
 export interface BuilderUtteranceTemplateService {
@@ -87,10 +87,10 @@ export interface BuilderUtteranceTemplateService {
 }
 
 export interface PlatformBuilder {
-  execute(language: string, buildDir: string, intentConfigurations: BuildIntentConfiguration[], parameterMapping: BuilderParameterMapping);
+  execute(language: string, buildDir: string, intentConfigurations: BuildIntentConfiguration[], entityMapping: BuilderEntityMapping);
 }
 
-export interface BuilderParameterMapping {
+export interface BuilderEntityMapping {
   [type: string]: string;
 }
 

@@ -5,7 +5,7 @@ import * as generateUtterances from "alexa-utterances"; // We are only using ale
 import { GenericIntent, intent } from "./interfaces";
 import { GeneratorExtension } from "../root/interfaces";
 
-import { PlatformBuilder, componentInterfaces, Configuration, BuildIntentConfiguration, BuilderParameterMapping, BuilderUtteranceTemplateService } from "./interfaces";
+import { PlatformBuilder, componentInterfaces, Configuration, BuildIntentConfiguration, BuilderEntityMapping, BuilderUtteranceTemplateService } from "./interfaces";
 
 @injectable()
 export class Generator implements GeneratorExtension {
@@ -13,7 +13,7 @@ export class Generator implements GeneratorExtension {
   private platformBuilders: PlatformBuilder[] = [];
 
   @multiInject(componentInterfaces["parameter-mappings"]) @optional()
-  private parameterMappings: BuilderParameterMapping[] = [];
+  private parameterMappings: BuilderEntityMapping[] = [];
 
   @multiInject(componentInterfaces["utterance-template-service"]) @optional()
   private additionalUtteranceTemplatesServices: BuilderUtteranceTemplateService[] = [];
@@ -89,7 +89,7 @@ export class Generator implements GeneratorExtension {
         buildIntentConfigs.push({
           utterances: utterances,
           intent: intent,
-          parameters: parameters
+          entities: parameters
         });
       });
 

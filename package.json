@@ -5,8 +5,8 @@
   "scripts": {
     "test": "jasmine-ts spec/**/*.spec.ts"
   },
-  "main": "lib/ioc-container.js",
-  "typings": "./dts/ioc-container.d.ts",
+  "main": "lib/assistant-source.js",
+  "typings": "./dts/assistant-source.d.ts",
   "author": "Antonius Ostermann",
   "license": "ISC",
   "dependencies": {
