@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+'use strict';
+
+process.title = 'assistantJS';
+
+var resolve = require('resolve');
+var exit = require('exit');
+
+resolve('assistant-source', {
+  basedir: process.cwd()
+}, function(error, projectLocalSource) {
+  var cli;
+  if (error) {
+    // Use it as global module
+    cli = require('../lib/cli');
+  } else {
+    // Use it as local module
+    cli = require(projectLocalSource);
+  }
+
+  cli(process.argv);
+});

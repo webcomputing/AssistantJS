@@ -3,12 +3,12 @@ import { Component } from "ioc-container";
 import * as fs from "fs";
 import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
 import { GenericIntent, intent } from "./interfaces";
-import { BuilderExtension } from "../root/interfaces";
+import { GeneratorExtension } from "../root/interfaces";
 
 import { PlatformBuilder, componentInterfaces, Configuration, BuildIntentConfiguration, BuilderParameterMapping, BuilderUtteranceTemplateService } from "./interfaces";
 
 @injectable()
-export class Builder implements BuilderExtension {
+export class Generator implements GeneratorExtension {
   @multiInject(componentInterfaces["platform-builder"]) @optional()
   private platformBuilders: PlatformBuilder[] = [];
 

@@ -1,6 +1,7 @@
 export const componentInterfaces = {
   "contextDeriver": Symbol("request-handler"),
-  "afterContextExtension": Symbol("after-context-extension")
+  "afterContextExtension": Symbol("after-context-extension"),
+  "generator": Symbol("generator")
 };
 
 export interface RequestContext {
@@ -19,6 +20,6 @@ export interface ContextDeriver {
   derive(context: RequestContext): Promise<[any, string]> | Promise<undefined>;
 }
 
-export interface BuilderExtension {
+export interface GeneratorExtension {
   execute(buildPath: string): void;
 }

@@ -2,9 +2,10 @@ import { ComponentDescriptor, BindingDescriptor } from "ioc-container";
 import { interfaces as inversifyInterfaces } from "inversify";
 
 import { DestroyableSession } from "../services/interfaces";
-import { ContextDeriver as ContextDeriverI } from "../root/interfaces";
+import { ContextDeriver as ContextDeriverI, GeneratorExtension } from "../root/interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
+import { Generator } from "./generator";
 import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
@@ -18,6 +19,7 @@ export const descriptor: ComponentDescriptor = {
   bindings: {
     root: (bindService, lookupService) => {
       bindService.bindExtension<ContextDeriverI>(lookupService.lookup("core:root").getInterface("contextDeriver")).to(ContextDeriver);
+      bindService.bindExtension<GeneratorExtension>(lookupService.lookup("core:root").getInterface("generator")).to(Generator);
     },
 
     request: (bindService) => {
