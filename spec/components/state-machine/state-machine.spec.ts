@@ -4,7 +4,7 @@ import { Container } from "ioc-container";
 
 describe("StateMachine", function() {
   beforeEach(function() {
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
   });
 

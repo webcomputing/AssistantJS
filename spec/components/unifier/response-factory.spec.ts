@@ -10,7 +10,7 @@ import { EmptyResponse } from "../../../src/components/unifier/responses/empty-r
 
 describe("ResponseFactory", function() {
   beforeEach(function() {
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
     this.extraction = this.container.inversifyInstance.get("core:unifier:current-extraction");
     this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
   });

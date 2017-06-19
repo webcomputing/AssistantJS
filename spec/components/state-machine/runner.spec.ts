@@ -5,7 +5,7 @@ import { extraction } from "../../support/mocks/unifier/extraction";
 
 describe("Runner", function() {
   beforeEach(function() {
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
 
     this.stateMachine = (this.container as Container).inversifyInstance.get("core:state-machine:current-state-machine");
     spyOn(this.stateMachine, "handleIntent");

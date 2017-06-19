@@ -5,7 +5,7 @@ import * as express from "express";
 import * as timeout from "connect-timeout";
 
 import { AssistantJSSetup } from "../../../src/setup";
-import { ServerApplication } from "../../../src/components/root/app-server";
+import { SpecSetup } from "../../../src/spec-setup";
 
 /** Proxy for request-promise to use in combination with running server */
 export class RequestProxy {
@@ -19,13 +19,10 @@ export class RequestProxy {
 }
 
 export function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
-  return new Promise(resolve => {
-    assistantJs.run(new ServerApplication((app) => {
-      let stopServer = () => {
-        app.stop();
-      }
-      resolve([new RequestProxy(), stopServer]);
-    }, expressApp));
+  let specSetup = new SpecSetup(assistantJs);
+
+  return specSetup.withServer(expressApp).then(stopFunction => {
+    return [new RequestProxy(), stopFunction];
   });
 }
 

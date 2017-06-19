@@ -2,7 +2,7 @@ import { createRequestScope } from "../../support/util/setup";
 
 describe("I18nContext", function() {
   beforeEach(function() {
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
   });
 

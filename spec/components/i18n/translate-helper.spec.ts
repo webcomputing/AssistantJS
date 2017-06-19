@@ -5,7 +5,7 @@ describe("TranslateHelper", function() {
   beforeEach(function() {
     configureI18nLocale(this.container, false);
 
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
   });
 

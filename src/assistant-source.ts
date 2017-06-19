@@ -12,3 +12,6 @@ export { ServerApplication } from "./components/root/app-server";
 export { GeneratorApplication } from "./components/root/app-generator";
 export { GenericRequestHandler } from "./components/root/generic-request-handler";
 export { StateMachineSetup } from "./components/state-machine/setup";
+
+// Export SpecHelper
+export { SpecSetup } from "./spec-setup";

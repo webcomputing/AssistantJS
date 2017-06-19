@@ -1,6 +1,6 @@
 import { GenericIntent } from "../../../src/components/unifier/interfaces";
 
-import { createRequestScope, createTestAssistantJsSetup } from "../../support/util/setup";
+import { createRequestScope, createSpecHelper } from "../../support/util/setup";
 import { StateMachineSetup } from "../../../src/components/state-machine/setup";
 
 import { MainState } from "../../support/mocks/states/main";
@@ -13,10 +13,11 @@ describe("StateMachineSetup", function() {
   const implicitMainStateIntents = ["test", "other", GenericIntent.Yes];
 
   beforeEach(function() {
-    this.assistantJs = createTestAssistantJsSetup(false);
+    this.specHelper = createSpecHelper(false);
+    this.assistantJs = this.specHelper.setup;
     this.container = this.assistantJs.container;
 
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
     this.setup = new StateMachineSetup(this.assistantJs);
   });
 

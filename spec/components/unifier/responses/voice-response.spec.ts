@@ -4,7 +4,7 @@ import { VoiceResponse } from "../../../../src/components/unifier/responses/voic
 
 describe("VoiceResponse", function() {
   beforeEach(function() {
-    createRequestScope(this.assistantJs);
+    createRequestScope(this.specHelper);
     this.extraction = this.container.inversifyInstance.get("core:unifier:current-extraction");
 
     let oldHandler = this.extraction.getHandler();
