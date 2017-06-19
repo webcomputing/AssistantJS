@@ -6,7 +6,8 @@ import { ContextDeriver as ContextDeriverI, GeneratorExtension } from "../root/i
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
-import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory } from "./interfaces";
+import { EntityDictionary as EntityDictionaryImpl } from "./entitiy-dictionary";
+import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, EntityDictionary } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
   utterancePath: process.cwd() + "config/locales"
@@ -32,6 +33,8 @@ export const descriptor: ComponentDescriptor = {
       });
 
       bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);
+
+      bindService.bindGlobalService<EntityDictionary>("current-entity-dictionary").to(EntityDictionaryImpl);
     }
   }
 };

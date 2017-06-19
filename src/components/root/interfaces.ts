@@ -8,7 +8,7 @@ export interface RequestContext {
   method: string;
   path: string;
   body: any;
-  headers: { [name: string]: string }
+  headers: { [name: string]: string | string[] }
   responseCallback: ResponseCallback;
 }
 
