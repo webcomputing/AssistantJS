@@ -1,10 +1,10 @@
-import { MinimalRequestExtraction, OptionalHandlerFeatures, Voiceable } from "../interfaces";
+import { MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../interfaces";
 import { VoiceResponse } from "./voice-response";
 import { BaseResponse } from "./base-response";
 
 export class UnauthenticatedResponse extends BaseResponse {
-  constructor(extraction: MinimalRequestExtraction, voiceResponse: VoiceResponse, text: string = "") {
-    super(extraction);
+  constructor(handler: MinimalResponseHandler, voiceResponse: VoiceResponse, text: string = "") {
+    super(handler);
     
     if (!this.featureIsAvailable(OptionalHandlerFeatures.FeatureChecker.AuthenticationHandler))
       throw new Error("Unauthentication Feature is not available for this response handler: " + this.handler);

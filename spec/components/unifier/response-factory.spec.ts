@@ -8,15 +8,17 @@ import { SSMLResponse } from "../../../src/components/unifier/responses/ssml-res
 import { UnauthenticatedResponse } from "../../../src/components/unifier/responses/unauthenticated-response";
 import { EmptyResponse } from "../../../src/components/unifier/responses/empty-response";
 
+import { Container } from "ioc-container";
+
 describe("ResponseFactory", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
-    this.extraction = this.container.inversifyInstance.get("core:unifier:current-extraction");
+    this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
   });
 
-  it("uses extraction correctly as di argument", function() {
-    expect(this.extraction).toEqual(this.responseFactory.extraction);
+  it("uses handler correctly as di argument", function() {
+    expect(this.handler).toEqual(this.responseFactory.handler);
   })
 
   describe("with extraction as a MinimalRequestExtraction", function() {
@@ -60,7 +62,8 @@ describe("ResponseFactory", function() {
 
       it("sends an empty response", function() {
         this.sent = false;
-        this.extraction.getHandler = () => {return {sendResponse: () => this.sent = true};}
+        this.handler = Object.assign(this.handler, { sendResponse: () => this.sent = true });
+        this.responseFactory = new ResponseFactory(this.handler);
 
         this.responseFactory.createAndSendEmptyResponse();
         expect(this.sent).toBeTruthy();
@@ -68,11 +71,10 @@ describe("ResponseFactory", function() {
     });
   });
 
-  describe("with extraction as SSML enabled extraction", function() {
+  describe("with handler as SSML enabled handler", function() {
     beforeEach(function() {
-      let oldHandler = this.extraction.getHandler();
-      this.extraction.getHandler = () => Object.assign(oldHandler, { isSSML: false });
-      this.responseFactory = new ResponseFactory(this.extraction);
+      this.handler = Object.assign(this.handler, { isSSML: false });
+      this.responseFactory = new ResponseFactory(this.handler);
     });
 
     describe("createSSMLResponse", function() {
@@ -89,15 +91,15 @@ describe("ResponseFactory", function() {
     })
   });
 
-  describe("with extraction as OAuth enabled extraction", function() {
+  describe("with handler as OAuth enabled handler", function() {
     beforeEach(function() {
       this.sent = false;
-      this.extraction.getHandler = () => {return {
+      this.handler = Object.assign(this.handler, {
         sendResponse: () => this.sent = true,
         forceAuthenticated: false
-      };}
+      });
 
-      this.responseFactory = new ResponseFactory(this.extraction);
+      this.responseFactory = new ResponseFactory(this.handler);
     });
 
     describe("createAndSendUnauthenticatedResponse", function() {

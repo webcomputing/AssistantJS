@@ -108,7 +108,6 @@ export interface MinimalRequestExtraction {
   readonly intent: intent;
   readonly sessionID: string;
   readonly language: string;
-  getHandler(): MinimalResponseHandler;
 }
 
 export namespace OptionalExtractions {

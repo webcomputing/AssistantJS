@@ -3,7 +3,7 @@ import { ContainerImpl, Container } from "ioc-container";
 import { AssistantJSSetup } from "../../../src/setup";
 import { GenericRequestHandler } from "../../../src/components/root/generic-request-handler";
 import { RequestContext } from "../../../src/components/root/interfaces";
-import { MinimalRequestExtraction } from "../../../src/components/unifier/interfaces";
+import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/interfaces";
 import { StateMachineSetup } from "../../../src/components/state-machine/setup";
 
 import { SpecSetup } from "../../../src/spec-setup";
@@ -12,6 +12,7 @@ import { MainState } from "../mocks/states/main";
 import { SecondState } from "../mocks/states/second";
 import { context } from "../mocks/root/request-context";
 import { extraction } from "../mocks/unifier/extraction";
+import { ResponseHandler } from "../mocks/unifier/handler";
 
 /**
  * Creates a test assistant js setup
@@ -34,14 +35,8 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
  * You can pass null if you don't want to pass a result. If you don't pass anything, mocks/unifier/extraction will be used
  * @param requestContext Request context to add to di container for scope opening. If you don't pass one, mocks/root/request-context will be used
  */
-export function createRequestScope(specSetup: SpecSetup, minimalExtraction?: MinimalRequestExtraction | null, requestContext?: RequestContext) {
-  // Apply default values
-  if (typeof minimalExtraction === "undefined") {
-    minimalExtraction = extraction;
-  }
-  if (typeof requestContext === "undefined") {
-    requestContext = context;
-  }
-
-  specSetup.createRequestScope(minimalExtraction, requestContext);
+export function createRequestScope(specSetup: SpecSetup, minimalExtraction: MinimalRequestExtraction | null = extraction, 
+  requestContext: RequestContext = context, responseHandler: { new(...args: any[]): MinimalResponseHandler } = ResponseHandler)
+{
+  specSetup.createRequestScope(minimalExtraction, requestContext, responseHandler);
 }

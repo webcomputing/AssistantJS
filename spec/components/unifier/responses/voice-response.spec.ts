@@ -5,11 +5,9 @@ import { VoiceResponse } from "../../../../src/components/unifier/responses/voic
 describe("VoiceResponse", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
-    this.extraction = this.container.inversifyInstance.get("core:unifier:current-extraction");
-
-    let oldHandler = this.extraction.getHandler();
-    this.extraction.getHandler = () => Object.assign(oldHandler, { isSSML: false });
-    this.responseFactory = new ResponseFactory(this.extraction);
+    this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
+    this.handler = Object.assign(this.handler, { isSSML: false });
+    this.responseFactory = new ResponseFactory(this.handler);
 
     this.voiceResponse = this.responseFactory.createVoiceResponse();
     spyOn(this.voiceResponse.simple, "endSessionWith");

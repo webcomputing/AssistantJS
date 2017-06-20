@@ -1,9 +1,9 @@
-import { MinimalRequestExtraction, Voiceable } from "../interfaces";
+import { MinimalResponseHandler, Voiceable } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
 export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
-  constructor(extraction: MinimalRequestExtraction) {
-    super(extraction);
+  constructor(handler: MinimalResponseHandler) {
+    super(handler);
   }
 
   endSessionWith(text: string) {

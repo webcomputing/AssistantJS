@@ -1,12 +1,12 @@
-import { MinimalRequestExtraction, Voiceable } from "../interfaces";
+import { MinimalResponseHandler, Voiceable } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
 export class VoiceResponse extends BaseResponse implements Voiceable {
   simple: Voiceable;
   ssml: Voiceable;
 
-  constructor(extraction: MinimalRequestExtraction, simple: Voiceable, ssml: Voiceable) {
-    super(extraction);
+  constructor(handler: MinimalResponseHandler, simple: Voiceable, ssml: Voiceable) {
+    super(handler);
     this.simple = simple;
     this.ssml = ssml;
   }

@@ -1,12 +1,10 @@
-import { MinimalResponseHandler, MinimalRequestExtraction } from "../interfaces";
+import { MinimalResponseHandler } from "../interfaces";
 
 export class BaseResponse {
-  extraction: MinimalRequestExtraction;
   handler: MinimalResponseHandler;
 
-  constructor(extraction: MinimalRequestExtraction) {
-    this.extraction = extraction;
-    this.handler = extraction.getHandler();
+  constructor(handler: MinimalResponseHandler) {
+    this.handler = handler;
   }
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */

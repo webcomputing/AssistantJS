@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { ResponseFactory as ResponseFactoryInterface, MinimalRequestExtraction, OptionalHandlerFeatures, Voiceable } from "./interfaces";
+import { ResponseFactory as ResponseFactoryInterface, MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "./interfaces";
 
 import { BaseResponse } from "./responses/base-response";
 import { EmptyResponse } from "./responses/empty-response";
@@ -10,36 +10,36 @@ import { VoiceResponse } from "./responses/voice-response";
 
 @injectable()
 export class ResponseFactory implements ResponseFactoryInterface {
-  extraction: MinimalRequestExtraction;
+  handler: MinimalResponseHandler;
 
-  constructor(@inject("core:unifier:current-extraction") extraction: MinimalRequestExtraction) {
-    this.extraction = extraction;
+  constructor(@inject("core:unifier:current-response-handler") handler: MinimalResponseHandler) {
+    this.handler = handler;
   }
 
   createVoiceResponse() {
     let ssml: Voiceable;
-    if (BaseResponse.featureIsAvailable(this.extraction.getHandler(), OptionalHandlerFeatures.FeatureChecker.SSMLHandler)) {
-      ssml = new SSMLResponse(this.extraction);
+    if (BaseResponse.featureIsAvailable(this.handler, OptionalHandlerFeatures.FeatureChecker.SSMLHandler)) {
+      ssml = new SSMLResponse(this.handler);
     } else {
-      ssml = new SimpleVoiceResponse(this.extraction);
+      ssml = new SimpleVoiceResponse(this.handler);
     }
     
-    return new VoiceResponse(this.extraction, new SimpleVoiceResponse(this.extraction), ssml);
+    return new VoiceResponse(this.handler, new SimpleVoiceResponse(this.handler), ssml);
   }
 
   createSimpleVoiceResponse() {
-    return new SimpleVoiceResponse(this.extraction);
+    return new SimpleVoiceResponse(this.handler);
   }
 
   createSSMLResponse() {
-    return new SSMLResponse(this.extraction);
+    return new SSMLResponse(this.handler);
   }
 
   createAndSendEmptyResponse() {
-    return new EmptyResponse(this.extraction);
+    return new EmptyResponse(this.handler);
   }
 
   createAndSendUnauthenticatedResponse(text: string = "") {
-    return new UnauthenticatedResponse(this.extraction, this.createVoiceResponse(), text);
+    return new UnauthenticatedResponse(this.handler, this.createVoiceResponse(), text);
   }
 }

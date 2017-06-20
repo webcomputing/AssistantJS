@@ -5,7 +5,7 @@ import { GenericRequestHandler } from "./components/root/generic-request-handler
 import { StateMachineSetup } from "./components/state-machine/setup";
 import { StateConstructor } from "./components/state-machine/interfaces";
 import { RequestContext } from "./components/root/interfaces";
-import { MinimalRequestExtraction } from "./components/unifier/interfaces";
+import { MinimalRequestExtraction, MinimalResponseHandler } from "./components/unifier/interfaces";
 import { ServerApplication } from "./components/root/app-server"; 
 
 import { AssistantJSSetup } from "./setup";
@@ -38,8 +38,10 @@ export class SpecSetup {
    * @param minimalExtraction Extraction result to add to di container for scope opening. 
    * You can pass null if you don't want to pass a result.
    * @param requestContext Request context to add to di container for scope opening.
+   * @param responseHandler If given, this handler is bound to minimalExtraction.component.name + ":current-response-handler.
+   * Does  not work with minimalExtraction being null
    */
-  createRequestScope(minimalExtraction: MinimalRequestExtraction | null, requestContext: RequestContext) {
+  createRequestScope(minimalExtraction: MinimalRequestExtraction | null, requestContext: RequestContext, responseHandler?: { new(...args: any[]): MinimalResponseHandler }) {
     // Get request handle instance and create child container of it
     let requestHandle = this.setup.container.inversifyInstance.get(GenericRequestHandler);
     let childContainer = requestHandle.createChildContainer(this.setup.container);
@@ -50,6 +52,16 @@ export class SpecSetup {
     // Add minimal extraction if wanted
     if (minimalExtraction !== null) {
       requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction");
+    }
+
+    // Add minimal response handler
+    if (typeof responseHandler !== "undefined") {
+      if (minimalExtraction !== null) {
+        childContainer.bind<MinimalResponseHandler>(minimalExtraction.component.name + ":current-response-handler").to(responseHandler);
+      }
+      else {
+        throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");
+      }
     }
 
     // Open request scope

@@ -1,9 +1,9 @@
-import { MinimalRequestExtraction } from "../interfaces";
+import { MinimalResponseHandler } from "../interfaces";
 import { SimpleVoiceResponse } from "./simple-voice-response";
 
 export class EmptyResponse extends SimpleVoiceResponse {
-  constructor(extraction: MinimalRequestExtraction) {
-    super(extraction);
+  constructor(handler: MinimalResponseHandler) {
+    super(handler);
     this.endSessionWith("");
   }
 }
