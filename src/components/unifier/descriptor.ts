@@ -11,7 +11,7 @@ import { SessionEndedCallback } from "./session-ended-callback";
 import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, EntityDictionary, MinimalResponseHandler } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
-  utterancePath: process.cwd() + "config/locales"
+  utterancePath: process.cwd() + "/config/locales"
 }
 
 export const descriptor: ComponentDescriptor = {

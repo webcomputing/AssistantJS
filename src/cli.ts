@@ -9,13 +9,25 @@ import { ServerApplication } from "./components/root/app-server";
 import * as commander from "commander";
 
 // Get package.json data
-const pjson = require("./package.json");
+const pjson = require("../package.json");
 
-export function cli(argv) {
+export function cli(argv, resolvedIndex) {
+  // Grab local assistant js configuration / setup file
+  let grabSetup: () => AssistantJSSetup = () => {
+    if (!resolvedIndex) {
+      throw new Error("Could not find your local index.js. Are you in the correct directory?");
+    } else {
+      if (typeof resolvedIndex.assistantJs === "undefined")
+        throw new Error("Found your local index.js, but assistantJs attribute was undefined. Do you export 'assistantJs' in your index.js?");
 
-  // Create assistant js setup file
-  let setup = new AssistantJSSetup();
-
+      // Configure and return setup
+      let setup: AssistantJSSetup = resolvedIndex.assistantJs;
+      setup.registerInternalComponents();
+      setup.autobind();
+      return setup;
+    }
+  }
+  
   // Set version to CLI
   commander.version(pjson.version);
 
@@ -24,14 +36,28 @@ export function cli(argv) {
     .command("server")
     .alias("s")
     .description("Starts the server")
-    .action(() => setup.run(new ServerApplication()));
+    .action(() => grabSetup().run(new ServerApplication()));
 
-  // Register builder command
+  // Register generate command
   commander
-    .command("build")
-    .alias("b")
-    .description("Builds all platform configurations")
-    .action(() => setup.run(new GeneratorApplication(process.cwd())));
+    .command("generate")
+    .alias("g")
+    .description("Generates all platform configurations")
+    .action(() => grabSetup().run(new GeneratorApplication(process.cwd())));
+  
+  // Register new command
+  commander
+    .command("new")
+    .description("Creates a new and preconfigured assistantJS application")
+    .arguments('[name]')
+    .action(name => {
+      console.log("TODO: Build a nice and friendly generator for '"+ name +"' :-)");
+    });
+
+  // Display help as default
+  if (!argv.slice(2).length) {
+    commander.outputHelp();
+  }
 
   // Start commander
   commander.parse(argv);

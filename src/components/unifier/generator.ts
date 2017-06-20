@@ -16,7 +16,7 @@ export class Generator implements GeneratorExtension {
   private configuration: Configuration;
 
   constructor(
-    @inject("meta:component//core:conversation") componentMeta: Component, 
+    @inject("meta:component//core:unifier") componentMeta: Component, 
     @inject("core:state-machine:used-intents") intents: intent[] = [],
     @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator[] = [],
     @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: GeneratorUtteranceTemplateService[] = [],
