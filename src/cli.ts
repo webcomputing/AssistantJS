@@ -43,7 +43,7 @@ export function cli(argv, resolvedIndex) {
     .command("generate")
     .alias("g")
     .description("Generates all platform configurations")
-    .action(() => grabSetup().run(new GeneratorApplication(process.cwd())));
+    .action(() => grabSetup().run(new GeneratorApplication(process.cwd() + "/builds")));
   
   // Register new command
   commander
