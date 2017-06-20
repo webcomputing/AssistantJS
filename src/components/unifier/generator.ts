@@ -5,37 +5,40 @@ import * as generateUtterances from "alexa-utterances"; // We are only using ale
 import { GenericIntent, intent } from "./interfaces";
 import { GeneratorExtension } from "../root/interfaces";
 
-import { PlatformBuilder, componentInterfaces, Configuration, BuildIntentConfiguration, BuilderEntityMapping, BuilderUtteranceTemplateService } from "./interfaces";
+import { PlatformGenerator, componentInterfaces, Configuration, GenerateIntentConfiguration, GeneratorEntityMapping, GeneratorUtteranceTemplateService } from "./interfaces";
 
 @injectable()
 export class Generator implements GeneratorExtension {
-  @multiInject(componentInterfaces["platform-builder"]) @optional()
-  private platformBuilders: PlatformBuilder[] = [];
-
-  @multiInject(componentInterfaces["parameter-mappings"]) @optional()
-  private parameterMappings: BuilderEntityMapping[] = [];
-
-  @multiInject(componentInterfaces["utterance-template-service"]) @optional()
-  private additionalUtteranceTemplatesServices: BuilderUtteranceTemplateService[] = [];
-
-  @inject("core:state-machine:used-intents")
+  private platformGenerators: PlatformGenerator[] = [];
+  private entitiyMappings: GeneratorEntityMapping[] = [];
+  private additionalUtteranceTemplatesServices: GeneratorUtteranceTemplateService[] = [];
   private intents: intent[] = [];
-
   private configuration: Configuration;
-  constructor(@inject("meta:component//core:conversation") componentMeta: Component) {
+
+  constructor(
+    @inject("meta:component//core:conversation") componentMeta: Component, 
+    @inject("core:state-machine:used-intents") intents: intent[] = [],
+    @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator[] = [],
+    @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: GeneratorUtteranceTemplateService[] = [],
+    @multiInject(componentInterfaces.entityMapping) @optional() entitiyMappings: GeneratorEntityMapping[] = []
+  ) {
     this.configuration = componentMeta.configuration;
+    this.intents = intents;
+    this.platformGenerators = generators;
+    this.additionalUtteranceTemplatesServices = utteranceServices;
+    this.entitiyMappings = entitiyMappings;
   }
 
   execute(buildDir: string) {
     // Combine all registered parameter mappings to single object
-    let parameterMapping = this.parameterMappings.reduce((prev, curr) => Object.assign(prev, curr), {});
+    let parameterMapping = this.entitiyMappings.reduce((prev, curr) => Object.assign(prev, curr), {});
 
     // Get utterance templates per language
     let templatesPerLanguage = this.getUtteranceTemplatesPerLanguage();
 
     // For each found language...
     Object.keys(templatesPerLanguage).forEach(language => {
-      let buildIntentConfigs: BuildIntentConfiguration[] = [];
+      let buildIntentConfigs: GenerateIntentConfiguration[] = [];
 
       // Create language specific build dir
       let languageSpecificBuildDir = buildDir + "/" + language;
@@ -50,7 +53,7 @@ export class Generator implements GeneratorExtension {
         currentTemplates[intent] = this.buildUtterances(currentTemplates[intent]);
       });
 
-      // ... build the BuildIntentConfiguration[] array based on these utterances and the found intents
+      // ... build the GenerateIntentConfiguration[] array based on these utterances and the found intents
       this.intents.forEach(intent => {
         let utterances: string[] = [];
 
@@ -93,9 +96,9 @@ export class Generator implements GeneratorExtension {
         });
       });
 
-      // Call all platform builders
-      this.platformBuilders.forEach(builder =>
-        builder.execute(language, languageSpecificBuildDir, buildIntentConfigs.map(config => Object.assign({}, config)), Object.assign({}, parameterMapping)));
+      // Call all platform generators
+      this.platformGenerators.forEach(generator =>
+        generator.execute(language, languageSpecificBuildDir, buildIntentConfigs.map(config => Object.assign({}, config)), Object.assign({}, parameterMapping)));
     });
   }
 

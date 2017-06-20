@@ -6,7 +6,10 @@ export declare type userID = string | undefined;
 
 export const componentInterfaces = {
   "requestProcessor": Symbol("request-processor"),
-  "sessionEndedCallback": Symbol("session-ended-callback")
+  "sessionEndedCallback": Symbol("session-ended-callback"),
+  "platformGenerator": Symbol("platform-generator"),
+  "utteranceTemplateService": Symbol("utterance-template-service"),
+  "entityMapping": Symbol("entitiy-mapping")
 };
 
 /** End user interfaces */
@@ -75,23 +78,23 @@ export interface EntityDictionary {
   set(name: string, value: any);
 }
 
-/** Builder interfaces */
+/** Generator interfaces */
 
-export interface BuildIntentConfiguration {
+export interface GenerateIntentConfiguration {
   intent: intent;
   utterances: string[];
   entities: string[];
 }
 
-export interface BuilderUtteranceTemplateService {
+export interface GeneratorUtteranceTemplateService {
   getUtterancesFor(language: string): {[intent: string]: string[]};
 }
 
-export interface PlatformBuilder {
-  execute(language: string, buildDir: string, intentConfigurations: BuildIntentConfiguration[], entityMapping: BuilderEntityMapping);
+export interface PlatformGenerator {
+  execute(language: string, buildDir: string, intentConfigurations: GenerateIntentConfiguration[], entityMapping: GeneratorEntityMapping);
 }
 
-export interface BuilderEntityMapping {
+export interface GeneratorEntityMapping {
   [type: string]: string;
 }
 
