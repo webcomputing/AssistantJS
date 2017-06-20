@@ -1,4 +1,4 @@
-import { ComponentDescriptor, BindingDescriptor } from "ioc-container";
+import { ComponentDescriptor, BindingDescriptor, ExecutableExtension } from "ioc-container";
 import { interfaces as inversifyInterfaces } from "inversify";
 
 import { DestroyableSession } from "../services/interfaces";
@@ -42,6 +42,13 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);
 
       bindService.bindGlobalService<EntityDictionary>("current-entity-dictionary").to(EntityDictionaryImpl);
+
+      bindService.bindGlobalService<Function>("end-session-callbacks-executer").toDynamicValue(context => {
+        return () => {
+          let callbacks = context.container.getAll<ExecutableExtension>(componentInterfaces.sessionEndedCallback);
+          callbacks.forEach(e => e.execute());
+        }
+      });
 
       bindService.bindExecutable(componentInterfaces.sessionEndedCallback, SessionEndedCallback);
     }
