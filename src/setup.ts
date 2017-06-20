@@ -5,7 +5,7 @@ import { injectable, inject, multiInject } from "inversify";
 import * as internalComponents from "./components/index";
 
 export class AssistantJSSetup {
-  static log = debug("assistant.js");
+  static log = debug("assistant");
   static globalContainer = new ContainerImpl();
 
   container: Container;
