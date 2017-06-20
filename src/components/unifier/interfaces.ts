@@ -6,6 +6,7 @@ export declare type userID = string | undefined;
 
 export const componentInterfaces = {
   "requestProcessor": Symbol("request-processor"),
+  "sessionEndedCallback": Symbol("session-ended-callback")
 };
 
 /** End user interfaces */

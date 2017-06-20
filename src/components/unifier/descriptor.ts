@@ -7,6 +7,7 @@ import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entitiy-dictionary";
+import { SessionEndedCallback } from "./session-ended-callback";
 import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, EntityDictionary, MinimalResponseHandler } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
@@ -41,6 +42,8 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);
 
       bindService.bindGlobalService<EntityDictionary>("current-entity-dictionary").to(EntityDictionaryImpl);
+
+      bindService.bindExecutable(componentInterfaces.sessionEndedCallback, SessionEndedCallback);
     }
   }
 };
