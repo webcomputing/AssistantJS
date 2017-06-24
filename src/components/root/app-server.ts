@@ -44,7 +44,7 @@ export class ServerApplication implements MainApplication {
     let requestContext: RequestContext = {
       path: request.path,
       method: request.method,
-      headers: request.headers,
+      headers: request.headers as any,
       body: request.body,
       responseCallback: this.createResponseCallback(response)
     };

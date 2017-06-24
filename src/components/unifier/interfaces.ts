@@ -2,7 +2,6 @@ import { ExecutableExtension, Component, MessageBus } from "ioc-container";
 import { RequestContext } from "../root/interfaces";
 
 export declare type intent = string | GenericIntent;
-export declare type userID = string | undefined;
 
 export const componentInterfaces = {
   "requestProcessor": Symbol("request-processor"),
@@ -68,6 +67,7 @@ export namespace GenericIntent {
 
 export interface OptionalConfiguration {
   utterancePath?: string;
+  entities?: { [type: string]: string[] };
 }
 export interface Configuration extends OptionalConfiguration {}
 
@@ -116,7 +116,7 @@ export interface MinimalRequestExtraction {
 
 export namespace OptionalExtractions {
   export interface OAuthExtraction extends MinimalRequestExtraction {
-    oAuthToken: string;
+    oAuthToken: string | undefined;
   }
 
   export interface SpokenTextExtraction extends MinimalRequestExtraction {

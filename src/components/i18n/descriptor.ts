@@ -1,12 +1,23 @@
 import { ComponentDescriptor, Hooks } from "ioc-container";
 import { I18nextWrapper } from "./wrapper";
 import { I18n } from "i18next";
-import { TranslateHelper } from "./interfaces";
+import * as i18next from "i18next";
+import { TranslateHelper, Configuration } from "./interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nContext } from "./context";
 
+let defaultConfiguration: Configuration = {
+  i18nextInstance: i18next.createInstance(),
+  i18nextAdditionalConfiguration: {
+    backend: {
+      loadPath: process.cwd() + "/config/locales/{{lng}}/{{ns}}.json"
+    }
+  }
+}
+
 export const descriptor: ComponentDescriptor = {
   name: "core:i18n",
+  defaultConfiguration: defaultConfiguration,
   bindings: {
     root: (bindService, lookupService) => {
       bindService.bindGlobalService<I18nextWrapper>("wrapper").to(I18nextWrapper).inSingletonScope();
@@ -15,7 +26,7 @@ export const descriptor: ComponentDescriptor = {
       });
     },
     request: (bindService, lookupService) => {
-      bindService.bindGlobalService<TranslateHelper>("current-helper").to(TranslateHelperImpl);
+      bindService.bindGlobalService<TranslateHelper>("current-translate-helper").to(TranslateHelperImpl);
       bindService.bindGlobalService<I18nContext>("current-context").to(I18nContext).inSingletonScope();
 
       // Hook into beforeIntent and save current state and current intent into I18nContext (see above)

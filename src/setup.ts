@@ -34,6 +34,14 @@ export class AssistantJSSetup {
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
   }
 
+  configure(configuration: { [componentName: string]: any }) {
+    Object.keys(configuration).forEach(componentName => this.configureComponent(componentName, configuration[componentName]));
+  }
+
+  configureComponent(componentName: string, configuration: any) {
+    this.container.componentRegistry.lookup(componentName).addConfiguration(configuration);
+  }
+
   autobind() {
     this.container.componentRegistry.autobind(this.container.inversifyInstance);
   }

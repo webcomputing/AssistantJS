@@ -168,4 +168,14 @@ describe("StateMachine", function() {
       expect(this.stateMachine.handleIntent).toHaveBeenCalledWith("test", "param1", "param2");
     });
   });
+
+  describe("stateExists", function() {
+    it("returns true for registered states", function() {
+      expect(this.stateMachine.stateExists("MainState")).toBeTruthy();
+    });
+
+    it("returns false for not existing states", function() {
+      expect(this.stateMachine.stateExists("NotExistingState")).toBeFalsy();
+    });
+  });
 });

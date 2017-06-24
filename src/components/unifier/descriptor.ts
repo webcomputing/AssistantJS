@@ -1,4 +1,4 @@
-import { ComponentDescriptor, BindingDescriptor, ExecutableExtension } from "ioc-container";
+import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component } from "ioc-container";
 import { interfaces as inversifyInterfaces } from "inversify";
 
 import { DestroyableSession } from "../services/interfaces";
@@ -8,7 +8,8 @@ import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entitiy-dictionary";
 import { SessionEndedCallback } from "./session-ended-callback";
-import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, EntityDictionary, MinimalResponseHandler } from "./interfaces";
+import { swapHash } from "./swap-hash";
+import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
   utterancePath: process.cwd() + "/config/locales"
@@ -22,6 +23,15 @@ export const descriptor: ComponentDescriptor = {
     root: (bindService, lookupService) => {
       bindService.bindExtension<ContextDeriverI>(lookupService.lookup("core:root").getInterface("contextDeriver")).to(ContextDeriver);
       bindService.bindExtension<GeneratorExtension>(lookupService.lookup("core:root").getInterface("generator")).to(Generator);
+
+      // Bind swapped entity configuration
+      bindService.bindGlobalService<GeneratorEntityMapping>("user-entity-mappings").toDynamicValue(context => {
+        return swapHash((context.container.get<Component>("meta:component//core:unifier").configuration as any).entities);
+      });
+      
+      // Bind same swapped entity configuration to own extension
+      bindService.bindExtension<GeneratorEntityMapping>(componentInterfaces.entityMapping).toDynamicValue(context =>
+        context.container.get<GeneratorEntityMapping>("core:unifier:user-mappings"));
     },
 
     request: (bindService) => {

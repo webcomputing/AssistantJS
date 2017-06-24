@@ -64,6 +64,10 @@ export class StateMachine implements StateMachineInterface {
     return this.handleIntent(intent, ...args);
   }
 
+  stateExists(state: string) {
+    return this.stateNames.indexOf(state) !== -1;
+  }
+
   /* Private helper methods */
 
   /** If you change this: Have a look at registering of states / automatic intent recognition, too! */

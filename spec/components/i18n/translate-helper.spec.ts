@@ -15,7 +15,7 @@ describe("TranslateHelper", function() {
       this.context.intent = "testIntent";
       this.context.state = "mainState";
 
-      this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-helper");
+      this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
     });
 
     it("supports explicit keys", function() {

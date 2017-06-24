@@ -18,7 +18,7 @@ resolve('assistant-source', { basedir: process.cwd() }, function(error, projectL
   }
 
   // resolve local index.js configuration
-  resolve("./index.js", { basedir: process.cwd() }, function(error, projectIndex) {
+  resolve("./js/index.js", { basedir: process.cwd() }, function(error, projectIndex) {
     cli(process.argv, error ? false : require(projectIndex));
   });  
 });

@@ -13,7 +13,13 @@ export const componentInterfaces = {
 
 export const MAIN_STATE_NAME = "MainState";
 
+/** Main interface to implement a state */
 export interface State {
+  /** 
+   * Method to be called automatically if no intent method was matched
+   * @param machine Current transitionable interface
+   * @param originalIntent Name of intent the state machine tried to call 
+  */
   unhandledIntent(machine: Transitionable, originalIntent: string): void;
 }
 
@@ -33,9 +39,14 @@ export interface StateFactory {
   (stateName?: string): State;
 }
 
-// Interface segregation principle
 export interface Transitionable {
+  /** Checks if given state exists */
+  stateExists(state: string): boolean;
+
+  /** Transitions to given state. Promise fulfills as soon as transition was successful */
   transitionTo(state: string): Promise<void>;
+
+  /** Transitions to given state and calls intent method */
   redirectTo(state: string, intent: intent, ...args: any[]): Promise<void>;
 }
 

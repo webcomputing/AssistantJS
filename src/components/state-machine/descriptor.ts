@@ -37,9 +37,17 @@ export const descriptor: ComponentDescriptor = {
 
       // Publish all meta states
       bindService.bindGlobalService<MetaState[]>("meta-states").toDynamicValue(context => {
-        if (!context.container.isBound(componentInterfaces.metaState)) return [];
+        // Fixing a mysterious bug: constant value componentInterfaces.metaState is bound to parent container only, but not to child?!
+        let containerToUse = context.container;
+        if (!containerToUse.isBound(componentInterfaces.metaState)) {
+          if (containerToUse.parent !== null && containerToUse.parent.isBound(componentInterfaces.metaState)) {
+            containerToUse = containerToUse.parent;
+          } else {
+            return [];
+          }
+        }
 
-        return context.container.getAll<MetaState>(componentInterfaces["metaState"]);
+        return containerToUse.getAll<MetaState>(componentInterfaces.metaState);
       });
 
       // Returns all intents

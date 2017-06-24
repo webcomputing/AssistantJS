@@ -1,9 +1,10 @@
 import { ComponentDescriptor } from "ioc-container";
+import * as fs from "fs";
 
-import { State, StateConstructor, MetaState } from "./interfaces";
+import { State, StateConstructor, MetaState, componentInterfaces } from "./interfaces";
 
 import { GenericIntent } from "../unifier/interfaces";
-import { AssistantJSSetup } from "../../setup";
+import { AssistantJSSetup, log } from "../../setup";
 
 export class StateMachineSetup {
   private assistantJS: AssistantJSSetup;
@@ -12,6 +13,29 @@ export class StateMachineSetup {
 
   constructor(assistantJS: AssistantJSSetup) {
     this.assistantJS = assistantJS;
+  }
+
+  /** 
+   * [Sync!] Adds all classes in a specific directory as states.
+   * @param addOnly If set to true, this method only calls "addState", but not "registerStates" finally
+   * @param baseDirectory Base directory to start (process.cwd() + "/js")
+   * @param dictionary Dictionary which contains state classes, defaults to "states"
+   */
+  registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js", dictionary = "/states") {
+    fs.readdirSync(baseDirectory + dictionary).forEach(file => {
+      let suffixParts = file.split(".");
+      let suffix = suffixParts[suffixParts.length-1];
+
+      // Load if file is a JavaScript file
+      if (suffix !== "js") return;
+      let classModule = require(baseDirectory + dictionary + "/" + file);
+
+      Object.keys(classModule).forEach(exportName => {
+        this.addState(classModule[exportName]);
+      });
+    })
+
+    if (!addOnly) this.registerStates();
   }
 
   /** Adds a state to setup */
@@ -24,11 +48,13 @@ export class StateMachineSetup {
     this.metaStates.push(metaState);
 
     // Add state class
+    log("Adding state " + name + " with intents = %o", intents);
     this.stateClasses[name] = stateClass;
   }
 
   /** Registers all states in dependency injection container */
   registerStates() {
+    log("Registering all added states (count: "+ this.metaStates.length +")");
     this.assistantJS.registerComponent(this.toComponentDescriptor());
   }
 
