@@ -9,10 +9,12 @@ import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entitiy-dictionary";
 import { SessionEndedCallback } from "./session-ended-callback";
 import { swapHash } from "./swap-hash";
-import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping } from "./interfaces";
+import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, 
+  EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping, Configuration } from "./interfaces";
 
 let configuration: OptionalConfiguration = {
-  utterancePath: process.cwd() + "/config/locales"
+  utterancePath: process.cwd() + "/config/locales",
+  entities: {}
 }
 
 export const descriptor: ComponentDescriptor = {
@@ -26,7 +28,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<GeneratorEntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return swapHash((context.container.get<Component>("meta:component//core:unifier").configuration as any).entities);
+        return swapHash((context.container.get<Component>("meta:component//core:unifier").configuration as Configuration).entities);
       });
       
       // Bind same swapped entity configuration to own extension
