@@ -3,9 +3,9 @@ import * as express from "express";
 
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { StateMachineSetup } from "./components/state-machine/setup";
-import { StateConstructor } from "./components/state-machine/interfaces";
+import { StateConstructor, StateMachine } from "./components/state-machine/interfaces";
 import { RequestContext } from "./components/root/interfaces";
-import { MinimalRequestExtraction, MinimalResponseHandler } from "./components/unifier/interfaces";
+import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/interfaces";
 import { ServerApplication } from "./components/root/app-server"; 
 
 import { AssistantJSSetup } from "./setup";
@@ -66,6 +66,27 @@ export class SpecSetup {
 
     // Open request scope
     this.setup.container.componentRegistry.autobind(childContainer, [], "request", requestContext);
+  }
+
+  /** 
+   * Runs state machine. Needs request scope opened!
+   * @param stateName Name of state to run. If not passed, uses state in session 
+   * @param intent Name of intent to run. If not passed, uses extracted intent
+   */
+  async runMachine(stateName?: string, intent?: intent) {
+    if (this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") 
+    && this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")) {
+      let machine = this.setup.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine")
+      let extraction = this.setup.container.inversifyInstance.get<MinimalRequestExtraction>("core:unifier:current-extraction");
+
+      if (typeof stateName !== "undefined") {
+        await machine.transitionTo(stateName);
+      }
+
+      return machine.handleIntent(typeof intent === "undefined" ? extraction.intent : intent);
+    } else {
+      throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
+    }
   }
 
   /** Registers states */

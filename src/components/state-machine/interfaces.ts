@@ -51,5 +51,5 @@ export interface Transitionable {
 }
 
 export interface StateMachine extends Transitionable {
-  handleIntent(intent: intent, ...args: any[]): void;
+  handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }

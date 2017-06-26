@@ -1,5 +1,6 @@
 import { ExecutableExtension, Component, MessageBus } from "ioc-container";
 import { RequestContext } from "../root/interfaces";
+import { SpecSetup } from "../../spec-setup";
 
 export declare type intent = string | GenericIntent;
 
@@ -136,6 +137,20 @@ export interface MinimalResponseHandler {
   endSession: boolean;
   voiceMessage: string;
   sendResponse(): void;
+}
+
+export interface PlatformSpecHelper {
+  /** Link to assistantJS SpecSetup */
+  specSetup: SpecSetup;
+
+  /** 
+   * Pretends call of given intent (and entities, ...)
+   * @param intent intent to call
+   * @param autoStart if set to true, setup.runMachine() will be called automatically
+   * @param additionalExtractions Extractions (entities, oauth, ...) in addition to intent
+   * @param additionalContext additional context info (in addition to default mock) to add to request context
+   */
+  pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
 }
 
 
