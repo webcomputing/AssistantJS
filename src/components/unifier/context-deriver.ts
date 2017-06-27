@@ -1,6 +1,7 @@
 import { injectable, inject, multiInject, optional } from "inversify";
 
 import { log } from "../../setup";
+import { featureIsAvailable } from "./feature-checker";
 import { RequestContext, ContextDeriver as ContextDeriverI } from "../root/interfaces";
 import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./interfaces";
 
@@ -63,7 +64,6 @@ export class ContextDeriver implements ContextDeriverI {
 
   /** Returns true if given extractor supports given feature (see FeatureChecker) */
   private extractorSupportsFeature(extraction: MinimalRequestExtraction, feature: string[]) {
-    let objectKeys = Object.keys(extraction);
-    return feature.filter(f => objectKeys.indexOf(f) === -1).length === 0;
+    return featureIsAvailable(extraction, feature);
   }
 }

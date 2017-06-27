@@ -1,4 +1,5 @@
 import { MinimalResponseHandler } from "../interfaces";
+import { featureIsAvailable } from "../feature-checker";
 
 export class BaseResponse {
   handler: MinimalResponseHandler;
@@ -14,7 +15,6 @@ export class BaseResponse {
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */
   static featureIsAvailable(handler: MinimalResponseHandler, feature: string[]) {
-    let objectKeys = Object.keys(handler);
-    return feature.filter(f => objectKeys.indexOf(f) === -1).length === 0;
+    return featureIsAvailable(handler, feature);
   }
 }

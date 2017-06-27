@@ -13,6 +13,7 @@ export { GeneratorApplication } from "./components/root/app-generator";
 export { GenericRequestHandler } from "./components/root/generic-request-handler";
 export { StateMachineSetup } from "./components/state-machine/setup";
 export { AbstractResponseHandler } from "./components/unifier/abstract-response-handler";
+export { featureIsAvailable } from "./components/unifier/feature-checker";
 export { cli } from "./cli";
 
 // Export SpecHelper
