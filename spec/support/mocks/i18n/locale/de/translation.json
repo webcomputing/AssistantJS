@@ -21,5 +21,9 @@
     "yesGenericIntent": "root-yes",
     "rootKey": "root-veryUnspecific"
   },
-  "noIntentState": "stateOnly"
+  "noIntentState": "stateOnly",
+  "templateSyntax": [
+    "{Can|May} I help you, {{var}}?",
+    "Would you like me to help you?"
+  ] 
 }

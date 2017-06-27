@@ -30,6 +30,14 @@ describe("TranslateHelper", function() {
       expect(this.translateHelper.t("var", { var: "b" })).toEqual("ab");
     });
 
+    it("supports template syntax", function() {
+      expect([
+        "Can I help you, Sir?",
+        "May I help you, Sir?",
+        "Would you like me to help you?"
+      ]).toContain(this.translateHelper.t("templateSyntax", { var: "Sir" }));
+    });
+
     describe("when translation does not exist", function() {
       it("throws error", function() {
         expect(() => this.translateHelper.t(".notExisting")).toThrow();

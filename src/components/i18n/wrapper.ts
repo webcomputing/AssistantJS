@@ -4,6 +4,7 @@ import * as i18next from "i18next";
 import * as i18nextBackend from "i18next-sync-fs-backend";
 
 import { processor, arraySplitter } from "./plugins/array-returns-sample.plugin";
+import { processor as templateParser } from "./plugins/parse-template-language.plugin";
 import { Configuration } from "./interfaces";
 import { log } from "../../setup";
 
@@ -30,12 +31,13 @@ export class I18nextWrapper {
     } else if (typeof(i18nextConfiguration.postProcess) === "undefined") {
       i18nextConfiguration.postProcess = [];
     }
+    i18nextConfiguration.postProcess.push("parseTemplateLanguage");
     i18nextConfiguration.postProcess.push("arrayReturnsSample");
     i18nextConfiguration.joinArrays = arraySplitter;
 
     log("Using i18next configuration: %o", i18nextConfiguration);
     log("Loading from path: ", i18nextConfiguration.backend.loadPath);
 
-    this.instance.use(i18nextBackend).use(processor).init(i18nextConfiguration, err => { if (err) throw err; });
+    this.instance.use(i18nextBackend).use(templateParser).use(processor).init(i18nextConfiguration, err => { if (err) throw err; });
   }
 }

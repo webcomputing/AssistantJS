@@ -48,8 +48,9 @@ export interface Transitionable {
 
   /** Transitions to given state and calls intent method */
   redirectTo(state: string, intent: intent, ...args: any[]): Promise<void>;
-}
 
-export interface StateMachine extends Transitionable {
+  /** Jumps to given intent in current state */
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
+
+export interface StateMachine extends Transitionable {}
