@@ -6,7 +6,7 @@ import { ContextDeriver as ContextDeriverI, GeneratorExtension } from "../root/i
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
-import { EntityDictionary as EntityDictionaryImpl } from "./entitiy-dictionary";
+import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
 import { SessionEndedCallback } from "./session-ended-callback";
 import { swapHash } from "./swap-hash";
 import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, 
@@ -33,7 +33,7 @@ export const descriptor: ComponentDescriptor = {
       
       // Bind same swapped entity configuration to own extension
       bindService.bindExtension<GeneratorEntityMapping>(componentInterfaces.entityMapping).toDynamicValue(context =>
-        context.container.get<GeneratorEntityMapping>("core:unifier:user-mappings"));
+        context.container.get<GeneratorEntityMapping>("core:unifier:user-entity-mappings"));
     },
 
     request: (bindService) => {

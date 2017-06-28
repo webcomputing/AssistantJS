@@ -10,28 +10,31 @@ import { PlatformGenerator, componentInterfaces, Configuration, GenerateIntentCo
 @injectable()
 export class Generator implements GeneratorExtension {
   private platformGenerators: PlatformGenerator[] = [];
-  private entitiyMappings: GeneratorEntityMapping[] = [];
+  private entityMappings: GeneratorEntityMapping[] = [];
   private additionalUtteranceTemplatesServices: GeneratorUtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration;
 
   constructor(
     @inject("meta:component//core:unifier") componentMeta: Component, 
-    @inject("core:state-machine:used-intents") intents: intent[] = [],
-    @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator[] = [],
-    @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: GeneratorUtteranceTemplateService[] = [],
-    @multiInject(componentInterfaces.entityMapping) @optional() entitiyMappings: GeneratorEntityMapping[] = []
+    @inject("core:state-machine:used-intents") @optional() intents: intent[],
+    @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator[],
+    @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: GeneratorUtteranceTemplateService[],
+    @multiInject(componentInterfaces.entityMapping) @optional() entityMappings: GeneratorEntityMapping[]
   ) {
+    // Set default values. Setting them in the constructor leads to not calling the injections
+    [intents, generators, utteranceServices, entityMappings].forEach(v =>  { if (typeof v === "undefined") v = [] } )
+
     this.configuration = componentMeta.configuration;
     this.intents = intents;
     this.platformGenerators = generators;
     this.additionalUtteranceTemplatesServices = utteranceServices;
-    this.entitiyMappings = entitiyMappings;
+    this.entityMappings = entityMappings;
   }
 
   execute(buildDir: string) {
     // Combine all registered parameter mappings to single object
-    let parameterMapping = this.entitiyMappings.reduce((prev, curr) => Object.assign(prev, curr), {});
+    let parameterMapping = this.entityMappings.reduce((prev, curr) => Object.assign(prev, curr), {});
 
     // Get utterance templates per language
     let templatesPerLanguage = this.getUtteranceTemplatesPerLanguage();

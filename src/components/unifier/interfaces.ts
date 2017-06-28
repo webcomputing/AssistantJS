@@ -9,7 +9,7 @@ export const componentInterfaces = {
   "sessionEndedCallback": Symbol("session-ended-callback"),
   "platformGenerator": Symbol("platform-generator"),
   "utteranceTemplateService": Symbol("utterance-template-service"),
-  "entityMapping": Symbol("entitiy-mapping")
+  "entityMapping": Symbol("entity-mapping")
 };
 
 /** End user interfaces */

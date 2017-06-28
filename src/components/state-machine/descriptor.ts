@@ -52,6 +52,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Returns all intents
       bindService.bindGlobalService<intent[]>("used-intents").toDynamicValue(context => {
+        
         let meta = context.container.get<MetaState[]>("core:state-machine:meta-states");
         return meta
           .map(m => m.intents)
