@@ -7,4 +7,5 @@ node_modules
 # Builds
 dts
 lib
-spec/build
+spec/builds
+coverage

@@ -5,3 +5,4 @@ spec
 gulpfile.js
 tsconfig.json
 .gitignore
+coverage

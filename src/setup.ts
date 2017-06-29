@@ -9,6 +9,7 @@ export class AssistantJSSetup {
   static globalContainer = new ContainerImpl();
 
   container: Container;
+  configuration: { [componentName: string]: any } = {};
 
   constructor(container: Container = AssistantJSSetup.globalContainer) {
     this.container = container;
@@ -34,16 +35,25 @@ export class AssistantJSSetup {
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
   }
 
-  configure(configuration: { [componentName: string]: any }) {
-    Object.keys(configuration).forEach(componentName => this.configureComponent(componentName, configuration[componentName]));
+  addConfiguration(configuration: { [componentName: string]: any }) {
+    this.configuration = Object.assign(this.configuration, configuration);
+  }
+
+  configure() {
+    if (typeof this.configuration === "undefined") return; 
+    Object.keys(this.configuration).forEach(componentName => this.configureComponent(componentName, this.configuration[componentName]));
   }
 
   configureComponent(componentName: string, configuration: any) {
     this.container.componentRegistry.lookup(componentName).addConfiguration(configuration);
   }
 
-  autobind() {
+  /** 
+   * @param autoConfigure If set to true, calls this.configure() afterwards
+   */
+  autobind(autoConfigure = true) {
     this.container.componentRegistry.autobind(this.container.inversifyInstance);
+    if (autoConfigure) this.configure();
   }
 }
 

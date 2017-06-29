@@ -17,6 +17,7 @@
     "commander": "^2.9.0",
     "debug": "2.6",
     "express": "^4.15.3",
+    "fakeredis": "^2.0.0",
     "i18next": "^6.0.2",
     "i18next-sync-fs-backend": "^0.1.0",
     "ioc-container": "../../Masterthesis/ioc-container",
@@ -34,7 +35,7 @@
     "request-promise": "^4.1.1",
     "@types/request-promise": "^4.1.33",
     "tslint": "^5.4.0",
-    "typescript": "^2.3.4",
+    "typescript": "2.3.4",
     "connect-timeout": "^1.9.0"
   },
   "bin": {

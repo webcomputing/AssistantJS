@@ -1,11 +1,13 @@
 import { ContainerImpl } from "ioc-container";
 import * as express from "express";
+import * as fakeRedis from "fakeredis";
 
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { StateMachineSetup } from "./components/state-machine/setup";
 import { StateConstructor, StateMachine } from "./components/state-machine/interfaces";
 import { RequestContext } from "./components/root/interfaces";
 import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/interfaces";
+import { Configuration } from "./components/services/interfaces";
 import { ServerApplication } from "./components/root/app-server"; 
 
 import { AssistantJSSetup } from "./setup";
@@ -16,6 +18,7 @@ export class SpecSetup {
 
   constructor(originalSetup: AssistantJSSetup = new AssistantJSSetup(new ContainerImpl())) {
     this.setup = originalSetup;
+    this.initializeDefaults();
   }
 
   /** 
@@ -116,6 +119,15 @@ export class SpecSetup {
         resolve(() => { app.stop() });
       }, expressApp));
     });
+  }
+
+  /** Initialize default settings */
+  private initializeDefaults() {
+    // Set redis instance to fake redis instance
+    const serviceConfiguration: Configuration = {
+      redisClient: fakeRedis.createClient()
+    }
+    this.setup.addConfiguration({"core:services": serviceConfiguration});
   }
 }
 

@@ -138,10 +138,11 @@ describe("StateMachine", function() {
   });
 
   describe("transitionTo", function() {
-    it("transitions to given state", async function() {
+    it("transitions to given state", async function(done) {
       await this.stateMachine.transitionTo("SecondState");
       let currentState = await this.stateMachine.getCurrentState();
       expect(currentState.name).toEqual("SecondState");
+      done();
     });
 
     describe("when given state is not registered in state machine", function() {
