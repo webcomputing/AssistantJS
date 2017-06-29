@@ -37,16 +37,16 @@ export class StateMachine implements StateMachineInterface {
       this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runAsFilter(() => {
         if (typeof(currentState.instance[intent]) !== "undefined") {
           // Call given intent
-          currentState.instance[intent](this, ...args);
+          Promise.resolve(currentState.instance[intent](this, ...args)).then(() => {
+            // Run afterIntent hooks
+            this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runWithResultset(() => {});
 
-          // Run afterIntent hooks
-          this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runWithResultset(() => {});
-
-          // Done
-          resolve();
+            // Done
+            resolve();
+          }).catch(reason => reject(reason));
         } else {
           // -> Intent does not exist on state class, so call unhandledIntent instead
-          this.handleIntent("unhandledIntent", intent, ...args).then(() => resolve());
+          this.handleIntent("unhandledIntent", intent, ...args).catch(reason => reject(reason)).then(() => resolve());
         }
       }, () => resolve());
     });
