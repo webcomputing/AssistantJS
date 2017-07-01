@@ -89,8 +89,9 @@ export class Generator implements GeneratorExtension {
         // Check for parameters in utterances which have no mapping
         let unmatchedParameter = parameters.find(name => typeof(parameterMapping[name as string]) === "undefined");
         if (typeof(unmatchedParameter) === "string")
-          throw Error("Unknown parameter '" + unmatchedParameter + "' found in utterances of intent '" + intent + "'. \n" +
-            "Either you misspelled your parameter in one of the intents utterances or you did not define a type mapping for it.");
+          throw Error("Unknown entity '" + unmatchedParameter + "' found in utterances of intent '" + intent + "'. \n" +
+            "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " + 
+            "Your configured entity mappings are: " + JSON.stringify(this.entityMappings));
 
         buildIntentConfigs.push({
           utterances: utterances,

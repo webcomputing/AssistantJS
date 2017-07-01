@@ -26,6 +26,9 @@ export class ServerApplication implements MainApplication {
 
   /** Starts express server, calls handleRequest on each request */
   execute(container: Container) {
+    log("Preloading i18n instance...");
+    let preloadI18n = container.inversifyInstance.get("core:i18n:wrapper");
+
     log("Registering express catch all route...");
     this.app.all("*", (request, response) => {
       this.handleRequest(request, response, container);
@@ -54,7 +57,7 @@ export class ServerApplication implements MainApplication {
   }
 
   /** Returns a callback function which can be used to response to a request */
-  createResponseCallback(response: express.Response): ResponseCallback {
+  createResponseCallback(response: express.Response, nanoTimestamp = process.hrtime() ): ResponseCallback {
     return (body, headers, statusCode = 200) => {
       if (typeof headers !== "undefined") {
         Object.keys(headers).forEach((key) => {
@@ -63,6 +66,8 @@ export class ServerApplication implements MainApplication {
       }
 
       response.status(statusCode).send(body);
+      let timeNeeded = process.hrtime(nanoTimestamp);
+      log("Sent response. Handled request in " + (timeNeeded[0] * 1000 + timeNeeded[1]/1000000) + "ms.");
     }
   }
 

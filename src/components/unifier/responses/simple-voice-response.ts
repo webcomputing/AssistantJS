@@ -12,7 +12,12 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
   }
 
   prompt(text: string) {
-    this.handler.voiceMessage = text;
+    this.handler.voiceMessage = this.prepareText(text);
     this.handler.sendResponse();
+  }
+
+  /** Easy overwrite functionality for text preprocessing */
+  protected prepareText(text: string) {
+    return text;
   }
 }

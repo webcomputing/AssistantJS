@@ -20,7 +20,7 @@ export class VoiceResponse extends BaseResponse implements Voiceable {
   }
 
   delegatorBasedOnInput(text: string) {
-    if (text.includes("</")) {
+    if (text.includes("</") || text.includes("/>")) {
       return this.ssml;
     } else {
       return this.simple;

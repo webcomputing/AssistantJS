@@ -7,7 +7,11 @@ export class SSMLResponse extends SimpleVoiceResponse {
     
     if (!this.featureIsAvailable(OptionalHandlerFeatures.FeatureChecker.SSMLHandler))
       throw new Error("SSML Feature is not available for this response handler: " + this.handler);
-    
+  }
+
+  /** Sets <speak></speak> around text and enables ssml*/
+  protected prepareText(text: string) {
     (this.handler as OptionalHandlerFeatures.SSMLHandler).isSSML = true;
+    return "<speak>" + text + "</speak>";
   }
 }
