@@ -1,5 +1,6 @@
 import { ExecutableExtension, Component, MessageBus } from "ioc-container";
 import { RequestContext } from "../root/interfaces";
+import { Session } from "../services/interfaces";
 import { SpecSetup } from "../../spec-setup";
 
 export declare type intent = string | GenericIntent;
@@ -77,6 +78,21 @@ export interface EntityDictionary {
   contains(name: string): boolean;
   get(name: string): any | undefined;
   set(name: string, value: any);
+
+  /** 
+   * Reads current entity dictionary from given session and merges with entities in this request. 
+   * @param session The session to read from (same as in storeToSession)
+   * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
+   */
+  storeToSession(session: Session, storeKey?: string): Promise<void>;
+
+  /** 
+   * Reads current entity dictionary from given session and merges with entities in this request. 
+   * @param session The session to read from (same as in storeToSession)
+   * @param preferCurrentStore If set to true (default), entities in this request overwrite stored ones (in case of same names). Else it's the other way around.
+   * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
+   */
+  readFromSession(session: Session, preferCurrentStore?: boolean, storeKey?: string): Promise<void>;
 }
 
 /** Generator interfaces */

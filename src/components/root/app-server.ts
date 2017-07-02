@@ -65,6 +65,7 @@ export class ServerApplication implements MainApplication {
         });
       }
 
+      log("Sending status code " + statusCode + " with response body:", body);
       response.status(statusCode).send(body);
       let timeNeeded = process.hrtime(nanoTimestamp);
       log("Sent response. Handled request in " + (timeNeeded[0] * 1000 + timeNeeded[1]/1000000) + "ms.");
