@@ -31,12 +31,13 @@ export class TranslateHelper implements TranslateHelperInterface {
       key = undefined;
     }
 
-    let options = Object.assign({ lng:  this.extraction.language}, locals);
+    // Set language 
+    // Disable returning of objects so that lookup works properly with state keys.
+    // Else, '.mainState' returns a valid result because of sub keys!
+    let options = Object.assign({ lng:  this.extraction.language, returnObjectTrees: false }, locals);
     let extractorName = this.extraction.component.name;
 
-    log("I18N: local resolving key '" + key + "' (language: '" + this.extraction.language + " ') with context: %o and extractor name '"+ extractorName +"'", this.context);
-
-    if (typeof(key) === "undefined") {
+    if (typeof key === "undefined") {
       key = "";
     }
 
@@ -54,7 +55,34 @@ export class TranslateHelper implements TranslateHelperInterface {
       lookupKeys = [key as string];
     }
 
-    if (!this.i18n.exists(lookupKeys as any)) throw new Error("I18n key lookup could not be resolved: " + lookupKeys.join(", "));
-    return this.i18n.t(lookupKeys as any, options);
+    log("I18N: using key resolvings %o with options/locals %o", lookupKeys, options);
+    return this.translateOrFail(lookupKeys, options);
+  }
+
+  /** 
+   * Finds first existing locale or throws exception if none of the lookups exist.
+   * i18n.exists() won't work here: it returns true for keys returning an object, even if returnObjectTrees is false. t() then returns undefined.
+   */
+  private translateOrFail(lookups: string[], options = {}) {
+    let foundTranslation: string | undefined = undefined;
+
+    lookups.some(lookup => {
+      if (typeof foundTranslation === "undefined" && this.i18n.exists(lookup, options)) {
+        let translation = this.i18n.t(lookup, options);
+        if (typeof translation === "string") {
+          log("I18N: choosing key: " + lookup);
+          foundTranslation = translation;
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    if (typeof foundTranslation === "undefined") {
+      throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
+    } else {
+      return foundTranslation;
+    }
   }
 }

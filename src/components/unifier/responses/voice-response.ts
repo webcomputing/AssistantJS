@@ -20,6 +20,8 @@ export class VoiceResponse extends BaseResponse implements Voiceable {
   }
 
   delegatorBasedOnInput(text: string) {
+    if (typeof text === "undefined" || text === null) text = "";
+    
     if (text.includes("</") || text.includes("/>")) {
       return this.ssml;
     } else {
