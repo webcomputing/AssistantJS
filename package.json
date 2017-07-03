@@ -20,7 +20,7 @@
     "fakeredis": "^2.0.0",
     "i18next": "^6.0.2",
     "i18next-sync-fs-backend": "^0.1.0",
-    "ioc-container": "../../Masterthesis/ioc-container",
+    "ioc-container": "^1.0.1",
     "redis": "^2.7.1",
     "reflect-metadata": "^0.1.10"
   },
