@@ -19,6 +19,9 @@ export { cli } from "./cli";
 // Export SpecHelper
 export { SpecSetup } from "./spec-setup";
 
+// Export injectionNames (less type errors for most important injections)
+export { injectionNames } from "./injection-names";
+
 // Export Mixin/Constructor interfaces
 export type Constructor<T> = new(...args: any[]) => T;
 export interface Mixin<T> { new(...args: any[]): T; };
