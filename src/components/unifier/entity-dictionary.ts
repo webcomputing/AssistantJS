@@ -7,7 +7,7 @@ export class EntityDictionary implements EntityDictionaryInterface {
   store: {[name: string]: any} = {};
 
   constructor(@inject("core:unifier:current-extraction") extraction: MinimalRequestExtraction) {
-    this.store = typeof extraction.entities === "undefined" ? {} : extraction.entities;
+    this.store = typeof extraction.entities === "undefined" ? {} : Object.assign({}, extraction.entities);
   }
 
   get(name: string): any | undefined {

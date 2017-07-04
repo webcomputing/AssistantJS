@@ -53,7 +53,7 @@ export const descriptor: ComponentDescriptor = {
 
       bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);
 
-      bindService.bindGlobalService<EntityDictionary>("current-entity-dictionary").to(EntityDictionaryImpl);
+      bindService.bindGlobalService<EntityDictionary>("current-entity-dictionary").to(EntityDictionaryImpl).inSingletonScope();
 
       bindService.bindGlobalService<Function>("end-session-callbacks-executer").toDynamicValue(context => {
         return () => {
