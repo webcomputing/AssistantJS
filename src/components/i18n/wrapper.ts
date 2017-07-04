@@ -24,7 +24,7 @@ export class I18nextWrapper {
      throw new Error("i18next configuration and instance must not be undefined! Please check your configuration.");
 
     this.instance = this.configuration.i18nextInstance;
-    let i18nextConfiguration = Object.assign({}, this.configuration.i18nextAdditionalConfiguration);
+    let i18nextConfiguration = Object.assign({ initImmediate: false }, this.configuration.i18nextAdditionalConfiguration);
 
     if (typeof(i18nextConfiguration.postProcess) === "string") {
       i18nextConfiguration.postProcess = [i18nextConfiguration.postProcess];
