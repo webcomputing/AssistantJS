@@ -1,4 +1,4 @@
-import { Container } from "ioc-container";
+import { Container } from "inversify-components";
 import { componentInterfaces } from "../../../src/components/unifier/interfaces";
 import { withServer, RequestProxy, expressAppWithTimeout } from "../../support/util/requester";
 

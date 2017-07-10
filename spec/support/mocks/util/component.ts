@@ -1,4 +1,4 @@
-import { Component as ComponentI, InterfaceDescriptor } from "ioc-container";
+import { Component as ComponentI, InterfaceDescriptor } from "inversify-components";
 
 export class Component implements ComponentI {
   readonly name: string;

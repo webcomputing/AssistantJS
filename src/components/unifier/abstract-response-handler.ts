@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { ExecutableExtension } from "ioc-container";
+import { ExecutableExtension } from "inversify-components";
 
 import { MinimalResponseHandler } from "./interfaces";
 import { ResponseCallback, RequestContext } from "../root/interfaces";

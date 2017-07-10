@@ -1,4 +1,4 @@
-import { MainApplication, Container } from "ioc-container";
+import { MainApplication, Container } from "inversify-components";
 import * as express from "express";
 import { Express } from "express";
 export { Express } from "express";

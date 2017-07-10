@@ -1,4 +1,4 @@
-import { MainApplication, Container } from "ioc-container";
+import { MainApplication, Container } from "inversify-components";
 import { componentInterfaces, GeneratorExtension } from "./interfaces";
 
 import * as fs from "fs";

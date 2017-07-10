@@ -1,5 +1,5 @@
 import { interfaces as inversifyInterfaces } from "inversify";
-import { ComponentDescriptor, Component } from "ioc-container";
+import { ComponentDescriptor, Component } from "inversify-components";
 import { RedisClient } from "redis";
 
 import { DestroyableSession, Configuration } from "./interfaces";

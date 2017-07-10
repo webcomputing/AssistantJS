@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.2.1",
+  "version": "0.1.0",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
     "test": "jasmine-ts spec/**/*.spec.ts"
@@ -14,22 +14,22 @@
     "@types/redis": "^2.6.0",
     "alexa-utterances": "^0.2.1",
     "body-parser": "^1.17.2",
-    "commander": "^2.9.0",
+    "commander": "2.9.0",
     "debug": "2.6",
     "express": "^4.15.3",
     "fakeredis": "^2.0.0",
     "i18next": "^6.0.2",
     "i18next-sync-fs-backend": "^0.1.0",
-    "ioc-container": "../../Masterthesis/ioc-container",
+    "inversify-components": "^0.1.0",
     "redis": "^2.7.1",
     "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
     "@types/jasmine": "^2.5.48",
-    "gulp": "^3.9.1",
+    "gulp": "3.9.1",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-tslint": "^8.1.0",
-    "gulp-typescript": "^3.1.7",
+    "gulp-typescript": "3.1.7",
     "jasmine-ts": "^0.1.3",
     "request": "^2.34",
     "request-promise": "^4.1.1",
@@ -40,5 +40,8 @@
   },
   "bin": {
     "assistant": "./bin/assistant"
+  },
+  "publishConfig": {
+    "registry": "http://sinopia.verstehe.local:4873"
   }
 }

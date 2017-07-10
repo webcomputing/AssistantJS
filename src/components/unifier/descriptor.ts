@@ -1,4 +1,4 @@
-import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component } from "ioc-container";
+import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component } from "inversify-components";
 import { interfaces as inversifyInterfaces } from "inversify";
 
 import { DestroyableSession } from "../services/interfaces";
@@ -36,7 +36,7 @@ export const descriptor: ComponentDescriptor = {
         context.container.get<GeneratorEntityMapping>("core:unifier:user-entity-mappings"));
     },
 
-    request: (bindService) => {
+    request: (bindService, lookupService) => {
       bindService.bindGlobalService<inversifyInterfaces.Factory<DestroyableSession>>("current-session-factory").toFactory<DestroyableSession>(context => {
         return ()  => {
           let currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
@@ -57,12 +57,12 @@ export const descriptor: ComponentDescriptor = {
 
       bindService.bindGlobalService<Function>("end-session-callbacks-executer").toDynamicValue(context => {
         return () => {
-          let callbacks = context.container.getAll<ExecutableExtension>(componentInterfaces.sessionEndedCallback);
+          let callbacks = context.container.getAll<ExecutableExtension>(lookupService.lookup("core:unifier").getInterface("sessionEndedCallback"));
           callbacks.forEach(e => e.execute());
         }
       });
 
-      bindService.bindExecutable(componentInterfaces.sessionEndedCallback, SessionEndedCallback);
+      bindService.bindExecutable(lookupService.lookup("core:unifier").getInterface("sessionEndedCallback"), SessionEndedCallback);
     }
   }
 };

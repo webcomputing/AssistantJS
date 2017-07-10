@@ -8,7 +8,7 @@ import { SSMLResponse } from "../../../src/components/unifier/responses/ssml-res
 import { UnauthenticatedResponse } from "../../../src/components/unifier/responses/unauthenticated-response";
 import { EmptyResponse } from "../../../src/components/unifier/responses/empty-response";
 
-import { Container } from "ioc-container";
+import { Container } from "inversify-components";
 
 describe("ResponseFactory", function() {
   beforeEach(function() {

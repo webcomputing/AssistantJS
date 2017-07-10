@@ -1,4 +1,4 @@
-import { ExecutableExtension, Component, MessageBus } from "ioc-container";
+import { ExecutableExtension, Component, MessageBus } from "inversify-components";
 import { RequestContext } from "../root/interfaces";
 import { Session } from "../services/interfaces";
 import { SpecSetup } from "../../spec-setup";

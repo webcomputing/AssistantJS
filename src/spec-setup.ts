@@ -1,4 +1,4 @@
-import { ContainerImpl } from "ioc-container";
+import { ContainerImpl } from "inversify-components";
 import * as express from "express";
 import * as fakeRedis from "fakeredis";
 

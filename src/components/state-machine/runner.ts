@@ -1,4 +1,4 @@
-import { ExecutableExtension } from "ioc-container";
+import { ExecutableExtension } from "inversify-components";
 import { inject, injectable, optional } from "inversify";
 import { MinimalRequestExtraction } from "../unifier/interfaces";
 

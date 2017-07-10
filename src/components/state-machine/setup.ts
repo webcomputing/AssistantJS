@@ -1,4 +1,4 @@
-import { ComponentDescriptor } from "ioc-container";
+import { ComponentDescriptor } from "inversify-components";
 import * as fs from "fs";
 
 import { State, StateConstructor, MetaState, componentInterfaces } from "./interfaces";

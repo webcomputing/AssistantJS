@@ -1,4 +1,4 @@
-import { Hooks, Container } from "ioc-container";
+import { Hooks, Container } from "inversify-components";
 import { componentInterfaces } from "../../../../src/components/state-machine/interfaces";
 
 /** Hook wich calls failure function if called intent is "test" */

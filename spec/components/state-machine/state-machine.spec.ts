@@ -1,6 +1,6 @@
 import { createRequestScope } from "../../support/util/setup";
 import { registerHook, createSpyHook } from "../../support/mocks/state-machine/hook";
-import { Container } from "ioc-container";
+import { Container } from "inversify-components";
 
 describe("StateMachine", function() {
   beforeEach(function() {

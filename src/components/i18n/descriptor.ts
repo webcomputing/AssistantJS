@@ -1,4 +1,4 @@
-import { ComponentDescriptor, Hooks } from "ioc-container";
+import { ComponentDescriptor, Hooks } from "inversify-components";
 import { I18nextWrapper } from "./wrapper";
 import { I18n } from "i18next";
 import * as i18next from "i18next";

@@ -1,6 +1,6 @@
 import * as request from "request-promise";
 export { RequestPromise } from "request-promise";
-import { Container } from "ioc-container";
+import { Container } from "inversify-components";
 import * as express from "express";
 import * as timeout from "connect-timeout";
 

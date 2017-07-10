@@ -2,7 +2,7 @@
  * Express independent request handling.
  * You could also use this entry point without express at all.
  */
-import { Container, ExecutableExtension } from "ioc-container";
+import { Container, ExecutableExtension } from "inversify-components";
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
 import { log } from "../../setup";
 

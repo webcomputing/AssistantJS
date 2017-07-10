@@ -1,4 +1,4 @@
-import { ContainerImpl, Container } from "ioc-container";
+import { ContainerImpl, Container } from "inversify-components";
 
 import { AssistantJSSetup } from "../../../src/setup";
 import { GenericRequestHandler } from "../../../src/components/root/generic-request-handler";

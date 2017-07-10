@@ -1,4 +1,4 @@
-import { ComponentDescriptor } from "ioc-container";
+import { ComponentDescriptor } from "inversify-components";
 import { GenericRequestHandler } from "./generic-request-handler";
 import { componentInterfaces } from "./interfaces";
 

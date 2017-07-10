@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { Hooks } from "ioc-container";
+import { Hooks } from "inversify-components";
 import { GenericIntent, intent } from "../unifier/interfaces";
 import { Session } from "../services/interfaces";
 import { log } from "../../setup";

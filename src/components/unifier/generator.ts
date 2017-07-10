@@ -1,5 +1,5 @@
 import { inject, injectable, multiInject, optional } from "inversify";
-import { Component } from "ioc-container";
+import { Component } from "inversify-components";
 import * as fs from "fs";
 import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
 import { GenericIntent, intent } from "./interfaces";

@@ -1,4 +1,4 @@
-import { Component } from "ioc-container";
+import { Component } from "inversify-components";
 import { inject, injectable } from "inversify";
 import * as i18next from "i18next";
 import * as i18nextBackend from "i18next-sync-fs-backend";

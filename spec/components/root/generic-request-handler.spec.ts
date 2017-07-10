@@ -1,4 +1,4 @@
-import { Container } from "ioc-container";
+import { Container } from "inversify-components";
 import { withServer, RequestProxy } from "../../support/util/requester";
 import { RequestContext } from "../../../src/components/root/interfaces";
 

@@ -1,4 +1,4 @@
-import { MessageBus, Message } from "ioc-container";
+import { MessageBus, Message } from "inversify-components";
 import { Session } from "../services/interfaces";
 import { GenericIntent, intent } from "../unifier/interfaces";
 

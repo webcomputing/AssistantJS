@@ -1,4 +1,4 @@
-import { ComponentDescriptor, BindingDescriptor } from "ioc-container";
+import { ComponentDescriptor, BindingDescriptor } from "inversify-components";
 
 import { Session } from "../services/interfaces";
 import { intent } from "../unifier/interfaces";

@@ -1,4 +1,4 @@
-import { Container } from "ioc-container";
+import { Container } from "inversify-components";
 import { Configuration } from "../../../src/components/i18n/interfaces";
 import * as i18next from "i18next";
 

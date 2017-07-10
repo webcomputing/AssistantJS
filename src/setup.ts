@@ -1,4 +1,4 @@
-import { Container, MainApplication, ContainerImpl, ComponentDescriptor } from "ioc-container";
+import { Container, MainApplication, ContainerImpl, ComponentDescriptor } from "inversify-components";
 import { debug } from "debug";
 import { injectable, inject, multiInject } from "inversify";
 
