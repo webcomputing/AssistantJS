@@ -18,10 +18,10 @@ export class StateMachineSetup {
   /** 
    * [Sync!] Adds all classes in a specific directory as states.
    * @param addOnly If set to true, this method only calls "addState", but not "registerStates" finally
-   * @param baseDirectory Base directory to start (process.cwd() + "/js")
+   * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
    * @param dictionary Dictionary which contains state classes, defaults to "states"
    */
-  registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js", dictionary = "/states") {
+  registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/states") {
     fs.readdirSync(baseDirectory + dictionary).forEach(file => {
       let suffixParts = file.split(".");
       let suffix = suffixParts[suffixParts.length-1];
