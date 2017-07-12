@@ -18,7 +18,6 @@ export class SpecSetup {
 
   constructor(originalSetup: AssistantJSSetup = new AssistantJSSetup(new ContainerImpl())) {
     this.setup = originalSetup;
-    this.initializeDefaults();
   }
 
   /** 
@@ -29,6 +28,7 @@ export class SpecSetup {
    * @param autoSetup If set to true, registers internal components
    * */
   prepare(states: StateConstructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
+    this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
 
@@ -121,8 +121,8 @@ export class SpecSetup {
     });
   }
 
-  /** Initialize default settings */
-  private initializeDefaults() {
+  /** Initialize default configuration -> changes redis to mock version */
+  initializeDefaultConfiguration() {
     // Set redis instance to fake redis instance
     const serviceConfiguration: Configuration = {
       redisClient: fakeRedis.createClient()
