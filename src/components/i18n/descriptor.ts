@@ -1,10 +1,11 @@
-import { ComponentDescriptor, Hooks } from "inversify-components";
+import { ComponentDescriptor, Hooks, Component } from "inversify-components";
 import { I18nextWrapper } from "./wrapper";
 import { I18n } from "i18next";
 import * as i18next from "i18next";
-import { TranslateHelper, Configuration } from "./interfaces";
+import { TranslateHelper, Configuration, TranslateValuesFor } from "./interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nContext } from "./context";
+import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 
 let defaultConfiguration: Configuration = {
   i18nextInstance: i18next.createInstance(),
@@ -21,6 +22,18 @@ export const descriptor: ComponentDescriptor = {
   bindings: {
     root: (bindService, lookupService) => {
       bindService.bindGlobalService<I18nextWrapper>("wrapper").to(I18nextWrapper).inSingletonScope();
+
+      bindService.bindGlobalService<I18nextWrapper>("spec-wrapper").toDynamicValue(context => {
+        return new I18nextWrapper(context.container.get<Component>("meta:component//core:i18n"), false);
+      }).inSingletonScope();
+
+      // Registers a spec helper function which returns all possible values instead of a sample one
+      bindService.bindGlobalService<TranslateValuesFor>("translate-values-for").toDynamicValue(context => {
+        return (key: string, options = {}) => {
+          return (context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options) as string).split(arraySplitter);
+        };
+      });
+
       bindService.bindGlobalService<I18n>("instance").toDynamicValue(context => {
         return context.container.get<I18nextWrapper>("core:i18n:wrapper").instance;
       });

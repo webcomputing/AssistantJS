@@ -12,6 +12,10 @@ export interface TranslateHelper {
   t(key?: string, locals?: {[name: string]: string | number}): string;
 }
 
+export interface TranslateValuesFor {
+  (key: string, options?: any): string[];
+}
+
 export interface Configuration {
   /** A valid instance of i18next needed */
   i18nextInstance?: i18next.I18n;

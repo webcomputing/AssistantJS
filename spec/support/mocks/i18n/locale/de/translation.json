@@ -25,5 +25,9 @@
   "templateSyntax": [
     "{Can|May} I help you, {{var}}?",
     "Would you like me to help you?"
+  ],
+  "templateSyntaxSmall": [
+    "{hello|hi} {{name}}",
+    "welcome {{name}}"
   ] 
 }

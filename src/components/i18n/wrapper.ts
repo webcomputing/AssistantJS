@@ -15,7 +15,11 @@ export class I18nextWrapper {
 
   instance: i18next.I18n;
 
-  constructor(@inject("meta:component//core:i18n") componentMeta: Component) {
+  /**
+   * @param componentMeta Component meta data
+   * @param returnOnlySample If set to true, translation calls return a sample out of many options (for production), if false, you get all options (for specs only)
+   */
+  constructor(@inject("meta:component//core:i18n") componentMeta: Component, returnOnlySample = true) {
     this.component = componentMeta;
     this.configuration = componentMeta.configuration as Configuration;
 
@@ -32,7 +36,7 @@ export class I18nextWrapper {
       i18nextConfiguration.postProcess = [];
     }
     i18nextConfiguration.postProcess.push("parseTemplateLanguage");
-    i18nextConfiguration.postProcess.push("arrayReturnsSample");
+    if (returnOnlySample) i18nextConfiguration.postProcess.push("arrayReturnsSample");
     i18nextConfiguration.joinArrays = arraySplitter;
 
     log("Using i18next configuration: %o", i18nextConfiguration);

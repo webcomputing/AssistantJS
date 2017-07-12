@@ -1,6 +1,7 @@
 /** Names of injectionable services, leads to fewer typing errors for most important injections */
 export const injectionNames = {
   "i18nWrapper": "core:i18n:wrapper",
+  "i18nTranslateValuesFor": "core:i18n:translate-values-for",
   "redisInstance": "core:services:redis-instance",
   "stateFactory": "core:state-machine:state-factory",
   "current": {
