@@ -30,7 +30,7 @@ export class SpecSetup {
    * */
   prepare(states: StateConstructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
     if (autoSetup) this.setup.registerInternalComponents();
-    this.registerStates(states);
+    if (states.length > 0) this.registerStates(states);
 
     if (autoBind) this.setup.autobind();
     if (!useChilds) this.bindChildlessRequestHandlerMock();
