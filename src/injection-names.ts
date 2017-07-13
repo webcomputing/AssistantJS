@@ -7,6 +7,8 @@ export const injectionNames = {
   "current": {
     "translateHelper": "core:i18n:current-translate-helper",
     "stateMachine": "core:state-machine:current-state-machine",
+    "stateNameProvider": "core:state-machine:current-state-name-provider",
+    "stateProvider": "core:state-machine:current-state-provider",
     "sessionFactory": "core:unifier:current-session-factory",
     "extraction": "core:unifier:current-extraction",
     "responseFactory": "core:unifier:current-response-factory",
