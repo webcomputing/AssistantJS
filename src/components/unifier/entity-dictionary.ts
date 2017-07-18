@@ -15,7 +15,7 @@ export class EntityDictionary implements EntityDictionaryInterface {
   }
 
   contains(name: string) {
-    return typeof(this.get(name)) !== "undefined";
+    return typeof(this.get(name)) !== "undefined" && this.get(name) !== null;
   }
 
   set(name: string, value: any) {
