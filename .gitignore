@@ -9,3 +9,4 @@ dts
 lib
 spec/builds
 coverage
+.nyc_output

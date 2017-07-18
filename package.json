@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
-    "test": "jasmine-ts spec/**/*.spec.ts"
+    "test": "nyc jasmine-ts ./spec/**/*.spec.[tj]s"
   },
   "main": "lib/assistant-source.js",
   "typings": "./dts/assistant-source.d.ts",
@@ -27,22 +27,27 @@
   },
   "devDependencies": {
     "@types/jasmine": "^2.5.48",
+    "@types/request-promise": "^4.1.33",
+    "connect-timeout": "^1.9.0",
     "gulp": "3.9.1",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-tslint": "^8.1.0",
     "gulp-typescript": "3.1.7",
     "jasmine-ts": "^0.1.3",
+    "nyc": "^11.0.3",
     "request": "^2.34",
     "request-promise": "^4.1.1",
-    "@types/request-promise": "^4.1.33",
     "tslint": "^5.4.0",
-    "typescript": "2.3.4",
-    "connect-timeout": "^1.9.0"
+    "typescript": "2.3.4"
   },
   "bin": {
     "assistant": "./bin/assistant"
   },
   "publishConfig": {
     "registry": "http://sinopia.verstehe.local:4873"
+  },
+  "nyc": {
+    "all": true,
+    "include": ["lib/components/**"]
   }
 }
