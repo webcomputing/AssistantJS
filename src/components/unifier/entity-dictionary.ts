@@ -11,14 +11,18 @@ export class EntityDictionary implements EntityDictionaryInterface {
   }
 
   get(name: string): any | undefined {
-    return this.store[name];
+    // Return undefined instead of null. Uniforms all "missing" results to undefined.
+    return this.store[name] === null ? undefined : this.store[name];
   }
 
   contains(name: string) {
-    return typeof(this.get(name)) !== "undefined" && this.get(name) !== null;
+    return typeof(this.get(name)) !== "undefined";
   }
 
   set(name: string, value: any) {
+    // Set value to undefined if passed value is null. 
+    value = value === null ? undefined : value;
+
     this.store[name] = value;
   }
 
