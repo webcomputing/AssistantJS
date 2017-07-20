@@ -32,7 +32,7 @@ helps you to build better user interfaces using response text variation out of t
 ## Getting started
 Install assistant.js using npm as a global module:
 
-`npm i --save assistant-source`
+`npm i --global assistant-source`
 
 AssistantJS currently needs a running [redis][9] instance to work. So be sure to have redis set up! After that, check out these resources to get started:
 - **[assistant-boostrap][10]**: A well documented getting started bootrap assistant.js application. Use this to initialize your own project!
