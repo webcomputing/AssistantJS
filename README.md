@@ -15,7 +15,7 @@ of currently implemented assistant.js components.
 - **I18n integration**: Thanks to [i18next][5], assistant.js gives you full multi language support. In addition, it applies some really nice [convention-over-configuration][6] rulesets to speed up your development and
 helps you to build better user interfaces using response text variation out of the box.
 - **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language (as known from [alexa-utterances][7]) to generate utterances efficiently.
-- **Debugable**: Based on its components, assistant.js uses the awesome [debug][4] module to give you exactly that kind of rich debug output you need.
+- **Debuggable**: Based on its components, assistant.js uses the awesome [debug][4] module to give you exactly that kind of rich debug output you need.
 - **CLI**: AssistantJS gives you a simple command line interface you can use to start your assistant.js server (`assistant s`, backend by [express][8]) or generate nlu configurations (`assistant g`).
 - **Entity validation**: Don't check for presence of entities, let assistant.js do this job for you. *(Optional dependency)*
 - **Authentication**: Protect your states with configurable authentication mechanisms. *(Optional dependency)*
