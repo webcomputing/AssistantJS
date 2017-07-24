@@ -5,7 +5,7 @@ you even don't have to configure and update intent schema and utterances. Instea
 based on your implementation.
 
 But even if you are currently not interested in deploying your voice application to multiple voice assistants, you possibly still should take a look at assistant.js.
-On the one hand obviously because you never know if your platform requirements may change in future. 
+On one hand obviously because you never know if your platform requirements may change in future. 
 On the other hand, you probably don't want to miss some of the assistant.js development features:
 - **Object oriented state machine**: AssistantJS uses object oriented states to describe the flow of voice applications.  Amongs other things, this enables you to [DRY][1]-up your code by using inheritance and mixins. 
 In addition, assistant.js is heavily based on dependency injection using [inversify][2] with all its advantages.
