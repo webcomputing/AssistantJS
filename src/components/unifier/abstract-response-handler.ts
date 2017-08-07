@@ -10,7 +10,7 @@ export abstract class AbstractResponseHandler implements MinimalResponseHandler 
   private _isActive: boolean = true;
 
   endSession: boolean;
-  voiceMessage: string;
+  voiceMessage: string | null = null;
 
   responseCallback: ResponseCallback;
   endSessionExecuter: Function;

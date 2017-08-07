@@ -8,7 +8,7 @@ describe("CardResponse", function() {
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
 
     this.buildCardHandler = (additionalFeatures = {}) => {
-      this.handler = Object.assign(this.handler, Object.assign({ displayText: "", cardTitle: "" }, additionalFeatures));
+      this.handler = Object.assign(this.handler, Object.assign({ displayText: null, cardTitle: null }, additionalFeatures));
       this.responseFactory = new ResponseFactory(this.handler);
     }
   });

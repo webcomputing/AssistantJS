@@ -17,6 +17,7 @@ export class CardResponse extends BaseResponse {
    */
   setTitle(title: string) {
     this.handler.cardTitle = title;
+    return this;
   }
 
   /** Sets the card's body
@@ -25,6 +26,7 @@ export class CardResponse extends BaseResponse {
    */
   setBody(body: string) {
     this.handler.displayText = body;
+    return this;
   }
 
   /** Sets the card's image. Throws exception if current handler is not able to display images.
@@ -36,5 +38,7 @@ export class CardResponse extends BaseResponse {
       throw new Error("Displaying an image card is not available for this response handler: " + this.handler);
     
     this.handler.displayImage = imageURL;
+    
+    return this;
   }
 }

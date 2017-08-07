@@ -155,7 +155,7 @@ export namespace OptionalExtractions {
 
 export interface MinimalResponseHandler {
   endSession: boolean;
-  voiceMessage: string;
+  voiceMessage: string | null;
   sendResponse(): void;
 }
 
@@ -185,15 +185,15 @@ export namespace OptionalHandlerFeatures {
 
   export namespace Display {
     export interface ImageDisplay {
-      displayImage: string;
+      displayImage: string | null;
     }
 
     export interface TextDisplay {
-      displayText: string;
+      displayText: string | null;
     }
 
     export interface SimpleCardDisplay extends TextDisplay {
-      cardTitle: string;
+      cardTitle: string | null;
     }
 
     export interface ImageCardDisplay extends SimpleCardDisplay, ImageDisplay {}
