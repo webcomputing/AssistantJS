@@ -2,6 +2,7 @@ import { ExecutableExtension, Component, MessageBus } from "inversify-components
 import { RequestContext } from "../root/interfaces";
 import { Session } from "../services/interfaces";
 import { SpecSetup } from "../../spec-setup";
+import { CardResponse } from "./responses/card-response";
 
 export declare type intent = string | GenericIntent;
 
@@ -33,6 +34,9 @@ export interface ResponseFactory {
    * @param text String to add say in authentication prompt
    */
   createAndSendUnauthenticatedResponse(text?: string): {};
+
+  /** Creates a card response for adding simple graphical elements to your response */
+  createCardResponse(): CardResponse;
 }
 
 export interface Voiceable {
@@ -179,9 +183,29 @@ export namespace OptionalHandlerFeatures {
     isSSML: boolean;
   }
 
+  export namespace Display {
+    export interface ImageDisplay {
+      displayImage: string;
+    }
+
+    export interface TextDisplay {
+      displayText: string;
+    }
+
+    export interface SimpleCardDisplay extends TextDisplay {
+      cardTitle: string;
+    }
+
+    export interface ImageCardDisplay extends SimpleCardDisplay, ImageDisplay {}
+  }
+
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     AuthenticationHandler: ["forceAuthenticated"],
-    SSMLHandler: ["isSSML"]
+    SSMLHandler: ["isSSML"],
+    ImageDisplay: ["displayImage"],
+    TextDisplay: ["displayText"],
+    SimpleCardDisplay: ["displayText", "cardTitle"],
+    ImageCardDisplay: ["displayText", "cardTitle", "displayImage"]
   }
 }

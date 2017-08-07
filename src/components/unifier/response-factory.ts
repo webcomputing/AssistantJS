@@ -7,6 +7,7 @@ import { SimpleVoiceResponse } from "./responses/simple-voice-response";
 import { SSMLResponse } from "./responses/ssml-response";
 import { UnauthenticatedResponse } from "./responses/unauthenticated-response";
 import { VoiceResponse } from "./responses/voice-response";
+import { CardResponse } from "./responses/card-response";
 
 @injectable()
 export class ResponseFactory implements ResponseFactoryInterface {
@@ -41,5 +42,9 @@ export class ResponseFactory implements ResponseFactoryInterface {
 
   createAndSendUnauthenticatedResponse(text: string = "") {
     return new UnauthenticatedResponse(this.handler, this.createVoiceResponse(), text);
+  }
+
+  createCardResponse() {
+    return new CardResponse(this.handler);
   }
 }

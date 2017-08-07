@@ -43,7 +43,10 @@ export function cli(argv, resolvedIndex) {
     .command("generate")
     .alias("g")
     .description("Generates all platform configurations")
-    .action(() => grabSetup().run(new GeneratorApplication(process.cwd() + "/builds")));
+    .action(() => { 
+      grabSetup().run(new GeneratorApplication(process.cwd() + "/builds"));
+      process.exit(0);
+    });
   
   // Register new command
   commander
@@ -51,6 +54,7 @@ export function cli(argv, resolvedIndex) {
     .description("Creates a new and preconfigured assistantJS application")
     .arguments('[name]')
     .action(name => {
+      process.exit(0);
       console.log("TODO: Build a nice and friendly generator for '"+ name +"' :-)");
     });
 
