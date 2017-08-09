@@ -45,7 +45,6 @@ export function cli(argv, resolvedIndex) {
     .description("Generates all platform configurations")
     .action(() => { 
       grabSetup().run(new GeneratorApplication(process.cwd() + "/builds"));
-      process.exit(0);
     });
   
   // Register new command
@@ -54,8 +53,8 @@ export function cli(argv, resolvedIndex) {
     .description("Creates a new and preconfigured assistantJS application")
     .arguments('[name]')
     .action(name => {
-      process.exit(0);
       console.log("TODO: Build a nice and friendly generator for '"+ name +"' :-)");
+      process.exit(0);
     });
 
   // Display help as default
