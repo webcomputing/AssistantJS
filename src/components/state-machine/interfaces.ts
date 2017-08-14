@@ -23,6 +23,15 @@ export interface State {
   unhandledIntent(machine: Transitionable, originalIntent: string): void;
 }
 
+/** Implement this interface in your state if you need an error handler */
+export interface StateErrorHandler {
+  /** Method to be called automatically if an error occures in one of your intent methods
+   * @param error The occured error object
+   * @param reject Call this method to bubble up error handling
+   */
+  errorFallback(error: any, reject: (reason: any) => void);
+}
+
 export interface StateConstructor {
   new(...args: any[]): State;
 }
