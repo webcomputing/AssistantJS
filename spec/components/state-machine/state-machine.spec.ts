@@ -27,21 +27,54 @@ describe("StateMachine", function() {
     })
 
     describe("when given intent exists in state class", function() {
-      beforeEach(async function(done) {
-        await this.stateMachine.handleIntent("test", "param1");
-        done();
+      describe("when given intent does not throw an error", function() {
+        beforeEach(async function(done) {
+          await this.stateMachine.handleIntent("test", "param1");
+          done();
+        });
+
+        it("calls the given intent", function() {
+          expect(this.stateSpyResult[1]).toEqual("test");
+        });
+
+        it("gives state machine as parameter", function() {
+          expect(this.stateSpyResult[2]).toEqual(this.stateMachine);
+        });
+
+        it("gives additional given arguments as parameter", function() {
+          expect(this.stateSpyResult[3]).toEqual("param1");
+        });
       });
 
-      it("calls the given intent", function() {
-        expect(this.stateSpyResult[1]).toEqual("test");
-      });
+      describe("when given intent throws an exception", function() {
+        describe("when there is an errorFallback method defined", function() {
+          beforeEach(async function(done) {
+            await this.stateMachine.handleIntent("error");
+            done();
+          });
 
-      it("gives state machine as parameter", function() {
-        expect(this.stateSpyResult[2]).toEqual(this.stateMachine);
-      });
+          it("calls the fallback method", function() {
+            expect(this.stateSpyResult[1]).toEqual("errorFallback");
+          });
+        });
 
-      it("gives additional given arguments as parameter", function() {
-        expect(this.stateSpyResult[3]).toEqual("param1");
+        describe("when there is no errorFallback method defined", function() {
+          beforeEach(async function(done) {
+            await this.stateMachine.transitionTo("SecondState");
+            done();
+          });
+
+          it("throws an exception", async function(done) {
+            try {
+              await this.stateMachine.handleIntent("error");
+              fail();
+            } catch (e) {
+              expect(true).toBeTruthy();
+            }
+
+            done();
+          });
+        });
       });
     });
 
@@ -65,6 +98,38 @@ describe("StateMachine", function() {
 
       it("gives additional given arguments as parameter", function() {
         expect(this.stateSpyResult[4]).toEqual("param1");
+      });
+
+      describe("when unhandledIntent throws an exception", function() {
+        describe("when there is an errorFallback method defined", function() {
+          beforeEach(async function(done) {
+            await this.stateMachine.transitionTo("UnhandledErrorWithFallbackState");
+            await this.stateMachine.handleIntent("notExisting");
+            done();
+          });
+
+          it("calls the fallback method", function() {
+            expect(this.stateSpyResult[1]).toEqual("errorFallback");
+          });
+        });
+
+        describe("when there is no errorFallback method defined", function() {
+          beforeEach(async function(done) {
+            await this.stateMachine.transitionTo("UnhandledErrorState");
+            done();
+          });
+
+          it("throws an exception", async function(done) {
+            try {
+              await this.stateMachine.handleIntent("notExisting");
+              fail();
+            } catch (e) {
+              expect(true).toBeTruthy();
+            }
+
+            done();
+          });
+        });
       });
     });
 

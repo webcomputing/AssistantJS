@@ -4,7 +4,7 @@ import { injectable, inject, optional } from "inversify";
 
 
 @injectable()
-export class MainState implements State {
+export class UnhandledErrorState implements State {
   responseFactory: ResponseFactory;
   extraction: any;
   spy?: Function;
@@ -21,32 +21,7 @@ export class MainState implements State {
 
   unhandledIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
-  }
-
-  testIntent(...args: any[]) {
-    this.spyIfExistent("test", ...args);
-  }
-
-  answerIntent(...args: any[]) {
-    this.spyIfExistent("answer", ...args);
-    this.responseFactory.createSimpleVoiceResponse().endSessionWith(this.extraction.message);
-  }
-
-  otherIntent(...args: any[]) {
-    this.spyIfExistent("other", ...args);
-  }
-
-  yesGenericIntent(...args: any[]) {
-    this.spyIfExistent("yes", ...args);
-  }
-
-  errorIntent(...args: any[]) {
-    this.spyIfExistent("error", ...args);
-    throw new Error("Error!");
-  }
-
-  errorFallback(...args: any[]) {
-    this.spyIfExistent("errorFallback", ...args);
+    throw new Error("Error");
   }
 
   protected spyIfExistent(methodName: string, ...args: any[]) {

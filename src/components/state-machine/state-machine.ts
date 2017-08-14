@@ -35,18 +35,22 @@ export class StateMachine implements StateMachineInterface {
     // Run beforeIntent-hooks as filter
     return new Promise<void>((resolve, reject) => {
       this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runAsFilter(() => {
-        if (typeof(currentState.instance[intent]) !== "undefined") {
-          // Call given intent
-          Promise.resolve(currentState.instance[intent](this, ...args)).then(() => {
-            // Run afterIntent hooks
-            this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runWithResultset(() => {});
+        if (typeof(currentState.instance[intent]) === "function") {
+          try {
+            // Call given intent
+            Promise.resolve(currentState.instance[intent](this, ...args)).then(() => {
+              // Run afterIntent hooks
+              this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intent, this).runWithResultset(() => {});
 
-            // Done
-            resolve();
-          }).catch(reason => reject(reason));
+              // Done
+              resolve();
+            }).catch(reason => this.handleOrReject(reason, currentState.instance, reject, resolve));
+          } catch(e) {
+            this.handleOrReject(e, currentState.instance, reject, resolve);
+          }
         } else {
           // -> Intent does not exist on state class, so call unhandledIntent instead
-          this.handleIntent("unhandledIntent", intent, ...args).catch(reason => reject(reason)).then(() => resolve());
+          this.handleIntent("unhandledIntent", intent, ...args).catch(reason => this.handleOrReject(reason, currentState.instance, reject, resolve)).then(() => resolve());
         }
       }, () => resolve());
     });
@@ -69,6 +73,16 @@ export class StateMachine implements StateMachineInterface {
   }
 
   /* Private helper methods */
+
+  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). Calls rejectMethod() instead.*/
+  private handleOrReject(error: Error, state: State, rejectMethod: Function, resolveMethod) {
+    if (typeof state["errorFallback"] === "function") {
+      state["errorFallback"](error, rejectMethod);
+      resolveMethod();
+    } else {
+      rejectMethod(error);
+    }
+  }
 
   /** If you change this: Have a look at registering of states / automatic intent recognition, too! */
   private deriveIntentMethod(intent: intent): string {

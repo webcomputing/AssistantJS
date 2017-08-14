@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
     "test": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\""
@@ -45,9 +45,5 @@
   },
   "publishConfig": {
     "registry": "http://sinopia.verstehe.local:4873"
-  },
-  "nyc": {
-    "all": true,
-    "include": ["lib/components/**"]
   }
 }

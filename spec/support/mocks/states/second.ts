@@ -22,6 +22,11 @@ export class SecondState implements State {
     this.spyIfExistent("no", ...args);
   }
 
+  errorIntent(...args: any[]) {
+    this.spyIfExistent("error", ...args);
+    throw new Error("Error!");
+  }
+
   protected spyIfExistent(methodName: string, ...args: any[]) {
     if (typeof this.spy !== "undefined") {
       this.spy(this, methodName, ...args);

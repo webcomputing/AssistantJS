@@ -10,6 +10,8 @@ import { SpecSetup } from "../../../src/spec-setup";
 
 import { MainState } from "../mocks/states/main";
 import { SecondState } from "../mocks/states/second";
+import { UnhandledErrorState } from "../mocks/states/unhandled-error";
+import { UnhandledErrorWithFallbackState } from "../mocks/states/unhandled-error-with-fallback";
 import { context } from "../mocks/root/request-context";
 import { extraction } from "../mocks/unifier/extraction";
 import { ResponseHandler } from "../mocks/unifier/handler";
@@ -23,7 +25,7 @@ import { ResponseHandler } from "../mocks/unifier/handler";
  */
 export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecSetup {
   let assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
-  assistantJs.prepare([MainState, SecondState], autoBind, useChilds, autoSetup);
+  assistantJs.prepare([MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState], autoBind, useChilds, autoSetup);
   return assistantJs;
 }
 
