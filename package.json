@@ -1,9 +1,9 @@
 {
   "name": "assistant-source",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
-    "test": "nyc jasmine-ts ./spec/**/*.spec.[tj]s"
+    "test": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\""
   },
   "main": "lib/assistant-source.js",
   "typings": "./dts/assistant-source.d.ts",
