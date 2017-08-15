@@ -5,5 +5,20 @@
   ],
   "helpers": [
     "helpers/**/*.js"
+  ],
+  "reporters": [
+    {
+      "name": "jasmine-spec-reporter#SpecReporter",
+      "options": {
+        "spec": {
+          "displayStacktrace": "all",
+          "displaySuccessful": false,
+          "displayDuration": true,
+          "displayFailed": true,
+          "displayPending": true,
+          "displayErrorMessage": true
+        }
+      }
+    }
   ]
 }

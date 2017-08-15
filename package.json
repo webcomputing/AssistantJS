@@ -3,7 +3,7 @@
   "version": "0.1.9",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
-    "test": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\""
+    "test": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\" --config=spec/support/jasmine.json"
   },
   "main": "lib/assistant-source.js",
   "typings": "./dts/assistant-source.d.ts",
@@ -33,6 +33,7 @@
     "gulp-sourcemaps": "^2.6.0",
     "gulp-tslint": "^8.1.0",
     "gulp-typescript": "3.1.7",
+    "jasmine-spec-reporter": "^4.2.1",
     "jasmine-ts": "^0.1.3",
     "nyc": "^11.0.3",
     "request": "^2.34",
