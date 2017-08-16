@@ -137,17 +137,22 @@ export interface MinimalRequestExtraction {
 
 export namespace OptionalExtractions {
   export interface OAuthExtraction extends MinimalRequestExtraction {
-    oAuthToken: string | undefined;
+    oAuthToken: string | null;
+  }
+
+  export interface TemporalAuthExtraction extends MinimalRequestExtraction {
+    temporalAuthToken: string | null;
   }
 
   export interface SpokenTextExtraction extends MinimalRequestExtraction {
-    spokenText: string;
+    spokenText: string | null;
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     OAuthExtraction: ["oAuthToken"],
-    SpokenTextExtraction: ["spokenText"]
+    SpokenTextExtraction: ["spokenText"],
+    TemporalAuthExtraction: ["temporalAuthToken"]
   }
 }
 
