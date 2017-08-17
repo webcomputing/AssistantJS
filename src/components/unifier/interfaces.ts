@@ -84,8 +84,8 @@ export interface EntityDictionary {
   set(name: string, value: any);
 
   /** 
-   * Reads current entity dictionary from given session and merges with entities in this request. 
-   * @param session The session to read from (same as in storeToSession)
+   * Stores current entity dictionary to a given session to allow restoring all contained entities later.
+   * @param session The session to store into
    * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
    */
   storeToSession(session: Session, storeKey?: string): Promise<void>;
