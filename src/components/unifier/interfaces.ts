@@ -53,7 +53,8 @@ export enum GenericIntent {
   Help,
   Yes,
   No,
-  Cancel
+  Cancel,
+  Stop
 }
 
 export namespace GenericIntent {
