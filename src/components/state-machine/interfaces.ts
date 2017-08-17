@@ -29,7 +29,7 @@ export interface StateErrorHandler {
    * @param error The occured error object
    * @param reject Call this method to bubble up error handling
    */
-  errorFallback(error: any, reject: (reason: any) => void);
+  errorFallback(error: any, reject: (reason: any) => void, state: State, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
 }
 
 export interface StateConstructor {
