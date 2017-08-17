@@ -13,14 +13,14 @@ export abstract class AbstractResponseHandler implements MinimalResponseHandler 
   voiceMessage: string | null = null;
 
   responseCallback: ResponseCallback;
-  endSessionExecuter: Function;
+  killSession: () => Promise<void>;
   
   constructor(
     @inject("core:root:current-request-context") extraction: RequestContext,
-    @inject("core:unifier:end-session-callbacks-executer") endSessionExecuter: Function
+    @inject("core:unifier:current-kill-session-promise") killSession: () => Promise<void>
   ) {
     this.responseCallback = extraction.responseCallback;
-    this.endSessionExecuter = endSessionExecuter;
+    this.killSession = killSession;
   }
 
   get isActive() {
@@ -32,7 +32,7 @@ export abstract class AbstractResponseHandler implements MinimalResponseHandler 
 
     this.responseCallback(JSON.stringify(this.getBody()), this.getHeaders());
     if (this.endSession) {
-      this.endSessionExecuter();
+      this.killSession();
     }
 
     this._isActive = false;
