@@ -11,7 +11,9 @@ export const componentInterfaces = {
   "sessionEndedCallback": Symbol("session-ended-callback"),
   "platformGenerator": Symbol("platform-generator"),
   "utteranceTemplateService": Symbol("utterance-template-service"),
-  "entityMapping": Symbol("entity-mapping")
+  "entityMapping": Symbol("entity-mapping"),
+  "beforeKillSession": Symbol("hooks-before-kill-session"),
+  "afterKillSession": Symbol("hooks-after-kill-session")
 };
 
 /** End user interfaces */

@@ -7,7 +7,7 @@ import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
-import { SessionEndedCallback } from "./session-ended-callback";
+import { KillSessionService } from "./kill-session-service";
 import { swapHash } from "./swap-hash";
 import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, 
   EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping, Configuration } from "./interfaces";
@@ -55,14 +55,13 @@ export const descriptor: ComponentDescriptor = {
 
       bindService.bindGlobalService<EntityDictionary>("current-entity-dictionary").to(EntityDictionaryImpl).inSingletonScope();
 
-      bindService.bindGlobalService<Function>("end-session-callbacks-executer").toDynamicValue(context => {
+      bindService.bindLocalServiceToSelf(KillSessionService);
+      bindService.bindGlobalService("current-kill-session-promise").toProvider(context => {
         return () => {
-          let callbacks = context.container.getAll<ExecutableExtension>(lookupService.lookup("core:unifier").getInterface("sessionEndedCallback"));
-          callbacks.forEach(e => e.execute());
+          let killService = context.container.get(KillSessionService);
+          return killService.execute();
         }
       });
-
-      bindService.bindExecutable(lookupService.lookup("core:unifier").getInterface("sessionEndedCallback"), SessionEndedCallback);
     }
   }
 };
