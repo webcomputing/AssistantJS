@@ -83,8 +83,28 @@ export interface Configuration extends OptionalConfiguration {}
 export interface EntityDictionary {
   store: {[name: string]: any};
   contains(name: string): boolean;
-  get(name: string): any | undefined;
+  get(name: string): string | undefined;
   set(name: string, value: any);
+
+  /** 
+   * Returns the element in validValues which is as close as possible to the entity value for name.
+   * Returns undefined if there is no entity for name. Calculates a Levenshtein distance to find out the closest valid value.
+   * @param name Name of the entity
+   * @param validValues List of all valid values
+   * @param maxDistance If given, returns undefined if the closest match's Levenshtein distance is > than this value 
+  */
+  getClosest(name: string, validValues: string[], maxDistance?: number): string | undefined;
+
+  /** 
+   * Returns a list containing all values from validValues and their distances to the entity value.
+   * Returns undefined if there is no entity for name. Calculates a Levenshtein distance to find out the distance values.
+   * @param name Name of the entity
+   * @param validValues List of all valid values
+  */
+  getDistanceSet(name: string, validValues: string[]): undefined | {
+    value: string;
+    distance: number;
+  }[];
 
   /** 
    * Stores current entity dictionary to a given session to allow restoring all contained entities later.
