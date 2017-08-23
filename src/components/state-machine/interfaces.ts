@@ -27,9 +27,12 @@ export interface State {
 export interface StateErrorHandler {
   /** Method to be called automatically if an error occures in one of your intent methods
    * @param error The occured error object
-   * @param reject Call this method to bubble up error handling
+   * @param state Current state object
+   * @param stateName Name of current state
+   * @param intentMethod Called intent method as string
+   * @param transitionable machine
    */
-  errorFallback(error: any, reject: (reason: any) => void, state: State, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
+  errorFallback(error: any, state: State, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
 }
 
 export interface StateConstructor {

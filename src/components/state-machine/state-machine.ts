@@ -77,8 +77,9 @@ export class StateMachine implements StateMachineInterface {
   /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). Calls rejectMethod() instead.*/
   private handleOrReject(error: Error, state: State, stateName: string, intentMethod: string, rejectMethod: Function, resolveMethod: Function, ...args) {
     if (typeof state["errorFallback"] === "function") {
-      state["errorFallback"](error, rejectMethod, state, stateName, intentMethod, this, ...args);
-      resolveMethod();
+      Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args))
+        .then(() => resolveMethod())
+        .catch(e => rejectMethod(e));
     } else {
       rejectMethod(error);
     }

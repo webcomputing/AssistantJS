@@ -60,11 +60,10 @@ describe("StateMachine", function() {
 
           it("passes correct arguments", function() {
             expect(this.stateSpyResult[2].constructor).toEqual(Error);
-            expect(typeof this.stateSpyResult[3]).toBe("function"); // reject() method
-            expect(this.stateSpyResult[4].constructor.name).toEqual("MainState");
-            expect(this.stateSpyResult[5]).toEqual("MainState");
-            expect(this.stateSpyResult[6]).toEqual("errorIntent");
-            expect(this.stateSpyResult[7]).toBe(this.stateMachine);
+            expect(this.stateSpyResult[3].constructor.name).toEqual("MainState");
+            expect(this.stateSpyResult[4]).toEqual("MainState");
+            expect(this.stateSpyResult[5]).toEqual("errorIntent");
+            expect(this.stateSpyResult[6]).toBe(this.stateMachine);
           });
         });
 
@@ -124,12 +123,11 @@ describe("StateMachine", function() {
 
           it("passes correct arguments", function() {
             expect(this.stateSpyResult[2].constructor).toEqual(Error);
-            expect(typeof this.stateSpyResult[3]).toBe("function"); // reject() method
-            expect(this.stateSpyResult[4].constructor.name).toEqual("UnhandledErrorWithFallbackState");
-            expect(this.stateSpyResult[5]).toEqual("UnhandledErrorWithFallbackState");
-            expect(this.stateSpyResult[6]).toEqual("unhandledIntent");
-            expect(this.stateSpyResult[7]).toEqual(this.stateMachine);
-            expect(this.stateSpyResult[8]).toBe("notExistingIntent");
+            expect(this.stateSpyResult[3].constructor.name).toEqual("UnhandledErrorWithFallbackState");
+            expect(this.stateSpyResult[4]).toEqual("UnhandledErrorWithFallbackState");
+            expect(this.stateSpyResult[5]).toEqual("unhandledIntent");
+            expect(this.stateSpyResult[6]).toEqual(this.stateMachine);
+            expect(this.stateSpyResult[7]).toBe("notExistingIntent");
           });
         });
 
