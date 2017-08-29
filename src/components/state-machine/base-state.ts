@@ -1,6 +1,7 @@
 import { injectable, unmanaged } from "inversify";
 import { ResponseFactory } from "../unifier/interfaces";
 import { TranslateHelper } from "../i18n/interfaces";
+import { Transitionable } from "../state-machine/interfaces";
 import { State } from "./interfaces";
 
 /**
@@ -20,12 +21,12 @@ export abstract class BaseState implements State {
   }
 
   /** Prompts with current unhandled message */
-  unhandledGenericIntent() {
+  unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
     this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
   }
 
   /** Sends empty response */
-  unansweredGenericIntent() {
+  unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
     this.responseFactory.createAndSendEmptyResponse();
   }
 }
