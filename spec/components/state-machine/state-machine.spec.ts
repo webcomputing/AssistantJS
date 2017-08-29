@@ -109,7 +109,7 @@ describe("StateMachine", function() {
         expect(this.stateSpyResult[4]).toEqual("param1");
       });
 
-      describe("when unhandledIntent throws an exception", function() {
+      describe("when unhandledGenericIntent throws an exception", function() {
         describe("when there is an errorFallback method defined", function() {
           beforeEach(async function(done) {
             await this.stateMachine.transitionTo("UnhandledErrorWithFallbackState");
@@ -125,7 +125,7 @@ describe("StateMachine", function() {
             expect(this.stateSpyResult[2].constructor).toEqual(Error);
             expect(this.stateSpyResult[3].constructor.name).toEqual("UnhandledErrorWithFallbackState");
             expect(this.stateSpyResult[4]).toEqual("UnhandledErrorWithFallbackState");
-            expect(this.stateSpyResult[5]).toEqual("unhandledIntent");
+            expect(this.stateSpyResult[5]).toEqual("unhandledGenericIntent");
             expect(this.stateSpyResult[6]).toEqual(this.stateMachine);
             expect(this.stateSpyResult[7]).toBe("notExistingIntent");
           });
@@ -167,8 +167,8 @@ describe("StateMachine", function() {
           expect(this.spyResult.length).toEqual(1);
         });
 
-        it("calls hook after executing unhandledIntent", function() {
-          expect(this.spyResult[0]).toEqual("unhandledIntent");
+        it("calls hook after executing unhandledGenericIntent", function() {
+          expect(this.spyResult[0]).toEqual("unhandledGenericIntent");
         })
       });
 
@@ -209,8 +209,8 @@ describe("StateMachine", function() {
           expect(this.spyResult.length).toEqual(2);
         })
 
-        it("calls hook with unhandledIntent", function() {
-          expect(this.spyResult[1]).toEqual("unhandledIntent");
+        it("calls hook with unhandledGenericIntent", function() {
+          expect(this.spyResult[1]).toEqual("unhandledGenericIntent");
         });
 
         it("calls hook with original intent", function() {

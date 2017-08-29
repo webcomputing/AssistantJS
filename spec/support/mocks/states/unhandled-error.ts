@@ -19,9 +19,13 @@ export class UnhandledErrorState implements State {
     this.responseFactory = responseFactory;
   }
 
-  unhandledIntent(...args: any[]) {
+  unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
     throw new Error("Error");
+  }
+
+  unansweredGenericIntent(...args: any[]) {
+    this.spyIfExistent("unanswered", ...args);
   }
 
   protected spyIfExistent(methodName: string, ...args: any[]) {

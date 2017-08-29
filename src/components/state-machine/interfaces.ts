@@ -16,11 +16,17 @@ export const MAIN_STATE_NAME = "MainState";
 /** Main interface to implement a state */
 export interface State {
   /** 
-   * Method to be called automatically if no intent method was matched
+   * Method which is called automatically if no intent method was matched
    * @param machine Current transitionable interface
    * @param originalIntent Name of intent the state machine tried to call 
   */
-  unhandledIntent(machine: Transitionable, originalIntent: string): void;
+  unhandledGenericIntent(machine: Transitionable, originalIntent: string): void | Promise<void>;
+
+  /** 
+   * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
+   * @param machine Current transitionable interface
+   */
+  unansweredGenericIntent(machine: Transitionable): Promise<void> | void;
 }
 
 /** Implement this interface in your state if you need an error handler */

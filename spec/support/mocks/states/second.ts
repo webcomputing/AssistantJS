@@ -10,8 +10,12 @@ export class SecondState implements State {
     this.spy = spy;
   }
 
-  unhandledIntent(...args: any[]) {
+  unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
+  }
+
+  unansweredGenericIntent(...args: any[]) {
+    this.spyIfExistent("unanswered", ...args);
   }
 
   testIntent(...args: any[]) {

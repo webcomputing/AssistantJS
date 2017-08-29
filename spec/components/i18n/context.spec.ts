@@ -1,7 +1,9 @@
 import { createRequestScope } from "../../support/util/setup";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
 
 describe("I18nContext", function() {
   beforeEach(function() {
+    configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
   });

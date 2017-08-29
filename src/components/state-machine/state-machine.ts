@@ -49,8 +49,8 @@ export class StateMachine implements StateMachineInterface {
             this.handleOrReject(e, currentState.instance, currentState.name, intentMethod, reject, resolve, ...args);
           }
         } else {
-          // -> Intent does not exist on state class, so call unhandledIntent instead
-          this.handleIntent("unhandledIntent", intentMethod, ...args).catch(reason => this.handleOrReject(reason, currentState.instance, currentState.name, intentMethod, reject, resolve, ...args)).then(() => resolve());
+          // -> Intent does not exist on state class, so call unhandledGenericIntent instead
+          this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args).catch(reason => this.handleOrReject(reason, currentState.instance, currentState.name, intentMethod, reject, resolve, ...args)).then(() => resolve());
         }
       }, () => resolve());
     });

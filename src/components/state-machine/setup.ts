@@ -104,7 +104,7 @@ export class StateMachineSetup {
     const superIntents = StateMachineSetup.deriveStateIntents(Object.getPrototypeOf(stateClass));
 
     return superIntents.concat(Object.getOwnPropertyNames(prototype)
-      .filter(method => method.endsWith("Intent") && method !== "unhandledIntent")
+      .filter(method => method.endsWith("Intent") && method !== "unhandledGenericIntent" && method !== "unansweredGenericIntent")
       .map(method => {
 
         if (method.endsWith("GenericIntent")) {

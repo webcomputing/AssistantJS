@@ -46,9 +46,10 @@ export interface Voiceable {
   prompt(text: String);
 }
 
+/** Currently, we are not allowed to use camelCase here! So try to just use a single word! */
 export enum GenericIntent {
   Invoke,
-  EndSession,
+  Unanswered,
   Unhandled,
   Help,
   Yes,
@@ -66,7 +67,7 @@ export namespace GenericIntent {
   export function isSpeakable(intent: GenericIntent) {
     let unspeakableIntents: GenericIntent[] = [
       GenericIntent.Invoke,
-      GenericIntent.EndSession,
+      GenericIntent.Unanswered,
       GenericIntent.Unhandled
     ];
 
