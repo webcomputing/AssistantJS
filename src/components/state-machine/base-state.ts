@@ -20,12 +20,12 @@ export abstract class BaseState implements State {
   }
 
   /** Prompts with current unhandled message */
-  unhandledGenericIntent() {
+  unhandledGenericIntent(): any {
     this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
   }
 
   /** Sends empty response */
-  unansweredGenericIntent() {
+  unansweredGenericIntent(): any {
     this.responseFactory.createAndSendEmptyResponse();
   }
 }

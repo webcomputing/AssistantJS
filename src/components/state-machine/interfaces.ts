@@ -20,13 +20,13 @@ export interface State {
    * @param machine Current transitionable interface
    * @param originalIntent Name of intent the state machine tried to call 
   */
-  unhandledGenericIntent(machine: Transitionable, originalIntent: string): void | Promise<void>;
+  unhandledGenericIntent(machine: Transitionable, originalIntent: string): any;
 
   /** 
    * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
    * @param machine Current transitionable interface
    */
-  unansweredGenericIntent(machine: Transitionable): Promise<void> | void;
+  unansweredGenericIntent(machine: Transitionable): any;
 }
 
 /** Implement this interface in your state if you need an error handler */
