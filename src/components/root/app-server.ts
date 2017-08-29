@@ -81,7 +81,8 @@ export class ServerApplication implements MainApplication {
 
   /** Configures middleware for express app */
   configureExpressApp() {
-    this.app.use(bodyParser());
+    this.app.use(bodyParser.urlencoded({ extended: true }));
+    this.app.use(bodyParser.json());
   }
 
   private getGenericRequestHandler(container: Container) {
