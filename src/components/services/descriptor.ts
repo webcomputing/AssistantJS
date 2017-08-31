@@ -6,7 +6,8 @@ import { DestroyableSession, Configuration } from "./interfaces";
 import { Session } from "./session";
 
 const defaultConfiguration: Configuration = {
-  redisClient: new RedisClient({})
+  redisClient: new RedisClient({}),
+  maxLifeTime: 1800
 };
 
 export const descriptor: ComponentDescriptor = {
@@ -17,7 +18,8 @@ export const descriptor: ComponentDescriptor = {
       bindingService.bindGlobalService<inversifyInterfaces.Factory<DestroyableSession>>("session-factory").toFactory<DestroyableSession>(context => {
         return (sessionID: string) => {
           let redisInstance = context.container.get<RedisClient>("core:services:redis-instance");
-          return new Session(sessionID, redisInstance);
+          let configuration = context.container.get<Component>("meta:component//core:services").configuration as Configuration;
+          return new Session(sessionID, redisInstance, configuration.maxLifeTime as number);
         };
       });
 

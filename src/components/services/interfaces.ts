@@ -14,6 +14,14 @@ export interface DestroyableSession extends Session {
   delete(): Promise<void>;
 }
 
-export interface Configuration {
+export interface OptionalConfiguration {
+  /** 
+   * Maximum life time of a session in seconds. Useful if sessions are not getting fully closed by error.
+   * Defaults to 1800. Counter starts after each successful SET command.
+   */
+  maxLifeTime?: number;
+}
+
+export interface Configuration extends OptionalConfiguration {
   redisClient: RedisClient;
 }

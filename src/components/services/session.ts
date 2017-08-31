@@ -4,10 +4,12 @@ import { RedisClient } from "redis";
 export class Session implements DestroyableSession {
   id: string;
   redisInstance: RedisClient;
+  maxLifeTime: number;
 
-  constructor(id: string, redisInstance: RedisClient) {
+  constructor(id: string, redisInstance: RedisClient, maxLifeTime: number) {
     this.id = id;
     this.redisInstance = redisInstance;
+    this.maxLifeTime = maxLifeTime;
   }
 
   async get(field: string): Promise<string> {
@@ -27,6 +29,9 @@ export class Session implements DestroyableSession {
       this.redisInstance.hset(this.documentID, field, value, err => {
         if (!err) {
           resolve();
+
+          // Reset expire counter to maxLifeTime
+          this.redisInstance.expire(this.documentID, this.maxLifeTime);
         } else {
           reject(err);
         }
