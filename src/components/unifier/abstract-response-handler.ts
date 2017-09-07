@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
 import { ExecutableExtension } from "inversify-components";
+import * as util from "util";
 
 import { MinimalResponseHandler } from "./interfaces";
 import { ResponseCallback, RequestContext } from "../root/interfaces";
@@ -48,7 +49,7 @@ export abstract class AbstractResponseHandler implements MinimalResponseHandler 
 
   private failIfInactive() {
     if (!this.isActive) {
-      throw Error("This handle is already inactive, an response was already sent. You cannot send text to alexa multiple times in one request.");
+      throw Error("This handle is already inactive, an response was already sent. You cannot send text to a platform multiple times in one request. Current response handler: " + util.inspect(this));
     }
   }
 }
