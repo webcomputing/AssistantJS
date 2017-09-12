@@ -36,7 +36,8 @@ export function cli(argv, resolvedIndex) {
     .command("server")
     .alias("s")
     .description("Starts the server")
-    .action(() => grabSetup().run(new ServerApplication()));
+    .option('-p, --port [port]', 'Makes the server listen at the given port')
+    .action(() => grabSetup().run(new ServerApplication(commander.port ? commander.port : 3000)));
 
   // Register generate command
   commander

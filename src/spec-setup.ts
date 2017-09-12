@@ -115,7 +115,7 @@ export class SpecSetup {
    */
   withServer(expressApp: express.Express = express()): Promise<Function> {
     return new Promise(resolve => {
-      this.setup.run(new ServerApplication((app) => {
+      this.setup.run(new ServerApplication(3000, (app) => {
         resolve(() => { app.stop() });
       }, expressApp));
     });

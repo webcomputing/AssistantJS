@@ -9,13 +9,15 @@ import { ResponseCallback, RequestContext } from "./interfaces";
 import { GenericRequestHandler } from "./generic-request-handler";
 
 export class ServerApplication implements MainApplication {
+  private port: number;
   private app: express.Express;
   private listeningCallback = (app: ServerApplication) => {};
   private expressRunningInstance;
 
-  constructor (listeningCallback = (app: ServerApplication) => {}, expressApp: Express = express(), registerOwnMiddleware = true) {
+  constructor (port = 3000, listeningCallback = (app: ServerApplication) => {}, expressApp: Express = express(), registerOwnMiddleware = true) {
     this.listeningCallback = listeningCallback;
     this.app = expressApp;
+    this.port = port;
 
     if (registerOwnMiddleware) {
       log("Initializing express instance...");
@@ -34,8 +36,8 @@ export class ServerApplication implements MainApplication {
       this.handleRequest(request, response, container);
     });
 
-    log("Starting express server...");
-    this.expressRunningInstance = this.app.listen(3000, () => {
+    log("Starting express server at port " + this.port + "...");
+    this.expressRunningInstance = this.app.listen(this.port, () => {
       log("Server is running.");
       this.listeningCallback(this);
     });

@@ -29,7 +29,7 @@ export const descriptor: ComponentDescriptor = {
 
           // Throw message if searched state is not defined
           if (!context.container.isBoundTagged(componentInterfaces.state, "name", stateName))
-            throw new Error("There is no state defined: '"+ name +"'");
+            throw new Error("There is no state defined: '"+ stateName +"'");
 
           return context.container.getTagged<State>(componentInterfaces.state, "name", stateName);
         };
