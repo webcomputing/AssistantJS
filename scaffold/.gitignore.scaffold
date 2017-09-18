@@ -1,0 +1,5 @@
+.vscode
+js
+node_modules
+builds/*
+!builds/.keep

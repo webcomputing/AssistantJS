@@ -8,12 +8,15 @@ import { ServerApplication } from "./components/root/app-server";
 // Import commander
 import * as commander from "commander";
 
+// Import node.js filesystem module
+import * as fs from "fs";
+
 // Get package.json data
 const pjson = require("../package.json");
 
 export function cli(argv, resolvedIndex) {
   // Grab local assistant js configuration / setup file
-  let grabSetup: () => AssistantJSSetup = () => {
+  const grabSetup: () => AssistantJSSetup = () => {
     if (!resolvedIndex) {
       throw new Error("Could not find your local js/index.js. Are you in the correct directory?");
     } else {
@@ -26,6 +29,56 @@ export function cli(argv, resolvedIndex) {
       setup.autobind();
       return setup;
     }
+  }
+
+  /** Copies a file from source to destination by replacing name */
+  const copyAndReplace = function(name: string, source: string, destination: string) {
+    const contents = fs.readFileSync(source, 'utf8');
+    fs.writeFileSync(destination, contents.replace(/\{\{__NAME__\}\}/g, name));
+  }
+
+  /** Initializes new assistantjs project (prototyped currently) */
+  const createProject = function (name: string) {
+    // Path to new project
+    const projectPath = process.cwd() + "/" + name + "/";
+    const scaffoldDir = __dirname + "/../scaffold/";
+
+    // Create directories
+    console.log("Creating project directory..")
+    fs.mkdirSync(projectPath.substr(0, projectPath.length - 1));
+
+    ["app", "app/states", "app/states/mixins", "builds", "config", "config/locales", "config/locales/en", "spec", "spec/helpers", "spec/support"].forEach(directory => {
+      console.log("Creating " + directory + "..");
+      fs.mkdirSync(projectPath + directory);
+    });
+
+    // Create copyInstructions: [0] => source directory, [1] => target directory
+    let copyInstructions = [
+      ['components.ts', 'config/components.ts'], 
+      ['jasmine.json', 'spec/support/jasmine.json'], ['promise-traces.js', 'spec/helpers/promise-traces.js'], ['setup.js', 'spec/helpers/setup.js'],
+      ['application.ts', 'app/states/application.ts'], ['main.ts', 'app/states/main.ts']
+    ];
+    
+    // Merge root files into array
+    copyInstructions = copyInstructions.concat(['.gitignore', 'index.ts', 'tsconfig.json', 'README.md', 'package.json'].map(rootFile => [rootFile, rootFile]));
+
+    // Copy templates!
+    copyInstructions.forEach(copyInstruction => {
+      console.log("Creating " + copyInstruction[1] + "..");
+      copyAndReplace(name, scaffoldDir + copyInstruction[0] + ".scaffold", projectPath + copyInstruction[1]);
+    });
+
+    // Create empty files
+    ["builds/.keep"].forEach(touchableFile => {
+      console.log("Touching " + touchableFile + "..");
+      fs.closeSync(fs.openSync(projectPath + touchableFile, 'w'));
+    });
+
+    // Create empty json files
+    ["config/locales/en/translation.json", "config/locales/en/utterances.json"].forEach(filePath => {
+      console.log("Creating " + filePath + "..");
+      fs.writeFileSync(projectPath + filePath, "{}");
+    });
   }
   
   // Set version to CLI
@@ -54,7 +107,9 @@ export function cli(argv, resolvedIndex) {
     .description("Creates a new and preconfigured assistantJS application")
     .arguments('[name]')
     .action(name => {
-      console.log("TODO: Build a nice and friendly generator for '"+ name +"' :-)");
+      createProject(name);
+      console.log("Project created. Now run npm install!");
+      console.log("Happy hacking :-)!")
       process.exit(0);
     });
 
