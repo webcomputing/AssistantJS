@@ -108,7 +108,7 @@ export function cli(argv, resolvedIndex) {
     .arguments('[name]')
     .action(name => {
       createProject(name);
-      console.log("Project created. Now run npm install!");
+      console.log("Project created. Now run npm install and tsc!");
       console.log("Happy hacking :-)!")
       process.exit(0);
     });
