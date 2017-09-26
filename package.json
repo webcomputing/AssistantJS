@@ -22,7 +22,7 @@
   "main": "lib/assistant-source.js",
   "typings": "./dts/assistant-source.d.ts",
   "author": "Antonius Ostermann <ostermann.antonius@gmail.com> (http://www.antonius-ostermann.de)",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "SEE LICENSE IN <LICENSE>",
   "dependencies": {
     "@types/express": "^4.0.35",
     "@types/redis": "^2.6.0",

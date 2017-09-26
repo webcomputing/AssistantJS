@@ -40,6 +40,10 @@ AssistantJS currently needs a running [redis][9] instance to work. So be sure to
 - **[assistant-boostrap][10]**: A well documented bootrap AssistantJS application. Maybe you want to use it to initialize your own project!
 - **[stackoverflow][12]**: If you have any further questions, ask them on stackoverflow and use the `assistant.js` tag!
 
+## License
+For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
+using AssistantJS is a non-commercial setup.
+
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
 [3]: https://github.com/webcomputing/inversify-components
@@ -53,3 +57,4 @@ AssistantJS currently needs a running [redis][9] instance to work. So be sure to
 [11]: https://github.com/webcomputing/AssistantJS/wiki
 [12]: https://stackoverflow.com/
 [13]: https://github.com/webcomputing/AssistantJS/wiki/Getting-Started
+[14]: https://github.com/webcomputing/AssistantJS/blob/master/LICENSE
