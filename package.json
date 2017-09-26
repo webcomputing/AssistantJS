@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "scripts": {
     "test": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\" --config=spec/support/jasmine.json"
@@ -44,6 +44,10 @@
   },
   "bin": {
     "assistant": "./bin/assistant"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webcomputing/AssistantJS"
   },
   "publishConfig": {
     "registry": "http://sinopia.verstehe.local:4873"
