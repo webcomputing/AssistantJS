@@ -1,14 +1,28 @@
 {
   "name": "assistant-source",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
+  "keywords": [
+    "alexa",
+    "google assistant",
+    "cortana",
+    "siri",
+    "multi assistant",
+    "voice assistant",
+    "digital assistant",
+    "natural language",
+    "api.ai",
+    "inversify"
+  ],
   "scripts": {
     "test": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\" --config=spec/support/jasmine.json"
   },
+  "homepage": "http://www.assistantjs.org",
+  "bugs": "https://github.com/webcomputing/AssistantJS/issues",
   "main": "lib/assistant-source.js",
   "typings": "./dts/assistant-source.d.ts",
-  "author": "Antonius Ostermann",
-  "license": "ISC",
+  "author": "Antonius Ostermann <ostermann.antonius@gmail.com> (http://www.antonius-ostermann.de)",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@types/express": "^4.0.35",
     "@types/redis": "^2.6.0",

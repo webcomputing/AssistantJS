@@ -35,17 +35,10 @@ Install AssistantJS using npm as a global module:
 `npm i --global assistant-source`
 
 AssistantJS currently needs a running [redis][9] instance to work. So be sure to have redis set up! After that, check out these resources to get started:
-- **[assistant-boostrap][10]**: A well documented getting started bootrap AssistantJS application. Use this to initialize your own project!
-- **[wiki][11]**: In out github wiki, most of the AssistantJS functionalities are well-described. And we are still working on it!
-- **[stackoverflow][12]**: If you have any further questions, use stackoverflow with the `AssistantJS` tag!
-- **In future**: Demonstration video of AssistantJS
-
-### First quick insight
-This is what one of your states might look like if you are using AssistantJS. Get used to the syntactic sugar!
-
-```typescript
-// Todo :-)
-```
+- **[video tutorial][13]**: A short video tutorial covering the implementation of a bus travelling application. Check this out first!
+- **[wiki][11]**: In our github wiki, most of the AssistantJS functionalities are well-described. Look into it for a deeper understanding of AssitantJS!
+- **[assistant-boostrap][10]**: A well documented bootrap AssistantJS application. Maybe you want to use it to initialize your own project!
+- **[stackoverflow][12]**: If you have any further questions, ask them on stackoverflow and use the `assistant.js` tag!
 
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
@@ -59,3 +52,4 @@ This is what one of your states might look like if you are using AssistantJS. Ge
 [10]: https://github.com/webcomputing/assistant-bootstrap
 [11]: https://github.com/webcomputing/AssistantJS/wiki
 [12]: https://stackoverflow.com/
+[13]: https://github.com/webcomputing/AssistantJS/wiki/Getting-Started
