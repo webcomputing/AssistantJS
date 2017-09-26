@@ -56,7 +56,7 @@ export class Session implements DestroyableSession {
   private destroySession():Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.del(this.documentID, (err, response) => {
-        if (response === 1) {
+        if (!err) {
           resolve();
         } else {
           reject(err);
