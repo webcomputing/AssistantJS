@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.1.33",
+  "version": "0.1.0",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "keywords": [
     "alexa",
@@ -62,8 +62,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/webcomputing/AssistantJS"
-  },
-  "publishConfig": {
-    "registry": "http://sinopia.verstehe.local:4873"
   }
 }
