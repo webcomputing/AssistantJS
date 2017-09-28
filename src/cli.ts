@@ -18,7 +18,7 @@ export function cli(argv, resolvedIndex) {
   // Grab local assistant js configuration / setup file
   const grabSetup: () => AssistantJSSetup = () => {
     if (!resolvedIndex) {
-      throw new Error("Could not find your local js/index.js. Are you in the correct directory?");
+      throw new Error("Could not find your local js/index.js. Are you in the correct directory? Did you run 'tsc'?");
     } else {
       if (typeof resolvedIndex.assistantJs === "undefined")
         throw new Error("Found your local js/index.js, but assistantJs attribute was undefined. Do you export 'assistantJs' in your js/index.js?");

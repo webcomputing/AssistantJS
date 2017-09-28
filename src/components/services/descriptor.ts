@@ -2,11 +2,10 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { ComponentDescriptor, Component } from "inversify-components";
 import { RedisClient } from "redis";
 
-import { DestroyableSession, Configuration } from "./interfaces";
+import { DestroyableSession, OptionalConfiguration, Configuration } from "./interfaces";
 import { Session } from "./session";
 
-const defaultConfiguration: Configuration = {
-  redisClient: new RedisClient({}),
+const defaultConfiguration: OptionalConfiguration = {
   maxLifeTime: 1800
 };
 
