@@ -7,7 +7,7 @@ based on your implementation.
 But even if you are currently not interested in deploying your voice application to multiple voice assistants, you possibly still should take a look at AssistantJS.
 On one hand obviously because you never know if your platform requirements may change in future. 
 On the other hand, you probably don't want to miss some of the AssistantJS development features:
-- **Object oriented state machine**: AssistantJS uses object oriented states to describe the flow of voice applications.  Amongs other things, this enables you to [DRY][1]-up your code by using inheritance and mixins. 
+- **Object oriented state machine**: AssistantJS uses object oriented states to describe the flow of voice applications.  Amongst other things, this enables you to [DRY][1]-up your code by using inheritance and mixins. 
 In addition, AssistantJS is heavily based on dependency injection using [inversify][2] with all its advantages.
 - **Extendable**: AssistantJS is built out of multiple components extending each other using [inversify-components][3]. You are able to decide which components you need and which you don't. See below for an overview 
 of currently implemented AssistantJS components.
@@ -21,13 +21,13 @@ helps you to build better user interfaces using response text variation out of t
 - **Authentication**: Protect your states with configurable authentication mechanisms. *(Optional dependency)*
 
 ## AssistantJS Ecosphere
-- **assistant-source**: AssistantJS core framework, the only real dependency to use AssistantJS.
-- **assistant-alexa**: Brings amazon alexa to AssistantJS!
-- **assistant-apiai**: Connects api.ai with AssistantJS!
-- **assistant-google**: Brings google assistant (via api.ai) to AssistantJS!
-- **assistant-validations**: Enables you to use a `@needs` decorator to express dependent entities. AssistantJS will automatically manage prompting for this entity, so you can focus on your real business!
-- **assistant-authentication**: Enables you to protect your states with configurable authentication stratgies. Currently supports OAuth authentication token and pin authentication.
-- **assistant-generic-utterances**: Automatically inserts useful utterances for generic intents, if a specific platform (like google assistant / api.ai) does not have generic intents on their own.
+- **assistant-source**: AssistantJS core framework, the only real dependency to use AssistantJS. *(Current repository)*
+- **[assistant-alexa][15]**: Enables integrating Amazon Alexa into AssistantJS.
+- **[assistant-apiai][16]**: Connects Api.ai with AssistantJS.
+- **[assistant-google][17]**: Brings Google Assistant (via Api.ai) to AssistantJS.
+- **[assistant-validations][18]**: Enables you to use a `@needs` decorator to express dependent entities. AssistantJS will automatically manage prompting for this entity, so you can focus on your real business.
+- **[assistant-authentication][19]**: Enables you to protect your states with configurable authentication stratgies. Currently supports OAuth authentication token and pin authentication.
+- **[assistant-generic-utterances][20]**: Automatically inserts useful utterances for generic intents, if a specific platform (like google assistant / api.ai) does not have generic intents on their own.
 
 ## Getting started
 Install AssistantJS using npm as a global module:
@@ -58,3 +58,9 @@ using AssistantJS is a non-commercial setup.
 [12]: https://stackoverflow.com/
 [13]: https://github.com/webcomputing/AssistantJS/wiki/Getting-Started
 [14]: https://github.com/webcomputing/AssistantJS/blob/master/LICENSE
+[15]: https://github.com/webcomputing/assistant-alexa
+[16]: https://github.com/webcomputing/assistant-apiai
+[17]: https://github.com/webcomputing/assistant-google
+[18]: https://github.com/webcomputing/assistant-validations
+[19]: https://github.com/webcomputing/assistant-authentication
+[20]: https://github.com/webcomputing/assistant-generic-utterances
