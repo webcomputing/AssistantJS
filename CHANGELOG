@@ -1,0 +1,8 @@
+version 0.1.1
+- introduces changelog
+- adds redis configuration to scaffold
+- removes redis default configuration
+- removes redis dependency for assistant cli
+
+version 0.1.0
+- first initial public release

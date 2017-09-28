@@ -1,3 +1,4 @@
+import { RedisClient } from "redis";
 import { i18nInterfaces, unifierInterfaces, servicesInterfaces } from "assistant-source";
 
 const i18nConfiguration: i18nInterfaces.Configuration = {
@@ -14,10 +15,15 @@ const i18nConfiguration: i18nInterfaces.Configuration = {
   }
 }
 
+const servicesConfiguration: servicesInterfaces.Configuration = {
+  redisClient: new RedisClient({})
+}
+
 /*
  * Each configuration must be mapped to it's corresponding component name.
  * The registration is done in index.ts.
  */
 export default {
-  "core:i18n": i18nConfiguration
+  "core:i18n": i18nConfiguration,
+  "core:services": servicesInterfaces
 }
