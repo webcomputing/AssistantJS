@@ -20,7 +20,7 @@ helps you to build better user interfaces using response text variation out of t
 - **Entity validation**: Don't check for presence of entities, let AssistantJS do this job for you. *(Optional dependency)*
 - **Authentication**: Protect your states with configurable authentication mechanisms. *(Optional dependency)*
 
-## AssistantJS Ecosphere
+## AssistantJS ecosystem
 - **assistant-source**: AssistantJS core framework, the only real dependency to use AssistantJS. *(Current repository)*
 - **[assistant-alexa][15]**: Enables integrating Amazon Alexa into AssistantJS.
 - **[assistant-apiai][16]**: Connects Api.ai with AssistantJS.
@@ -42,7 +42,7 @@ AssistantJS currently needs a running [redis][9] instance to work. So be sure to
 
 ## License
 For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
-using AssistantJS is a non-commercial setup.
+using AssistantJS in a non-commercial setup.
 
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
