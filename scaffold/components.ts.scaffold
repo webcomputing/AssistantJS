@@ -25,5 +25,5 @@ const servicesConfiguration: servicesInterfaces.Configuration = {
  */
 export default {
   "core:i18n": i18nConfiguration,
-  "core:services": servicesInterfaces
+  "core:services": servicesConfiguration
 }
