@@ -40,6 +40,36 @@ AssistantJS currently needs a running [redis][9] instance to work. So be sure to
 - **[assistant-bootstrap][10]**: A well documented AssistantJS demo application, which also includes jasmine tests.
 - **[gitter][21]**: If you have any additional questions, don't hesitate to ask them on our official gitter channel!
 
+### Show some code!
+Just to give you a first insight into AssistantJS, this is what one of your states looks like after finishing our [video tutorial][13]:
+```typescript
+@injectable()
+// Need account linking? Just add @authenticate(OAuthStrategy) over here!
+export class MainState extends ApplicationState {
+  entities: unifierInterfaces.EntityDictionary;
+
+  constructor(
+    @inject(injectionNames.current.responseFactory) responseFactory: unifierInterfaces.ResponseFactory,
+    @inject(injectionNames.current.translateHelper) translateHelper: i18nInterfaces.TranslateHelper,
+    @inject(injectionNames.current.entityDictionary) entityDictionary: unifierInterfaces.EntityDictionary
+  ) {
+    super(responseFactory, translateHelper);
+    this.entities = entityDictionary;
+  }
+
+  invokeGenericIntent(machine: stateMachineInterfaces.Transitionable) {
+    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
+  }
+
+  @needs("target")
+  async busRouteIntent(machine: stateMachineInterfaces.Transitionable) {
+    await machine.transitionTo("BusOrderState");
+    let usersTarget = this.entities.get("target") as string;
+    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t({target: usersTarget}));
+  }
+}
+```
+
 ## License
 For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
 using AssistantJS in a non-commercial setup.
