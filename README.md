@@ -38,7 +38,7 @@ AssistantJS currently needs a running [redis][9] instance to work. So be sure to
 - **[video tutorial][13]**: A short video tutorial covering the implementation of a bus travelling application. Check this out first!
 - **[wiki][11]**: In our github wiki, most of the AssistantJS functionalities are well-described. Look into it for a deeper understanding of AssitantJS!
 - **[assistant-bootstrap][10]**: A well documented AssistantJS demo application, which also includes jasmine tests.
-- **[stackoverflow][12]**: If you have any further questions, ask them on stackoverflow and use the `assistant.js` tag!
+- **[gitter][21]**: If you have any additional questions, don't hesitate to ask them on our official gitter channel!
 
 ## License
 For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
@@ -64,3 +64,4 @@ using AssistantJS in a non-commercial setup.
 [18]: https://github.com/webcomputing/assistant-validations
 [19]: https://github.com/webcomputing/assistant-authentication
 [20]: https://github.com/webcomputing/assistant-generic-utterances
+[21]: https://gitter.im/AssistantJS/Lobby
