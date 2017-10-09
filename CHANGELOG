@@ -1,3 +1,6 @@
+version 0.1.2
+- bugfix: additional arguments of intent methods are now passed to hooks, too
+
 version 0.1.1
 - introduces changelog
 - adds redis configuration to scaffold

@@ -34,13 +34,13 @@ export class StateMachine implements StateMachineInterface {
 
     // Run beforeIntent-hooks as filter
     return new Promise<void>((resolve, reject) => {
-      this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this).runAsFilter(() => {
+      this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runAsFilter(() => {
         if (typeof(currentState.instance[intentMethod]) === "function") {
           try {
             // Call given intent
             Promise.resolve(currentState.instance[intentMethod](this, ...args)).then(() => {
               // Run afterIntent hooks
-              this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this).runWithResultset(() => {});
+              this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runWithResultset(() => {});
 
               // Done
               resolve();

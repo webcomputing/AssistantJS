@@ -1,10 +1,12 @@
 import { createRequestScope } from "../../support/util/setup";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { registerHook, createSpyHook } from "../../support/mocks/state-machine/hook";
 import { Container } from "inversify-components";
 
 
 describe("StateMachine", function() {
   beforeEach(function() {
+    configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
   });
@@ -177,6 +179,19 @@ describe("StateMachine", function() {
         expect(this.spyResult[0]).toEqual("testIntent");
         done();
       });
+
+      describe("with additional arguments", function() {
+        beforeEach(function() {
+          this.argsResult = [];
+          registerHook(this.container, false, createSpyHook((intent, stateName, state, mode, machine, success, failure, ...args) => this.argsResult.push(args)));
+        });
+
+        it("passes arguments to hook function", async function(done) {
+          await this.stateMachine.handleIntent("test", "myFirstArgument", "mySecondArgument");
+          expect(this.argsResult).toEqual([["myFirstArgument", "mySecondArgument"]]);
+          done();
+        });
+      });
     });
 
     describe("with beforeIntent hooks given", function() {
@@ -197,6 +212,19 @@ describe("StateMachine", function() {
         await this.stateMachine.handleIntent("test");
         expect(this.stateSpyResult).toEqual([]);
         done();
+      });
+
+      describe("with additional arguments", function() {
+        beforeEach(function() {
+          this.argsResult = [];
+          registerHook(this.container, true, createSpyHook((intent, stateName, state, mode, machine, success, failure, ...args) => this.argsResult.push(args)));
+        });
+
+        it("passes arguments to hook function", async function(done) {
+          await this.stateMachine.handleIntent("other", "myFirstArgument", "mySecondArgument");
+          expect(this.argsResult).toEqual([["myFirstArgument", "mySecondArgument"]]);
+          done();
+        });
       });
 
       describe("when given intent does not exist", function() {
