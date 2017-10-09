@@ -9,8 +9,8 @@ export const TestIntentFilterHook: Hooks.Hook = (success, failure, mode, state, 
 
 /** Creates a hook which calls given function with called intent */
 export function createSpyHook(spyFunction: Function): Hooks.Hook {
-  return (success, failure, mode, state, stateName, intent, machine) => {
-    spyFunction(intent, stateName, state, mode, machine, success, failure);
+  return (success, failure, mode, state, stateName, intent, machine, ...args) => {
+    spyFunction(intent, stateName, state, mode, machine, success, failure, ...args);
     success();
   }
 }
