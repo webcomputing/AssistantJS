@@ -194,10 +194,10 @@ export interface PlatformSpecHelper {
 
   /** 
    * Pretends call of given intent (and entities, ...)
-   * @param intent intent to call
-   * @param autoStart if set to true, setup.runMachine() will be called automatically
-   * @param additionalExtractions Extractions (entities, oauth, ...) in addition to intent
-   * @param additionalContext additional context info (in addition to default mock) to add to request context
+   * @param {intent} intent intent to call
+   * @param {boolean} autoStart if set to true, setup.runMachine() will be called automatically
+   * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
+   * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
   pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
 }
@@ -212,29 +212,35 @@ export namespace OptionalHandlerFeatures {
     isSSML: boolean;
   }
 
-  export namespace Display {
-    export interface ImageDisplay {
-      displayImage: string | null;
+  export namespace GUI {
+    export namespace Card {
+      export interface Simple {
+        cardTitle: string | null;
+        cardBody: string | null;
+      }
+
+      export interface Image extends Simple {
+        cardImage: string | null;
+      }
     }
 
-    export interface TextDisplay {
-      displayText: string | null;
+    export interface SuggestionChips {
+      suggestionChips: string[] | null;
     }
 
-    export interface SimpleCardDisplay extends TextDisplay {
-      cardTitle: string | null;
+    export interface ChatResponse {
+      chatText: string | null;
     }
-
-    export interface ImageCardDisplay extends SimpleCardDisplay, ImageDisplay {}
   }
+
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     AuthenticationHandler: ["forceAuthenticated"],
+    ChatResponse: ["chatText"],
     SSMLHandler: ["isSSML"],
-    ImageDisplay: ["displayImage"],
-    TextDisplay: ["displayText"],
-    SimpleCardDisplay: ["displayText", "cardTitle"],
-    ImageCardDisplay: ["displayText", "cardTitle", "displayImage"]
+    SimpleCard: ["cardBody", "cardTitle"],
+    ImageCard: ["cardBody", "cardTitle", "cardImage"],
+    SuggestionChips: ["suggestionChips"]
   }
 }
