@@ -5,9 +5,8 @@ import { BaseResponse } from "./base-response";
 export class UnauthenticatedResponse extends BaseResponse {
   constructor(handler: MinimalResponseHandler, voiceResponse: VoiceResponse, text: string = "") {
     super(handler);
-    
-    if (!this.featureIsAvailable(OptionalHandlerFeatures.FeatureChecker.AuthenticationHandler))
-      throw new Error("Unauthentication Feature is not available for this response handler: " + this.handler);
+
+    this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.AuthenticationHandler, "The currently used platform does not allow sending authentication failures.");
     
     (this.handler as OptionalHandlerFeatures.AuthenticationHandler).forceAuthenticated = true;
 

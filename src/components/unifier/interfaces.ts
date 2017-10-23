@@ -224,12 +224,12 @@ export namespace OptionalHandlerFeatures {
       }
     }
 
-    export interface SuggestionChips {
+    export interface SuggestionChip {
       suggestionChips: string[] | null;
     }
 
-    export interface ChatResponse {
-      chatText: string | null;
+    export interface ChatBubble {
+      chatBubbles: string[] | null;
     }
   }
 
@@ -237,10 +237,10 @@ export namespace OptionalHandlerFeatures {
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     AuthenticationHandler: ["forceAuthenticated"],
-    ChatResponse: ["chatText"],
+    ChatBubble: ["chatBubbles"],
     SSMLHandler: ["isSSML"],
     SimpleCard: ["cardBody", "cardTitle"],
     ImageCard: ["cardBody", "cardTitle", "cardImage"],
-    SuggestionChips: ["suggestionChips"]
+    SuggestionChip: ["suggestionChips"]
   }
 }

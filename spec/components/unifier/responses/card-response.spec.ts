@@ -8,7 +8,7 @@ describe("CardResponse", function() {
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
 
     this.buildCardHandler = (additionalFeatures = {}) => {
-      this.handler = Object.assign(this.handler, Object.assign({ displayText: null, cardTitle: null }, additionalFeatures));
+      this.handler = Object.assign(this.handler, Object.assign({ cardBody: null, cardTitle: null }, additionalFeatures));
       this.responseFactory = new ResponseFactory(this.handler);
     }
   });
@@ -38,7 +38,7 @@ describe("CardResponse", function() {
     describe("setBody", function() {
       it("sets body to response handler", function() {
         this.responseFactory.createCardResponse().setBody("body");
-        expect(this.handler.displayText).toEqual("body");
+        expect(this.handler.cardBody).toEqual("body");
       });
     });
   });
@@ -56,12 +56,12 @@ describe("CardResponse", function() {
 
     describe("with a handler supporting images", function() {
       beforeEach(function() {
-        this.buildCardHandler({ displayImage: "" });
+        this.buildCardHandler({ cardImage: "" });
       });
 
       it("appends image to response", function() {
         this.responseFactory.createCardResponse().setImage("http://my-image");
-        expect(this.handler.displayImage).toEqual("http://my-image");
+        expect(this.handler.cardImage).toEqual("http://my-image");
       });
     });
   });
