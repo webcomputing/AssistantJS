@@ -14,6 +14,16 @@ export interface DestroyableSession extends Session {
   delete(): Promise<void>;
 }
 
+/** Factory function which returns a session for a given session id */
+export interface SessionFactory {
+  (id: string): DestroyableSession;
+}
+
+/** Factory function which returns the current session (based on extraction result) */
+export interface CurrentSessionFactory {
+  (): DestroyableSession;
+}
+
 export interface OptionalConfiguration {
   /** 
    * Maximum life time of a session in seconds. Useful if sessions are not getting fully closed by error.
