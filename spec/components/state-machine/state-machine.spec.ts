@@ -29,6 +29,12 @@ describe("StateMachine", function() {
       done();
     })
 
+    it("adds state/intent combinatiion to history", async function(done) {
+      await this.stateMachine.handleIntent("test");
+      expect(this.stateMachine.intentHistory).toEqual([{ stateName: "MainState", intentMethodName: "testIntent" }]);
+      done();
+    });
+
     describe("when given intent exists in state class", function() {
       describe("when given intent does not throw an error", function() {
         beforeEach(async function(done) {

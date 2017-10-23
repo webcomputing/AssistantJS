@@ -58,6 +58,9 @@ export interface StateFactory {
 }
 
 export interface Transitionable {
+  /** History of all called intent methods */
+  intentHistory: { stateName: string; intentMethodName: string }[];
+
   /** Checks if given state exists */
   stateExists(state: string): boolean;
 
