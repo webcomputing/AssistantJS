@@ -9,6 +9,8 @@ import { UnauthenticatedResponse } from "../../../src/components/unifier/respons
 import { EmptyResponse } from "../../../src/components/unifier/responses/empty-response";
 
 import { Container } from "inversify-components";
+import { ChatResponse } from "../../../src/components/unifier/responses/chat-response";
+import { SuggestionChipsResponse } from "../../../src/components/unifier/responses/suggestion-chips-response";
 
 describe("ResponseFactory", function() {
   beforeEach(function() {
@@ -43,6 +45,22 @@ describe("ResponseFactory", function() {
       it("throws an exception", function() {
         expect(() => {
           this.responseFactory.createSSMLResponse();
+        }).toThrow();
+      });
+    });
+
+    describe("createSuggestionChipsResponse", function() {
+      it("throws an exception", function() {
+        expect(() => {
+          this.responseFactory.createSuggestionChipsResponse();
+        }).toThrow();
+      });
+    });
+
+    describe("createChatResponse", function() {
+      it("throws an exception", function() {
+        expect(() => {
+          this.responseFactory.createChatResponse();
         }).toThrow();
       });
     });
@@ -89,6 +107,32 @@ describe("ResponseFactory", function() {
         expect(this.responseFactory.createVoiceResponse().ssml.constructor).toEqual(SSMLResponse);
       });
     })
+  });
+
+  describe("with handler as chat messages enabled handler", function() {
+    beforeEach(function() {
+      this.handler = Object.assign(this.handler, { chatBubbles: null });
+      this.responseFactory = new ResponseFactory(this.handler);
+    });
+
+    describe("createChatResponse", function() {
+      it("creates instance correclty", function() {
+        expect(this.responseFactory.createChatResponse().constructor).toEqual(ChatResponse);
+      });
+    });
+  });
+
+  describe("with handler as suggestion chips enabled handler", function() {
+    beforeEach(function() {
+      this.handler = Object.assign(this.handler, { suggestionChips: null });
+      this.responseFactory = new ResponseFactory(this.handler);
+    });
+
+    describe("createSuggestionChipsResponse", function() {
+      it("creates instance correclty", function() {
+        expect(this.responseFactory.createSuggestionChipsResponse().constructor).toEqual(SuggestionChipsResponse);
+      });
+    });
   });
 
   describe("with handler as OAuth enabled handler", function() {
