@@ -2,7 +2,8 @@ import { MinimalResponseHandler, OptionalHandlerFeatures } from "../interfaces";
 import { SimpleVoiceResponse } from "./simple-voice-response";
 
 export class SSMLResponse extends SimpleVoiceResponse {
-  handler: MinimalResponseHandler & OptionalHandlerFeatures.SSMLHandler & OptionalHandlerFeatures.Reprompt;
+  /** Response handler of the currently used platform */
+  protected handler: MinimalResponseHandler & OptionalHandlerFeatures.SSMLHandler & OptionalHandlerFeatures.Reprompt;
 
   constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
     super(handler, failSilentlyOnUnsupportedFeatures);

@@ -14,7 +14,10 @@ import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
 
 @injectable()
 export class ResponseFactory implements ResponseFactoryInterface {
+  /** If set to false, this response object will throw an exception if an unsupported feature if used */
   failSilentlyOnUnsupportedFeatures = true;
+
+  /** Response handler of the currently used platform */
   handler: MinimalResponseHandler;
 
   constructor(

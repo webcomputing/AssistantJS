@@ -2,7 +2,8 @@ import { MinimalResponseHandler, OptionalHandlerFeatures } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
 export class SuggestionChipsResponse extends BaseResponse {
-  handler: OptionalHandlerFeatures.GUI.SuggestionChip & MinimalResponseHandler;
+  /** Response handler of the currently used platform */
+  protected handler: OptionalHandlerFeatures.GUI.SuggestionChip & MinimalResponseHandler;
 
   constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
     super(handler, failSilentlyOnUnsupportedFeatures);
