@@ -41,38 +41,75 @@ AssistantJS currently needs a running [redis][9] instance to work. So be sure to
 - **[gitter][21]**: If you have any additional questions, don't hesitate to ask them on our official gitter channel!
 
 ### Show some code!
-Just to give you a first insight into AssistantJS, this is what one of your states looks like after finishing our [video tutorial][13]:
+Just to give you a first insight into AssistantJS, this is one of the states implemented in our [video tutorial][13]:
 ```typescript
 @injectable()
 // Need account linking? Just add @authenticate(OAuthStrategy) over here!
 export class MainState extends ApplicationState {
-  entities: unifierInterfaces.EntityDictionary;
-
-  constructor(
-    @inject(injectionNames.current.responseFactory) responseFactory: unifierInterfaces.ResponseFactory,
-    @inject(injectionNames.current.translateHelper) translateHelper: i18nInterfaces.TranslateHelper,
-    @inject(injectionNames.current.entityDictionary) entityDictionary: unifierInterfaces.EntityDictionary
-  ) {
-    super(responseFactory, translateHelper);
-    this.entities = entityDictionary;
-  }
-
+  /* Invoked by saying "Launch/Talk to my bus application" */
   invokeGenericIntent(machine: stateMachineInterfaces.Transitionable) {
     this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
   }
 
-  @needs("target")
+  /* "Whats the next bus to train station?" */
+  @needs("target") // Tell AssistantJS to wait for entity "target"
   async busRouteIntent(machine: stateMachineInterfaces.Transitionable) {
     await machine.transitionTo("BusOrderState");
-    let usersTarget = this.entities.get("target") as string;
+    const usersTarget = this.entities.get("target") as string;
     this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t({target: usersTarget}));
   }
 }
 ```
+Wondering about the empty `this.translateHelper.t()` calls? Translation keys are matched by applying simple [convention over configuration][6] rules. Try to find them out on your own by taking a look at the corresponding translation file:
+```json
+{
+  "mainState": {
+    "invokeGenericIntent": {
+      "alexa": "Welcome, Alexa user!",
+      "google": [
+        "Welcome, Google user!",
+        "Nice to have you here, Googler!"
+      ]
+    },
+    "busRouteIntent": [
+      "{Love to help you!|} The next bus to {{target}} arrives in {{minutes}} minutes. Do you want me to buy a ticket?"
+    ],
+    "helpGenericIntent": "Currently, you can only ask for busses. Try it out!"
+  },
+  "busOrderState": {
+    "yesGenericIntent": "{Allright|Okay}! Just sent a ticket to your smartphone!",
+    "noGenericIntent": "Cancelled, but maybe next time!",
+    "helpGenericIntent": "Say \"yes\" to buy a ticket, or \"no\" otherwise."
+  },
+}
+```
+As you can see, AssistantJS supports you in building more varied voice applications per default. Just use our template syntax (`{Allright|Okay}`) or pass all alternatives in an array. Thanks to our convention over configuration rulesets, we are greeting google assistant users different than alexa users. Oh, and as you can see, inheriting intents (like the `helpGenericIntent` above) from other states (here: `ApplicationState`) is also possible.
 
-## License
-For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
-using AssistantJS in a non-commercial setup.
+This is what a test for the MainState's `invokeGenericIntent` could look like:
+```typescript
+describe("MainState", function () {
+  describe("on platform = alexa", function() {
+    beforeEach(function() {
+      this.currentPlatformHelper = this.platforms.alexa;
+    });
+
+    describe("invokeGenericIntent", function() {
+      beforeEach(async function(done) {
+        this.responseHandler = await this.currentPlatformHelper.pretendIntentCalled(unifierInterfaces.GenericIntent.Invoke);
+        done();
+      });
+
+      it("greets the user", function() {
+        expect(this.responseHandler.voiceMessage).toEqual("Welcome, Alexa user!");
+      });
+
+      it("waits for an answer", function() {
+        expect(this.responseHandler.endSession).toBeFalsy();
+      });
+    });
+  });
+});
+```
 
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
