@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A TypeScript framework to create generic voice applications, independet of assistants",
   "keywords": [
     "alexa",
