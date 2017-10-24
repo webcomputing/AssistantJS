@@ -6,16 +6,17 @@ describe("CardResponse", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
+    this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
 
     this.buildCardHandler = (additionalFeatures = {}) => {
       this.handler = Object.assign(this.handler, Object.assign({ cardBody: null, cardTitle: null }, additionalFeatures));
-      this.responseFactory = new ResponseFactory(this.handler);
+      this.responseFactory.handler = this.handler;
     }
   });
 
   describe("with a handler not supporting cards", function() {
     it("is not creatable", function() {
-      this.responseFactory = new ResponseFactory(this.handler);
+      this.responseFactory = this.responseFactory;
 
       expect(function() {
         this.responseFactory.createCardResponse();

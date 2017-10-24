@@ -4,8 +4,8 @@ import { BaseResponse } from "./base-response";
 export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
   handler: MinimalResponseHandler & OptionalHandlerFeatures.Reprompt;
 
-  constructor(handler: MinimalResponseHandler) {
-    super(handler);
+  constructor(handler: MinimalResponseHandler,failSilentlyOnUnsupportedFeatures: boolean) {
+    super(handler, failSilentlyOnUnsupportedFeatures);
   }
 
   endSessionWith(text: string) {

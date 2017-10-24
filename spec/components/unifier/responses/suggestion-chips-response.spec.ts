@@ -7,7 +7,7 @@ describe("SuggestionChipsResponse", function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.handler.suggestionChips = null;
-    this.chatResponse = new SuggestionChipsResponse(this.handler);
+    this.chatResponse = new SuggestionChipsResponse(this.handler, false);
   });
 
   describe("with a handler not supporting suggestion chips", function() {
@@ -15,7 +15,7 @@ describe("SuggestionChipsResponse", function() {
       this.handler.suggestionChips = undefined;
 
       expect(function() {
-        new SuggestionChipsResponse(this.handler);
+        new SuggestionChipsResponse(this.handler, false);
       }).toThrow();
     });
   });

@@ -1,5 +1,6 @@
 import { injectable, inject } from "inversify";
-import { ResponseFactory as ResponseFactoryInterface, MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "./interfaces";
+import { Component } from "inversify-components";
+import { ResponseFactory as ResponseFactoryInterface, MinimalResponseHandler, OptionalHandlerFeatures, Voiceable, Configuration } from "./interfaces";
 
 import { BaseResponse } from "./responses/base-response";
 import { EmptyResponse } from "./responses/empty-response";
@@ -13,48 +14,53 @@ import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
 
 @injectable()
 export class ResponseFactory implements ResponseFactoryInterface {
+  failSilentlyOnUnsupportedFeatures = true;
   handler: MinimalResponseHandler;
 
-  constructor(@inject("core:unifier:current-response-handler") handler: MinimalResponseHandler) {
+  constructor(
+    @inject("core:unifier:current-response-handler") handler: MinimalResponseHandler,
+    @inject("meta:component//core:unifier") componentMeta: Component
+  ) {
     this.handler = handler;
+    this.failSilentlyOnUnsupportedFeatures = (componentMeta.configuration as Configuration).failSilentlyOnUnsupportedFeatures as boolean;
   }
 
   createVoiceResponse() {
     let ssml: Voiceable;
     if (BaseResponse.featureIsAvailable(this.handler, OptionalHandlerFeatures.FeatureChecker.SSMLHandler)) {
-      ssml = new SSMLResponse(this.handler);
+      ssml = new SSMLResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
     } else {
-      ssml = new SimpleVoiceResponse(this.handler);
+      ssml = new SimpleVoiceResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
     }
     
-    return new VoiceResponse(this.handler, new SimpleVoiceResponse(this.handler), ssml);
+    return new VoiceResponse(new SimpleVoiceResponse(this.handler, this.failSilentlyOnUnsupportedFeatures), ssml);
   }
 
   createSimpleVoiceResponse() {
-    return new SimpleVoiceResponse(this.handler);
+    return new SimpleVoiceResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
   }
 
   createSSMLResponse() {
-    return new SSMLResponse(this.handler);
+    return new SSMLResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
   }
 
   createSuggestionChipsResponse() {
-    return new SuggestionChipsResponse(this.handler);
+    return new SuggestionChipsResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
   }
 
   createChatResponse() {
-    return new ChatResponse(this.handler);
+    return new ChatResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
   }
 
   createCardResponse() {
-    return new CardResponse(this.handler);
+    return new CardResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
   }
 
   createAndSendEmptyResponse() {
-    return new EmptyResponse(this.handler);
+    return new EmptyResponse(this.handler, this.failSilentlyOnUnsupportedFeatures);
   }
 
   createAndSendUnauthenticatedResponse(text: string = "") {
-    return new UnauthenticatedResponse(this.handler, this.createVoiceResponse(), text);
+    return new UnauthenticatedResponse(this.handler, this.createVoiceResponse(), this.failSilentlyOnUnsupportedFeatures, text);
   }
 }

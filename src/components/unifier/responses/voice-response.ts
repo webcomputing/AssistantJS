@@ -1,12 +1,11 @@
 import { MinimalResponseHandler, Voiceable } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
-export class VoiceResponse extends BaseResponse implements Voiceable {
+export class VoiceResponse implements Voiceable {
   simple: Voiceable;
   ssml: Voiceable;
 
-  constructor(handler: MinimalResponseHandler, simple: Voiceable, ssml: Voiceable) {
-    super(handler);
+  constructor(simple: Voiceable, ssml: Voiceable) {
     this.simple = simple;
     this.ssml = ssml;
   }

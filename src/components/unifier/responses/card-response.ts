@@ -4,8 +4,8 @@ import { BaseResponse } from "./base-response";
 export class CardResponse extends BaseResponse {
   handler: OptionalHandlerFeatures.GUI.Card.Simple & OptionalHandlerFeatures.GUI.Card.Image & MinimalResponseHandler;
 
-  constructor(handler: MinimalResponseHandler) {
-    super(handler);
+  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
+    super(handler, failSilentlyOnUnsupportedFeatures);
     
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.SimpleCard, "The currently selected platform does not support sending cards.");
   }

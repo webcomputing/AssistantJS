@@ -4,8 +4,8 @@ import { SimpleVoiceResponse } from "./simple-voice-response";
 export class SSMLResponse extends SimpleVoiceResponse {
   handler: MinimalResponseHandler & OptionalHandlerFeatures.SSMLHandler & OptionalHandlerFeatures.Reprompt;
 
-  constructor(handler: MinimalResponseHandler) {
-    super(handler);
+  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
+    super(handler, failSilentlyOnUnsupportedFeatures);
     
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.SSMLHandler, "The currently selected platform does not allow SSML.");
   }

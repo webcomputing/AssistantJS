@@ -10,7 +10,7 @@ describe("BaseResponse", function() {
     // Add some supported features
     this.handler.supportedFeature = null;
 
-    this.baseResponse = new BaseResponse(this.handler);
+    this.baseResponse = new BaseResponse(this.handler, false);
   });
 
   describe("reportIfUnavailable", function() {

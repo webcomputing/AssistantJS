@@ -7,7 +7,7 @@ describe("VoiceResponse", function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.handler = Object.assign(this.handler, { isSSML: false });
-    this.responseFactory = new ResponseFactory(this.handler);
+    this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
 
     this.voiceResponse = this.responseFactory.createVoiceResponse();
     spyOn(this.voiceResponse.simple, "endSessionWith");

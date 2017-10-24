@@ -12,7 +12,7 @@ export class BaseResponse {
    * @param {MinimalResponseHandler} handler The currently acting response handler
    * @param {boolean} failSilentlyOnUnsupportedFeatures If set to true, response class won't throw an error if a feature is unsupported
    */
-  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures = false) {
+  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
     this.handler = handler;
     this.failSilentlyOnUnsupportedFeatures = failSilentlyOnUnsupportedFeatures;
   }

@@ -3,6 +3,8 @@ import { RequestContext } from "../root/interfaces";
 import { Session } from "../services/interfaces";
 import { SpecSetup } from "../../spec-setup";
 import { CardResponse } from "./responses/card-response";
+import { ChatResponse } from "./responses/chat-response";
+import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
 
 export declare type intent = string | GenericIntent;
 
@@ -19,6 +21,9 @@ export const componentInterfaces = {
 /** End user interfaces */
 
 export interface ResponseFactory {
+  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
+  failSilentlyOnUnsupportedFeatures: boolean;
+
   /** Creates a Voiceable response object which decides wheter or wheter not to use SSML based on input and platform features */
   createVoiceResponse(): Voiceable;
 
@@ -27,6 +32,12 @@ export interface ResponseFactory {
 
   /** Creates a Voiceable response object with SSML enabled. Throws an exception of SSML is not possible on platform. */
   createSSMLResponse(): Voiceable;
+
+  /** Creates a response object for adding suggestion chips to the current response */
+  createSuggestionChipsResponse(): SuggestionChipsResponse;
+
+  /** Creates a response object for adding text/chat messsages (for displaying) to the current response */
+  createChatResponse(): ChatResponse;
 
   /** Creates and sends an empty response */
   createAndSendEmptyResponse(): {};
@@ -88,6 +99,9 @@ export namespace GenericIntent {
 export interface OptionalConfiguration {
   utterancePath?: string;
   entities?: { [type: string]: string[] };
+
+  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
+  failSilentlyOnUnsupportedFeatures?: boolean;
 }
 export interface Configuration extends OptionalConfiguration {}
 

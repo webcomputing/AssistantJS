@@ -4,8 +4,8 @@ import { BaseResponse } from "./base-response";
 export class ChatResponse extends BaseResponse {
   handler: OptionalHandlerFeatures.GUI.ChatBubble & MinimalResponseHandler;
 
-  constructor(handler: MinimalResponseHandler) {
-    super(handler);
+  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
+    super(handler, failSilentlyOnUnsupportedFeatures);
 
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.ChatBubble, "The currently used platform does not support chat messages.");
   }

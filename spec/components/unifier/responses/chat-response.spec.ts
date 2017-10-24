@@ -7,7 +7,7 @@ describe("ChatResponse", function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.handler.chatBubbles = null;
-    this.chatResponse = new ChatResponse(this.handler);
+    this.chatResponse = new ChatResponse(this.handler, false);
   });
 
   describe("with a handler not supporting cards", function() {
@@ -15,7 +15,7 @@ describe("ChatResponse", function() {
       this.handler.chatBubbles = undefined;
 
       expect(function() {
-        new ChatResponse(this.handler);
+        new ChatResponse(this.handler, false);
       }).toThrow();
     });
   });
