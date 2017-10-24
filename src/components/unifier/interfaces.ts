@@ -42,8 +42,18 @@ export interface ResponseFactory {
 }
 
 export interface Voiceable {
-  endSessionWith(text: String);
-  prompt(text: String);
+  /**
+   * Sends voice message and ends session
+   * @param {string} text Text to say to user
+   */
+  endSessionWith(text: string);
+
+  /**
+   * Sends voice message but does not end session, so the user is able to respond
+   * @param {string} text Text to say to user
+   * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
+   */
+  prompt(text: string, ...reprompts: string[]);
 }
 
 /** Currently, we are not allowed to use camelCase here! So try to just use a single word! */
@@ -204,12 +214,16 @@ export interface PlatformSpecHelper {
 
 
 export namespace OptionalHandlerFeatures {
-  export interface AuthenticationHandler extends MinimalResponseHandler {
+  export interface AuthenticationHandler {
     forceAuthenticated: boolean;
   }
 
-  export interface SSMLHandler extends MinimalResponseHandler {
+  export interface SSMLHandler {
     isSSML: boolean;
+  }
+
+  export interface Reprompt {
+    reprompts: string[] | null;
   }
 
   export namespace GUI {
@@ -238,6 +252,7 @@ export namespace OptionalHandlerFeatures {
   export const FeatureChecker = {
     AuthenticationHandler: ["forceAuthenticated"],
     ChatBubble: ["chatBubbles"],
+    Reprompt: ["reprompts"],
     SSMLHandler: ["isSSML"],
     SimpleCard: ["cardBody", "cardTitle"],
     ImageCard: ["cardBody", "cardTitle", "cardImage"],
