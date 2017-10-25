@@ -48,7 +48,7 @@ Just to give you a first insight into AssistantJS, this is one of the states imp
 export class MainState extends ApplicationState {
   /* Invoked by saying "Launch/Talk to my bus application" */
   invokeGenericIntent(machine: stateMachineInterfaces.Transitionable) {
-    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
+    this.prompt(this.t());
   }
 
   /* "Whats the next bus to train station?" */
@@ -56,7 +56,7 @@ export class MainState extends ApplicationState {
   async busRouteIntent(machine: stateMachineInterfaces.Transitionable) {
     await machine.transitionTo("BusOrderState");
     const usersTarget = this.entities.get("target") as string;
-    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t({target: usersTarget}));
+    this.prompt(this.t({target: usersTarget}));
   }
 }
 ```
