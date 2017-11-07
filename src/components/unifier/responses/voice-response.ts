@@ -14,8 +14,8 @@ export class VoiceResponse implements Voiceable {
     this.delegatorBasedOnInput(text).endSessionWith(text);
   }
 
-  prompt(text: string) {
-    this.delegatorBasedOnInput(text).prompt(text);
+  prompt(text: string, ...reprompts: string[]) {
+    this.delegatorBasedOnInput(text).prompt(text, ...reprompts);
   }
 
   private delegatorBasedOnInput(text: string) {
