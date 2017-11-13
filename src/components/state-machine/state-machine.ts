@@ -8,6 +8,7 @@ import { State, StateMachine as StateMachineInterface, componentInterfaces, Meta
 
 @injectable()
 export class StateMachine implements StateMachineInterface {
+  intentHistory: { stateName: string; intentMethodName: string }[] = [];
 
   private getCurrentState: () => Promise<{instance: State, name: string}>;
   private stateNames: string[];
@@ -30,6 +31,7 @@ export class StateMachine implements StateMachineInterface {
     let currentState = await this.getCurrentState();
 
     let intentMethod = this.deriveIntentMethod(intent);
+    this.intentHistory.push({stateName: currentState.name, intentMethodName: intentMethod});
     log("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
     // Run beforeIntent-hooks as filter

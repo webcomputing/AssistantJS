@@ -3,6 +3,8 @@ import { RequestContext } from "../root/interfaces";
 import { Session } from "../services/interfaces";
 import { SpecSetup } from "../../spec-setup";
 import { CardResponse } from "./responses/card-response";
+import { ChatResponse } from "./responses/chat-response";
+import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
 
 export declare type intent = string | GenericIntent;
 
@@ -19,6 +21,9 @@ export const componentInterfaces = {
 /** End user interfaces */
 
 export interface ResponseFactory {
+  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
+  failSilentlyOnUnsupportedFeatures: boolean;
+
   /** Creates a Voiceable response object which decides wheter or wheter not to use SSML based on input and platform features */
   createVoiceResponse(): Voiceable;
 
@@ -27,6 +32,12 @@ export interface ResponseFactory {
 
   /** Creates a Voiceable response object with SSML enabled. Throws an exception of SSML is not possible on platform. */
   createSSMLResponse(): Voiceable;
+
+  /** Creates a response object for adding suggestion chips to the current response */
+  createSuggestionChipsResponse(): SuggestionChipsResponse;
+
+  /** Creates a response object for adding text/chat messsages (for displaying) to the current response */
+  createChatResponse(): ChatResponse;
 
   /** Creates and sends an empty response */
   createAndSendEmptyResponse(): {};
@@ -42,8 +53,18 @@ export interface ResponseFactory {
 }
 
 export interface Voiceable {
-  endSessionWith(text: String);
-  prompt(text: String);
+  /**
+   * Sends voice message and ends session
+   * @param {string} text Text to say to user
+   */
+  endSessionWith(text: string);
+
+  /**
+   * Sends voice message but does not end session, so the user is able to respond
+   * @param {string} text Text to say to user
+   * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
+   */
+  prompt(text: string, ...reprompts: string[]);
 }
 
 /** Currently, we are not allowed to use camelCase here! So try to just use a single word! */
@@ -78,6 +99,9 @@ export namespace GenericIntent {
 export interface OptionalConfiguration {
   utterancePath?: string;
   entities?: { [type: string]: string[] };
+
+  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
+  failSilentlyOnUnsupportedFeatures?: boolean;
 }
 export interface Configuration extends OptionalConfiguration {}
 
@@ -194,47 +218,58 @@ export interface PlatformSpecHelper {
 
   /** 
    * Pretends call of given intent (and entities, ...)
-   * @param intent intent to call
-   * @param autoStart if set to true, setup.runMachine() will be called automatically
-   * @param additionalExtractions Extractions (entities, oauth, ...) in addition to intent
-   * @param additionalContext additional context info (in addition to default mock) to add to request context
+   * @param {intent} intent intent to call
+   * @param {boolean} autoStart if set to true, setup.runMachine() will be called automatically
+   * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
+   * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
   pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
 }
 
 
 export namespace OptionalHandlerFeatures {
-  export interface AuthenticationHandler extends MinimalResponseHandler {
+  export interface AuthenticationHandler {
     forceAuthenticated: boolean;
   }
 
-  export interface SSMLHandler extends MinimalResponseHandler {
+  export interface SSMLHandler {
     isSSML: boolean;
   }
 
-  export namespace Display {
-    export interface ImageDisplay {
-      displayImage: string | null;
-    }
-
-    export interface TextDisplay {
-      displayText: string | null;
-    }
-
-    export interface SimpleCardDisplay extends TextDisplay {
-      cardTitle: string | null;
-    }
-
-    export interface ImageCardDisplay extends SimpleCardDisplay, ImageDisplay {}
+  export interface Reprompt {
+    reprompts: string[] | null;
   }
+
+  export namespace GUI {
+    export namespace Card {
+      export interface Simple {
+        cardTitle: string | null;
+        cardBody: string | null;
+      }
+
+      export interface Image extends Simple {
+        cardImage: string | null;
+      }
+    }
+
+    export interface SuggestionChip {
+      suggestionChips: string[] | null;
+    }
+
+    export interface ChatBubble {
+      chatBubbles: string[] | null;
+    }
+  }
+
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     AuthenticationHandler: ["forceAuthenticated"],
+    ChatBubble: ["chatBubbles"],
+    Reprompt: ["reprompts"],
     SSMLHandler: ["isSSML"],
-    ImageDisplay: ["displayImage"],
-    TextDisplay: ["displayText"],
-    SimpleCardDisplay: ["displayText", "cardTitle"],
-    ImageCardDisplay: ["displayText", "cardTitle", "displayImage"]
+    SimpleCard: ["cardBody", "cardTitle"],
+    ImageCard: ["cardBody", "cardTitle", "cardImage"],
+    SuggestionChip: ["suggestionChips"]
   }
 }

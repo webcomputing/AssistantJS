@@ -20,10 +20,10 @@ helps you to build better user interfaces using response text variation out of t
 - **Entity validation**: Don't check for presence of entities, let AssistantJS do this job for you. *(Optional dependency)*
 - **Authentication**: Protect your states with configurable authentication mechanisms. *(Optional dependency)*
 
-## AssistantJS Ecosphere
+## AssistantJS ecosystem
 - **assistant-source**: AssistantJS core framework, the only real dependency to use AssistantJS. *(Current repository)*
 - **[assistant-alexa][15]**: Enables integrating Amazon Alexa into AssistantJS.
-- **[assistant-apiai][16]**: Connects Api.ai with AssistantJS.
+- **[assistant-apiai][16]**: Connects Api.ai (now "Dialogflow") with AssistantJS.
 - **[assistant-google][17]**: Brings Google Assistant (via Api.ai) to AssistantJS.
 - **[assistant-validations][18]**: Enables you to use a `@needs` decorator to express dependent entities. AssistantJS will automatically manage prompting for this entity, so you can focus on your real business.
 - **[assistant-authentication][19]**: Enables you to protect your states with configurable authentication stratgies. Currently supports OAuth authentication token and pin authentication.
@@ -37,12 +37,79 @@ Install AssistantJS using npm as a global module:
 AssistantJS currently needs a running [redis][9] instance to work. So be sure to have redis set up! After that, check out these resources to get started:
 - **[video tutorial][13]**: A short video tutorial covering the implementation of a bus travelling application. Check this out first!
 - **[wiki][11]**: In our github wiki, most of the AssistantJS functionalities are well-described. Look into it for a deeper understanding of AssitantJS!
-- **[assistant-boostrap][10]**: A well documented bootrap AssistantJS application. Maybe you want to use it to initialize your own project!
-- **[stackoverflow][12]**: If you have any further questions, ask them on stackoverflow and use the `assistant.js` tag!
+- **[assistant-bootstrap][10]**: A well documented AssistantJS demo application, which also includes jasmine tests.
+- **[gitter][21]**: If you have any additional questions, don't hesitate to ask them on our official gitter channel!
 
-## License
-For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
-using AssistantJS is a non-commercial setup.
+### Show some code!
+Just to give you a first insight into AssistantJS, this is one of the states implemented in our [video tutorial][13]:
+```typescript
+@injectable()
+// Need account linking? Just add @authenticate(OAuthStrategy) over here!
+export class MainState extends ApplicationState {
+  /* Invoked by saying "Launch/Talk to my bus application" */
+  invokeGenericIntent(machine: stateMachineInterfaces.Transitionable) {
+    this.prompt(this.t());
+  }
+
+  /* "Whats the next bus to train station?" */
+  @needs("target") // Tell AssistantJS to wait for entity "target"
+  async busRouteIntent(machine: stateMachineInterfaces.Transitionable) {
+    await machine.transitionTo("BusOrderState");
+    const usersTarget = this.entities.get("target") as string;
+    this.prompt(this.t({target: usersTarget}));
+  }
+}
+```
+Wondering about the empty `this.translateHelper.t()` calls? Translation keys are matched by applying simple [convention over configuration][6] rules. Try to find them out on your own by taking a look at the corresponding translation file:
+```json
+{
+  "mainState": {
+    "invokeGenericIntent": {
+      "alexa": "Welcome, Alexa user!",
+      "google": [
+        "Welcome, Google user!",
+        "Nice to have you here, Googler!"
+      ]
+    },
+    "busRouteIntent": [
+      "{Love to help you!|} The next bus to {{target}} arrives in {{minutes}} minutes. Do you want me to buy a ticket?"
+    ],
+    "helpGenericIntent": "Currently, you can only ask for busses. Try it out!"
+  },
+  "busOrderState": {
+    "yesGenericIntent": "{Allright|Okay}! Just sent a ticket to your smartphone!",
+    "noGenericIntent": "Cancelled, but maybe next time!",
+    "helpGenericIntent": "Say \"yes\" to buy a ticket, or \"no\" otherwise."
+  },
+}
+```
+As you can see, AssistantJS supports you in building more varied voice applications per default. Just use our template syntax (`{Allright|Okay}`) or pass all alternatives in an array. Thanks to our convention over configuration rulesets, we are greeting google assistant users different than alexa users. Oh, and as you can see, inheriting intents (like the `helpGenericIntent` above) from other states (here: `ApplicationState`) is also possible.
+
+This is what a test for the MainState's `invokeGenericIntent` could look like:
+```typescript
+describe("MainState", function () {
+  describe("on platform = alexa", function() {
+    beforeEach(function() {
+      this.currentPlatformHelper = this.platforms.alexa;
+    });
+
+    describe("invokeGenericIntent", function() {
+      beforeEach(async function(done) {
+        this.responseHandler = await this.currentPlatformHelper.pretendIntentCalled(unifierInterfaces.GenericIntent.Invoke);
+        done();
+      });
+
+      it("greets the user", function() {
+        expect(this.responseHandler.voiceMessage).toEqual("Welcome, Alexa user!");
+      });
+
+      it("waits for an answer", function() {
+        expect(this.responseHandler.endSession).toBeFalsy();
+      });
+    });
+  });
+});
+```
 
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
@@ -64,3 +131,4 @@ using AssistantJS is a non-commercial setup.
 [18]: https://github.com/webcomputing/assistant-validations
 [19]: https://github.com/webcomputing/assistant-authentication
 [20]: https://github.com/webcomputing/assistant-generic-utterances
+[21]: https://gitter.im/AssistantJS/Lobby

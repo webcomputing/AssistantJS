@@ -9,12 +9,20 @@ import { UnauthenticatedResponse } from "../../../src/components/unifier/respons
 import { EmptyResponse } from "../../../src/components/unifier/responses/empty-response";
 
 import { Container } from "inversify-components";
+import { ChatResponse } from "../../../src/components/unifier/responses/chat-response";
+import { SuggestionChipsResponse } from "../../../src/components/unifier/responses/suggestion-chips-response";
 
 describe("ResponseFactory", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
+  });
+
+  describe("failSilentlyOnUnsupportedFeatures", function() {
+    it("is initialized with true", function() {
+      expect(this.responseFactory.failSilentlyOnUnsupportedFeatures).toBeTruthy();
+    });
   });
 
   it("uses handler correctly as di argument", function() {
@@ -40,18 +48,90 @@ describe("ResponseFactory", function() {
     });
 
     describe("createSSMLResponse", function() {
-      it("throws an exception", function() {
-        expect(() => {
-          this.responseFactory.createSSMLResponse();
-        }).toThrow();
+      describe("with failSilentlyOnUnsupportedFeatures = false", function() {
+        beforeEach(function() {
+          this.responseFactory.failSilentlyOnUnsupportedFeatures = false;
+        });
+
+        it("throws an exception", function() {
+          expect(() => {
+            this.responseFactory.createSSMLResponse();
+          }).toThrow();
+        });
+      });
+
+      describe("with failSilentlyOnUnsupportedFeatures = true", function() {
+        it("does not throw an exception", function() {
+          expect(() => {
+            this.responseFactory.createSSMLResponse();
+          }).not.toThrow();
+        });
+      });
+    });
+
+    describe("createSuggestionChipsResponse", function() {
+      describe("with failSilentlyOnUnsupportedFeatures = false", function() {
+        beforeEach(function() {
+          this.responseFactory.failSilentlyOnUnsupportedFeatures = false;
+        });
+
+        it("throws an exception", function() {
+          expect(() => {
+            this.responseFactory.createSuggestionChipsResponse();
+          }).toThrow();
+        });
+      });
+
+      describe("with failSilentlyOnUnsupportedFeatures = true", function() {
+        it("does not throw an exception", function() {
+          expect(() => {
+            this.responseFactory.createSuggestionChipsResponse();
+          }).not.toThrow();
+        });
+      });
+    });
+
+    describe("createChatResponse", function() {
+      describe("with failSilentlyOnUnsupportedFeatures = false", function() {
+        beforeEach(function() {
+          this.responseFactory.failSilentlyOnUnsupportedFeatures = false;
+        });
+
+        it("throws an exception", function() {
+          expect(() => {
+            this.responseFactory.createChatResponse();
+          }).toThrow();
+        });
+      });
+
+      describe("with failSilentlyOnUnsupportedFeatures = true", function() {
+        it("does not throw an exception", function() {
+          expect(() => {
+            this.responseFactory.createChatResponse();
+          }).not.toThrow();
+        });
       });
     });
 
     describe("createAndSendUnauthenticatedResponse", function() {
-      it("throws an exception", function() {
-        expect(() => {
-          this.responseFactory.createAndSendUnauthenticatedResponse();
-        }).toThrow();
+      describe("with failSilentlyOnUnsupportedFeatures = false", function() {
+        beforeEach(function() {
+          this.responseFactory.failSilentlyOnUnsupportedFeatures = false;
+        });
+
+        it("throws an exception", function() {
+          expect(() => {
+            this.responseFactory.createAndSendUnauthenticatedResponse();
+          }).toThrow();
+        });
+      });
+
+      describe("with failSilentlyOnUnsupportedFeatures = true", function() {
+        it("does not throw an exception", function() {
+          expect(() => {
+            this.responseFactory.createAndSendUnauthenticatedResponse();
+          }).not.toThrow();
+        });
       });
     });
 
@@ -63,7 +143,7 @@ describe("ResponseFactory", function() {
       it("sends an empty response", function() {
         this.sent = false;
         this.handler = Object.assign(this.handler, { sendResponse: () => this.sent = true });
-        this.responseFactory = new ResponseFactory(this.handler);
+        this.responseFactory.handler = this.handler;
 
         this.responseFactory.createAndSendEmptyResponse();
         expect(this.sent).toBeTruthy();
@@ -74,7 +154,7 @@ describe("ResponseFactory", function() {
   describe("with handler as SSML enabled handler", function() {
     beforeEach(function() {
       this.handler = Object.assign(this.handler, { isSSML: false });
-      this.responseFactory = new ResponseFactory(this.handler);
+      this.responseFactory.handler = this.handler;
     });
 
     describe("createSSMLResponse", function() {
@@ -91,6 +171,32 @@ describe("ResponseFactory", function() {
     })
   });
 
+  describe("with handler as chat messages enabled handler", function() {
+    beforeEach(function() {
+      this.handler = Object.assign(this.handler, { chatBubbles: null });
+      this.responseFactory.handler = this.handler;
+    });
+
+    describe("createChatResponse", function() {
+      it("creates instance correclty", function() {
+        expect(this.responseFactory.createChatResponse().constructor).toEqual(ChatResponse);
+      });
+    });
+  });
+
+  describe("with handler as suggestion chips enabled handler", function() {
+    beforeEach(function() {
+      this.handler = Object.assign(this.handler, { suggestionChips: null });
+      this.responseFactory.handler = this.handler;
+    });
+
+    describe("createSuggestionChipsResponse", function() {
+      it("creates instance correclty", function() {
+        expect(this.responseFactory.createSuggestionChipsResponse().constructor).toEqual(SuggestionChipsResponse);
+      });
+    });
+  });
+
   describe("with handler as OAuth enabled handler", function() {
     beforeEach(function() {
       this.sent = false;
@@ -98,8 +204,7 @@ describe("ResponseFactory", function() {
         sendResponse: () => this.sent = true,
         forceAuthenticated: false
       });
-
-      this.responseFactory = new ResponseFactory(this.handler);
+      this.responseFactory.handler = this.handler;
     });
 
     describe("createAndSendUnauthenticatedResponse", function() {

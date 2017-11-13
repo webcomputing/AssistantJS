@@ -15,10 +15,16 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   async derive(context: RequestContext) {
-    let extractor = await this.findExtractor(context);
+    const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
-      return [await extractor.extract(context), "core:unifier:current-extraction"];
+      const extractionResult = await extractor.extract(context);
+      const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
+
+      log("Resolved platform context = %o", logableExtractionResult);
+      return [extractionResult, "core:unifier:current-extraction"];
+    } else {
+      return undefined;
     }
   }
 
@@ -27,7 +33,7 @@ export class ContextDeriver implements ContextDeriverI {
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
     
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
-    if (runnableExtensions.length > 1) throw new TypeError("Multiple extractors fit to this request. "+ 
+    if (runnableExtensions.length > 1) throw new Error("Multiple extractors fit to this request. "+ 
       "Please check your registerend platforms for duplicate extractors.");
 
     if (runnableExtensions.length !== 1) {
@@ -65,5 +71,28 @@ export class ContextDeriver implements ContextDeriverI {
   /** Returns true if given extractor supports given feature (see FeatureChecker) */
   private extractorSupportsFeature(extraction: MinimalRequestExtraction, feature: string[]) {
     return featureIsAvailable(extraction, feature);
+  }
+
+  /** Filters sensitive values, making the extraction result logable */
+  private prepareExtractionResultForLogging(extraction: MinimalRequestExtraction): MinimalRequestExtraction {
+    /** List of entity names to filter */
+    const entityNamesToFilter = ["pin", "password", "secure"];
+
+    /** "filtered" String */
+    const filteredPlaceholder = "**filtered**";
+
+    // Filter tokens
+    let filtered = Object.assign({}, extraction, {
+      "component": filteredPlaceholder,
+      "oAuthToken": filteredPlaceholder,
+      "temporalAuthToken": filteredPlaceholder
+    });
+
+    // Filter entities
+    if (typeof filtered.entities !== "undefined") {
+      Object.keys(filtered.entities).forEach(key => (filtered.entities as object)[key] = filteredPlaceholder);
+    }
+
+    return filtered;
   }
 }

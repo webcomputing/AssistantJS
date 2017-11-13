@@ -45,6 +45,8 @@ export class ServerApplication implements MainApplication {
 
   /** Binds GenericRequestHandler to request after extracting context */
   handleRequest(request: express.Request, response: express.Response, container: Container) {
+    log(`Incomming request: ${request.method} ${request.path}`);
+
     // Create generic request context
     let requestContext: RequestContext = {
       path: request.path,
@@ -67,7 +69,7 @@ export class ServerApplication implements MainApplication {
         });
       }
 
-      log("Sending status code " + statusCode + " with response body:", body);
+      log("Sending status code " + statusCode + " with response body: %o", body);
       response.status(statusCode).send(body);
       let timeNeeded = process.hrtime(nanoTimestamp);
       log("Sent response. Handled request in " + (timeNeeded[0] * 1000 + timeNeeded[1]/1000000) + "ms.");
@@ -78,6 +80,7 @@ export class ServerApplication implements MainApplication {
   stop() {
     if (typeof this.expressRunningInstance !== "undefined") { 
       this.expressRunningInstance.close();
+      log("Server stopped.");
     }
   }
 
