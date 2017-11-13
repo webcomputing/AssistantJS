@@ -75,6 +75,9 @@ export class ContextDeriver implements ContextDeriverI {
 
   /** Filters sensitive values, making the extraction result logable */
   private prepareExtractionResultForLogging(extraction: MinimalRequestExtraction): MinimalRequestExtraction {
+    // Deep clone extraction object, just to be sure we don't change any values
+    extraction = JSON.parse(JSON.stringify(extraction));
+
     /** List of entity names to filter */
     const entityNamesToFilter = ["pin", "password", "secure"];
 
