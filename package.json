@@ -1,7 +1,7 @@
 {
   "name": "assistant-source",
   "version": "0.2.1",
-  "description": "A TypeScript framework to create generic voice applications, independet of assistants",
+  "description": "TypeScript framework to build cross-platform voice applications (alexa, google home, ...). Write once, run anywhere!",
   "keywords": [
     "alexa",
     "google assistant",
