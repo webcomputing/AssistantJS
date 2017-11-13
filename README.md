@@ -70,10 +70,6 @@ export class MainState extends ApplicationState {
 }
 ```
 
-## License
-For license information, see our [license file][14]. We might change this license to a more community-friendly one later, and will never charge you for
-using AssistantJS in a non-commercial setup.
-
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
 [3]: https://github.com/webcomputing/inversify-components
