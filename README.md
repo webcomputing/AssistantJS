@@ -23,7 +23,7 @@ helps you to build better user interfaces using response text variation out of t
 ## AssistantJS ecosystem
 - **assistant-source**: AssistantJS core framework, the only real dependency to use AssistantJS. *(Current repository)*
 - **[assistant-alexa][15]**: Enables integrating Amazon Alexa into AssistantJS.
-- **[assistant-apiai][16]**: Connects Api.ai with AssistantJS.
+- **[assistant-apiai][16]**: Connects Api.ai (now "Dialogflow") with AssistantJS.
 - **[assistant-google][17]**: Brings Google Assistant (via Api.ai) to AssistantJS.
 - **[assistant-validations][18]**: Enables you to use a `@needs` decorator to express dependent entities. AssistantJS will automatically manage prompting for this entity, so you can focus on your real business.
 - **[assistant-authentication][19]**: Enables you to protect your states with configurable authentication stratgies. Currently supports OAuth authentication token and pin authentication.
