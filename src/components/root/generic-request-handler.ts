@@ -16,8 +16,6 @@ export class GenericRequestHandler {
    * After that, calls extensions registered @componentInterfaces.requestHandler
    */
   async execute(context: RequestContext, container: Container) {
-    log("Handling request with context = %O", context);
-
     // Create child container and append this request context to it
     let scopedRequestContainer = this.createChildContainer(container);
     this.bindContextToContainer(context, scopedRequestContainer, "core:root:current-request-context");

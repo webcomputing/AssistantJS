@@ -2,8 +2,8 @@ import { MinimalResponseHandler, Voiceable } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
 export class VoiceResponse implements Voiceable {
-  simple: Voiceable;
-  ssml: Voiceable;
+  private simple: Voiceable;
+  private ssml: Voiceable;
 
   constructor(simple: Voiceable, ssml: Voiceable) {
     this.simple = simple;
@@ -14,11 +14,11 @@ export class VoiceResponse implements Voiceable {
     this.delegatorBasedOnInput(text).endSessionWith(text);
   }
 
-  prompt(text: string) {
-    this.delegatorBasedOnInput(text).prompt(text);
+  prompt(text: string, ...reprompts: string[]) {
+    this.delegatorBasedOnInput(text).prompt(text, ...reprompts);
   }
 
-  delegatorBasedOnInput(text: string) {
+  private delegatorBasedOnInput(text: string) {
     if (typeof text === "undefined" || text === null) text = "";
     
     if (text.includes("</") || text.includes("/>")) {

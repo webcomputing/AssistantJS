@@ -1,3 +1,10 @@
+version 0.2.0
+- adds interfaces for chat text, reprompts and suggestion chips
+- introduces state transition history
+- adds interfaces for session factory and current session factory
+- response objects can now ignore unsupported platform features
+- adds code examples to readme
+
 version 0.1.2
 - bugfix: additional arguments of intent methods are now passed to hooks, too
 

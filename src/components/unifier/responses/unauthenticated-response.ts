@@ -3,7 +3,8 @@ import { VoiceResponse } from "./voice-response";
 import { BaseResponse } from "./base-response";
 
 export class UnauthenticatedResponse extends BaseResponse {
-  handler: MinimalResponseHandler & OptionalHandlerFeatures.AuthenticationHandler;
+  /** Response handler of the currently used platform */
+  protected handler: MinimalResponseHandler & OptionalHandlerFeatures.AuthenticationHandler;
 
   constructor(handler: MinimalResponseHandler, voiceResponse: VoiceResponse, failSilentlyOnUnsupportedFeatures: boolean, text: string = "") {
     super(handler, failSilentlyOnUnsupportedFeatures);
