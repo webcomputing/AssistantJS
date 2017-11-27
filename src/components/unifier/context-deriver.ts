@@ -93,7 +93,7 @@ export class ContextDeriver implements ContextDeriverI {
 
     // Filter entities
     if (typeof filtered.entities !== "undefined") {
-      Object.keys(filtered.entities).forEach(key => (filtered.entities as object)[key] = filteredPlaceholder);
+      Object.keys(filtered.entities).filter(key => entityNamesToFilter.indexOf(key) > -1).forEach(key => (filtered.entities as object)[key] = filteredPlaceholder);
     }
 
     return filtered;
