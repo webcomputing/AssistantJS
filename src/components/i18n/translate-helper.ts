@@ -44,11 +44,13 @@ export class TranslateHelper implements TranslateHelperInterface {
     let lookupKeys: string[];
     if (key === "" || (key as string).charAt(0) === ".") {
       lookupKeys = [
-        this.context.state + "." + this.context.intent + "." + extractorName + key, 
+        this.context.state + "." + this.context.intent + key + "." + extractorName, 
         this.context.state + "." + this.context.intent + key, 
+        this.context.state + key + "." + extractorName,
         this.context.state + key,
-        "root" + "." + this.context.intent + "." + extractorName + key, 
+        "root" + "." + this.context.intent + key + "." + extractorName, 
         "root" + "." + this.context.intent + key, 
+        "root" + key + "." + extractorName,
         "root" + key
       ];
     } else {
