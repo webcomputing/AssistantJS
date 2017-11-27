@@ -1,5 +1,6 @@
 version 0.2.2
 - enhances platform-specific i18n translations
+- enables i18n data models
 
 version 0.2.1
 - fixes bug which changed values of entities named "password", "pin" or "secure"
