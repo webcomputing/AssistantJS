@@ -48,30 +48,71 @@ describe("TranslateHelper", function() {
       describe("when intent namespace exists", function() {
         describe("when extractor namespace exists", function() {
           describe("when key given", function() {
-            it("returns translation for '.key'", function() {
-              expect(this.translateHelper.t(".key")).toEqual("verySpecific");
+            it("returns translation for '.embedded.platformDependent'", function() {
+              expect(this.translateHelper.t(".embedded.platformDependent")).toEqual("platform-specific-sub-key");
+            });
+          });
+
+          describe("when key is not given", function() {
+            it('returns platform-specific translation for intent', function() {
+              this.context.intent = 'platformSpecificIntent';
+              expect(this.translateHelper.t()).toEqual("platform-specific-intent");
             });
           });
         });
 
         describe("without extractor namespace", function() {
-          beforeEach(function() {
-            this.context.intent = "yesGenericIntent";
+          describe("when key is not given", function() {
+            it("returns intent-only translation", function() {
+              this.context.intent = "yesGenericIntent";
+              expect(this.translateHelper.t()).toEqual("yes");
+            });
           });
 
-          it("returns correct translation for empty key", function() {
-            expect(this.translateHelper.t()).toEqual("yes");
+          describe("when key is given", function() {
+            it("returns key specific intent translation", function() {
+              expect(this.translateHelper.t(".embedded.test")).toEqual("very-specific-without-extractor");
+            });
           });
         });
       });
 
-      describe("without intent namesace", function() {
+      describe("without intent namespace", function() {
         beforeEach(function() {
-          this.context.state = "noIntentState";
+          this.context.intent = "notExisting";
         });
 
         it("returns correct translation for empty key", function() {
+          this.context.state = "noIntentState";
           expect(this.translateHelper.t()).toEqual("stateOnly");
+        });
+
+        describe("with extractor given", function() {
+          describe("with key given", function() {
+            it("returns platform specific translation for key", function() {
+              expect(this.translateHelper.t(".platformDependent")).toEqual("platform-specific-embedded-state-only");
+            });
+          });
+
+          describe("with key not given", function() {
+            it("returns platform specific translation on state level", function() {
+              expect(this.translateHelper.t()).toEqual("platform-specific-main-state-only");
+            });
+          });
+        });
+
+        describe("without extractor", function() {
+          describe("with key given", function() {
+            it("returns platform specific translation for key", function() {
+              expect(this.translateHelper.t(".platformIndependent")).toEqual("platform-independent-main-state");
+            });
+          });
+
+          describe("with key not given", function() {
+            it("returns platform specific translation on state level", function() {
+              expect(this.translateHelper.t()).toEqual("platform-specific-main-state-only");
+            });
+          });
         });
       });
     });
@@ -85,18 +126,28 @@ describe("TranslateHelper", function() {
       describe("when intent namespace exist", function() {
         describe("when extractor namespace exist", function() {
           describe("when key given", function() {
-            it("returns translation for '.key'", function() {
-              expect(this.translateHelper.t(".key")).toEqual("root-verySpecific");
+            it("returns key with embedded extractor", function() {
+              expect(this.translateHelper.t(".embedded.platformDependent")).toEqual("platform-specific-embedded");
+            });
+          });
+
+          describe("when key is not given", function() {
+            it('returns platform-specific translation for intent', function() {
+              this.context.intent = 'secondPlatformSpecificIntent';
+              expect(this.translateHelper.t()).toEqual("root-platform-specific-intent");
             });
           });
         });
 
         describe("without extractor namespace", function() {
-          beforeEach(function() {
-            this.context.intent = "yesGenericIntent";
+          describe("with key given", function() {
+            it("returns platform-independent translation for intent+key", function() {
+              expect(this.translateHelper.t(".withoutExtractor")).toEqual("root-without-extractor");
+            });
           });
 
           it("returns correct translation for empty key", function() {
+            this.context.intent = "yesGenericIntent";
             expect(this.translateHelper.t()).toEqual("root-yes");
           });
         });
@@ -104,10 +155,18 @@ describe("TranslateHelper", function() {
 
 
       describe("without intent namespace", function() {
-        describe("when key given", function() {
-          it("returns translation for '.key'", function() {
-            expect(this.translateHelper.t(".rootKey")).toEqual("root-veryUnspecific");
+        describe("with extractor existing", function() {
+          describe("when key given", function() {
+            it("returns platform-specific translation for '.key'", function() {
+              expect(this.translateHelper.t(".rootKey")).toEqual("platform-specific-root-only");
+            });
           });
+        });
+
+        describe("with extractor existing", function() {
+          it("returns platform specific translation on state level", function() {
+            expect(this.translateHelper.t()).toEqual("root-only-platform-given");
+          })
         });
       });
     });
