@@ -6,20 +6,41 @@
   "var": "a{{var}}",
   "mainState": {
     "testIntent": {
-      "ExtractorComponent": {
-        "key": "verySpecific"
+      "embedded": {
+        "test": "very-specific-without-extractor",
+        "platformDependent": {
+          "ExtractorComponent": "platform-specific-sub-key"
+        }
       }
     },
-    "yesGenericIntent": "yes"
+    "yesGenericIntent": "yes",
+    "platformDependent": {
+      "ExtractorComponent": "platform-specific-embedded-state-only"
+    },
+    "platformIndependent": "platform-independent-main-state",
+    "ExtractorComponent": "platform-specific-main-state-only",
+    "platformSpecificIntent": {
+      "ExtractorComponent": "platform-specific-intent"
+    }
   },
   "root": {
     "testIntent": {
-      "ExtractorComponent": {
-        "key": "root-verySpecific"
-      }
+      "embedded": {
+        "platformDependent": {
+          "ExtractorComponent": "platform-specific-embedded"
+        },
+        "platformIndependent": "platform-independent-root-embedded"
+      },
+      "withoutExtractor": "root-without-extractor"
+    },
+    "secondPlatformSpecificIntent": {
+      "ExtractorComponent": "root-platform-specific-intent"
     },
     "yesGenericIntent": "root-yes",
-    "rootKey": "root-veryUnspecific"
+    "rootKey": {
+      "ExtractorComponent": "platform-specific-root-only"
+    },
+    "ExtractorComponent": "root-only-platform-given"
   },
   "noIntentState": "stateOnly",
   "templateSyntax": [

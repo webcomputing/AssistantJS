@@ -8,8 +8,8 @@ export interface TranslateHelper {
    * looks at given absolute key.
    * @param locals Variables to use in resonses
    */
-  t(locals?: {[name: string]: string | number}): string;
-  t(key?: string, locals?: {[name: string]: string | number}): string;
+  t(locals?: {[name: string]: string | number | object}): string;
+  t(key?: string, locals?: {[name: string]: string | number | object}): string;
 }
 
 export interface TranslateValuesFor {
