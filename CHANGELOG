@@ -1,3 +1,8 @@
+version 0.2.3
+- sample selection now prefers array syntax over template syntax:
+  When translateHelper draws a translation, it first looks out for the translation array and grabs a sample,
+  before evaluating the sample's template syntax. This changes the probabilities of translation entries.
+
 version 0.2.2
 - enhances platform-specific i18n translations
 - enables i18n data models
