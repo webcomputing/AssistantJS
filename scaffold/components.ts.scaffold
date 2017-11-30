@@ -1,4 +1,4 @@
-import { RedisClient } from "redis";
+import * as fakeRedis from "fakeredis";
 import { i18nInterfaces, unifierInterfaces, servicesInterfaces } from "assistant-source";
 
 const i18nConfiguration: i18nInterfaces.Configuration = {
@@ -15,8 +15,12 @@ const i18nConfiguration: i18nInterfaces.Configuration = {
   }
 }
 
+/**
+ * Configures the redis instance to use. 
+ * Currently uses fakeredis, you want to change this to a real redis endpoint for production usage!
+ */
 const servicesConfiguration: servicesInterfaces.Configuration = {
-  redisClient: new RedisClient({})
+  redisClient: fakeRedis.createClient()
 }
 
 /*

@@ -1,3 +1,6 @@
+version 0.2.4
+- switches to fakeredis as default configuration, lowering the barriers to entry
+
 version 0.2.3
 - sample selection now prefers array syntax over template syntax:
   When translateHelper draws a translation, it first looks out for the translation array and grabs a sample,
