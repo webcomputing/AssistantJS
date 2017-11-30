@@ -35,9 +35,18 @@ export class I18nextWrapper {
     } else if (typeof(i18nextConfiguration.postProcess) === "undefined") {
       i18nextConfiguration.postProcess = [];
     }
-    i18nextConfiguration.postProcess.push("parseTemplateLanguage");
-    if (returnOnlySample) i18nextConfiguration.postProcess.push("arrayReturnsSample");
+
+    // Tell I18next to join arrays by a join string
     i18nextConfiguration.joinArrays = arraySplitter;
+
+    // 1) Grab a sample from all translation entries in array syntax
+    if (returnOnlySample) i18nextConfiguration.postProcess.push("arrayReturnsSample");
+
+    // 2) Parse this sample -> create a new array with all variants
+    i18nextConfiguration.postProcess.push("parseTemplateLanguage");
+
+    // 3) Grab a sample from the array of variants
+    if (returnOnlySample) i18nextConfiguration.postProcess.push("arrayReturnsSample");
 
     log("Using i18next configuration: %o", i18nextConfiguration);
     log("Loading from path: ", i18nextConfiguration.backend.loadPath);
