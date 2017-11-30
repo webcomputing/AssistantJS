@@ -34,7 +34,7 @@ Install AssistantJS using npm as a global module:
 
 `npm i --global assistant-source`
 
-AssistantJS currently needs a running [redis][9] instance to work. So be sure to have redis set up! After that, check out these resources to get started:
+Check out these resources to get started:
 - **[video tutorial][13]**: A short video tutorial covering the implementation of a bus travelling application. Check this out first!
 - **[wiki][11]**: In our github wiki, most of the AssistantJS functionalities are well-described. Look into it for a deeper understanding of AssitantJS!
 - **[assistant-bootstrap][10]**: A well documented AssistantJS demo application, which also includes jasmine tests.
