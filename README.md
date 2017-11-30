@@ -1,6 +1,6 @@
 <p align="center"><img src="http://www.antonius-ostermann.de/assets/images/assistantjs.png"></p>
 AssistantJS enables you to develop ambitious platform-agnostic voice applications with ease. Don't write duplicate code - use the generic AssistantJS
-state machine to implement your voice application and it runs on amazon alexa, google assistant and api.ai simultaneously. To fasten development,
+state machine to implement your voice application and it runs on amazon alexa, google assistant and dialogflow (formerly known as api.ai) simultaneously. To fasten development,
 you even don't have to configure and update intent schema and utterances. Instead, AssistantJS generates the relevant nlu configuration for all connected platforms
 based on your implementation.
 
@@ -13,9 +13,9 @@ In addition, AssistantJS is heavily based on dependency injection using [inversi
 of currently implemented AssistantJS components.
 - **Testable**: AssistantJS allows you to write voice applications which are fully testable, even across multiple voice assistants. To make testing even easier, AssistantJS gives you some nice test and mock helpers.
 - **I18n integration**: Thanks to [i18next][5], AssistantJS gives you full multi language support. In addition, it applies some really nice [convention-over-configuration][6] rulesets to speed up your development and
-helps you to build better user interfaces using response text variation out of the box.
-- **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language (as known from [alexa-utterances][7]) to generate utterances efficiently.
-- **Debuggable**: Based on its components, AssistantJS uses the awesome [debug][4] module to give you exactly that kind of rich debug output you need.
+help you to build better user interfaces using response text variation out of the box.
+- **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language (as known from [alexa-utterances][7]) to generate utterances efficiently. You are tired of maintaining your intents and utterances in dialogflow *and* in alexa? AssistantJS generates a fitting configuration for alexa and a zip file for dialogflow *based you the code you write*!
+- **Debuggable**: AssistantJS uses the awesome [debug][4] module to give you exactly that kind of rich debug output you need.
 - **CLI**: AssistantJS gives you a simple command line interface you can use to start your AssistantJS server (`assistant s`, backend by [express][8]) or generate nlu configurations (`assistant g`).
 - **Entity validation**: Don't check for presence of entities, let AssistantJS do this job for you. *(Optional dependency)*
 - **Authentication**: Protect your states with configurable authentication mechanisms. *(Optional dependency)*
@@ -24,10 +24,10 @@ helps you to build better user interfaces using response text variation out of t
 - **assistant-source**: AssistantJS core framework, the only real dependency to use AssistantJS. *(Current repository)*
 - **[assistant-alexa][15]**: Enables integrating Amazon Alexa into AssistantJS.
 - **[assistant-apiai][16]**: Connects Api.ai (now "Dialogflow") with AssistantJS.
-- **[assistant-google][17]**: Brings Google Assistant (via Api.ai) to AssistantJS.
+- **[assistant-google][17]**: Brings Google Assistant (via dialogflow) to AssistantJS.
 - **[assistant-validations][18]**: Enables you to use a `@needs` decorator to express dependent entities. AssistantJS will automatically manage prompting for this entity, so you can focus on your real business.
 - **[assistant-authentication][19]**: Enables you to protect your states with configurable authentication stratgies. Currently supports OAuth authentication token and pin authentication.
-- **[assistant-generic-utterances][20]**: Automatically inserts useful utterances for generic intents, if a specific platform (like google assistant / api.ai) does not have generic intents on their own.
+- **[assistant-generic-utterances][20]**: Automatically inserts useful utterances for generic intents, if a specific platform (like google assistant / dialogflow) does not have generic intents on their own.
 
 ## Getting started
 Install AssistantJS using npm as a global module:
@@ -60,7 +60,7 @@ export class MainState extends ApplicationState {
   }
 }
 ```
-Wondering about the empty `this.translateHelper.t()` calls? Translation keys are matched by applying simple [convention over configuration][6] rules. Try to find them out on your own by taking a look at the corresponding translation file:
+Wondering about the empty `this.t()` calls? Translation keys are matched by applying simple [convention over configuration][6] rules. Try to find them out on your own by taking a look at the corresponding translation file:
 ```json
 {
   "mainState": {

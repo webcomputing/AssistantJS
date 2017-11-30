@@ -1,5 +1,6 @@
 import { createRequestScope } from "../../support/util/setup";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { injectionNames } from "../../../src/injection-names";
 
 describe("TranslateHelper", function() {
   beforeEach(function() {
@@ -36,6 +37,16 @@ describe("TranslateHelper", function() {
         "May I help you, Sir?",
         "Would you like me to help you?"
       ]).toContain(this.translateHelper.t("templateSyntax", { var: "Sir" }));
+    });
+
+    it("looks for match in array syntax before evaluation template syntax", function() {
+      // Regularly, "5" should have a probabilty of 1/10
+      // In a bug case, the prob is much higher (around 1024/1033 ~ 99%)
+      const testSize = 100;
+      const probabilitySet: string[] = [...Array(testSize)].map(x => this.translateHelper.t("templateProbs"));
+      const occuredAmount = probabilitySet.filter(x => x.charAt(0) === "5").length / testSize;
+
+      expect(occuredAmount).toBeCloseTo(0.15, 0.15); // Expected amount is 10%, let's check for 0%-30%.
     });
 
     describe("when translation does not exist", function() {
