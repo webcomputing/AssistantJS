@@ -12,6 +12,9 @@ import { ServerApplication } from "./components/root/app-server";
 
 import { AssistantJSSetup } from "./setup";
 
+/** Used for managing multiple spec setups */
+let specSetupId = 0;
+
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecSetup {
   setup: AssistantJSSetup;
@@ -125,7 +128,7 @@ export class SpecSetup {
   initializeDefaultConfiguration() {
     // Set redis instance to fake redis instance
     const serviceConfiguration: Configuration = {
-      redisClient: fakeRedis.createClient()
+      redisClient: fakeRedis.createClient(`redis-spec-setup-${++specSetupId}`, { fast: true })
     }
     this.setup.addConfiguration({"core:services": serviceConfiguration});
   }

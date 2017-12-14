@@ -20,7 +20,7 @@ const i18nConfiguration: i18nInterfaces.Configuration = {
  * Currently uses fakeredis, you want to change this to a real redis endpoint for production usage!
  */
 const servicesConfiguration: servicesInterfaces.Configuration = {
-  redisClient: fakeRedis.createClient()
+  redisClient: fakeRedis.createClient({ fast: true })
 }
 
 /*
