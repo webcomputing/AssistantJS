@@ -26,4 +26,5 @@ export function initializeSetups (assistantJs: AssistantJSSetup, stateMachineSet
 }
 
 // Initialize the exported production setups
+assistantJs.registerInternalComponents();
 initializeSetups(assistantJs, stateMachineSetup);

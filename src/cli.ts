@@ -25,7 +25,9 @@ export function cli(argv, resolvedIndex) {
 
       // Configure and return setup
       let setup: AssistantJSSetup = resolvedIndex.assistantJs;
-      setup.registerInternalComponents();
+
+      // Register internal components if not done already
+      if (!setup.allInternalComponentsAreRegistered()) setup.registerInternalComponents();
       setup.autobind();
       return setup;
     }
