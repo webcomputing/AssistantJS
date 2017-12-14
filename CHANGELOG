@@ -1,6 +1,7 @@
 version 0.2.5
 - makes tests faster
 - updates inversify-components
+- uses fast-option for fakeredis in default configuration
 
 version 0.2.4
 - switches to fakeredis as default configuration, lowering the barriers to entry
