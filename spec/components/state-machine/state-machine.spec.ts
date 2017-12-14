@@ -29,7 +29,7 @@ describe("StateMachine", function() {
       done();
     })
 
-    it("adds state/intent combinatiion to history", async function(done) {
+    it("adds state/intent combination to history", async function(done) {
       await this.stateMachine.handleIntent("test");
       expect(this.stateMachine.intentHistory).toEqual([{ stateName: "MainState", intentMethodName: "testIntent" }]);
       done();
