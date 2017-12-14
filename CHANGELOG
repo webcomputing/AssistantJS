@@ -1,3 +1,7 @@
+version 0.2.5
+- makes tests faster
+- 
+
 version 0.2.4
 - switches to fakeredis as default configuration, lowering the barriers to entry
 

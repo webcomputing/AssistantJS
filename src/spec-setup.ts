@@ -125,7 +125,7 @@ export class SpecSetup {
   initializeDefaultConfiguration() {
     // Set redis instance to fake redis instance
     const serviceConfiguration: Configuration = {
-      redisClient: fakeRedis.createClient()
+      redisClient: fakeRedis.createClient({ fast: true })
     }
     this.setup.addConfiguration({"core:services": serviceConfiguration});
   }
