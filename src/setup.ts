@@ -20,6 +20,11 @@ export class AssistantJSSetup {
     this.container.runMain();
   }
 
+  /** Returns true if internal components have already been registered */
+  allInternalComponentsAreRegistered() {
+    return Object.keys(internalComponents).filter(k => !this.container.componentRegistry.isRegistered(internalComponents[k].name)).length === 0;
+  }
+
   registerInternalComponents() {
     Object.keys(internalComponents).forEach(k => this.registerComponent(internalComponents[k]));
   }

@@ -1,3 +1,6 @@
+version 0.2.6
+- executes registerInternalComponents() only if not done already by developer, giving him/her more flexibility
+
 version 0.2.5
 - makes tests faster
 - updates inversify-components
