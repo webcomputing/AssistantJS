@@ -189,7 +189,7 @@ describe("StateMachine", function() {
       describe("with additional arguments", function() {
         beforeEach(function() {
           this.argsResult = [];
-          registerHook(this.container, false, createSpyHook((intent, stateName, state, mode, machine, success, failure, ...args) => this.argsResult.push(args)));
+          registerHook(this.container, false, createSpyHook((intent, stateName, state, mode, machine, ...args) => this.argsResult.push(args)));
         });
 
         it("passes arguments to hook function", async function(done) {
@@ -223,7 +223,7 @@ describe("StateMachine", function() {
       describe("with additional arguments", function() {
         beforeEach(function() {
           this.argsResult = [];
-          registerHook(this.container, true, createSpyHook((intent, stateName, state, mode, machine, success, failure, ...args) => this.argsResult.push(args)));
+          registerHook(this.container, true, createSpyHook((intent, stateName, state, mode, machine, ...args) => this.argsResult.push(args)));
         });
 
         it("passes arguments to hook function", async function(done) {

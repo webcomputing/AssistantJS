@@ -36,7 +36,7 @@
     "fast-levenshtein": "^2.0.6",
     "i18next": "^6.0.2",
     "i18next-sync-fs-backend": "^0.1.0",
-    "inversify-components": "^0.2.0",
+    "inversify-components": "../../Masterthesis/inversify-components/inversify-components-0.3.0.tgz",
     "redis": "^2.7.1",
     "reflect-metadata": "^0.1.10",
     "resolve": "^1.5.0"

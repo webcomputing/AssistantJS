@@ -19,32 +19,25 @@ export class KillSessionService {
   }
 
   async execute() {
-    return new Promise((resolve, reject) => {
       let currentSession = this.sessionFactory();
 
       // Create hook pipes
       const beforeKillSessionHooks = this.pipeFactory(componentInterfaces.beforeKillSession).withArguments(currentSession);
       const afterKillSessionHooks = this.pipeFactory(componentInterfaces.afterKillSession).withArguments(currentSession);
 
-      /** Called if call beforeKillSession hooks are finished */
-      const finishedBeforeCallbacks = (killSession: boolean) => {
-        return () => {
-          let sessionKilled = Promise.resolve();
+      // Result of all beforeKillSessionHooks in filter mode
+      const filterResult = await beforeKillSessionHooks.runAsFilter();
 
-          if (killSession) {
-            sessionKilled = currentSession.delete().then(() => log("Session killed."));
-          } else {
-            log("Not killing session since one of your hooks did not call success().");
-          }
+      // Kill session if all hooks ended successful
+      if (filterResult.success) {
+        // Kill session
+        await currentSession.delete();
+        log("Session killed.");
 
-          sessionKilled.then(() => afterKillSessionHooks.runWithResultset(() => {
-            resolve();
-          }));
-        };
+        // Run afterKillSessionHooks
+        await afterKillSessionHooks.runWithResultset();
+      } else {
+        log("Not killing session since one of your did not return a successful result.");
       }
-
-      // Trigger process by executing beforeKillSession hooks
-      beforeKillSessionHooks.runAsFilter(finishedBeforeCallbacks(true), finishedBeforeCallbacks(false));
-    });
   }
 }
