@@ -1,17 +1,17 @@
 import { Hooks, Container } from "inversify-components";
 import { componentInterfaces } from "../../../../src/components/state-machine/interfaces";
 
-/** Hook wich calls failure function if called intent is "test" */
-export const TestIntentFilterHook: Hooks.Hook = (success, failure, mode, state, stateName, intent, machine) => {
-  if (intent === "testIntent") failure();
-  else success();
+/** Hook wich returns a unsuccessful result if called intent is "test" */
+export const TestIntentFilterHook: Hooks.Hook = (mode, state, stateName, intent, machine) => {
+  if (intent === "testIntent") return false;
+  else return true;
 }
 
 /** Creates a hook which calls given function with called intent */
 export function createSpyHook(spyFunction: Function): Hooks.Hook {
-  return (success, failure, mode, state, stateName, intent, machine, ...args) => {
-    spyFunction(intent, stateName, state, mode, machine, success, failure, ...args);
-    success();
+  return (mode, state, stateName, intent, machine, ...args) => {
+    spyFunction(intent, stateName, state, mode, machine, ...args);
+    return true;
   }
 }
 
