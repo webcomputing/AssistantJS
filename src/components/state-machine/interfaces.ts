@@ -1,6 +1,9 @@
 import { MessageBus, Message } from "inversify-components";
 import { Session } from "../services/interfaces";
-import { GenericIntent, intent } from "../unifier/interfaces";
+import { RequestContext } from '../root/interfaces';
+import { TranslateHelper } from '../i18n/translate-helper';
+import { ResponseFactory } from '../unifier/response-factory';
+import { MinimalRequestExtraction, GenericIntent,  intent} from '../unifier/interfaces';
 
 export const componentInterfaces = {
   "state": Symbol("state"),
@@ -54,7 +57,14 @@ export interface StateFactory {
   /** Returns a state by name (string).
    * @param stateName Name of state. If you leave out this parameter, the main state is returned.
   */
-  (stateName?: string): State;
+  <T extends State>(stateName?: string): T;
+}
+
+/** Set containing objects needed to setup a BaseState. */
+export interface StateSetupSet {
+  responseFactory: ResponseFactory;
+  translateHelper: TranslateHelper;
+  extraction: MinimalRequestExtraction;
 }
 
 export interface Transitionable {

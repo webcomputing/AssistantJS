@@ -1,11 +1,15 @@
 import { ComponentDescriptor, BindingDescriptor } from "inversify-components";
 
+import { injectionNames } from '../../injection-names';
+
 import { Session } from "../services/interfaces";
-import { intent } from "../unifier/interfaces";
+import { MinimalRequestExtraction, intent } from '../unifier/interfaces';
+import { ResponseFactory } from '../unifier/response-factory';
+import { TranslateHelper } from '../i18n/translate-helper';
 
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
-import { componentInterfaces, StateMachine, State, StateFactory, MetaState, MAIN_STATE_NAME } from "./interfaces";
+import { componentInterfaces, StateMachine, State, StateFactory, MetaState, MAIN_STATE_NAME, StateSetupSet } from "./interfaces";
 
 
 export const descriptor: ComponentDescriptor = {
@@ -67,6 +71,15 @@ export const descriptor: ComponentDescriptor = {
     },
 
     request: (bindService) => {
+      // Returns set of dependencies fitting for BaseState
+      bindService.bindGlobalService<StateSetupSet>("current-state-setup-set").toDynamicValue(context => {
+        return {
+          "responseFactory": context.container.get<ResponseFactory>(injectionNames.current.responseFactory),
+          "translateHelper": context.container.get<TranslateHelper>(injectionNames.current.translateHelper),
+          "extraction": context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction)
+        }
+      });
+
       // Returns current state machine: State machine with current state set up
       bindService.bindGlobalService<StateMachine>("current-state-machine").to(StateMachineImpl).inSingletonScope();
 
