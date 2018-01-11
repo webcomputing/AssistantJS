@@ -21,7 +21,7 @@ describe("with child containers enabled", function() {
   describe("when multiple requests fired", function() {
     const FIRE_AMOUNT = 50;
 
-    const extractionData = {intent: "answer", message: "My message", component: { name: extraction.component.name }};
+    const extractionData = {intent: "answer", message: "My message", platform: extraction.platform };
     let request: RequestProxy;
     let stopServer: Function;
 
@@ -30,7 +30,7 @@ describe("with child containers enabled", function() {
 
       // Bind MockExtractor and fitting response handler
       (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-      (this.container as Container).inversifyInstance.bind(extraction.component.name + ":current-response-handler").to(RealResponseHandler);
+      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").to(RealResponseHandler);
 
       done();
     });

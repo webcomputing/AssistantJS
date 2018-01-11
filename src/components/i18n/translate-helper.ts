@@ -1,7 +1,8 @@
 import { inject, injectable } from "inversify";
 import { I18n } from "i18next";
 import { TranslateHelper as TranslateHelperInterface } from "./interfaces";
-import { MinimalRequestExtraction } from "../unifier/interfaces";
+import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/interfaces';
+import { featureIsAvailable } from '../unifier/feature-checker';
 import { I18nContext } from "./context";
 import { log } from "../../setup";
 
@@ -34,8 +35,11 @@ export class TranslateHelper implements TranslateHelperInterface {
     // Set language 
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
-    let options = Object.assign({ lng:  this.extraction.language, returnObjectTrees: false }, locals);
-    let extractorName = this.extraction.component.name;
+    const options = Object.assign({ lng:  this.extraction.language, returnObjectTrees: false }, locals);
+    const extractorName = this.extraction.platform;
+
+    // Catch up device name or set to undefined
+    const device = featureIsAvailable(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction) ? (this.extraction as OptionalExtractions.DeviceExtraction).device : undefined;
 
     if (typeof key === "undefined") {
       key = "";
@@ -43,16 +47,35 @@ export class TranslateHelper implements TranslateHelperInterface {
 
     let lookupKeys: string[];
     if (key === "" || (key as string).charAt(0) === ".") {
-      lookupKeys = [
-        this.context.state + "." + this.context.intent + key + "." + extractorName, 
-        this.context.state + "." + this.context.intent + key, 
-        this.context.state + key + "." + extractorName,
-        this.context.state + key,
-        "root" + "." + this.context.intent + key + "." + extractorName, 
-        "root" + "." + this.context.intent + key, 
-        "root" + key + "." + extractorName,
-        "root" + key
-      ];
+      if (typeof device === "string") {
+        // Lookup keys shall include device specific lookups
+        lookupKeys = [
+          this.context.state + "." + this.context.intent + key + "." + extractorName + "." + device, 
+          this.context.state + "." + this.context.intent + key + "." + extractorName,
+          this.context.state + "." + this.context.intent + key, 
+          this.context.state + key + "." + extractorName + "." + device,
+          this.context.state + key + "." + extractorName,
+          this.context.state + key,
+          "root" + "." + this.context.intent + key + "." + extractorName + "." + device,
+          "root" + "." + this.context.intent + key + "." + extractorName, 
+          "root" + "." + this.context.intent + key, 
+          "root" + key + "." + extractorName + "." + device,
+          "root" + key + "." + extractorName,
+          "root" + key
+        ];
+      } else {
+        // Lookup keys shall not include device specific lookups
+        lookupKeys = [
+          this.context.state + "." + this.context.intent + key + "." + extractorName, 
+          this.context.state + "." + this.context.intent + key, 
+          this.context.state + key + "." + extractorName,
+          this.context.state + key,
+          "root" + "." + this.context.intent + key + "." + extractorName, 
+          "root" + "." + this.context.intent + key, 
+          "root" + key + "." + extractorName,
+          "root" + key
+        ];
+      }
     } else {
       lookupKeys = [key as string];
     }

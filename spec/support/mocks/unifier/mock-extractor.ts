@@ -13,7 +13,7 @@ export class MockExtractor implements RequestConversationExtractor {
   }
   
   /** Returns true if path == "/fitting_path" */
-  fits(context: RequestContext) {
+  fits(context: RequestContext):Promise<boolean> {
     return new Promise(resolve => {
       resolve(context.path === MockExtractor.fittingPath());
     });

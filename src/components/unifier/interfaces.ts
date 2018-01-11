@@ -175,32 +175,64 @@ export interface RequestConversationExtractor {
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
 
-export interface MinimalRequestExtraction {
-  component: Component;
+/** Common fields between PlatformRequestExtraction and MinimalRequestExtraction */
+export interface CommonRequestExtraction {
+  /** Set of entities */
   entities?: { [name: string]: any; };
+
+  /** Intent to call */
   readonly intent: intent;
+
+  /** Given session id */
   readonly sessionID: string;
+
+  /** Language of this request */
   readonly language: string;
 }
 
+/** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
+export interface PlatformRequestExtraction extends CommonRequestExtraction {
+  component: Component;
+}
+
+export interface MinimalRequestExtraction extends CommonRequestExtraction {
+  /** Name of platform responsible for this extraction (equals to component.name) */
+  readonly platform: string;
+}
+
 export namespace OptionalExtractions {
+  /** Interface for extraction of oauth key */
   export interface OAuthExtraction extends MinimalRequestExtraction {
+    /** The oauth token, or null, if not present in current extraction */
     oAuthToken: string | null;
   }
 
+  /** Interface for extraction of platform-specific temporal auth */
   export interface TemporalAuthExtraction extends MinimalRequestExtraction {
+    /** The temporal auth token, or null, if not present in current extraction */
     temporalAuthToken: string | null;
   }
 
+  /** Interface for extraction of spoken text */
   export interface SpokenTextExtraction extends MinimalRequestExtraction {
-    spokenText: string | null;
+    /** The spoken text. NULL values are not allowed here: If a platform supports spoken-text-extraxtion, it has to return to spoken text. */
+    spokenText: string;
+  }
+
+  export interface DeviceExtraction extends MinimalRequestExtraction {
+    /** 
+     * Name of platform-specific device, name is given and filled by platform.
+     * NULLL values are not allowed here: If a platform supports devices, it has to return the used one.
+    */
+    device: string;
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     OAuthExtraction: ["oAuthToken"],
     SpokenTextExtraction: ["spokenText"],
-    TemporalAuthExtraction: ["temporalAuthToken"]
+    TemporalAuthExtraction: ["temporalAuthToken"],
+    DeviceExtraction: ["device"]
   }
 }
 

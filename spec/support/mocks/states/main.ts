@@ -17,7 +17,7 @@ export class MainState extends BaseState implements State {
     @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
     @optional() @inject("mocks:states:call-spy") spy: Function
   ) {
-    super(responseFactory, translateHelper);
+    super(responseFactory, translateHelper, extraction);
     this.extraction = extraction;
     this.spy = spy;
     this.responseFactory = responseFactory;

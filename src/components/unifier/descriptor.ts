@@ -49,7 +49,7 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService<MinimalResponseHandler>("current-response-handler").toDynamicValue(context => {
         let currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
 
-        return context.container.get<MinimalResponseHandler>(currentExtraction.component.name + ":current-response-handler");
+        return context.container.get<MinimalResponseHandler>(currentExtraction.platform + ":current-response-handler");
       });
 
       bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);

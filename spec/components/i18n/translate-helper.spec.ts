@@ -62,6 +62,17 @@ describe("TranslateHelper", function() {
             it("returns translation for '.embedded.platformDependent'", function() {
               expect(this.translateHelper.t(".embedded.platformDependent")).toEqual("platform-specific-sub-key");
             });
+
+            describe("when extraction contains device", function() {
+              beforeEach(function() {
+                this.context.intent = "deviceDependentIntent";
+                Object.assign(this.translateHelper.extraction, { device: 'device1' });
+              });
+
+              it("returns state-intent-key-extractor-device specific translation", function() {
+                expect(this.translateHelper.t(".embeddedKeyOuter.embeddedKeyInner")).toEqual("device-specific-sub-key");
+              });
+            });
           });
 
           describe("when key is not given", function() {
@@ -109,6 +120,17 @@ describe("TranslateHelper", function() {
             it("returns platform specific translation on state level", function() {
               expect(this.translateHelper.t()).toEqual("platform-specific-main-state-only");
             });
+
+            describe("when extraction data contains device", function() {
+              beforeEach(function() {
+                this.context.state = "deviceDependentState"
+                Object.assign(this.translateHelper.extraction, { device: 'device1' });
+              });
+
+              it("returns state-platform-device specific translation", function() {
+                expect(this.translateHelper.t()).toEqual("state-platform-device-specific");
+              });
+            });
           });
         });
 
@@ -139,6 +161,16 @@ describe("TranslateHelper", function() {
           describe("when key given", function() {
             it("returns key with embedded extractor", function() {
               expect(this.translateHelper.t(".embedded.platformDependent")).toEqual("platform-specific-embedded");
+            });
+
+            describe("when device exists in extraction result", function() {
+              beforeEach(function() {
+                Object.assign(this.translateHelper.extraction, { device: 'device1' });
+              });
+
+              it("returns root-intent-platform-device-specific value", function() {
+                expect(this.translateHelper.t(".deviceDependent")).toEqual("root-intent-platform-device-specific");
+              });
             });
           });
 
