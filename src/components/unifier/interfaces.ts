@@ -197,7 +197,7 @@ export interface PlatformRequestExtraction extends CommonRequestExtraction {
 
 export interface MinimalRequestExtraction extends CommonRequestExtraction {
   /** Name of platform responsible for this extraction (equals to component.name) */
-  platform: string;
+  readonly platform: string;
 }
 
 export namespace OptionalExtractions {

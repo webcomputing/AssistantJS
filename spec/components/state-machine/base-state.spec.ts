@@ -12,7 +12,7 @@ interface CurrentThisContext {
   voiceResponseMock: Voiceable;
 }
 
-fdescribe("BaseState", function() {
+describe("BaseState", function() {
   beforeEach(function(this: CurrentThisContext) {
     configureI18nLocale((this as any).container, false);
     createRequestScope(this.specHelper);
@@ -62,5 +62,29 @@ fdescribe("BaseState", function() {
         expect(this.state.translateHelper.t).toHaveBeenCalledWith(...params);
       });
     })
-  })
+  });
+
+  describe("getPlatform", function() {
+    it("returns current platform string", function() {
+      expect(this.state.getPlatform()).toEqual("ExtractorComponent");
+    });
+  });
+
+  describe("getDeviceOrPlatform", function() {
+    describe("with no device set", function() {
+      it("returns current platform string", function() {
+        expect(this.state.getDeviceOrPlatform()).toEqual("ExtractorComponent");
+      });
+    });
+    
+    describe("with device present in extraction result", function() {
+      beforeEach(function() {
+        Object.assign(this.state.extraction, { "device": "device1" });
+      });
+
+      it("returns current device string", function() {
+        expect(this.state.getDeviceOrPlatform()).toEqual("device1");
+      });
+    })
+  });
 });

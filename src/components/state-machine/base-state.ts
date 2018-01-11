@@ -1,5 +1,6 @@
 import { injectable, unmanaged } from "inversify";
-import { Voiceable, MinimalRequestExtraction,  ResponseFactory} from '../unifier/interfaces';
+import { Voiceable, MinimalRequestExtraction,  ResponseFactory, OptionalExtractions } from '../unifier/interfaces';
+import { featureIsAvailable } from '../unifier/feature-checker';
 import { RequestContext } from '../root/interfaces';
 import { TranslateHelper } from "../i18n/interfaces";
 import { Transitionable } from "../state-machine/interfaces";
@@ -62,6 +63,20 @@ export abstract class BaseState implements State, Voiceable, TranslateHelper {
       this.responseFactory = (responseFactoryOrSet as StateSetupSet).responseFactory;
       this.translateHelper = (responseFactoryOrSet as StateSetupSet).translateHelper;
       this.extraction = (responseFactoryOrSet as StateSetupSet).extraction;
+    }
+  }
+
+  /** Returns name of current platform */
+  getPlatform(): string {
+    return this.extraction.platform;
+  }
+
+  /** Returns name of current device. If the current platform does not support different devices, returns name of current platform. */
+  getDeviceOrPlatform(): string {
+    if (featureIsAvailable(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
+      return (this.extraction as OptionalExtractions.DeviceExtraction).device;
+    } else {
+      return this.getPlatform();
     }
   }
 
