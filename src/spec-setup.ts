@@ -63,7 +63,7 @@ export class SpecSetup {
     // Add minimal response handler
     if (typeof responseHandler !== "undefined") {
       if (minimalExtraction !== null) {
-        childContainer.bind<MinimalResponseHandler>(minimalExtraction.component.name + ":current-response-handler").to(responseHandler);
+        childContainer.bind<MinimalResponseHandler>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
       }
       else {
         throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");

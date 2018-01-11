@@ -35,7 +35,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
     let options = Object.assign({ lng:  this.extraction.language, returnObjectTrees: false }, locals);
-    let extractorName = this.extraction.component.name;
+    let extractorName = this.extraction.platform;
 
     if (typeof key === "undefined") {
       key = "";
