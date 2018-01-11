@@ -7,7 +7,7 @@ export function createExtraction(intent: intent = GenericIntent.Yes, entities = 
     sessionID: sessionId,
     entities: entities,
     language: language,
-    component: new Component("ExtractorComponent")
+    platform: "ExtractorComponent"
   }
 }
 

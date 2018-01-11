@@ -31,11 +31,11 @@ describe("ContextDeriver", function() {
   describe("with a valid extractor registered", function() {
     beforeEach(function() {
       (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-      (this.container as Container).inversifyInstance.bind(extraction.component.name + ":current-response-handler").toConstantValue({});
+      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
     });
 
     describe("when a valid request was sent", function() {
-      const extractionData = {intent: "MyIntent", furtherExtraction: "MyExtraction", component: { name: extraction.component.name }};
+      const extractionData = {intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform };
 
       beforeEach(async function(done) {
         [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
@@ -56,11 +56,11 @@ describe("ContextDeriver", function() {
       beforeEach(function() {
         (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
         (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(SpokenTextExtractor);
-        (this.container as Container).inversifyInstance.bind(extraction.component.name + ":current-response-handler").toConstantValue({});
+        (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
       });
 
       describe("when a valid request was sent", function() {
-        const extractionData = {intent: "MyIntent", furtherExtraction: "MyExtraction", component: { name: extraction.component.name }};
+        const extractionData = {intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform };
 
         beforeEach(async function(done) {
           [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));

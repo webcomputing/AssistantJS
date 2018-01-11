@@ -13,6 +13,15 @@
         }
       }
     },
+    "deviceDependentIntent": {
+      "embeddedKeyOuter": {
+        "embeddedKeyInner": {
+          "ExtractorComponent": {
+            "device1": "device-specific-sub-key"
+          }
+        }
+      }
+    },
     "yesGenericIntent": "yes",
     "platformDependent": {
       "ExtractorComponent": "platform-specific-embedded-state-only"
@@ -23,6 +32,11 @@
       "ExtractorComponent": "platform-specific-intent"
     }
   },
+  "deviceDependentState": {
+    "ExtractorComponent": {
+      "device1": "state-platform-device-specific"
+    }
+  },
   "root": {
     "testIntent": {
       "embedded": {
@@ -31,7 +45,12 @@
         },
         "platformIndependent": "platform-independent-root-embedded"
       },
-      "withoutExtractor": "root-without-extractor"
+      "withoutExtractor": "root-without-extractor",
+      "deviceDependent": {
+        "ExtractorComponent": {
+          "device1": "root-intent-platform-device-specific"
+        }
+      }
     },
     "secondPlatformSpecificIntent": {
       "ExtractorComponent": "root-platform-specific-intent"
