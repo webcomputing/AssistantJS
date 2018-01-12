@@ -2,6 +2,7 @@ import { Container } from "inversify-components";
 import { componentInterfaces } from "../../../src/components/unifier/interfaces";
 import { withServer, RequestProxy } from "../../support/util/requester";
 import { createSpecHelper } from "../../support/util/setup";
+import { configureI18nLocale } from '../../support/util/i18n-configuration';
 
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
 import { RealResponseHandler } from "../../support/mocks/unifier/handler";
@@ -16,6 +17,8 @@ describe("with child containers enabled", function() {
     this.specHelper = createSpecHelper(true, true);
     this.assistantJs = this.specHelper.setup;
     this.container = this.assistantJs.container;
+
+    configureI18nLocale((this as any).container, false);
   });
 
   describe("when multiple requests fired", function() {

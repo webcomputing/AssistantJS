@@ -19,6 +19,9 @@ export class RealResponseHandler extends ResponseHandler {
   }
 
   sendResponse() {
-    this.context.responseCallback(this.voiceMessage);
+    // Respond in a chaotic order to test against race conditions
+    setTimeout(() => {
+      this.context.responseCallback(this.voiceMessage);
+    }, Math.random()*1000);
   }
 }

@@ -57,7 +57,7 @@ export class SpecSetup {
 
     // Add minimal extraction if wanted
     if (minimalExtraction !== null) {
-      requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction");
+      requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
     }
 
     // Add minimal response handler
