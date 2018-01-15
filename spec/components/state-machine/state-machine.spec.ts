@@ -252,6 +252,75 @@ describe("StateMachine", function() {
         });
       });
     });
+
+    describe("with appending, non-instance-based mock spy", function() {
+      beforeEach(function() {
+        this.intentSpyResult = [];
+        this.intentSpy = (...args: any[]) => this.intentSpyResult.push(args.slice(1));
+  
+        (this.container as Container).inversifyInstance.unbind("mocks:states:call-spy");
+        (this.container as Container).inversifyInstance.bind("mocks:states:call-spy").toFunction(this.intentSpy);
+      });
+
+      describe("with beforeIntent_ method given", function() {
+        beforeEach(async function(done) {
+          await this.stateMachine.transitionTo("IntentCallbackState");
+          done();
+        });
+
+        it("is called with given parameters", async function(done) {
+          await this.stateMachine.handleIntent("okay", "param1");
+          expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
+          expect(this.intentSpyResult[0][1]).toEqual("okayIntent");
+          expect(this.intentSpyResult[0][2]).toEqual(this.stateMachine);
+          expect(this.intentSpyResult[0][3]).toEqual("param1");
+          done();
+        });
+
+        describe("when beforeIntent method returns false", function() {
+          it("does not call intent", async function(done) {
+            await this.stateMachine.handleIntent("notOkay");
+            expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
+            expect(this.intentSpyResult.length).toBe(1);
+            done();
+          });
+        });
+
+        describe("when beforeIntent method returns true", function() {
+          it("calls intent after beforeIntent_ call", async function(done) {
+            await this.stateMachine.handleIntent("okay");
+            expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
+            expect(this.intentSpyResult[1][0]).toEqual("okayIntent");
+            done();
+          });
+        });
+
+        describe("when beforeIntent does not return a boolean", function() {
+          it("throws exception", function() {
+            return this.stateMachine.handleIntent("illegal")
+              .then(fail)
+              .catch(e => expect(true).toBeTruthy());
+          });
+        });
+      });
+
+      describe("with afterIntent_ method given", function() {
+        beforeEach(async function(done) {
+          await this.stateMachine.transitionTo("IntentCallbackState");
+          await this.stateMachine.handleIntent("okayIntent", "param1");
+          done();
+        });
+
+        it("is called in a row with all arguments", function() {
+          expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
+          expect(this.intentSpyResult[1][0]).toEqual("okayIntent");
+          expect(this.intentSpyResult[2][0]).toEqual("afterIntent_");
+          expect(this.intentSpyResult[2][1]).toEqual("okayIntent");
+          expect(this.intentSpyResult[2][2]).toEqual(this.stateMachine);
+          expect(this.intentSpyResult[2][3]).toEqual("param1");
+        });
+      });
+    });
   });
 
   describe("transitionTo", function() {
