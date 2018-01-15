@@ -16,6 +16,7 @@ import { UnhandledErrorWithFallbackState } from "../mocks/states/unhandled-error
 import { context } from "../mocks/root/request-context";
 import { extraction } from "../mocks/unifier/extraction";
 import { ResponseHandler } from "../mocks/unifier/handler";
+import { IntentCallbackState } from "../mocks/states/intent-callbacks";
 
 /**
  * Creates a test assistant js setup
@@ -26,7 +27,7 @@ import { ResponseHandler } from "../mocks/unifier/handler";
  */
 export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecSetup {
   let assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
-  assistantJs.prepare([MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState], autoBind, useChilds, autoSetup);
+  assistantJs.prepare([MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState], autoBind, useChilds, autoSetup);
   return assistantJs;
 }
 

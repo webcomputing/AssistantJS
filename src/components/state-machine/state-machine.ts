@@ -44,6 +44,20 @@ export class StateMachine implements StateMachineInterface {
         return;
       }
 
+      // Check if there is a "beforeIntent_" method available
+      if (typeof(currentState.instance["beforeIntent_"]) === "function") {
+        const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
+
+        if (typeof callbackResult !== "boolean") {
+          throw new Error(`You have to return either true or false in your beforeIntent_ callback. Called beforeIntent_ for ${currentState.name}#${intentMethod}. `);
+        }
+
+        if (!callbackResult) {
+          log("Your beforeIntent_ callback returned false. Aborting planned state machine execution.");
+          return;
+        }
+      }
+
       // Check if intentMethod is available in currentState
       if (typeof(currentState.instance[intentMethod]) === "function") {
         // Call given intent
