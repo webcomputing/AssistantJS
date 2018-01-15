@@ -10,7 +10,7 @@ import { State, StateMachine as StateMachineInterface, componentInterfaces, Meta
 export class StateMachine implements StateMachineInterface {
   intentHistory: { stateName: string; intentMethodName: string }[] = [];
 
-  private getCurrentState: () => Promise<{instance: State, name: string}>;
+  private getCurrentState: () => Promise<{instance: State.Required, name: string}>;
   private stateNames: string[];
   private currentSessionFactory: () => Session;
   private pipeFactory: Hooks.PipeFactory;
@@ -80,7 +80,7 @@ export class StateMachine implements StateMachineInterface {
   /* Private helper methods */
 
   /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again.*/
-  private async handleOrReject(error: Error, state: State, stateName: string, intentMethod: string, ...args): Promise<void> {
+  private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
     if (typeof state["errorFallback"] === "function") {
       await Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args));
     } else {

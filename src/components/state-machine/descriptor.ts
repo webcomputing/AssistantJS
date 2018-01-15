@@ -21,7 +21,7 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindExecutable(lookupService.lookup("core:root").getInterface("afterContextExtension"), Runner);
 
       // See StateFactory interface
-      bindService.bindGlobalService<StateFactory>("state-factory").toFactory<State>(context => {
+      bindService.bindGlobalService<StateFactory>("state-factory").toFactory<State.Required>(context => {
         return (stateName?: string) => {
           if (typeof(stateName) === "undefined" || stateName === null || stateName === "") {
             stateName = MAIN_STATE_NAME;
@@ -35,7 +35,7 @@ export const descriptor: ComponentDescriptor = {
           if (!context.container.isBoundTagged(componentInterfaces.state, "name", stateName))
             throw new Error("There is no state defined: '"+ stateName +"'");
 
-          return context.container.getTagged<State>(componentInterfaces.state, "name", stateName);
+          return context.container.getTagged<State.Required>(componentInterfaces.state, "name", stateName);
         };
       });
 
@@ -91,7 +91,7 @@ export const descriptor: ComponentDescriptor = {
       });
 
       // Provider for current state. Returns current state or MAIN STATE if no state is present.
-      bindService.bindGlobalService("current-state-provider").toProvider<{instance: State, name: string}>(context => {
+      bindService.bindGlobalService("current-state-provider").toProvider<{instance: State.Required, name: string}>(context => {
         return () => {
           let factory = context.container.get<Function>("core:state-machine:state-factory");
           return context.container.get<() => Promise<string>>("core:state-machine:current-state-name-provider")().then((name) => {

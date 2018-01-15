@@ -76,7 +76,7 @@ export class StateMachineSetup {
           let stateInterface = lookupService.lookup("core:state-machine").getInterface("state");
 
           Object.keys(this.stateClasses).forEach(stateName => {
-            let binding = bindService.bindExtension<State>(stateInterface).to(this.stateClasses[stateName]);
+            let binding = bindService.bindExtension<State.Required>(stateInterface).to(this.stateClasses[stateName]);
             let scope = this.registerStatesInSingleton ? binding.inSingletonScope() : binding;
             scope.whenTargetTagged("name", stateName);
           })

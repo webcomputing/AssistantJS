@@ -6,7 +6,7 @@ import { injectable, inject, optional } from "inversify";
 
 
 @injectable()
-export class MainState extends BaseState implements State {
+export class MainState extends BaseState implements State.Required {
   responseFactory: ResponseFactory;
   extraction: any;
   spy?: Function;

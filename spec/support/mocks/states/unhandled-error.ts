@@ -4,7 +4,7 @@ import { injectable, inject, optional } from "inversify";
 
 
 @injectable()
-export class UnhandledErrorState implements State {
+export class UnhandledErrorState implements State.Required {
   responseFactory: ResponseFactory;
   extraction: any;
   spy?: Function;

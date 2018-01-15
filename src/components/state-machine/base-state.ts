@@ -13,7 +13,7 @@ import { State, StateSetupSet } from "./interfaces";
  */
 
 @injectable()
-export abstract class BaseState implements State, Voiceable, TranslateHelper {
+export abstract class BaseState implements State.Required, Voiceable, TranslateHelper {
 
   /** Current response factory */
   responseFactory: ResponseFactory; 
