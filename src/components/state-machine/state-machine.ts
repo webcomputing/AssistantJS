@@ -63,6 +63,11 @@ export class StateMachine implements StateMachineInterface {
         // Call given intent
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
+        // Call afterIntent_ method if present
+        if (typeof currentState.instance["afterIntent_"] === "function") {
+          ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
+        }
+
         // Run afterIntent hooks
         await this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runWithResultset();
       } else {

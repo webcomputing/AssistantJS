@@ -303,6 +303,23 @@ describe("StateMachine", function() {
           });
         });
       });
+
+      describe("with afterIntent_ method given", function() {
+        beforeEach(async function(done) {
+          await this.stateMachine.transitionTo("IntentCallbackState");
+          await this.stateMachine.handleIntent("okayIntent", "param1");
+          done();
+        });
+
+        it("is called in a row with all arguments", function() {
+          expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
+          expect(this.intentSpyResult[1][0]).toEqual("okayIntent");
+          expect(this.intentSpyResult[2][0]).toEqual("afterIntent_");
+          expect(this.intentSpyResult[2][1]).toEqual("okayIntent");
+          expect(this.intentSpyResult[2][2]).toEqual(this.stateMachine);
+          expect(this.intentSpyResult[2][3]).toEqual("param1");
+        });
+      });
     });
   });
 
