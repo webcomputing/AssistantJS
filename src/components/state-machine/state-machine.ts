@@ -2,37 +2,28 @@ import { injectable, inject } from "inversify";
 import { Hooks } from "inversify-components";
 import { GenericIntent, intent } from "../unifier/interfaces";
 import { Session } from "../services/interfaces";
-import { log } from "../../setup";
+import { Logger } from "../root/interfaces";
 
 import { State, StateMachine as StateMachineInterface, componentInterfaces, MetaState } from "./interfaces";
 
 @injectable()
 export class StateMachine implements StateMachineInterface {
   intentHistory: { stateName: string; intentMethodName: string }[] = [];
-
-  private getCurrentState: () => Promise<{instance: State.Required, name: string}>;
-  private stateNames: string[];
-  private currentSessionFactory: () => Session;
-  private pipeFactory: Hooks.PipeFactory;
-
+  
   constructor(
-    @inject("core:state-machine:current-state-provider") getCurrentState: any,
-    @inject("core:state-machine:state-names") stateNames: string[],
-    @inject("core:unifier:current-session-factory") currentSessionFactory: () => Session,
-    @inject("core:hook-pipe-factory") pipeFactory: Hooks.PipeFactory
-  ) {
-    this.getCurrentState = getCurrentState;
-    this.stateNames = stateNames;
-    this.currentSessionFactory = currentSessionFactory;
-    this.pipeFactory = pipeFactory;
-  }
+    @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{instance: State.Required, name: string}>,
+    @inject("core:state-machine:state-names") private stateNames: string[],
+    @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
+    @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
+    @inject("core:root:current-logger") private logger: Logger
+  ) { }
 
   async handleIntent(intent: intent, ...args: any[]) {
     let currentState = await this.getCurrentState();
 
     let intentMethod = this.deriveIntentMethod(intent);
     this.intentHistory.push({stateName: currentState.name, intentMethodName: intentMethod});
-    log("Handling intent '" + intentMethod + "' on state " + currentState.name);
+    this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
     try {
       // Run beforeIntent-hooks as filter
@@ -40,7 +31,7 @@ export class StateMachine implements StateMachineInterface {
 
       // Abort if not all hooks returned a "success" result
       if (!hookResults.success) {
-        log("Hook "+ hookResults.failedHooks[0].hook.toString() +" did not return a successful result. Aborting planned state machine execution.");
+        this.logger.info("Hook "+ hookResults.failedHooks[0].hook.toString() +" did not return a successful result. Aborting planned state machine execution.");
         return;
       }
 
@@ -53,7 +44,7 @@ export class StateMachine implements StateMachineInterface {
         }
 
         if (!callbackResult) {
-          log("Your beforeIntent_ callback returned false. Aborting planned state machine execution.");
+          this.logger.info("Your beforeIntent_ callback returned false. Aborting planned state machine execution.");
           return;
         }
       }

@@ -1,22 +1,18 @@
 import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
 import { componentInterfaces } from "./interfaces";
+import { Logger } from "../root/interfaces";
 import { DestroyableSession } from "../services/interfaces";
-import { log } from "../../setup";
 
 /** Destroys redis session after session ended */
 @injectable()
 export class KillSessionService {
-  sessionFactory: () => DestroyableSession;
-  pipeFactory: Hooks.PipeFactory;
 
   constructor(
-    @inject("core:unifier:current-session-factory") sessionFactory,
-    @inject("core:hook-pipe-factory") pipeFactory: Hooks.PipeFactory
-  ) {
-    this.sessionFactory = sessionFactory;
-    this.pipeFactory = pipeFactory;
-  }
+    @inject("core:unifier:current-session-factory") public sessionFactory: () => DestroyableSession,
+    @inject("core:hook-pipe-factory") public pipeFactory: Hooks.PipeFactory,
+    @inject("core:root:current-logger") public logger: Logger
+  ) {}
 
   async execute() {
       let currentSession = this.sessionFactory();
@@ -32,12 +28,12 @@ export class KillSessionService {
       if (filterResult.success) {
         // Kill session
         await currentSession.delete();
-        log("Session killed.");
+        this.logger.info("Session killed.");
 
         // Run afterKillSessionHooks
         await afterKillSessionHooks.runWithResultset();
       } else {
-        log("Not killing session since one of your did not return a successful result.");
+        this.logger.info("Not killing session since one of your did not return a successful result.");
       }
   }
 }

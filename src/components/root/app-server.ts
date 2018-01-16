@@ -3,10 +3,9 @@ import * as express from "express";
 import { Express } from "express";
 export { Express } from "express";
 import * as bodyParser from "body-parser";
-import Logger = require("bunyan");
 const cuid = require("cuid");
 
-import { ResponseCallback, RequestContext } from "./interfaces";
+import { ResponseCallback, RequestContext, Logger } from "./interfaces";
 import { GenericRequestHandler } from "./generic-request-handler";
 
 export class ServerApplication implements MainApplication {

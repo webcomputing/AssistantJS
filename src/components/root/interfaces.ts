@@ -1,5 +1,6 @@
 import Logger = require("bunyan");
 
+export { Logger };
 
 export const componentInterfaces = {
   "contextDeriver": Symbol("request-handler"),

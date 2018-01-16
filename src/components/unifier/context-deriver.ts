@@ -1,18 +1,17 @@
 import { injectable, inject, multiInject, optional } from "inversify";
 
-import { log } from "../../setup";
 import { featureIsAvailable } from "./feature-checker";
-import { RequestContext, ContextDeriver as ContextDeriverI } from "../root/interfaces";
+import { injectionNames } from '../../injection-names';
+import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/interfaces";
 import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
-  private extractors: RequestConversationExtractor[];
 
   constructor(
-    @optional() @multiInject(componentInterfaces.requestProcessor) extractors: RequestConversationExtractor[] = []) {
-    this.extractors = extractors;
-  }
+    @inject(injectionNames.logger) private logger: Logger,
+    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = []
+  ) {}
 
   async derive(context: RequestContext) {
     const extractor = await this.findExtractor(context);
@@ -21,7 +20,7 @@ export class ContextDeriver implements ContextDeriverI {
       const extractionResult = await extractor.extract(context);
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      log("Resolved platform context = %o", logableExtractionResult);
+      this.logger.info("Resolved platform context = %o", logableExtractionResult, { requestId: context.id });
       return [extractionResult, "core:unifier:current-extraction"];
     } else {
       return undefined;
@@ -46,7 +45,7 @@ export class ContextDeriver implements ContextDeriverI {
   } 
 
   respondWithNoExtractor(context: RequestContext) {
-    log("None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
+    this.logger.warn("None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.", { requestId: context.id });
     context.responseCallback("", {}, 404);
   }
 

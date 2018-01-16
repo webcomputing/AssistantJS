@@ -4,7 +4,7 @@ import * as fs from "fs";
 import { State, StateConstructor, MetaState, componentInterfaces } from "./interfaces";
 
 import { GenericIntent } from "../unifier/interfaces";
-import { AssistantJSSetup, log } from "../../setup";
+import { AssistantJSSetup } from "../../setup";
 
 export class StateMachineSetup {
   private assistantJS: AssistantJSSetup;
@@ -51,13 +51,11 @@ export class StateMachineSetup {
     this.metaStates.push(metaState);
 
     // Add state class
-    log("Adding state " + name + " with intents = %o", intents);
     this.stateClasses[name] = stateClass;
   }
 
   /** Registers all states in dependency injection container */
   registerStates() {
-    log("Registering all added states (count: "+ this.metaStates.length +")");
     this.assistantJS.registerComponent(this.toComponentDescriptor());
   }
 

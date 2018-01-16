@@ -1,26 +1,20 @@
 import { inject, injectable } from "inversify";
 import { I18n } from "i18next";
+
 import { TranslateHelper as TranslateHelperInterface } from "./interfaces";
 import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/interfaces';
+import { Logger } from "../root/interfaces";
 import { featureIsAvailable } from '../unifier/feature-checker';
 import { I18nContext } from "./context";
-import { log } from "../../setup";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
-  context: I18nContext;
-  extraction: MinimalRequestExtraction;
-  i18n: I18n;
-
   constructor(
-    @inject("core:i18n:instance") i18n: I18n, 
-    @inject("core:i18n:current-context") context: I18nContext,
-    @inject("core:unifier:current-extraction") extraction: MinimalRequestExtraction) 
-  {
-    this.i18n = i18n;
-    this.context = context;
-    this.extraction = extraction;
-  }
+    @inject("core:i18n:instance") public i18n: I18n, 
+    @inject("core:i18n:current-context") public context: I18nContext,
+    @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
+    @inject("core:root:current-logger") public logger: Logger
+  ) { }
 
 
   t(key?: string, locals?: {});
@@ -80,7 +74,7 @@ export class TranslateHelper implements TranslateHelperInterface {
       lookupKeys = [key as string];
     }
 
-    log("I18N: using key resolvings %o with options/locals %o", lookupKeys, options);
+    this.logger.debug("I18N: using key resolvings %o with options/locals %o", lookupKeys);
     return this.translateOrFail(lookupKeys, options);
   }
 
@@ -95,7 +89,7 @@ export class TranslateHelper implements TranslateHelperInterface {
       if (typeof foundTranslation === "undefined" && this.i18n.exists(lookup, options)) {
         let translation = this.i18n.t(lookup, options);
         if (typeof translation === "string") {
-          log("I18N: choosing key: " + lookup);
+          this.logger.debug("I18N: choosing key: " + lookup);
           foundTranslation = translation;
           return true;
         }
