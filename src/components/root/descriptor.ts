@@ -1,10 +1,10 @@
 import { ComponentDescriptor, Component } from "inversify-components";
 import { GenericRequestHandler } from "./generic-request-handler";
-import { instance as winstonInstance } from "./default-winston";
+import { defaultBunyan } from "./default-bunyan";
 import { componentInterfaces, OptionalConfiguration, Configuration } from "./interfaces";
 
 const defaultConfiguration: OptionalConfiguration = {
-  winstonInstance: winstonInstance
+  bunyanInstance: defaultBunyan
 }
 
 export const descriptor: ComponentDescriptor = {
@@ -15,7 +15,7 @@ export const descriptor: ComponentDescriptor = {
     root: (bindService) => {
       bindService.bindLocalServiceToSelf(GenericRequestHandler);
       bindService.bindGlobalService("logger").toDynamicValue(context => {
-        return (context.container.get<Component>("meta:component//core:root").configuration as any).winstonInstance;
+        return (context.container.get<Component>("meta:component//core:root").configuration as any).bunyanInstance;
       });
     }
   }

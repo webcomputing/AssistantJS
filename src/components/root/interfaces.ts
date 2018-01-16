@@ -1,4 +1,5 @@
-import { LoggerInstance } from "winston";
+import Logger = require("bunyan");
+
 
 export const componentInterfaces = {
   "contextDeriver": Symbol("request-handler"),
@@ -28,7 +29,7 @@ export interface GeneratorExtension {
 }
 
 export interface OptionalConfiguration {
-  winstonInstance?: LoggerInstance;
+  bunyanInstance?: Logger
 }
 
 export interface Configuration extends OptionalConfiguration {

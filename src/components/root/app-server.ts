@@ -3,7 +3,7 @@ import * as express from "express";
 import { Express } from "express";
 export { Express } from "express";
 import * as bodyParser from "body-parser";
-import { LoggerInstance } from "winston";
+import Logger = require("bunyan");
 const cuid = require("cuid");
 
 import { ResponseCallback, RequestContext } from "./interfaces";
@@ -14,7 +14,7 @@ export class ServerApplication implements MainApplication {
   private app: express.Express;
   private listeningCallback = (app: ServerApplication) => {};
   private expressRunningInstance;
-  private logger: undefined | LoggerInstance;
+  private logger: undefined | Logger;
 
   constructor (port = 3000, listeningCallback = (app: ServerApplication) => {}, expressApp: Express = express(), registerOwnMiddleware = true) {
     this.listeningCallback = listeningCallback;
@@ -29,7 +29,7 @@ export class ServerApplication implements MainApplication {
   /** Starts express server, calls handleRequest on each request */
   execute(container: Container) {
     // Set logger
-    this.logger = container.inversifyInstance.get<LoggerInstance>("core:root:logger");
+    this.logger = container.inversifyInstance.get<Logger>("core:root:logger");
 
     this.log("Preloading i18n instance...");
     let preloadI18n = container.inversifyInstance.get("core:i18n:wrapper");
