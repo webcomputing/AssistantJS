@@ -5,6 +5,7 @@ export const componentInterfaces = {
 };
 
 export interface RequestContext {
+  id: string;
   method: string;
   path: string;
   body: any;

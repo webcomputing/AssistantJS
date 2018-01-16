@@ -3,6 +3,7 @@ import * as express from "express";
 import { Express } from "express";
 export { Express } from "express";
 import * as bodyParser from "body-parser";
+const cuid = require("cuid");
 import { log } from "../../setup";
 
 import { ResponseCallback, RequestContext } from "./interfaces";
@@ -49,6 +50,7 @@ export class ServerApplication implements MainApplication {
 
     // Create generic request context
     let requestContext: RequestContext = {
+      id: cuid(),
       path: request.path,
       method: request.method,
       headers: request.headers as any,
