@@ -1,3 +1,5 @@
+import { LoggerInstance } from "winston";
+
 export const componentInterfaces = {
   "contextDeriver": Symbol("request-handler"),
   "afterContextExtension": Symbol("after-context-extension"),
@@ -23,4 +25,12 @@ export interface ContextDeriver {
 
 export interface GeneratorExtension {
   execute(buildPath: string): void;
+}
+
+export interface OptionalConfiguration {
+  winstonInstance?: LoggerInstance;
+}
+
+export interface Configuration extends OptionalConfiguration {
+  
 }
