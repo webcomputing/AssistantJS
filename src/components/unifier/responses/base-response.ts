@@ -27,9 +27,8 @@ export class BaseResponse {
    */
   protected reportIfUnavailable(feature: string[], message: string) {
     if (!this.featureIsAvailable(feature)) {
-      const errorMessage = message + " - Used response handler = " + this.handler.constructor.name;    
-      this.logger.warn(errorMessage);
-      if (!this.failSilentlyOnUnsupportedFeatures) throw new Error(errorMessage);
+      this.logger.warn(message);
+      if (!this.failSilentlyOnUnsupportedFeatures) throw new Error(message);
     }
   }
 

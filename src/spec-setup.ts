@@ -41,7 +41,7 @@ export class SpecSetup {
     if (!useChilds) this.bindChildlessRequestHandlerMock();
 
     // Change logger unless env variable is set
-    if (!(process.env.LOG === "true")) this.bindSpecLogger();
+    if (!(process.env.SPEC_LOGS === "true")) this.bindSpecLogger();
   }
 
   /**

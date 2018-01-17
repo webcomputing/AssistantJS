@@ -27,7 +27,7 @@ describe("BaseResponse", function() {
 
         it("does not throw any exception", function() {
           expect(() => {
-            this.baseResponse.reportIfUnavailable(this.featureToCheck);
+            this.baseResponse.reportIfUnavailable(this.featureToCheck, "spec message");
           }).not.toThrow();
         });
       });
@@ -39,7 +39,7 @@ describe("BaseResponse", function() {
 
         it("throws an exception", function() {
           expect(() => {
-            this.baseResponse.reportIfUnavailable(this.featureToCheck);
+            this.baseResponse.reportIfUnavailable(this.featureToCheck, "spec message");
           }).toThrow();
         });
       });
@@ -57,7 +57,7 @@ describe("BaseResponse", function() {
 
         it("does not throw any exception", function() {
           expect(() => {
-            this.baseResponse.reportIfUnavailable(this.featureToCheck);
+            this.baseResponse.reportIfUnavailable(this.featureToCheck, "spec message");
           }).not.toThrow();
         });
       });
