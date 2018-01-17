@@ -5,6 +5,7 @@ import { injectionNames } from '../../injection-names';
 import { Session } from "../services/interfaces";
 import { MinimalRequestExtraction, intent } from '../unifier/interfaces';
 import { ResponseFactory } from '../unifier/response-factory';
+import { Logger } from "../root/interfaces";
 import { TranslateHelper } from '../i18n/translate-helper';
 
 import { Runner } from "./runner";
@@ -76,7 +77,8 @@ export const descriptor: ComponentDescriptor = {
         return {
           "responseFactory": context.container.get<ResponseFactory>(injectionNames.current.responseFactory),
           "translateHelper": context.container.get<TranslateHelper>(injectionNames.current.translateHelper),
-          "extraction": context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction)
+          "extraction": context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction),
+          "logger": context.container.get<Logger>(injectionNames.current.logger)
         }
       });
 

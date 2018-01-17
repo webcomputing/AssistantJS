@@ -1,7 +1,7 @@
 import { injectable, unmanaged } from "inversify";
 import { Voiceable, MinimalRequestExtraction,  ResponseFactory, OptionalExtractions } from '../unifier/interfaces';
 import { featureIsAvailable } from '../unifier/feature-checker';
-import { RequestContext } from '../root/interfaces';
+import { RequestContext, Logger } from '../root/interfaces';
 import { TranslateHelper } from "../i18n/interfaces";
 import { Transitionable } from "../state-machine/interfaces";
 import { State, StateSetupSet } from "./interfaces";
@@ -24,16 +24,21 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   /** Current extracion result */
   extraction: MinimalRequestExtraction; 
 
+  /** Current request-dependent logger */
+  logger: Logger;
+
   /**
    * 
    * @param {unifierInterfaces.ResponseFactory} responseFactory Current response factory
    * @param {i18nInterfaces.TranslateHelper} translateHelper Current translate helper
    * @param {unifierInterfaces.MinimalRequestExtraction} extraction Extraction of current request
+   * @param {rootInterfaces.Logger} logger Logger, prepared to log information about the current request
    */
   constructor(
     responseFactory: ResponseFactory, 
     translateHelper: TranslateHelper, 
     extraction: MinimalRequestExtraction, 
+    logger: Logger
   )
 
   /**
@@ -45,24 +50,27 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   constructor(
     @unmanaged() responseFactoryOrSet: ResponseFactory | StateSetupSet, 
     @unmanaged() translateHelper?: TranslateHelper, 
-    @unmanaged() extraction?: MinimalRequestExtraction
+    @unmanaged() extraction?: MinimalRequestExtraction,
+    @unmanaged() logger?: Logger
   ) {
     if (typeof (responseFactoryOrSet as StateSetupSet).responseFactory === "undefined") {
       // Did not pass StateSetupSet
-      if (typeof translateHelper === "undefined" || typeof extraction === "undefined")
-        throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper and extraction.");
+      if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined")
+        throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
       
       this.responseFactory = responseFactoryOrSet as ResponseFactory;
       this.translateHelper = translateHelper;
       this.extraction = extraction;
+      this.logger = logger;
     } else {
       // Did pass StateSetupSet
-      if (typeof translateHelper !== "undefined" || typeof extraction !== "undefined")
-        throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper or extraction.");
+      if (typeof translateHelper !== "undefined" || typeof extraction !== "undefined" || typeof logger !== "undefined")
+        throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
       
       this.responseFactory = (responseFactoryOrSet as StateSetupSet).responseFactory;
       this.translateHelper = (responseFactoryOrSet as StateSetupSet).translateHelper;
       this.extraction = (responseFactoryOrSet as StateSetupSet).extraction;
+      this.logger = (responseFactoryOrSet as StateSetupSet).logger;
     }
   }
 

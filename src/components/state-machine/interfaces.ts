@@ -1,6 +1,6 @@
 import { MessageBus, Message } from "inversify-components";
 import { Session } from "../services/interfaces";
-import { RequestContext } from '../root/interfaces';
+import { RequestContext, Logger } from '../root/interfaces';
 import { TranslateHelper } from '../i18n/translate-helper';
 import { ResponseFactory } from '../unifier/response-factory';
 import { MinimalRequestExtraction, GenericIntent,  intent} from '../unifier/interfaces';
@@ -94,6 +94,7 @@ export interface StateSetupSet {
   responseFactory: ResponseFactory;
   translateHelper: TranslateHelper;
   extraction: MinimalRequestExtraction;
+  logger: Logger;
 }
 
 export interface Transitionable {
