@@ -31,7 +31,7 @@ export class StateMachine implements StateMachineInterface {
 
       // Abort if not all hooks returned a "success" result
       if (!hookResults.success) {
-        this.logger.info("Hook "+ hookResults.failedHooks[0].hook.toString() +" did not return a successful result. Aborting planned state machine execution.");
+        this.logger.info("One of your hooks did not return a successful result. Aborting planned state machine execution.");
         return;
       }
 
