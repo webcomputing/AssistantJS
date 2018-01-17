@@ -101,7 +101,7 @@ export class ServerApplication implements MainApplication {
   /** Logs a message if logger is already defined */
   private log(message, requestId?: string) {
     if (typeof this.logger !== "undefined") {
-      this.logger.info(message, typeof requestId === "undefined" ? {} : { requestId: requestId });
+      this.logger.info(typeof requestId === "undefined" ? {} : { requestId: requestId }, message);
     }
   }
 }

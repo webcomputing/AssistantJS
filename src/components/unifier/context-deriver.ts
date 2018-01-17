@@ -20,7 +20,7 @@ export class ContextDeriver implements ContextDeriverI {
       const extractionResult = await extractor.extract(context);
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      this.logger.info("Resolved platform context = %o", logableExtractionResult, { requestId: context.id });
+      this.logger.info( { requestId: context.id }, "Resolved platform context = %o", logableExtractionResult);
       return [extractionResult, "core:unifier:current-extraction"];
     } else {
       return undefined;
@@ -45,7 +45,7 @@ export class ContextDeriver implements ContextDeriverI {
   } 
 
   respondWithNoExtractor(context: RequestContext) {
-    this.logger.warn("None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.", { requestId: context.id });
+    this.logger.warn({ requestId: context.id }, "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
     context.responseCallback("", {}, 404);
   }
 
