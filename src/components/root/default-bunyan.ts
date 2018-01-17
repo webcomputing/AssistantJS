@@ -1,3 +1,4 @@
 import { createLogger } from "bunyan"
+import { Logger } from "./interfaces";
 
-export const defaultBunyan = createLogger({ name: "assistantjs-app" });
+export const defaultBunyan: Logger = createLogger({ name: "assistantjs-app" });
