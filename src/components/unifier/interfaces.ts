@@ -260,21 +260,21 @@ export interface PlatformSpecHelper {
 
 
 export namespace OptionalHandlerFeatures {
-  export interface AuthenticationHandler {
+  export interface AuthenticationHandler extends MinimalResponseHandler {
     forceAuthenticated: boolean;
   }
 
-  export interface SSMLHandler {
+  export interface SSMLHandler extends MinimalResponseHandler {
     isSSML: boolean;
   }
 
-  export interface Reprompt {
+  export interface Reprompt extends MinimalResponseHandler {
     reprompts: string[] | null;
   }
 
   export namespace GUI {
     export namespace Card {
-      export interface Simple {
+      export interface Simple extends MinimalResponseHandler {
         cardTitle: string | null;
         cardBody: string | null;
       }
@@ -284,11 +284,11 @@ export namespace OptionalHandlerFeatures {
       }
     }
 
-    export interface SuggestionChip {
+    export interface SuggestionChip extends MinimalResponseHandler {
       suggestionChips: string[] | null;
     }
 
-    export interface ChatBubble {
+    export interface ChatBubble extends MinimalResponseHandler {
       chatBubbles: string[] | null;
     }
   }

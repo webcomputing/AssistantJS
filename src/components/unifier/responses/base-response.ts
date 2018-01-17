@@ -16,8 +16,8 @@ export class BaseResponse {
   ) {}
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */
-  protected featureIsAvailable(feature: string[]) {
-    return BaseResponse.featureIsAvailable(this.handler, feature);
+  protected featureIsAvailable<Feature extends MinimalResponseHandler>(feature: string[]) {
+    return BaseResponse.featureIsAvailable<Feature>(this.handler, feature);
   }
 
   /**
@@ -33,7 +33,7 @@ export class BaseResponse {
   }
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */
-  static featureIsAvailable(handler: MinimalResponseHandler, feature: string[]) {
-    return featureIsAvailable(handler, feature);
+  static featureIsAvailable<Feature extends MinimalResponseHandler>(handler: MinimalResponseHandler, feature: string[]) {
+    return featureIsAvailable<Feature>(handler, feature);
   }
 }

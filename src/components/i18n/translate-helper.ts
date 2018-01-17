@@ -33,7 +33,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     const extractorName = this.extraction.platform;
 
     // Catch up device name or set to undefined
-    const device = featureIsAvailable(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction) ? (this.extraction as OptionalExtractions.DeviceExtraction).device : undefined;
+    const device = featureIsAvailable<OptionalExtractions.DeviceExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction) ? this.extraction.device : undefined;
 
     if (typeof key === "undefined") {
       key = "";

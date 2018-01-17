@@ -24,7 +24,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   /** Current extracion result */
   extraction: MinimalRequestExtraction; 
 
-  /** Current request-dependent logger */
+  /** Current request-specific logger */
   logger: Logger;
 
   /**
@@ -74,18 +74,14 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
     }
   }
 
-  /** Returns name of current platform */
-  getPlatform(): string {
-    return this.extraction.platform;
+  /** Prompts with current unhandled message */
+  unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
+    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
   }
 
-  /** Returns name of current device. If the current platform does not support different devices, returns name of current platform. */
-  getDeviceOrPlatform(): string {
-    if (featureIsAvailable(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
-      return (this.extraction as OptionalExtractions.DeviceExtraction).device;
-    } else {
-      return this.getPlatform();
-    }
+  /** Sends empty response */
+  unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
+    this.responseFactory.createAndSendEmptyResponse();
   }
 
   /** Synonym of translateHelper.t */
@@ -103,13 +99,17 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
     this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 
-  /** Prompts with current unhandled message */
-  unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
-    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
+  /** Returns name of current platform */
+  getPlatform(): string {
+    return this.extraction.platform;
   }
 
-  /** Sends empty response */
-  unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
-    this.responseFactory.createAndSendEmptyResponse();
+  /** Returns name of current device. If the current platform does not support different devices, returns name of current platform. */
+  getDeviceOrPlatform(): string {
+    if (featureIsAvailable<OptionalExtractions.DeviceExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
+      return this.extraction.device;
+    } else {
+      return this.getPlatform();
+    }
   }
 }

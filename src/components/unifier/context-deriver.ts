@@ -68,8 +68,8 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   /** Returns true if given extractor supports given feature (see FeatureChecker) */
-  private extractorSupportsFeature(extraction: MinimalRequestExtraction, feature: string[]) {
-    return featureIsAvailable(extraction, feature);
+  private extractorSupportsFeature<Feature extends MinimalRequestExtraction>(extraction: MinimalRequestExtraction, feature: string[]) {
+    return featureIsAvailable<Feature>(extraction, feature);
   }
 
   /** Filters sensitive values, making the extraction result logable */
