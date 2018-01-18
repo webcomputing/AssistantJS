@@ -28,7 +28,7 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   async findExtractor(context: RequestContext): Promise<RequestConversationExtractor | null> {
-    let isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
+    const isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
     
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
