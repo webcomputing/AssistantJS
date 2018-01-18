@@ -20,6 +20,7 @@ export const componentInterfaces = {
 
 /** End user interfaces */
 
+/** Main AssistantJS class to send responses to the user. */
 export interface ResponseFactory {
   /** If set to false, created response objects will throw an exception if an unsupported feature if used */
   failSilentlyOnUnsupportedFeatures: boolean;
@@ -57,17 +58,19 @@ export interface Voiceable {
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith(text: string);
+  endSessionWith(text: string): void;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]);
+  prompt(text: string, ...reprompts: string[]): void;
 }
 
 /** Currently, we are not allowed to use camelCase here! So try to just use a single word! */
+
+/** Intents which are not specific to a given platform. */
 export enum GenericIntent {
   Invoke,
   Unanswered,
@@ -260,21 +263,21 @@ export interface PlatformSpecHelper {
 
 
 export namespace OptionalHandlerFeatures {
-  export interface AuthenticationHandler {
+  export interface AuthenticationHandler extends MinimalResponseHandler {
     forceAuthenticated: boolean;
   }
 
-  export interface SSMLHandler {
+  export interface SSMLHandler extends MinimalResponseHandler {
     isSSML: boolean;
   }
 
-  export interface Reprompt {
+  export interface Reprompt extends MinimalResponseHandler {
     reprompts: string[] | null;
   }
 
   export namespace GUI {
     export namespace Card {
-      export interface Simple {
+      export interface Simple extends MinimalResponseHandler {
         cardTitle: string | null;
         cardBody: string | null;
       }
@@ -284,11 +287,11 @@ export namespace OptionalHandlerFeatures {
       }
     }
 
-    export interface SuggestionChip {
+    export interface SuggestionChip extends MinimalResponseHandler {
       suggestionChips: string[] | null;
     }
 
-    export interface ChatBubble {
+    export interface ChatBubble extends MinimalResponseHandler {
       chatBubbles: string[] | null;
     }
   }

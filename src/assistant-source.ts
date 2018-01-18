@@ -11,6 +11,7 @@ export { AssistantJSSetup } from "./setup";
 export { ServerApplication } from "./components/root/app-server";
 export { GeneratorApplication } from "./components/root/app-generator";
 export { GenericRequestHandler } from "./components/root/generic-request-handler";
+export { defaultBunyan } from "./components/root/default-bunyan";
 export { StateMachineSetup } from "./components/state-machine/setup";
 export { BaseState } from "./components/state-machine/base-state";
 export { AbstractResponseHandler } from "./components/unifier/abstract-response-handler";

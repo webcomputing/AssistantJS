@@ -1,3 +1,4 @@
+import { Logger } from "../../root/interfaces";
 import { MinimalResponseHandler, OptionalHandlerFeatures } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
@@ -5,8 +6,8 @@ export class ChatResponse extends BaseResponse {
   /** Response handler of the currently used platform */
   protected handler: OptionalHandlerFeatures.GUI.ChatBubble & MinimalResponseHandler;
 
-  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
-    super(handler, failSilentlyOnUnsupportedFeatures);
+  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger) {
+    super(handler, failSilentlyOnUnsupportedFeatures, logger);
 
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.ChatBubble, "The currently used platform does not support chat messages.");
   }

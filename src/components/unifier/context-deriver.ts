@@ -1,18 +1,17 @@
 import { injectable, inject, multiInject, optional } from "inversify";
 
-import { log } from "../../setup";
 import { featureIsAvailable } from "./feature-checker";
-import { RequestContext, ContextDeriver as ContextDeriverI } from "../root/interfaces";
+import { injectionNames } from '../../injection-names';
+import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/interfaces";
 import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
-  private extractors: RequestConversationExtractor[];
 
   constructor(
-    @optional() @multiInject(componentInterfaces.requestProcessor) extractors: RequestConversationExtractor[] = []) {
-    this.extractors = extractors;
-  }
+    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = [],
+    @inject(injectionNames.logger) private logger: Logger
+  ) {}
 
   async derive(context: RequestContext) {
     const extractor = await this.findExtractor(context);
@@ -21,7 +20,7 @@ export class ContextDeriver implements ContextDeriverI {
       const extractionResult = await extractor.extract(context);
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      log("Resolved platform context = %o", logableExtractionResult);
+      this.logger.info( { requestId: context.id }, "Resolved platform context = %o", logableExtractionResult);
       return [extractionResult, "core:unifier:current-extraction"];
     } else {
       return undefined;
@@ -29,7 +28,7 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   async findExtractor(context: RequestContext): Promise<RequestConversationExtractor | null> {
-    let isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
+    const isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
     
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
@@ -46,7 +45,7 @@ export class ContextDeriver implements ContextDeriverI {
   } 
 
   respondWithNoExtractor(context: RequestContext) {
-    log("None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
+    this.logger.warn({ requestId: context.id }, "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
     context.responseCallback("", {}, 404);
   }
 
@@ -69,8 +68,8 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   /** Returns true if given extractor supports given feature (see FeatureChecker) */
-  private extractorSupportsFeature(extraction: MinimalRequestExtraction, feature: string[]) {
-    return featureIsAvailable(extraction, feature);
+  private extractorSupportsFeature<Feature extends MinimalRequestExtraction>(extraction: MinimalRequestExtraction, feature: string[]) {
+    return featureIsAvailable<Feature>(extraction, feature);
   }
 
   /** Filters sensitive values, making the extraction result logable */

@@ -1,3 +1,4 @@
+import { Logger } from "../../root/interfaces";
 import { MinimalResponseHandler, OptionalHandlerFeatures } from "../interfaces";
 import { BaseResponse } from "./base-response";
 
@@ -5,8 +6,8 @@ export class SuggestionChipsResponse extends BaseResponse {
   /** Response handler of the currently used platform */
   protected handler: OptionalHandlerFeatures.GUI.SuggestionChip & MinimalResponseHandler;
 
-  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
-    super(handler, failSilentlyOnUnsupportedFeatures);
+  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger) {
+    super(handler, failSilentlyOnUnsupportedFeatures, logger);
 
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.SuggestionChip, "The currently used platform does not support suggestion chips.");
   }

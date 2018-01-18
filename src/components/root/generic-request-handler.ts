@@ -4,7 +4,6 @@
  */
 import { Container, ExecutableExtension } from "inversify-components";
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
-import { log } from "../../setup";
 
 import { RequestContext, ContextDeriver, componentInterfaces } from "./interfaces";
 
@@ -42,7 +41,6 @@ export class GenericRequestHandler {
 
   /** Binds a constant object to a given container */
   bindContextToContainer(context: any, container: inversifyInterfaces.Container, name: string, asDynamicValue = false) {
-    log(`Binding context to ${name}...`);
     asDynamicValue ? container.bind(name).toDynamicValue(c => JSON.parse(JSON.stringify(context))) : container.bind(name).toConstantValue(context);
   }
 

@@ -1,28 +1,23 @@
+import { Logger } from "../../root/interfaces";
 import { MinimalResponseHandler } from "../interfaces";
 import { featureIsAvailable } from "../feature-checker";
-import { log } from "../../../setup";
-import { inspect as utilInspect } from "util";
 
 export class BaseResponse {
-  /** Response handler of the currently used platform */
-  protected handler: MinimalResponseHandler;
-
-  /** If set to false, this response object will throw an exception if an unsupported feature if used */
-  failSilentlyOnUnsupportedFeatures: boolean;
-
   /**
    * Constructs a new instance
    * @param {MinimalResponseHandler} handler The currently acting response handler
    * @param {boolean} failSilentlyOnUnsupportedFeatures If set to true, response class won't throw an error if a feature is unsupported
+   * @param {Logger} logger Logger to use
    */
-  constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean) {
-    this.handler = handler;
-    this.failSilentlyOnUnsupportedFeatures = failSilentlyOnUnsupportedFeatures;
-  }
+  constructor(
+    protected handler: MinimalResponseHandler, 
+    public failSilentlyOnUnsupportedFeatures: boolean, 
+    public logger: Logger
+  ) {}
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */
-  protected featureIsAvailable(feature: string[]) {
-    return BaseResponse.featureIsAvailable(this.handler, feature);
+  protected featureIsAvailable<Feature extends MinimalResponseHandler>(feature: string[]) {
+    return BaseResponse.featureIsAvailable<Feature>(this.handler, feature);
   }
 
   /**
@@ -32,14 +27,13 @@ export class BaseResponse {
    */
   protected reportIfUnavailable(feature: string[], message: string) {
     if (!this.featureIsAvailable(feature)) {
-      const errorMessage = message + " - Used response handler = " + utilInspect(this.handler);    
-      log(errorMessage);
-      if (!this.failSilentlyOnUnsupportedFeatures) throw new Error(errorMessage);
+      this.logger.warn(message);
+      if (!this.failSilentlyOnUnsupportedFeatures) throw new Error(message);
     }
   }
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */
-  static featureIsAvailable(handler: MinimalResponseHandler, feature: string[]) {
-    return featureIsAvailable(handler, feature);
+  static featureIsAvailable<Feature extends MinimalResponseHandler>(handler: MinimalResponseHandler, feature: string[]) {
+    return featureIsAvailable<Feature>(handler, feature);
   }
 }

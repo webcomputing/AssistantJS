@@ -1,4 +1,4 @@
-import { stateMachineInterfaces, injectionNames, unifierInterfaces, i18nInterfaces } from "assistant-source";
+import { stateMachineInterfaces, injectionNames } from "assistant-source";
 import { injectable, inject } from "inversify";
 
 import { ApplicationState } from "./application";
@@ -12,10 +12,9 @@ import { ApplicationState } from "./application";
 @injectable()
 export class MainState extends ApplicationState {
   constructor(
-    @inject(injectionNames.current.responseFactory) responseFactory: unifierInterfaces.ResponseFactory,
-    @inject(injectionNames.current.translateHelper) translateHelper: i18nInterfaces.TranslateHelper
+    @inject(injectionNames.current.stateSetupSet) stateSetupSet: stateMachineInterfaces.stateSetupSet
   ) {
-    super(responseFactory, translateHelper);
+    super(stateSetupSet);
   }
 
   /**

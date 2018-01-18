@@ -1,11 +1,20 @@
 import { MinimalResponseHandler, MinimalRequestExtraction } from "./interfaces";
 
 /** 
- * Checks whether a given feature exists in an extraction result or is supported by a response handler.
- * @param container The extraction result or the response handler which might contain the feature
- * @param feature The feature to check. Just pass a value of the FeatureChecker object in OptionalExtractions or OptionalFeatures (=> unifierInterfaces)
+ * Checks whether a given feature exists in an extraction result.
+ * @param {MinimalRequestExtraction} container The extraction result which might contain the given feature
+ * @param {string[]} feature The feature to check. Just pass a value of the FeatureChecker object from unifierInterfaces.OptionalExtractions
  */
-export function featureIsAvailable(container: MinimalRequestExtraction | MinimalResponseHandler, feature: string[]): boolean {
+export function featureIsAvailable<FeatureInterface extends MinimalRequestExtraction>(container: MinimalRequestExtraction, feature: string[]): container is FeatureInterface;
+
+/** 
+ * Checks whether a given feature is supported by a response handler.
+ * @param {MinimalResponseHandler} container The response handler which might support the feature
+ * @param {string[]} feature The feature to check. Just pass a value of the FeatureChecker object from unifierInterfaces.OptionalFeatures
+ */
+export function featureIsAvailable<FeatureInterface extends MinimalResponseHandler>(container: MinimalResponseHandler, feature: string[]): container is FeatureInterface;
+
+export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction | MinimalResponseHandler, feature: string[]) {
   let objectKeys = Object.keys(container);
   return feature.filter(f => objectKeys.indexOf(f) === -1).length === 0;
 }

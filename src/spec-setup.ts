@@ -1,16 +1,18 @@
 import { ContainerImpl } from "inversify-components";
 import * as express from "express";
 import * as fakeRedis from "fakeredis";
+import { createLogger } from "bunyan"
 
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { StateMachineSetup } from "./components/state-machine/setup";
 import { StateConstructor, StateMachine } from "./components/state-machine/interfaces";
-import { RequestContext } from "./components/root/interfaces";
+import { RequestContext, Logger } from "./components/root/interfaces";
 import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/interfaces";
 import { Configuration } from "./components/services/interfaces";
 import { ServerApplication } from "./components/root/app-server"; 
 
 import { AssistantJSSetup } from "./setup";
+import { injectionNames } from "./injection-names";
 
 /** Used for managing multiple spec setups */
 let specSetupId = 0;
@@ -37,6 +39,9 @@ export class SpecSetup {
 
     if (autoBind) this.setup.autobind();
     if (!useChilds) this.bindChildlessRequestHandlerMock();
+
+    // Change logger unless env variable is set
+    if (!(process.env.SPEC_LOGS === "true")) this.bindSpecLogger();
   }
 
   /**
@@ -108,6 +113,14 @@ export class SpecSetup {
   bindChildlessRequestHandlerMock() {
     this.setup.container.inversifyInstance.unbind(GenericRequestHandler);
     this.setup.container.inversifyInstance.bind(GenericRequestHandler).to(ChildlessGenericRequestHandler);
+  }
+
+  /**
+   * Changes logger to a new one without any streams configured. Makes the logger silent.
+   */
+  bindSpecLogger() {
+    this.setup.container.inversifyInstance.unbind(injectionNames.logger);
+    this.setup.container.inversifyInstance.bind<Logger>(injectionNames.logger).toConstantValue(createLogger({ name: "assistantjs-testing", streams: [] }));
   }
 
   /** 

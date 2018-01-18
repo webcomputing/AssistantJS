@@ -6,11 +6,12 @@ describe("BaseResponse", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
+    this.logger = this.container.inversifyInstance.get("core:root:current-logger");
     
     // Add some supported features
     this.handler.supportedFeature = null;
 
-    this.baseResponse = new BaseResponse(this.handler, false);
+    this.baseResponse = new BaseResponse(this.handler, false, this.logger);
   });
 
   describe("reportIfUnavailable", function() {
@@ -26,7 +27,7 @@ describe("BaseResponse", function() {
 
         it("does not throw any exception", function() {
           expect(() => {
-            this.baseResponse.reportIfUnavailable(this.featureToCheck);
+            this.baseResponse.reportIfUnavailable(this.featureToCheck, "spec message");
           }).not.toThrow();
         });
       });
@@ -38,7 +39,7 @@ describe("BaseResponse", function() {
 
         it("throws an exception", function() {
           expect(() => {
-            this.baseResponse.reportIfUnavailable(this.featureToCheck);
+            this.baseResponse.reportIfUnavailable(this.featureToCheck, "spec message");
           }).toThrow();
         });
       });
@@ -56,7 +57,7 @@ describe("BaseResponse", function() {
 
         it("does not throw any exception", function() {
           expect(() => {
-            this.baseResponse.reportIfUnavailable(this.featureToCheck);
+            this.baseResponse.reportIfUnavailable(this.featureToCheck, "spec message");
           }).not.toThrow();
         });
       });

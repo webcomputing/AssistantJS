@@ -1,11 +1,9 @@
 import { Container, MainApplication, ContainerImpl, ComponentDescriptor } from "inversify-components";
-import { debug } from "debug";
 import { injectable, inject, multiInject } from "inversify";
 
 import * as internalComponents from "./components/index";
 
 export class AssistantJSSetup {
-  static log = debug("assistant");
   static globalContainer = new ContainerImpl();
 
   container: Container;
@@ -34,7 +32,6 @@ export class AssistantJSSetup {
   }
 
   registerComponents(components: ComponentDescriptor[] | {[name: string]: ComponentDescriptor}) {
-    AssistantJSSetup.log("Importing component descriptors: %O", components);
     components = typeof components === "object" ? Object.keys(components).map(k => components[k]) : components;
 
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
@@ -61,6 +58,3 @@ export class AssistantJSSetup {
     if (autoConfigure) this.configure();
   }
 }
-
-/** Short form of AssistantJS.log */
-export const log = AssistantJSSetup.log;
