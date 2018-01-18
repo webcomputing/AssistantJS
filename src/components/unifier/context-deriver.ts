@@ -9,8 +9,8 @@ import { componentInterfaces, RequestConversationExtractor, OptionalExtractions,
 export class ContextDeriver implements ContextDeriverI {
 
   constructor(
-    @inject(injectionNames.logger) private logger: Logger,
-    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = []
+    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = [],
+    @inject(injectionNames.logger) private logger: Logger
   ) {}
 
   async derive(context: RequestContext) {

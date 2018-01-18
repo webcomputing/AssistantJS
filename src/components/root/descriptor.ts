@@ -3,6 +3,8 @@ import { GenericRequestHandler } from "./generic-request-handler";
 import { defaultBunyan } from "./default-bunyan";
 import { componentInterfaces, OptionalConfiguration, Configuration, RequestContext, Logger } from "./interfaces";
 
+import { componentInterfaces as temp } from "../unifier/interfaces";
+
 const defaultConfiguration: OptionalConfiguration = {
   bunyanInstance: defaultBunyan
 }

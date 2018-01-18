@@ -74,7 +74,7 @@ export class TranslateHelper implements TranslateHelperInterface {
       lookupKeys = [key as string];
     }
 
-    this.logger.debug("I18N: using key resolvings %o with options/locals %o", lookupKeys);
+    this.logger.debug("I18N: using key resolvings %o", lookupKeys);
     return this.translateOrFail(lookupKeys, options);
   }
 
