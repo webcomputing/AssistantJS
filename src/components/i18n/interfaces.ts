@@ -2,13 +2,19 @@ import * as i18next from "i18next";
 
 export interface TranslateHelper {
   /**
-   * Translates the given key using your json translations.
-   * @param key optional string. If you leave out this param, will look at key called "currentState.currentIntent". If you pass a 
-   * relative key (beginning with '.'), will look at "currentState.currentIntent.KEY". If you pass an absolute key (without "." at beginning), 
-   * looks at given absolute key.
-   * @param locals Variables to use in resonses
+   * Translates the given key using your json translations and a convention-over-configuration-approach.
+   * First try is `currentState.currentIntent.platform.device`.
+   * @param locals If given: variables to use in response
    */
   t(locals?: {[name: string]: string | number | object}): string;
+
+    /**
+   * Translates the given key using your json translations.
+   * @param key String of the key to look for. If you pass a relative key (beginning with '.'), 
+    this method will apply several conventions, first looking for a translation for "currentState.currentIntent.KEY.platform.device". 
+    If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
+   * @param locals Variables to use in reponse
+   */
   t(key?: string, locals?: {[name: string]: string | number | object}): string;
 }
 

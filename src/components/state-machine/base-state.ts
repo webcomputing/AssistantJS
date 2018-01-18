@@ -84,19 +84,41 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
     this.responseFactory.createAndSendEmptyResponse();
   }
 
-  /** Synonym of translateHelper.t */
+  /**
+   * Translates the given key using your json translations and a convention-over-configuration-approach.
+   * First try is `currentState.currentIntent.platform.device`.
+   * @param locals If given: variables to use in response
+   */
+  t(locals?: {[name: string]: string | number | object}): string;
+  
+  /**
+   * Translates the given key using your json translations.
+   * @param key String of the key to look for. If you pass a relative key (beginning with '.'), this method will apply several conventions.
+   * First of them, this method will for a translation for "currentState.currentIntent.KEY.platform.device". 
+   * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
+   * @param locals Variables to use in reponse
+   */
+  t(key?: string, locals?: {[name: string]: string | number | object}): string;
+
   t(...args: any[]) {
     return (this.translateHelper as any).t(...args);
   }
 
-  /** Synonym of responseFactory.createVoiceResponse().prompt */
+  /**
+   * Sends voice message but does not end session, so the user is able to respond
+   * @param {string} text Text to say to user
+   * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
+   */
   prompt(text: string, ...reprompts: string[]) {
-    this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
+    return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 
-  /** Synonym of responseFactory.createVoiceResponse().endSessionWith */
+  /**
+   * Sends voice message and ends session
+   * @param {string} text Text to say to user
+   */
   endSessionWith(text: string) {
-    this.responseFactory.createVoiceResponse().endSessionWith(text);
+    return this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 
   /** Returns name of current platform */
