@@ -15,7 +15,8 @@ import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, R
 let configuration: OptionalConfiguration = {
   utterancePath: process.cwd() + "/config/locales",
   entities: {},
-  failSilentlyOnUnsupportedFeatures: true
+  failSilentlyOnUnsupportedFeatures: true,
+  logExtractionWhitelist: ["platform", "device", "intent", "language"]
 }
 
 export const descriptor: ComponentDescriptor = {

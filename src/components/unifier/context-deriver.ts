@@ -1,17 +1,22 @@
 import { injectable, inject, multiInject, optional } from "inversify";
+import { Component } from "inversify-components";
 
 import { featureIsAvailable } from "./feature-checker";
 import { injectionNames } from '../../injection-names';
 import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/interfaces";
-import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./interfaces";
+import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction, LogWhitelistSet, Configuration } from "./interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
+  loggingWhitelist: LogWhitelistSet;
 
   constructor(
     @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = [],
-    @inject(injectionNames.logger) private logger: Logger
-  ) {}
+    @inject(injectionNames.logger) private logger: Logger,
+    @inject("meta:component//core:unifier") componentMeta: Component
+  ) {
+    this.loggingWhitelist = (componentMeta.configuration as any).logExtractionWhitelist;
+  }
 
   async derive(context: RequestContext) {
     const extractor = await this.findExtractor(context);
@@ -20,7 +25,7 @@ export class ContextDeriver implements ContextDeriverI {
       const extractionResult = await extractor.extract(context);
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      this.logger.info( { requestId: context.id }, "Resolved platform context = %o", logableExtractionResult);
+      this.logger.info( { requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
       return [extractionResult, "core:unifier:current-extraction"];
     } else {
       return undefined;
@@ -77,24 +82,27 @@ export class ContextDeriver implements ContextDeriverI {
     // Deep clone extraction object, just to be sure we don't change any values
     extraction = JSON.parse(JSON.stringify(extraction));
 
-    /** List of entity names to filter */
-    const entityNamesToFilter = ["pin", "password", "secure"];
-
     /** "filtered" String */
     const filteredPlaceholder = "**filtered**";
 
-    // Filter tokens
-    let filtered = Object.assign({}, extraction, {
-      "component": filteredPlaceholder,
-      "oAuthToken": filteredPlaceholder,
-      "temporalAuthToken": filteredPlaceholder
-    });
+    /** Sets all entries to "filteredPlaceholder" except the ones in the given whitelist */
+    const filterSet = <T>(set: T, whitelist: LogWhitelistSet): T => {
+      // Get a merged set of all used object keys in whitelist. For example, if whitelist is ["a", {b: ["c"], d: ["e"]}, {f: "g"}], this would be {b: ["c"], d: ["e"], f: ["g"]}
+      const mergedObject = whitelist.filter(entry => typeof(entry) === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
 
-    // Filter entities
-    if (typeof filtered.entities !== "undefined") {
-      Object.keys(filtered.entities).filter(key => entityNamesToFilter.indexOf(key) > -1).forEach(key => (filtered.entities as object)[key] = filteredPlaceholder);
-    }
+      /** Check filtering for every key */
+      Object.keys(set).forEach(extractionKey => {
+        if (mergedObject.hasOwnProperty(extractionKey)) {
+          // Is filtered by object key => call filterSet with sub-whitelist recursivly
+          set[extractionKey] = filterSet(set[extractionKey], mergedObject[extractionKey]);
+        } else if (whitelist.indexOf(extractionKey) === -1) {
+          set[extractionKey] = filteredPlaceholder;
+        }
+      });
 
-    return filtered;
+      return set;
+    };
+
+    return filterSet(extraction, this.loggingWhitelist);
   }
 }
