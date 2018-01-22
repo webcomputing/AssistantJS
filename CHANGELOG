@@ -1,3 +1,6 @@
+version 0.2.7
+- adds default port to fakredis spec instance, bugfixing fast mode
+
 version 0.2.6
 - executes registerInternalComponents() only if not done already by developer, giving him/her more flexibility
 
