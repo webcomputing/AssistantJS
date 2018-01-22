@@ -1,4 +1,5 @@
 version 0.2.7
+- removes local references from package-lock.json
 - adds default port to fakredis spec instance, bugfixing fast mode
 
 version 0.2.6
