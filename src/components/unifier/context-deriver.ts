@@ -4,21 +4,21 @@ import { Component } from "inversify-components";
 import { featureIsAvailable } from "./feature-checker";
 import { injectionNames } from '../../injection-names';
 import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/interfaces";
-import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction, LogWhitelistSet, Configuration } from "./interfaces";
+import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction, Configuration } from "./interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
-  loggingWhitelist: LogWhitelistSet;
+  loggingWhitelist: Configuration.LogWhitelistSet;
 
   constructor(
     @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = [],
     @inject(injectionNames.logger) private logger: Logger,
-    @inject("meta:component//core:unifier") componentMeta: Component
+    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
   ) {
-    this.loggingWhitelist = (componentMeta.configuration as any).logExtractionWhitelist;
+    this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }
 
-  async derive(context: RequestContext) {
+  async derive(context: RequestContext): Promise<[any, string] | undefined> {
     const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
@@ -86,7 +86,7 @@ export class ContextDeriver implements ContextDeriverI {
     const filteredPlaceholder = "**filtered**";
 
     /** Sets all entries to "filteredPlaceholder" except the ones in the given whitelist */
-    const filterSet = <T>(set: T, whitelist: LogWhitelistSet): T => {
+    const filterSet = <T>(set: T, whitelist: Configuration.LogWhitelistSet): T => {
       // Get a merged set of all used object keys in whitelist. For example, if whitelist is ["a", {b: ["c"], d: ["e"]}, {f: "g"}], this would be {b: ["c"], d: ["e"], f: ["g"]}
       const mergedObject = whitelist.filter(entry => typeof(entry) === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
 

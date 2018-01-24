@@ -99,22 +99,37 @@ export namespace GenericIntent {
   }
 }
 
-export type LogWhitelistSet = ( string | { [keyName: string]: LogWhitelistSet } )[];
-
-export interface OptionalConfiguration {
-  /** Path to your utterances. Regularly, you shouldn't need to change this. */
-  utterancePath?: string;
-
-  /** Maps all entities of your app to their respective internal types. You later have to map these types to platform-specific types. */
-  entities?: { [type: string]: string[] };
-
-  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
-  failSilentlyOnUnsupportedFeatures?: boolean;
-
+export namespace Configuration {
   /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
-  logExtractionWhitelist?: LogWhitelistSet;
+  export type LogWhitelistSet = ( string | { [keyName: string]: LogWhitelistSet } )[];
+
+  /** Configuration defaults -> all of these keys are optional for user */
+  export interface Defaults {
+    /** Path to your utterances. Regularly, you shouldn't need to change this. */
+    utterancePath: string;
+  
+    /** Maps all entities of your app to their respective internal types. You later have to map these types to platform-specific types. */
+    entities: { [type: string]: string[] };
+  
+    /** If set to false, created response objects will throw an exception if an unsupported feature if used */
+    failSilentlyOnUnsupportedFeatures: boolean;
+  
+    /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
+    logExtractionWhitelist: LogWhitelistSet;
+  }
+
+  /** Required configuration options, no defaults are used here */
+  export interface Required {
+
+  }
+
+  /** Available configuration settings in a runtime application */
+  export interface Runtime extends Defaults, Required {};
 }
-export interface Configuration extends OptionalConfiguration {}
+
+/** Configuration object for AssistantJS user for unifier component */
+export interface Configuration extends Partial<Configuration.Defaults>, Configuration.Required {}
+
 
 export interface EntityDictionary {
   store: {[name: string]: any};
@@ -186,8 +201,8 @@ export interface GeneratorEntityMapping {
 
 /** Extractor interfaces */
 
-export interface RequestConversationExtractor {
-  component: Component;
+export interface RequestConversationExtractor<Configuration={}> {
+  component: Component<Configuration>;
   fits(context: RequestContext): Promise<boolean>;
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
@@ -208,8 +223,8 @@ export interface CommonRequestExtraction {
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
-export interface PlatformRequestExtraction extends CommonRequestExtraction {
-  component: Component;
+export interface PlatformRequestExtraction<Configuration={}> extends CommonRequestExtraction {
+  component: Component<Configuration>;
 }
 
 export interface MinimalRequestExtraction extends CommonRequestExtraction {

@@ -13,10 +13,10 @@ export class Generator implements GeneratorExtension {
   private entityMappings: GeneratorEntityMapping[] = [];
   private additionalUtteranceTemplatesServices: GeneratorUtteranceTemplateService[] = [];
   private intents: intent[] = [];
-  private configuration: Configuration;
+  private configuration: Configuration.Runtime;
 
   constructor(
-    @inject("meta:component//core:unifier") componentMeta: Component, 
+    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>, 
     @inject("core:state-machine:used-intents") @optional() intents: intent[],
     @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator[],
     @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: GeneratorUtteranceTemplateService[],
@@ -116,7 +116,7 @@ export class Generator implements GeneratorExtension {
 
   getUtteranceTemplatesPerLanguage(): {[language: string]: {[intent: string]: string[]}} {
     let utterances = {};
-    let utterancesDir = this.configuration.utterancePath as string;
+    let utterancesDir = this.configuration.utterancePath;
     let languages = fs.readdirSync(utterancesDir);
     languages.forEach(language => {
       let utterancePath = utterancesDir + "/" + language + "/utterances.json";

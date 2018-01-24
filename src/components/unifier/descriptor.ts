@@ -9,17 +9,17 @@ import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
 import { KillSessionService } from "./kill-session-service";
 import { swapHash } from "./swap-hash";
-import { componentInterfaces, MinimalRequestExtraction, OptionalConfiguration, ResponseFactory, 
-  EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping, Configuration } from "./interfaces";
+import { componentInterfaces, MinimalRequestExtraction, Configuration, ResponseFactory, 
+  EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping } from "./interfaces";
 
-let configuration: OptionalConfiguration = {
+const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
   entities: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"]
 }
 
-export const descriptor: ComponentDescriptor = {
+export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:unifier",
   interfaces: componentInterfaces,
   defaultConfiguration: configuration,
@@ -30,7 +30,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<GeneratorEntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return swapHash((context.container.get<Component>("meta:component//core:unifier").configuration as Configuration).entities);
+        return swapHash(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
       });
       
       // Bind same swapped entity configuration to own extension

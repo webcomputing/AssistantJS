@@ -20,7 +20,7 @@ export class MockExtractor implements RequestConversationExtractor {
   }
 
   /** Returns the whole body as extraction result */
-  extract(context: RequestContext) {
+  extract(context: RequestContext): Promise<any> {
     return new Promise(resolve => {
       resolve(context.body);
     });

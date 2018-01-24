@@ -28,12 +28,12 @@ export class ResponseFactory implements ResponseFactoryInterface {
 
   constructor(
     @inject("core:unifier:current-response-handler") handler: MinimalResponseHandler,
-    @inject("meta:component//core:unifier") componentMeta: Component,
+    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>,
     @inject(injectionNames.current.logger) logger: Logger
   ) {
     this.handler = handler;
     this.logger = logger;
-    this.failSilentlyOnUnsupportedFeatures = (componentMeta.configuration as Configuration).failSilentlyOnUnsupportedFeatures as boolean;
+    this.failSilentlyOnUnsupportedFeatures = componentMeta.configuration.failSilentlyOnUnsupportedFeatures;
   }
 
   createVoiceResponse() {

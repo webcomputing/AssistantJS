@@ -22,17 +22,31 @@ export interface ResponseCallback {
 }
 
 export interface ContextDeriver {
-  derive(context: RequestContext): Promise<[any, string]> | Promise<undefined>;
+  derive(context: RequestContext): Promise<[any, string] | undefined>;
 }
 
 export interface GeneratorExtension {
   execute(buildPath: string): void;
 }
 
-export interface OptionalConfiguration {
-  bunyanInstance?: Logger
+
+export namespace Configuration {
+  /** Configuration defaults -> all of these keys are optional for user */
+  export interface Defaults {
+    /**
+     * Instance of bunyan logger.
+     * If you want to use your own bunyan logger as root logger, pass it here.
+     * You will have access to request-dependent child instances of this logger in your states.
+     */
+    bunyanInstance: Logger
+  }
+
+  /** Required configuration options, no defaults are used here */
+  export interface Required {}
+
+  /** Available configuration settings in a runtime application */
+  export interface Runtime extends Defaults, Required {};
 }
 
-export interface Configuration extends OptionalConfiguration {
-  
-}
+/** Configuration object for AssistantJS user for root component */
+export interface Configuration extends Partial<Configuration.Defaults>, Configuration.Required {}

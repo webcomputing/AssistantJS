@@ -1,15 +1,15 @@
 import { ComponentDescriptor, Component } from "inversify-components";
 import { GenericRequestHandler } from "./generic-request-handler";
 import { defaultBunyan } from "./default-bunyan";
-import { componentInterfaces, OptionalConfiguration, Configuration, RequestContext, Logger } from "./interfaces";
+import { componentInterfaces, Configuration, RequestContext, Logger } from "./interfaces";
 
 import { componentInterfaces as temp } from "../unifier/interfaces";
 
-const defaultConfiguration: OptionalConfiguration = {
+const defaultConfiguration: Configuration.Defaults = {
   bunyanInstance: defaultBunyan
 }
 
-export const descriptor: ComponentDescriptor = {
+export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:root",
   interfaces: componentInterfaces,
   defaultConfiguration: defaultConfiguration,
@@ -17,7 +17,7 @@ export const descriptor: ComponentDescriptor = {
     root: (bindService) => {
       bindService.bindLocalServiceToSelf(GenericRequestHandler);
       bindService.bindGlobalService("logger").toDynamicValue(context => {
-        return (context.container.get<Component>("meta:component//core:root").configuration as any).bunyanInstance;
+        return context.container.get<Component<Configuration.Runtime>>("meta:component//core:root").configuration.bunyanInstance;
       });
     },
     request: (bindService) => {

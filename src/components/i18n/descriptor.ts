@@ -7,7 +7,7 @@ import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nContext } from "./context";
 import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 
-let defaultConfiguration: Configuration = {
+let defaultConfiguration: Configuration.Defaults = {
   i18nextInstance: i18next.createInstance(),
   i18nextAdditionalConfiguration: {
     backend: {
@@ -16,7 +16,7 @@ let defaultConfiguration: Configuration = {
   }
 }
 
-export const descriptor: ComponentDescriptor = {
+export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:i18n",
   defaultConfiguration: defaultConfiguration,
   bindings: {
@@ -24,7 +24,7 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService<I18nextWrapper>("wrapper").to(I18nextWrapper).inSingletonScope();
 
       bindService.bindGlobalService<I18nextWrapper>("spec-wrapper").toDynamicValue(context => {
-        return new I18nextWrapper(context.container.get<Component>("meta:component//core:i18n"), false);
+        return new I18nextWrapper(context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"), false);
       }).inSingletonScope();
 
       // Registers a spec helper function which returns all possible values instead of a sample one
