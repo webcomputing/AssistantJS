@@ -30,7 +30,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<GeneratorEntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return swapHash((context.container.get<Component>("meta:component//core:unifier").configuration as Configuration).entities);
+        return swapHash(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
       });
       
       // Bind same swapped entity configuration to own extension

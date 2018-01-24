@@ -24,7 +24,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<I18nextWrapper>("wrapper").to(I18nextWrapper).inSingletonScope();
 
       bindService.bindGlobalService<I18nextWrapper>("spec-wrapper").toDynamicValue(context => {
-        return new I18nextWrapper(context.container.get<Component>("meta:component//core:i18n"), false);
+        return new I18nextWrapper(context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"), false);
       }).inSingletonScope();
 
       // Registers a spec helper function which returns all possible values instead of a sample one

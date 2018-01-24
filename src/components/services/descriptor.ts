@@ -17,14 +17,14 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindingService.bindGlobalService<inversifyInterfaces.Factory<DestroyableSession>>("session-factory").toFactory<DestroyableSession>(context => {
         return (sessionID: string) => {
           let redisInstance = context.container.get<RedisClient>("core:services:redis-instance");
-          let configuration = context.container.get<Component>("meta:component//core:services").configuration as Configuration;
-          return new Session(sessionID, redisInstance, configuration.maxLifeTime as number);
+          let configuration = context.container.get<Component<Configuration.Runtime>>("meta:component//core:services").configuration;
+          return new Session(sessionID, redisInstance, configuration.maxLifeTime);
         };
       });
 
       bindingService.bindGlobalService<RedisClient>("redis-instance").toDynamicValue(context => {
-        let component = context.container.get<Component>("meta:component//core:services");
-        return (component.configuration as Configuration).redisClient;
+        const component = context.container.get<Component<Configuration.Runtime>>("meta:component//core:services");
+        return component.configuration.redisClient;
       })
     }
   }

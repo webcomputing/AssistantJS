@@ -201,8 +201,8 @@ export interface GeneratorEntityMapping {
 
 /** Extractor interfaces */
 
-export interface RequestConversationExtractor {
-  component: Component;
+export interface RequestConversationExtractor<Configuration={}> {
+  component: Component<Configuration>;
   fits(context: RequestContext): Promise<boolean>;
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
@@ -223,8 +223,8 @@ export interface CommonRequestExtraction {
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
-export interface PlatformRequestExtraction extends CommonRequestExtraction {
-  component: Component;
+export interface PlatformRequestExtraction<Configuration={}> extends CommonRequestExtraction {
+  component: Component<Configuration>;
 }
 
 export interface MinimalRequestExtraction extends CommonRequestExtraction {

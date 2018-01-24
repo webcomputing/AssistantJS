@@ -17,7 +17,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
     root: (bindService) => {
       bindService.bindLocalServiceToSelf(GenericRequestHandler);
       bindService.bindGlobalService("logger").toDynamicValue(context => {
-        return (context.container.get<Component>("meta:component//core:root").configuration as any).bunyanInstance;
+        return (context.container.get<Component<Configuration.Runtime>>("meta:component//core:root").configuration as any).bunyanInstance;
       });
     },
     request: (bindService) => {
