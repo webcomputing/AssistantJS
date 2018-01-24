@@ -7,7 +7,7 @@ import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nContext } from "./context";
 import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 
-let defaultConfiguration: Configuration = {
+let defaultConfiguration: Configuration.Defaults = {
   i18nextInstance: i18next.createInstance(),
   i18nextAdditionalConfiguration: {
     backend: {
@@ -16,7 +16,7 @@ let defaultConfiguration: Configuration = {
   }
 }
 
-export const descriptor: ComponentDescriptor = {
+export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:i18n",
   defaultConfiguration: defaultConfiguration,
   bindings: {

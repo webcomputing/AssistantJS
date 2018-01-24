@@ -18,7 +18,7 @@ export class ContextDeriver implements ContextDeriverI {
     this.loggingWhitelist = (componentMeta.configuration as any).logExtractionWhitelist;
   }
 
-  async derive(context: RequestContext) {
+  async derive(context: RequestContext): Promise<[any, string] | undefined> {
     const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {

@@ -9,7 +9,7 @@ import { Configuration } from "./interfaces";
 
 @injectable()
 export class I18nextWrapper {
-  private component: Component;
+  private component: Component<Configuration>;
   private configuration: Configuration;
 
   instance: i18next.I18n;
@@ -18,9 +18,9 @@ export class I18nextWrapper {
    * @param componentMeta Component meta data
    * @param returnOnlySample If set to true, translation calls return a sample out of many options (for production), if false, you get all options (for specs only)
    */
-  constructor(@inject("meta:component//core:i18n") componentMeta: Component, returnOnlySample = true) {
+  constructor(@inject("meta:component//core:i18n") componentMeta: Component<Configuration>, returnOnlySample = true) {
     this.component = componentMeta;
-    this.configuration = componentMeta.configuration as Configuration;
+    this.configuration = componentMeta.configuration;
 
     if (typeof this.configuration.i18nextAdditionalConfiguration === "undefined" || 
      this.configuration.i18nextAdditionalConfiguration === "undefined")

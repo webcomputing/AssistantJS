@@ -2,14 +2,14 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { ComponentDescriptor, Component } from "inversify-components";
 import { RedisClient } from "redis";
 
-import { DestroyableSession, OptionalConfiguration, Configuration } from "./interfaces";
+import { DestroyableSession, Configuration } from "./interfaces";
 import { Session } from "./session";
 
-const defaultConfiguration: OptionalConfiguration = {
+const defaultConfiguration: Configuration.Defaults = {
   maxLifeTime: 1800
 };
 
-export const descriptor: ComponentDescriptor = {
+export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:services",
   defaultConfiguration: defaultConfiguration,
   bindings: {
