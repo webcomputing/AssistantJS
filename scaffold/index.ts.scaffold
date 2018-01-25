@@ -1,9 +1,9 @@
 import { AssistantJSSetup, StateMachineSetup } from "assistant-source";
-import components from "./config/components";
+import componentConfiguration from "./config/components";
 
 /** 
- * Initialize assistant.js
- * The only requirement for assistantJs to work is to export an "assistantJs" object with the AssistantJSSetup configured.
+ * Initialize AssistantJS
+ * The only requirement for AssistantJS to work is to export an "assistantJs" object with the AssistantJSSetup configured.
  * Here, we are exporting all two used setups. Those setups are already initialized using the initializeSetups() function, see below.
  */
 export const assistantJs = new AssistantJSSetup();
@@ -16,10 +16,10 @@ export const stateMachineSetup = new StateMachineSetup(assistantJs);
  * @param addOnly If set to true, states will only be added, but not registered in the dependency injection container
  */
 export function initializeSetups (assistantJs: AssistantJSSetup, stateMachineSetup: StateMachineSetup, addOnly = false) {
-  // Register all AssistantJS components - currently none
+  // Register all additional AssistantJS components - currently none
 
   // Configure components
-  assistantJs.addConfiguration(components);
+  assistantJs.addConfiguration(componentConfiguration);
 
   // Register all states and strategies
   stateMachineSetup.registerByConvention(addOnly);
@@ -28,3 +28,14 @@ export function initializeSetups (assistantJs: AssistantJSSetup, stateMachineSet
 // Initialize the exported production setups
 assistantJs.registerInternalComponents();
 initializeSetups(assistantJs, stateMachineSetup);
+
+// Print stack traces of rejected promises to console if we are in a non-production environment
+// You possibly want to set up your own behaviour here
+const nodeEnv = process.env.NODE_ENV;
+if (!(typeof nodeEnv === "string" && nodeEnv.toLowerCase() === "production")) {
+  process.on('unhandledRejection', exception => { 
+    if (typeof exception !== "undefined" && exception !== null) {
+      console.log(exception);
+    }
+  });
+}

@@ -1,9 +1,9 @@
-import { stateMachineInterfaces, BaseState } from "assistant-source";
+import { State, BaseState } from "assistant-source";
 import { injectable, unmanaged } from "inversify";
 
 @injectable()
 export class ApplicationState extends BaseState {
-  constructor(@unmanaged() stateSetupSet: stateMachineInterfaces.StateSetupSet) {
-    super(stateSetupSet);
+  constructor(@unmanaged() setupSet: State.SetupSet) {
+    super(setupSet);
   }
 }

@@ -57,7 +57,7 @@ export function cli(argv, resolvedIndex) {
     // Create copyInstructions: [0] => source directory, [1] => target directory
     let copyInstructions = [
       ['components.ts', 'config/components.ts'], 
-      ['jasmine.json', 'spec/support/jasmine.json'], ['promise-traces.js', 'spec/helpers/promise-traces.js'], ['setup.js', 'spec/helpers/setup.js'],
+      ['jasmine.json', 'spec/support/jasmine.json'], ['setup.js', 'spec/helpers/setup.js'],
       ['application.ts', 'app/states/application.ts'], ['main.ts', 'app/states/main.ts']
     ];
     

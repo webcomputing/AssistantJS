@@ -1,4 +1,4 @@
-import { stateMachineInterfaces, injectionNames } from "assistant-source";
+import { State, Transitionable, injectionNames } from "assistant-source";
 import { injectable, inject } from "inversify";
 
 import { ApplicationState } from "./application";
@@ -12,7 +12,7 @@ import { ApplicationState } from "./application";
 @injectable()
 export class MainState extends ApplicationState {
   constructor(
-    @inject(injectionNames.current.stateSetupSet) stateSetupSet: stateMachineInterfaces.stateSetupSet
+    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet
   ) {
     super(stateSetupSet);
   }
@@ -21,7 +21,7 @@ export class MainState extends ApplicationState {
    * The invokeGenericIntent method (unifierInterfaces.GenericIntent.invoke) is your "main entrance" into your application. 
    * It is called as soon as the application is launched, e. g. if user says "launch xxxxx".
    */
-  invokeGenericIntent(machine: stateMachineInterfaces.Transitionable) {
+  invokeGenericIntent(machine: Transitionable) {
 
   }
 }
