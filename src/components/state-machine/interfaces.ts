@@ -71,10 +71,10 @@ export namespace State {
     afterIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): void;
   }
 
-}
-
-export interface StateConstructor {
-  new(...args: any[]): State.Required;
+  /** Constructor of state objects */
+  export interface Constructor<S extends Required = Required> {
+    new(...args: any[]): S;
+  }
 }
 
 export interface MetaState {

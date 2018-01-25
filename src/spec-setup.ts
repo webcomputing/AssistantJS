@@ -5,7 +5,7 @@ import { createLogger } from "bunyan"
 
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { StateMachineSetup } from "./components/state-machine/setup";
-import { StateConstructor, StateMachine } from "./components/state-machine/interfaces";
+import { State, StateMachine } from "./components/state-machine/interfaces";
 import { RequestContext, Logger } from "./components/root/interfaces";
 import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/interfaces";
 import { Configuration } from "./components/services/interfaces";
@@ -32,7 +32,7 @@ export class SpecSetup {
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
    * */
-  prepare(states: StateConstructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
+  prepare(states: State.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
     this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
@@ -101,7 +101,7 @@ export class SpecSetup {
   }
 
   /** Registers states */
-  registerStates(states: StateConstructor[]) {
+  registerStates(states: State.Constructor[]) {
     let stateMachineSetup = new StateMachineSetup(this.setup);
     states.forEach(state => stateMachineSetup.addState(state));
     stateMachineSetup.registerStates();

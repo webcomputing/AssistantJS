@@ -1,14 +1,14 @@
 import { ComponentDescriptor } from "inversify-components";
 import * as fs from "fs";
 
-import { State, StateConstructor, MetaState, componentInterfaces } from "./interfaces";
+import { State, MetaState, componentInterfaces } from "./interfaces";
 
 import { GenericIntent } from "../unifier/interfaces";
 import { AssistantJSSetup } from "../../setup";
 
 export class StateMachineSetup {
   private assistantJS: AssistantJSSetup;
-  private stateClasses: {[name: string]: StateConstructor} = {};
+  private stateClasses: {[name: string]: State.Constructor} = {};
   private metaStates: MetaState[] = [];
   
   /** If set to true, states are registered in singleton scope. This may be pretty useful for testing. */
@@ -42,7 +42,7 @@ export class StateMachineSetup {
   }
 
   /** Adds a state to setup */
-  addState(stateClass: StateConstructor, name?: string, intents?: string[]) {
+  addState(stateClass: State.Constructor, name?: string, intents?: string[]) {
     name = typeof name === "undefined" ? StateMachineSetup.deriveStateName(stateClass) : name;
     intents = typeof intents === "undefined" ? StateMachineSetup.deriveStateIntents(stateClass) : intents;
 
@@ -92,12 +92,12 @@ export class StateMachineSetup {
   }
 
   /** Returns a states name based on its constructor */
-  static deriveStateName(stateClass: StateConstructor): string {
+  static deriveStateName(stateClass: State.Constructor): string {
     return stateClass.name;
   }
 
   /** Derives names of intents based on a state class */
-  static deriveStateIntents(stateClass: StateConstructor): string[] {
+  static deriveStateIntents(stateClass: State.Constructor): string[] {
     let prototype = stateClass.prototype;
 
     // Return empty set if prototype is undefined - this also breaks recursive calls
