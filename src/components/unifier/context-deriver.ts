@@ -4,7 +4,7 @@ import { Component } from "inversify-components";
 import { featureIsAvailable } from "./feature-checker";
 import { injectionNames } from '../../injection-names';
 import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/public-interfaces";
-import { RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
+import { RequestExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
 import { Configuration, componentInterfaces } from "./private-interfaces";
 
 @injectable()
@@ -12,7 +12,7 @@ export class ContextDeriver implements ContextDeriverI {
   loggingWhitelist: Configuration.LogWhitelistSet;
 
   constructor(
-    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestConversationExtractor[] = [],
+    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestExtractor[] = [],
     @inject(injectionNames.logger) private logger: Logger,
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
   ) {
@@ -33,7 +33,7 @@ export class ContextDeriver implements ContextDeriverI {
     }
   }
 
-  async findExtractor(context: RequestContext): Promise<RequestConversationExtractor | null> {
+  async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
     const isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
     
@@ -56,7 +56,7 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   /** Returns list of extractors which implement most of all available optional extractor interfaces */
-  async selectExtractorsWithMostOptionalExtractions(extractors: RequestConversationExtractor[], context: RequestContext): Promise<RequestConversationExtractor[]> {
+  async selectExtractorsWithMostOptionalExtractions(extractors: RequestExtractor[], context: RequestContext): Promise<RequestExtractor[]> {
     if (extractors.length <= 1) return extractors; // Performance reasons
 
     // Build all extractions

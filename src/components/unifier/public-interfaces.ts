@@ -155,31 +155,67 @@ export interface EntityDictionary {
   readFromSession(session: Session, preferCurrentStore?: boolean, storeKey?: string): Promise<void>;
 }
 
-/** Generator interfaces */
+/** Bundled interfaces for platform generators */
+export namespace PlatformGenerator {
+  /** Mapping of intent, utterances and entities */
+  export interface IntentConfiguration {
+    /** The intent */
+    intent: intent;
 
-export interface GenerateIntentConfiguration {
-  intent: intent;
-  utterances: string[];
-  entities: string[];
+    /** Configured utterances of this intent */
+    utterances: string[];
+
+    /** Configured entities of this intent */
+    entities: string[];
+  }
+
+  /** Service extension, gets utterances by language */
+  export interface UtteranceTemplateService {
+    /**
+     * Gets intent-dependent utterances for specific langauge
+     * @param {string} langauge Language to get intent-specific utterances for
+     * @return {[intent: string]: string[]} Hash having intent as key and utterances as values
+     */
+    getUtterancesFor(language: string): {[intent: string]: string[]};
+  }
+
+  /** Extension interface to implement a platform generator */
+  export interface Extension {
+    /**
+     * Is called if user wants to generate build on your platform (can be async, see return value)
+     * @param {string} langauge langauge to build in
+     * @param {string} buildDir path of the build directory
+     * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
+     * @param {EntityMapping} entityMapping Mapping of entity types and names 
+     * @return {void|Promise<void>}
+     */
+    execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[], entityMapping: EntityMapping): void | Promise<void>;
+  }
+
+  /** Mapping of entity types and names */
+  export interface EntityMapping {
+    [type: string]: string;
+  }
 }
 
-export interface GeneratorUtteranceTemplateService {
-  getUtterancesFor(language: string): {[intent: string]: string[]};
-}
-
-export interface PlatformGenerator {
-  execute(language: string, buildDir: string, intentConfigurations: GenerateIntentConfiguration[], entityMapping: GeneratorEntityMapping);
-}
-
-export interface GeneratorEntityMapping {
-  [type: string]: string;
-}
-
-/** Extractor interfaces */
-
-export interface RequestConversationExtractor<Configuration={}> {
+/** Extension interface for request extractors */
+export interface RequestExtractor<Configuration={}> {
+  /** Link to component metadata */
   component: Component<Configuration>;
+
+  /** 
+   * Checks if given context can be processed by this extractor
+   * @param {RequestContext} context Given request context
+   * @return {Promise<boolean>} True if current context can be processed by this extractor
+   */
   fits(context: RequestContext): Promise<boolean>;
+
+  /**
+   * Extracts information out of request. The minimum set of information to extract is described by MinimalRequestExtraction.
+   * @param {RequestContext} context Request context to extract information from
+   * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information. 
+   *   See also OptionalExtration interface for more information.
+   */
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
 
@@ -203,11 +239,13 @@ export interface PlatformRequestExtraction<Configuration={}> extends CommonReque
   component: Component<Configuration>;
 }
 
+/** The minimum set of information a RequestExtractor has to extract from a request */
 export interface MinimalRequestExtraction extends CommonRequestExtraction {
   /** Name of platform responsible for this extraction (equals to component.name) */
   readonly platform: string;
 }
 
+/** Optional, additional informations which extractors may extract from a request */
 export namespace OptionalExtractions {
   /** Interface for extraction of oauth key */
   export interface OAuthExtraction extends MinimalRequestExtraction {
@@ -237,21 +275,110 @@ export namespace OptionalExtractions {
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
+    /** Are OAuth tokens available? */
     OAuthExtraction: ["oAuthToken"],
+
+    /** Is the spoken text available? */
     SpokenTextExtraction: ["spokenText"],
+
+    /** Is a platform-specific temporal auth token available? */
     TemporalAuthExtraction: ["temporalAuthToken"],
+
+    /** Are information about the used device available? */
     DeviceExtraction: ["device"]
   }
 }
-
-/** Response handler interfaces */
-
+/** Minimum interface a response handler has to fulfill */
 export interface MinimalResponseHandler {
+  /** If set to false, the session should go on after sending the response */
   endSession: boolean;
+  /** Voice message to speak to the user */
   voiceMessage: string | null;
+  /** Called automatically if the response should be sent */
   sendResponse(): void;
 }
 
+/** 
+ * In addition to the basic features every response handler has to support (see MinimalResponseHandler), 
+ * every response handler may also support a subset of these features
+*/
+export namespace OptionalHandlerFeatures {
+  /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
+  export interface AuthenticationHandler extends MinimalResponseHandler {
+    /** If set to true, the assistant will be informed about a missing oauth token */
+    forceAuthenticated: boolean;
+  }
+
+  /** If implemented, a response handler is able to parse SSML voice message */
+  export interface SSMLHandler extends MinimalResponseHandler {
+    /** If set to true, this voice message is in SSML format */
+    isSSML: boolean;
+  }
+
+  /** If implemented, the response handler's platform supports reprompts */
+  export interface Reprompt extends MinimalResponseHandler {
+    /** Reprompts for the current voice message */
+    reprompts: string[] | null;
+  }
+
+  export namespace GUI {
+    export namespace Card {
+      /** If implemented, the response handler's platform supports simple cards, containing text title and body */
+      export interface Simple extends MinimalResponseHandler {
+        /** The card's title */
+        cardTitle: string | null;
+
+        /** The card's body */
+        cardBody: string | null;
+      }
+
+      /* If implemented, the response handler's platform supports simple cards containing an image */
+      export interface Image extends Simple {
+        /** The image to display in the card */
+        cardImage: string | null;
+      }
+    }
+
+    /** If implemented, the response handler's platform supports suggestion chips */
+    export interface SuggestionChip extends MinimalResponseHandler {
+      /** The suggestion chips to show */
+      suggestionChips: string[] | null;
+    }
+
+    /** If implemented, the response handler's platform supports chat messages, which may differ to the given voice message */
+    export interface ChatBubble extends MinimalResponseHandler {
+      /** An array containing all chat messages / chat bubbles to display */
+      chatBubbles: string[] | null;
+    }
+  }
+
+
+  /** For internal feature checking since TypeScript does not emit interfaces */
+  export const FeatureChecker = {
+    /** Can we force the existance of OAuth tokens? */
+    AuthenticationHandler: ["forceAuthenticated"],
+
+    /** Are chat messages / chat bubbles available? */
+    ChatBubble: ["chatBubbles"],
+
+    /** Does this response handler support reprompts? */
+    Reprompt: ["reprompts"],
+
+    /** Does this response handler support SSML? */
+    SSMLHandler: ["isSSML"],
+
+    /** Does this response handler support cards containing a textual title and body? */
+    SimpleCard: ["cardBody", "cardTitle"],
+
+    /** Are cards containing a textual title, body and an image available? */
+    ImageCard: ["cardBody", "cardTitle", "cardImage"],
+
+    /** Does this response handler support suggestion chips? */
+    SuggestionChip: ["suggestionChips"]
+  }
+}
+
+/** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper {
   /** Link to assistantJS SpecSetup */
   specSetup: SpecSetup;
@@ -266,53 +393,6 @@ export interface PlatformSpecHelper {
   pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
 }
 
-
-export namespace OptionalHandlerFeatures {
-  export interface AuthenticationHandler extends MinimalResponseHandler {
-    forceAuthenticated: boolean;
-  }
-
-  export interface SSMLHandler extends MinimalResponseHandler {
-    isSSML: boolean;
-  }
-
-  export interface Reprompt extends MinimalResponseHandler {
-    reprompts: string[] | null;
-  }
-
-  export namespace GUI {
-    export namespace Card {
-      export interface Simple extends MinimalResponseHandler {
-        cardTitle: string | null;
-        cardBody: string | null;
-      }
-
-      export interface Image extends Simple {
-        cardImage: string | null;
-      }
-    }
-
-    export interface SuggestionChip extends MinimalResponseHandler {
-      suggestionChips: string[] | null;
-    }
-
-    export interface ChatBubble extends MinimalResponseHandler {
-      chatBubbles: string[] | null;
-    }
-  }
-
-
-  /** For internal feature checking since TypeScript does not emit interfaces */
-  export const FeatureChecker = {
-    AuthenticationHandler: ["forceAuthenticated"],
-    ChatBubble: ["chatBubbles"],
-    Reprompt: ["reprompts"],
-    SSMLHandler: ["isSSML"],
-    SimpleCard: ["cardBody", "cardTitle"],
-    ImageCard: ["cardBody", "cardTitle", "cardImage"],
-    SuggestionChip: ["suggestionChips"]
-  }
-}
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

@@ -57,7 +57,7 @@
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "tslint": "^5.8.0",
-    "typescript": "^2.5.2"
+    "typescript": "^2.6.2"
   },
   "bin": {
     "assistant": "./bin/assistant"

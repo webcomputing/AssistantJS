@@ -46,13 +46,13 @@ export interface ContextDeriver {
 }
 
 /** Interface to fulfill to register a generator (called via cli: "assistant g") */
-export interface GeneratorExtension {
+export interface CLIGeneratorExtension {
   /** 
    * Called if user users cli "assistant g" command
    * @param {string} buildPath Path to build directory
-   * @return {void}
+   * @return {void|Promise<void>}
    */
-  execute(buildPath: string): void;
+  execute(buildPath: string): void | Promise<void>;
 }
 
 /** Configuration object for AssistantJS user for root component */

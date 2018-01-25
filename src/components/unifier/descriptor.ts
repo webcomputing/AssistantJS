@@ -2,14 +2,14 @@ import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component 
 import { interfaces as inversifyInterfaces } from "inversify";
 
 import { DestroyableSession } from "../services/public-interfaces";
-import { ContextDeriver as ContextDeriverI, GeneratorExtension } from "../root/public-interfaces";
+import { ContextDeriver as ContextDeriverI, CLIGeneratorExtension } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
 import { KillSessionService } from "./kill-session-service";
 import { swapHash } from "./swap-hash";
-import { MinimalRequestExtraction, ResponseFactory, EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping } from "./public-interfaces";
+import { MinimalRequestExtraction, ResponseFactory, EntityDictionary, MinimalResponseHandler, PlatformGenerator } from "./public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 
 const configuration: Configuration.Defaults = {
@@ -26,16 +26,16 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   bindings: {
     root: (bindService, lookupService) => {
       bindService.bindExtension<ContextDeriverI>(lookupService.lookup("core:root").getInterface("contextDeriver")).to(ContextDeriver);
-      bindService.bindExtension<GeneratorExtension>(lookupService.lookup("core:root").getInterface("generator")).to(Generator);
+      bindService.bindExtension<CLIGeneratorExtension>(lookupService.lookup("core:root").getInterface("generator")).to(Generator);
 
       // Bind swapped entity configuration
-      bindService.bindGlobalService<GeneratorEntityMapping>("user-entity-mappings").toDynamicValue(context => {
+      bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
         return swapHash(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
       });
       
       // Bind same swapped entity configuration to own extension
-      bindService.bindExtension<GeneratorEntityMapping>(componentInterfaces.entityMapping).toDynamicValue(context =>
-        context.container.get<GeneratorEntityMapping>("core:unifier:user-entity-mappings"));
+      bindService.bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping).toDynamicValue(context =>
+        context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
     },
 
     request: (bindService, lookupService) => {

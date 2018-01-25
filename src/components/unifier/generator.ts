@@ -3,25 +3,25 @@ import { Component } from "inversify-components";
 import * as fs from "fs";
 import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
 import { GenericIntent, intent } from "./public-interfaces";
-import { GeneratorExtension } from "../root/public-interfaces";
+import { CLIGeneratorExtension } from "../root/public-interfaces";
 
-import { PlatformGenerator, GenerateIntentConfiguration, GeneratorEntityMapping, GeneratorUtteranceTemplateService } from "./public-interfaces";
+import { PlatformGenerator } from "./public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 
 @injectable()
-export class Generator implements GeneratorExtension {
-  private platformGenerators: PlatformGenerator[] = [];
-  private entityMappings: GeneratorEntityMapping[] = [];
-  private additionalUtteranceTemplatesServices: GeneratorUtteranceTemplateService[] = [];
+export class Generator implements CLIGeneratorExtension {
+  private platformGenerators: PlatformGenerator.Extension[] = [];
+  private entityMappings: PlatformGenerator.EntityMapping[] = [];
+  private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration.Runtime;
 
   constructor(
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>, 
     @inject("core:state-machine:used-intents") @optional() intents: intent[],
-    @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator[],
-    @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: GeneratorUtteranceTemplateService[],
-    @multiInject(componentInterfaces.entityMapping) @optional() entityMappings: GeneratorEntityMapping[]
+    @multiInject(componentInterfaces.platformGenerator) @optional() generators: PlatformGenerator.Extension[],
+    @multiInject(componentInterfaces.utteranceTemplateService) @optional() utteranceServices: PlatformGenerator.UtteranceTemplateService[],
+    @multiInject(componentInterfaces.entityMapping) @optional() entityMappings: PlatformGenerator.EntityMapping[]
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
     [intents, generators, utteranceServices, entityMappings].forEach(v =>  { if (typeof v === "undefined") v = [] } )
@@ -33,7 +33,7 @@ export class Generator implements GeneratorExtension {
     this.entityMappings = entityMappings;
   }
 
-  execute(buildDir: string) {
+  async execute(buildDir: string): Promise<void> {
     // Combine all registered parameter mappings to single object
     let parameterMapping = this.entityMappings.reduce((prev, curr) => Object.assign(prev, curr), {});
 
@@ -41,8 +41,8 @@ export class Generator implements GeneratorExtension {
     let templatesPerLanguage = this.getUtteranceTemplatesPerLanguage();
 
     // For each found language...
-    Object.keys(templatesPerLanguage).forEach(language => {
-      let buildIntentConfigs: GenerateIntentConfiguration[] = [];
+    const promises = Object.keys(templatesPerLanguage).map(language => {
+      let buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
 
       // Create language specific build dir
       let languageSpecificBuildDir = buildDir + "/" + language;
@@ -102,9 +102,12 @@ export class Generator implements GeneratorExtension {
       });
 
       // Call all platform generators
-      this.platformGenerators.forEach(generator =>
-        generator.execute(language, languageSpecificBuildDir, buildIntentConfigs.map(config => Object.assign({}, config)), Object.assign({}, parameterMapping)));
-    });
+      return this.platformGenerators.map(generator =>
+        Promise.resolve(generator.execute(language, languageSpecificBuildDir, buildIntentConfigs.map(config => Object.assign({}, config)), Object.assign({}, parameterMapping))));
+    }).reduce((prev, curr) => prev.concat(curr));
+
+    // Wait for all platform generators to finish
+    await Promise.all(promises);
   }
 
   buildUtterances(templateStrings: string[]): string[] {
