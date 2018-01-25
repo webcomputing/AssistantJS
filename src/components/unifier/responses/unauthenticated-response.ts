@@ -1,5 +1,5 @@
-import { Logger } from "../../root/interfaces";
-import { MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../interfaces";
+import { Logger } from "../../root/public-interfaces";
+import { MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../public-interfaces";
 import { VoiceResponse } from "./voice-response";
 import { BaseResponse } from "./base-response";
 

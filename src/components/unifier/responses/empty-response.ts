@@ -1,5 +1,5 @@
-import { Logger } from "../../root/interfaces";
-import { MinimalResponseHandler } from "../interfaces";
+import { Logger } from "../../root/public-interfaces";
+import { MinimalResponseHandler } from "../public-interfaces";
 import { SimpleVoiceResponse } from "./simple-voice-response";
 
 export class EmptyResponse extends SimpleVoiceResponse {

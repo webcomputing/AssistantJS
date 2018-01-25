@@ -1,5 +1,6 @@
 import { MainApplication, Container } from "inversify-components";
-import { componentInterfaces, GeneratorExtension } from "./interfaces";
+import { GeneratorExtension } from "./public-interfaces";
+import { componentInterfaces } from "./private-interfaces";
 
 import * as fs from "fs";
 

@@ -1,4 +1,4 @@
-import { MinimalResponseHandler, Voiceable } from "../interfaces";
+import { MinimalResponseHandler, Voiceable } from "../public-interfaces";
 import { BaseResponse } from "./base-response";
 
 export class VoiceResponse implements Voiceable {

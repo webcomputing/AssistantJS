@@ -1,24 +1,14 @@
 import { ExecutableExtension, Component, MessageBus } from "inversify-components";
-import { RequestContext } from "../root/interfaces";
-import { Session } from "../services/interfaces";
+import { RequestContext } from "../root/public-interfaces";
+import { Session } from "../services/public-interfaces";
 import { SpecSetup } from "../../spec-setup";
 import { CardResponse } from "./responses/card-response";
 import { ChatResponse } from "./responses/chat-response";
 import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
+import { Configuration } from "./private-interfaces";
 
+/** Intent type - intents are either strings or type of GenericIntent */
 export declare type intent = string | GenericIntent;
-
-export const componentInterfaces = {
-  "requestProcessor": Symbol("request-processor"),
-  "sessionEndedCallback": Symbol("session-ended-callback"),
-  "platformGenerator": Symbol("platform-generator"),
-  "utteranceTemplateService": Symbol("utterance-template-service"),
-  "entityMapping": Symbol("entity-mapping"),
-  "beforeKillSession": Symbol("hooks-before-kill-session"),
-  "afterKillSession": Symbol("hooks-after-kill-session")
-};
-
-/** End user interfaces */
 
 /** Main AssistantJS class to send responses to the user. */
 export interface ResponseFactory {
@@ -68,24 +58,40 @@ export interface Voiceable {
   prompt(text: string, ...reprompts: string[]): void;
 }
 
-/** Currently, we are not allowed to use camelCase here! So try to just use a single word! */
+// Currently, we are not allowed to use camelCase here! So try to just use a single word!
 
 /** Intents which are not specific to a given platform. */
 export enum GenericIntent {
+  /** Fired automatically if the voice app is launched */
   Invoke,
+
+  /** Fired automatically if there was no response */
   Unanswered,
+
+  /** Called if no other intent of this state was matched */
   Unhandled,
+
+  /** Say: "Help me" or "What can I do?" */
   Help,
+
+  /** Say: "Yes", "Okay" */
   Yes,
+
+  /** Say: "No" */
   No,
+
+  /** Say: "Cancel" */
   Cancel,
+
+  /** Say: "Stop" */
   Stop
 }
 
+/** Intents which are not specific to a given platform. */
 export namespace GenericIntent {
   /**
    * Returns true if a given platform intent is speakable. Unspeakable intents
-   * are only callable implicitly, for example GenericIntent.EndSession if session was ended by client.
+   * are only callable implicitly, for example GenericIntent.Invoke if the voice app is launched.
    * @param platform intent to check
    */
   export function isSpeakable(intent: GenericIntent) {
@@ -99,39 +105,9 @@ export namespace GenericIntent {
   }
 }
 
-export namespace Configuration {
-  /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
-  export type LogWhitelistSet = ( string | { [keyName: string]: LogWhitelistSet } )[];
-
-  /** Configuration defaults -> all of these keys are optional for user */
-  export interface Defaults {
-    /** Path to your utterances. Regularly, you shouldn't need to change this. */
-    utterancePath: string;
-  
-    /** Maps all entities of your app to their respective internal types. You later have to map these types to platform-specific types. */
-    entities: { [type: string]: string[] };
-  
-    /** If set to false, created response objects will throw an exception if an unsupported feature if used */
-    failSilentlyOnUnsupportedFeatures: boolean;
-  
-    /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
-    logExtractionWhitelist: LogWhitelistSet;
-  }
-
-  /** Required configuration options, no defaults are used here */
-  export interface Required {
-
-  }
-
-  /** Available configuration settings in a runtime application */
-  export interface Runtime extends Defaults, Required {};
-}
-
-/** Configuration object for AssistantJS user for unifier component */
-export interface Configuration extends Partial<Configuration.Defaults>, Configuration.Required {}
-
-
+/** Manages access to entities */
 export interface EntityDictionary {
+  /** Object containing all current entities */
   store: {[name: string]: any};
 
   /** Checks if the given entity is contained in the store */
@@ -337,3 +313,6 @@ export namespace OptionalHandlerFeatures {
     SuggestionChip: ["suggestionChips"]
   }
 }
+
+/** Configuration object for AssistantJS user for unifier component */
+export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

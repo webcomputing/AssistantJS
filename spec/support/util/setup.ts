@@ -2,8 +2,8 @@ import { ContainerImpl, Container } from "inversify-components";
 
 import { AssistantJSSetup } from "../../../src/setup";
 import { GenericRequestHandler } from "../../../src/components/root/generic-request-handler";
-import { RequestContext } from "../../../src/components/root/interfaces";
-import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/interfaces";
+import { RequestContext } from "../../../src/components/root/public-interfaces";
+import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/public-interfaces";
 import { StateMachineSetup } from "../../../src/components/state-machine/setup";
 
 import { SpecSetup } from "../../../src/spec-setup";

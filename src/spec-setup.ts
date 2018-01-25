@@ -5,10 +5,10 @@ import { createLogger } from "bunyan"
 
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { StateMachineSetup } from "./components/state-machine/setup";
-import { State, StateMachine } from "./components/state-machine/interfaces";
-import { RequestContext, Logger } from "./components/root/interfaces";
-import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/interfaces";
-import { Configuration } from "./components/services/interfaces";
+import { State, Transitionable } from "./components/state-machine/public-interfaces";
+import { RequestContext, Logger } from "./components/root/public-interfaces";
+import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/public-interfaces";
+import { Configuration } from "./components/services/private-interfaces";
 import { ServerApplication } from "./components/root/app-server"; 
 
 import { AssistantJSSetup } from "./setup";
@@ -87,7 +87,7 @@ export class SpecSetup {
   async runMachine(stateName?: string, intent?: intent) {
     if (this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") 
     && this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")) {
-      let machine = this.setup.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine")
+      let machine = this.setup.container.inversifyInstance.get<Transitionable>("core:state-machine:current-state-machine")
       let extraction = this.setup.container.inversifyInstance.get<MinimalRequestExtraction>("core:unifier:current-extraction");
 
       if (typeof stateName !== "undefined") {
@@ -140,7 +140,7 @@ export class SpecSetup {
   /** Initialize default configuration -> changes redis to mock version */
   initializeDefaultConfiguration() {
     // Set redis instance to fake redis instance
-    const serviceConfiguration: Configuration = {
+    const serviceConfiguration: Configuration.Required = {
       redisClient: fakeRedis.createClient(6379, `redis-spec-setup-${++specSetupId}`, { fast: true })
     }
     this.setup.addConfiguration({"core:services": serviceConfiguration});

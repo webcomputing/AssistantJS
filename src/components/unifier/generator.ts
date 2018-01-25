@@ -2,10 +2,11 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import * as fs from "fs";
 import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
-import { GenericIntent, intent } from "./interfaces";
-import { GeneratorExtension } from "../root/interfaces";
+import { GenericIntent, intent } from "./public-interfaces";
+import { GeneratorExtension } from "../root/public-interfaces";
 
-import { PlatformGenerator, componentInterfaces, Configuration, GenerateIntentConfiguration, GeneratorEntityMapping, GeneratorUtteranceTemplateService } from "./interfaces";
+import { PlatformGenerator, GenerateIntentConfiguration, GeneratorEntityMapping, GeneratorUtteranceTemplateService } from "./public-interfaces";
+import { componentInterfaces, Configuration } from "./private-interfaces";
 
 @injectable()
 export class Generator implements GeneratorExtension {

@@ -1,4 +1,4 @@
-import { State } from "../../../../src/components/state-machine/interfaces";
+import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { injectable, optional, inject } from "inversify";
 
 

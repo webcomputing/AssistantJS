@@ -1,6 +1,6 @@
 import { Container } from "inversify-components";
-import { componentInterfaces as rootComponentInterfaces} from "../../../src/components/root/interfaces";
-import { componentInterfaces } from "../../../src/components/unifier/interfaces";
+import { componentInterfaces as rootComponentInterfaces} from "../../../src/components/root/private-interfaces";
+import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { withServer, RequestProxy, expressAppWithTimeout } from "../../support/util/requester";
 import { configureI18nLocale } from '../../support/util/i18n-configuration';
 

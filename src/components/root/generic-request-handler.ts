@@ -5,7 +5,8 @@
 import { Container, ExecutableExtension } from "inversify-components";
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
 
-import { RequestContext, ContextDeriver, componentInterfaces } from "./interfaces";
+import { RequestContext, ContextDeriver } from "./public-interfaces";
+import { componentInterfaces } from "./private-interfaces";
 
 @injectable()
 export class GenericRequestHandler {

@@ -3,8 +3,9 @@ import { Component } from "inversify-components";
 
 import { featureIsAvailable } from "./feature-checker";
 import { injectionNames } from '../../injection-names';
-import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/interfaces";
-import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction, Configuration } from "./interfaces";
+import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/public-interfaces";
+import { RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
+import { Configuration, componentInterfaces } from "./private-interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {

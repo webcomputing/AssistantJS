@@ -1,4 +1,4 @@
-import { RequestContext } from "../../../../src/components/root/interfaces";
+import { RequestContext } from "../../../../src/components/root/public-interfaces";
 import { extraction } from "../unifier/extraction";
 
 const dummyCallback = () => console.log("You are only using a mock context, with no real request callback available.");

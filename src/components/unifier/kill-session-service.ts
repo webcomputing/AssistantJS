@@ -1,8 +1,8 @@
 import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
-import { componentInterfaces } from "./interfaces";
-import { Logger } from "../root/interfaces";
-import { DestroyableSession } from "../services/interfaces";
+import { componentInterfaces } from "./private-interfaces";
+import { Logger } from "../root/public-interfaces";
+import { DestroyableSession } from "../services/public-interfaces";
 
 /** Destroys redis session after session ended */
 @injectable()

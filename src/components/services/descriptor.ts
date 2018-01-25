@@ -2,7 +2,8 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { ComponentDescriptor, Component } from "inversify-components";
 import { RedisClient } from "redis";
 
-import { DestroyableSession, Configuration } from "./interfaces";
+import { DestroyableSession } from "./public-interfaces";
+import { Configuration } from "./private-interfaces";
 import { Session } from "./session";
 
 const defaultConfiguration: Configuration.Defaults = {

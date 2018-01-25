@@ -1,5 +1,6 @@
-import * as i18next from "i18next";
+import { Configuration } from "./private-interfaces";
 
+/** Uses I18next to get translations for keys */
 export interface TranslateHelper {
   /**
    * Translates the given key using your json translations and a convention-over-configuration-approach.
@@ -19,28 +20,14 @@ export interface TranslateHelper {
 }
 
 export interface TranslateValuesFor {
+  /**
+   * Returns all translations for a given key, especially useful for specs
+   * @param {string} key Key of the translation
+   * @param {any} options Options to pass to i18next / translate helper
+   * @return {string[]} All fitting translations
+   */
   (key: string, options?: any): string[];
 }
 
-export namespace Configuration {
-  /** Configuration defaults -> all of these keys are optional for user */
-  export interface Defaults {
-    /** A valid instance of i18next needed */
-    i18nextInstance: i18next.I18n;
-    /** 
-     * Additional options to configure with i18next. 
-     * This MUST contain a backend-path in backend: {loadPath: ...}!
-     * See i18next for more details.
-     */
-    i18nextAdditionalConfiguration: any;
-  }
-
-  /** Required configuration options, no defaults are used here */
-  export interface Required {}
-
-  /** Available configuration settings in a runtime application */
-  export interface Runtime extends Defaults, Required {};
-}
-
 /** Configuration object for AssistantJS user for i18n component */
-export interface Configuration extends Partial<Configuration.Defaults>, Configuration.Required {}
+export interface I18nConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

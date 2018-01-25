@@ -1,15 +1,15 @@
 import { ComponentDescriptor } from "inversify-components";
 import * as fs from "fs";
 
-import { State, MetaState, componentInterfaces } from "./interfaces";
+import { State } from "./public-interfaces";
 
-import { GenericIntent } from "../unifier/interfaces";
+import { GenericIntent } from "../unifier/public-interfaces";
 import { AssistantJSSetup } from "../../setup";
 
 export class StateMachineSetup {
   private assistantJS: AssistantJSSetup;
   private stateClasses: {[name: string]: State.Constructor} = {};
-  private metaStates: MetaState[] = [];
+  private metaStates: State.Meta[] = [];
   
   /** If set to true, states are registered in singleton scope. This may be pretty useful for testing. */
   registerStatesInSingleton = false;
@@ -67,7 +67,7 @@ export class StateMachineSetup {
         root: (bindService, lookupService) => {
           let metaStateInterface = lookupService.lookup("core:state-machine").getInterface("metaState");
 
-          this.metaStates.forEach(metaState => bindService.bindExtension<MetaState>(metaStateInterface).toConstantValue(metaState));
+          this.metaStates.forEach(metaState => bindService.bindExtension<State.Meta>(metaStateInterface).toConstantValue(metaState));
         },
 
         request: (bindService, lookupService) => {
@@ -84,7 +84,7 @@ export class StateMachineSetup {
   }
 
   /** Creates a valid metastate object based on name and intents */
-  static createMetaState(name: string, intents: string[]): MetaState {
+  static createMetaState(name: string, intents: string[]): State.Meta {
     return {
       name: name,
       intents: intents

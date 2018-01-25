@@ -1,13 +1,14 @@
 import { injectable, inject } from "inversify";
 import { Hooks } from "inversify-components";
-import { GenericIntent, intent } from "../unifier/interfaces";
-import { Session } from "../services/interfaces";
-import { Logger } from "../root/interfaces";
+import { GenericIntent, intent } from "../unifier/public-interfaces";
+import { Session } from "../services/public-interfaces";
+import { Logger } from "../root/public-interfaces";
 
-import { State, StateMachine as StateMachineInterface, componentInterfaces, MetaState } from "./interfaces";
+import { State, Transitionable } from "./public-interfaces";
+import { componentInterfaces } from "./private-interfaces";
 
 @injectable()
-export class StateMachine implements StateMachineInterface {
+export class StateMachine implements Transitionable {
   intentHistory: { stateName: string; intentMethodName: string }[] = [];
   
   constructor(

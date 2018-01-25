@@ -1,10 +1,11 @@
 import { inject, injectable } from "inversify";
 import { I18n } from "i18next";
 
-import { TranslateHelper as TranslateHelperInterface } from "./interfaces";
-import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/interfaces';
-import { Logger } from "../root/interfaces";
+import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/public-interfaces';
+import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from '../unifier/feature-checker';
+
+import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 import { I18nContext } from "./context";
 
 @injectable()

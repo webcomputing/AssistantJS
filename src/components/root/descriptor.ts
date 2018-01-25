@@ -1,9 +1,10 @@
 import { ComponentDescriptor, Component } from "inversify-components";
 import { GenericRequestHandler } from "./generic-request-handler";
 import { defaultBunyan } from "./default-bunyan";
-import { componentInterfaces, Configuration, RequestContext, Logger } from "./interfaces";
+import { RequestContext, Logger } from "./public-interfaces";
+import { componentInterfaces, Configuration } from "./private-interfaces";
 
-import { componentInterfaces as temp } from "../unifier/interfaces";
+import { componentInterfaces as temp } from "../unifier/private-interfaces";
 
 const defaultConfiguration: Configuration.Defaults = {
   bunyanInstance: defaultBunyan

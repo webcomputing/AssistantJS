@@ -1,7 +1,7 @@
 import {configureI18nLocale} from '../../support/util/i18n-configuration';
 import { injectionNames } from '../../../src/injection-names';
-import { StateFactory } from '../../../src/components/state-machine/interfaces';
-import { Voiceable } from '../../../src/components/unifier/interfaces';
+import { State } from '../../../src/components/state-machine/public-interfaces';
+import { Voiceable } from '../../../src/components/unifier/public-interfaces';
 import { SpecSetup } from '../../../src/spec-setup';
 import { BaseState } from '../../../src/components/state-machine/base-state';
 import { createRequestScope } from '../../support/util/setup';
@@ -17,7 +17,7 @@ describe("BaseState", function() {
     configureI18nLocale((this as any).container, false);
     createRequestScope(this.specHelper);
 
-    this.state = this.specHelper.setup.container.inversifyInstance.get<StateFactory>(injectionNames.stateFactory)<BaseState>("PlainState");
+    this.state = this.specHelper.setup.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<BaseState>("PlainState");
   });
 
   describe("responseFactory synonyms", function() {

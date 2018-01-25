@@ -2,8 +2,8 @@ import { inject, injectable } from "inversify";
 import { ExecutableExtension } from "inversify-components";
 import * as util from "util";
 
-import { MinimalResponseHandler } from "./interfaces";
-import { ResponseCallback, RequestContext } from "../root/interfaces";
+import { MinimalResponseHandler } from "./public-interfaces";
+import { ResponseCallback, RequestContext } from "../root/public-interfaces";
 
 @injectable()
 /** Take this class as base class for implementing response handler, if needed */

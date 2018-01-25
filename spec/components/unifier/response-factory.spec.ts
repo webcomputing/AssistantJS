@@ -1,4 +1,4 @@
-import { MinimalRequestExtraction } from "../../../src/components/unifier/interfaces";
+import { MinimalRequestExtraction } from "../../../src/components/unifier/public-interfaces";
 import { createRequestScope } from "../../support/util/setup";
 
 import { ResponseFactory } from "../../../src/components/unifier/response-factory";

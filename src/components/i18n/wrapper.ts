@@ -5,12 +5,12 @@ import * as i18nextBackend from "i18next-sync-fs-backend";
 
 import { processor, arraySplitter } from "./plugins/array-returns-sample.plugin";
 import { processor as templateParser } from "./plugins/parse-template-language.plugin";
-import { Configuration } from "./interfaces";
+import { Configuration } from "./private-interfaces";
 
 @injectable()
 export class I18nextWrapper {
   private component: Component<Configuration.Runtime>;
-  private configuration: Configuration;
+  private configuration: Configuration.Runtime;
 
   instance: i18next.I18n;
 

@@ -1,16 +1,16 @@
 import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component } from "inversify-components";
 import { interfaces as inversifyInterfaces } from "inversify";
 
-import { DestroyableSession } from "../services/interfaces";
-import { ContextDeriver as ContextDeriverI, GeneratorExtension } from "../root/interfaces";
+import { DestroyableSession } from "../services/public-interfaces";
+import { ContextDeriver as ContextDeriverI, GeneratorExtension } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
 import { KillSessionService } from "./kill-session-service";
 import { swapHash } from "./swap-hash";
-import { componentInterfaces, MinimalRequestExtraction, Configuration, ResponseFactory, 
-  EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping } from "./interfaces";
+import { MinimalRequestExtraction, ResponseFactory, EntityDictionary, MinimalResponseHandler, GeneratorEntityMapping } from "./public-interfaces";
+import { componentInterfaces, Configuration } from "./private-interfaces";
 
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",

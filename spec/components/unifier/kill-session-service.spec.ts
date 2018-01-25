@@ -1,6 +1,6 @@
 import { createRequestScope } from "../../support/util/setup";
-import { DestroyableSession } from "../../../src/components/services/interfaces";
-import { componentInterfaces } from "../../../src/components/unifier/interfaces";
+import { DestroyableSession } from "../../../src/components/services/public-interfaces";
+import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { KillSessionService } from "../../../src/components/unifier/kill-session-service";
 import { Hooks } from "inversify-components";
 

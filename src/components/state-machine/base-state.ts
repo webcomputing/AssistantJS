@@ -1,10 +1,9 @@
 import { injectable, unmanaged } from "inversify";
-import { Voiceable, MinimalRequestExtraction,  ResponseFactory, OptionalExtractions } from '../unifier/interfaces';
+import { Voiceable, MinimalRequestExtraction,  ResponseFactory, OptionalExtractions } from '../unifier/public-interfaces';
 import { featureIsAvailable } from '../unifier/feature-checker';
-import { RequestContext, Logger } from '../root/interfaces';
-import { TranslateHelper } from "../i18n/interfaces";
-import { Transitionable } from "../state-machine/interfaces";
-import { State, StateSetupSet } from "./interfaces";
+import { RequestContext, Logger } from '../root/public-interfaces';
+import { TranslateHelper } from "../i18n/public-interfaces";
+import { State, Transitionable } from "./public-interfaces";
 
 /**
  * BaseState
@@ -45,15 +44,15 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * As an alternative to passing all objects on it's own, you can also pass a set of them
    * @param {stateMachineInterfaces.StateSetupSet} stateSetupSet A set containing response factory, translate helper and extraction.
    */
-  constructor(stateSetupSet: StateSetupSet)
+  constructor(stateSetupSet: State.SetupSet)
 
   constructor(
-    @unmanaged() responseFactoryOrSet: ResponseFactory | StateSetupSet, 
+    @unmanaged() responseFactoryOrSet: ResponseFactory | State.SetupSet, 
     @unmanaged() translateHelper?: TranslateHelper, 
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
   ) {
-    if (typeof (responseFactoryOrSet as StateSetupSet).responseFactory === "undefined") {
+    if (typeof (responseFactoryOrSet as State.SetupSet).responseFactory === "undefined") {
       // Did not pass StateSetupSet
       if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined")
         throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
@@ -67,10 +66,10 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
       if (typeof translateHelper !== "undefined" || typeof extraction !== "undefined" || typeof logger !== "undefined")
         throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
       
-      this.responseFactory = (responseFactoryOrSet as StateSetupSet).responseFactory;
-      this.translateHelper = (responseFactoryOrSet as StateSetupSet).translateHelper;
-      this.extraction = (responseFactoryOrSet as StateSetupSet).extraction;
-      this.logger = (responseFactoryOrSet as StateSetupSet).logger;
+      this.responseFactory = (responseFactoryOrSet as State.SetupSet).responseFactory;
+      this.translateHelper = (responseFactoryOrSet as State.SetupSet).translateHelper;
+      this.extraction = (responseFactoryOrSet as State.SetupSet).extraction;
+      this.logger = (responseFactoryOrSet as State.SetupSet).logger;
     }
   }
 

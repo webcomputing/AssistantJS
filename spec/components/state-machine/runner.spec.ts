@@ -1,5 +1,5 @@
 import { Container } from "inversify-components";
-import { componentInterfaces } from "../../../src/components/root/interfaces";
+import { componentInterfaces } from "../../../src/components/root/private-interfaces";
 import { createRequestScope } from "../../support/util/setup";
 import { extraction } from "../../support/mocks/unifier/extraction";
 

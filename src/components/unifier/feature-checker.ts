@@ -1,4 +1,4 @@
-import { MinimalResponseHandler, MinimalRequestExtraction } from "./interfaces";
+import { MinimalResponseHandler, MinimalRequestExtraction } from "./public-interfaces";
 
 /** 
  * Checks whether a given feature exists in an extraction result.

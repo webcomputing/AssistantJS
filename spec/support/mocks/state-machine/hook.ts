@@ -1,5 +1,5 @@
 import { Hooks, Container } from "inversify-components";
-import { componentInterfaces } from "../../../../src/components/state-machine/interfaces";
+import { componentInterfaces } from "../../../../src/components/state-machine/private-interfaces";
 
 /** Hook wich returns a unsuccessful result if called intent is "test" */
 export const TestIntentFilterHook: Hooks.Hook = (mode, state, stateName, intent, machine) => {

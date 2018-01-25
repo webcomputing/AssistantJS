@@ -1,8 +1,8 @@
-import { State } from "../../../../src/components/state-machine/interfaces";
+import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
-import { Logger } from "../../../../src/components/root/interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/interfaces";
-import { TranslateHelper } from "../../../../src/components/i18n/interfaces";
+import { Logger } from "../../../../src/components/root/public-interfaces";
+import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { TranslateHelper } from "../../../../src/components/i18n/public-interfaces";
 import { injectable, inject, optional } from "inversify";
 
 

@@ -1,5 +1,5 @@
 import { Container } from "inversify-components";
-import { componentInterfaces } from "../../../src/components/unifier/interfaces";
+import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { withServer, RequestProxy } from "../../support/util/requester";
 import { createSpecHelper } from "../../support/util/setup";
 import { configureI18nLocale } from '../../support/util/i18n-configuration';

@@ -1,5 +1,5 @@
-import { MinimalResponseHandler } from "../../../../src/components/unifier/interfaces";
-import { RequestContext } from "../../../../src/components/root/interfaces";
+import { MinimalResponseHandler } from "../../../../src/components/unifier/public-interfaces";
+import { RequestContext } from "../../../../src/components/root/public-interfaces";
 import { injectable, inject } from "inversify";
 
 @injectable()

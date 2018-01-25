@@ -5,7 +5,7 @@ export { Express } from "express";
 import * as bodyParser from "body-parser";
 const cuid = require("cuid");
 
-import { ResponseCallback, RequestContext, Logger } from "./interfaces";
+import { ResponseCallback, RequestContext, Logger } from "./public-interfaces";
 import { GenericRequestHandler } from "./generic-request-handler";
 
 export class ServerApplication implements MainApplication {

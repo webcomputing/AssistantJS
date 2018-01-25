@@ -1,4 +1,4 @@
-import { DestroyableSession } from "./interfaces";
+import { DestroyableSession } from "./public-interfaces";
 import { RedisClient } from "redis";
 
 export class Session implements DestroyableSession {

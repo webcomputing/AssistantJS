@@ -1,23 +1,15 @@
 import { MessageBus, Message } from "inversify-components";
-import { Session } from "../services/interfaces";
-import { RequestContext, Logger } from '../root/interfaces';
+import { Session } from "../services/public-interfaces";
+import { RequestContext, Logger } from '../root/public-interfaces';
 import { TranslateHelper } from '../i18n/translate-helper';
 import { ResponseFactory } from '../unifier/response-factory';
-import { MinimalRequestExtraction, GenericIntent,  intent} from '../unifier/interfaces';
+import { MinimalRequestExtraction, GenericIntent,  intent} from '../unifier/public-interfaces';
 
-export const componentInterfaces = {
-  "state": Symbol("state"),
-  "metaState": Symbol("meta state"),
-
-  // Hooks
-  "beforeIntent": Symbol("before-intent-hook"),
-  "afterIntent": Symbol("after-intent-hook")
-};
-
+/** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
 
+ /** Namespace containing all state-specific interfaces */
 export namespace State {
-
   /** Main interface to implement a state */
   export interface Required {
     /** 
@@ -43,6 +35,7 @@ export namespace State {
      * @param stateName Name of current state
      * @param intentMethod Called intent method as string
      * @param transitionable machine
+     * @return {void}
      */
     errorFallback(error: any, state: Required, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
   }
@@ -66,7 +59,7 @@ export namespace State {
      * error, afterIntent_ is not called.
      * @param {string} intentMethod Name of intent method to call afterwards
      * @param {Transitionable} machine Reference to state machine
-     * @param {void}
+     * @return {void}
      */
     afterIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): void;
   }
@@ -75,28 +68,32 @@ export namespace State {
   export interface Constructor<S extends Required = Required> {
     new(...args: any[]): S;
   }
+
+  /** (Injectable) factory to create state instances */
+  export interface Factory {
+    /** Returns a state by name (string).
+     * @param {string} stateName Name of state. If you leave out this parameter, the main state is returned.
+     * @return {State extends State.Required}
+    */
+    <T extends State.Required = State.Required>(stateName?: string): T;
+  }
+
+  /** Set containing all objects needed to setup a BaseState. */
+  export interface SetupSet {
+    responseFactory: ResponseFactory;
+    translateHelper: TranslateHelper;
+    extraction: MinimalRequestExtraction;
+    logger: Logger;
+  }
+
+  /** Contains meta information about a state */
+  export interface Meta {
+    readonly name: string;
+    readonly intents: intent[];
+  }  
 }
 
-export interface MetaState {
-  readonly name: string;
-  readonly intents: intent[];
-}
-
-export interface StateFactory {
-  /** Returns a state by name (string).
-   * @param stateName Name of state. If you leave out this parameter, the main state is returned.
-  */
-  <T extends State.Required>(stateName?: string): T;
-}
-
-/** Set containing objects needed to setup a BaseState. */
-export interface StateSetupSet {
-  responseFactory: ResponseFactory;
-  translateHelper: TranslateHelper;
-  extraction: MinimalRequestExtraction;
-  logger: Logger;
-}
-
+/** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
 export interface Transitionable {
   /** History of all called intent methods */
   intentHistory: { stateName: string; intentMethodName: string }[];
@@ -113,5 +110,3 @@ export interface Transitionable {
   /** Jumps to given intent in current state */
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
-
-export interface StateMachine extends Transitionable {}

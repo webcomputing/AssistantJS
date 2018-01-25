@@ -1,5 +1,5 @@
-import { Logger } from "../../root/interfaces";
-import { MinimalResponseHandler, OptionalHandlerFeatures } from "../interfaces";
+import { Logger } from "../../root/public-interfaces";
+import { MinimalResponseHandler, OptionalHandlerFeatures } from "../public-interfaces";
 import { SimpleVoiceResponse } from "./simple-voice-response";
 
 export class SSMLResponse extends SimpleVoiceResponse {
