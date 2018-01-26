@@ -15,7 +15,7 @@ of currently implemented AssistantJS components.
 - **I18n integration**: Thanks to [i18next][5], AssistantJS gives you full multi language support. In addition, it applies some really nice [convention-over-configuration][6] rulesets to speed up your development and
 help you to build better user interfaces using response text variation out of the box.
 - **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language (as known from [alexa-utterances][7]) to generate utterances efficiently. You are tired of maintaining your intents and utterances in dialogflow *and* in alexa? AssistantJS generates a fitting configuration for alexa and a zip file for dialogflow *based you the code you write*!
-- **Debuggable**: AssistantJS uses the awesome [debug][4] module to give you exactly that kind of rich debug output you need.
+- **Logging**: AssistantJS uses the awesome [bunyan][4] module to give you production-ready and request-specific logging options.
 - **CLI**: AssistantJS gives you a simple command line interface you can use to start your AssistantJS server (`assistant s`, backend by [express][8]) or generate nlu configurations (`assistant g`).
 - **Entity validation**: Don't check for presence of entities, let AssistantJS do this job for you. *(Optional dependency)*
 - **Authentication**: Protect your states with configurable authentication mechanisms. *(Optional dependency)*
@@ -47,13 +47,13 @@ Just to give you a first insight into AssistantJS, this is one of the states imp
 // Need account linking? Just add @authenticate(OAuthStrategy) over here!
 export class MainState extends ApplicationState {
   /* Invoked by saying "Launch/Talk to my bus application" */
-  invokeGenericIntent(machine: stateMachineInterfaces.Transitionable) {
+  invokeGenericIntent(machine: Transitionable) {
     this.prompt(this.t());
   }
 
   /* "Whats the next bus to train station?" */
   @needs("target") // Tell AssistantJS to wait for entity "target"
-  async busRouteIntent(machine: stateMachineInterfaces.Transitionable) {
+  async busRouteIntent(machine: Transitionable) {
     await machine.transitionTo("BusOrderState");
     const usersTarget = this.entities.get("target") as string;
     this.prompt(this.t({target: usersTarget}));
@@ -114,7 +114,7 @@ describe("MainState", function () {
 [1]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [2]: http://inversify.io/
 [3]: https://github.com/webcomputing/inversify-components
-[4]: https://www.npmjs.com/package/debug
+[4]: https://github.com/trentm/node-bunyan
 [5]: https://www.i18next.com/
 [6]: https://en.wikipedia.org/wiki/Convention_over_configuration
 [7]: https://github.com/alexa-js/alexa-utterances
