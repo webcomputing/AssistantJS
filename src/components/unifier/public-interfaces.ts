@@ -1,4 +1,4 @@
-import { ExecutableExtension, Component, MessageBus } from "inversify-components";
+import { ExecutableExtension, Component } from "inversify-components";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { SpecSetup } from "../../spec-setup";
@@ -392,7 +392,6 @@ export interface PlatformSpecHelper {
    */
   pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
 }
-
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

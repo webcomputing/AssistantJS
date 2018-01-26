@@ -1,4 +1,3 @@
-import { MessageBus, Message } from "inversify-components";
 import { Session } from "../services/public-interfaces";
 import { RequestContext, Logger } from '../root/public-interfaces';
 import { TranslateHelper } from '../i18n/translate-helper';
