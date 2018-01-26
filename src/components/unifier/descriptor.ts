@@ -1,7 +1,7 @@
 import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component } from "inversify-components";
 import { interfaces as inversifyInterfaces } from "inversify";
 
-import { DestroyableSession } from "../services/public-interfaces";
+import { Session } from "../services/public-interfaces";
 import { ContextDeriver as ContextDeriverI, CLIGeneratorExtension } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
@@ -39,11 +39,11 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
     },
 
     request: (bindService, lookupService) => {
-      bindService.bindGlobalService<inversifyInterfaces.Factory<DestroyableSession>>("current-session-factory").toFactory<DestroyableSession>(context => {
+      bindService.bindGlobalService<inversifyInterfaces.Factory<Session>>("current-session-factory").toFactory<Session>(context => {
         return ()  => {
           let currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
 
-          return context.container.get<inversifyInterfaces.Factory<DestroyableSession>>("core:services:session-factory")(currentExtraction.sessionID);
+          return context.container.get<inversifyInterfaces.Factory<Session>>("core:services:session-factory")(currentExtraction.sessionID);
         }
       });
 

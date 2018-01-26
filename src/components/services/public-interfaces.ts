@@ -26,12 +26,9 @@ export interface Session {
    * @return {Promise<void>}
    */
   delete(field: string): Promise<void>;
-}
 
-/** Object describing a destroyable AssistantJS session */
-export interface DestroyableSession extends Session {
   /** Deletes the whole session object */
-  delete(): Promise<void>;
+  deleteAllFields(): Promise<void>;
 }
 
 /** Factory function which returns a session for a given session id */
@@ -39,18 +36,18 @@ export interface SessionFactory {
   /**
    * Returns a session object for a given id
    * @param {string} id  Id of the session to return
-   * @return {DestroyableSession}
+   * @return {Session}
    */
-  (id: string): DestroyableSession;
+  (id: string): Session;
 }
 
 /** Factory function which returns the current session (based on extraction result) */
 export interface CurrentSessionFactory {
   /**
    * Returns a session object based on the current extraction result
-   * @return {DestroyableSession}
+   * @return {Session}
    */
-  (): DestroyableSession;
+  (): Session;
 }
 
 /** Configuration object for AssistantJS user for services component */

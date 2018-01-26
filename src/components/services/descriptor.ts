@@ -2,7 +2,7 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { ComponentDescriptor, Component } from "inversify-components";
 import { RedisClient } from "redis";
 
-import { DestroyableSession } from "./public-interfaces";
+import { Session as SessionInterface } from "./public-interfaces";
 import { Configuration } from "./private-interfaces";
 import { Session } from "./session";
 
@@ -15,7 +15,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   defaultConfiguration: defaultConfiguration,
   bindings: {
     root: (bindingService) => {
-      bindingService.bindGlobalService<inversifyInterfaces.Factory<DestroyableSession>>("session-factory").toFactory<DestroyableSession>(context => {
+      bindingService.bindGlobalService<inversifyInterfaces.Factory<SessionInterface>>("session-factory").toFactory<SessionInterface>(context => {
         return (sessionID: string) => {
           let redisInstance = context.container.get<RedisClient>("core:services:redis-instance");
           let configuration = context.container.get<Component<Configuration.Runtime>>("meta:component//core:services").configuration;
