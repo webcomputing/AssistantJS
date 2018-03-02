@@ -1,5 +1,5 @@
 import { createRequestScope } from "../../support/util/setup";
-import { DestroyableSession } from "../../../src/components/services/public-interfaces";
+import { Session } from "../../../src/components/services/public-interfaces";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { KillSessionService } from "../../../src/components/unifier/kill-session-service";
 import { Hooks } from "inversify-components";
@@ -13,14 +13,14 @@ describe("KillSessionService", function() {
     /** Sets some example session data */
     this.setSessionData = () => {
       this.currentSessionFactory = this.container.inversifyInstance.get("core:unifier:current-session-factory");
-      let currentSession: DestroyableSession = this.currentSessionFactory();
+      let currentSession: Session = this.currentSessionFactory();
 
       return currentSession.set("testField", "testValue");
     };
 
     /** Gets the mock session data */
     this.getSessionData = () => {
-      let currentSession: DestroyableSession = this.currentSessionFactory();
+      let currentSession: Session = this.currentSessionFactory();
       return currentSession.get("testField"); 
     }
   });

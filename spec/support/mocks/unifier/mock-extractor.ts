@@ -2,10 +2,10 @@ import { injectable } from "inversify";
 
 import { Component } from "../util/component";
 import { RequestContext } from "../../../../src/components/root/public-interfaces";
-import { RequestConversationExtractor } from "../../../../src/components/unifier/public-interfaces";
+import { RequestExtractor } from "../../../../src/components/unifier/public-interfaces";
 
 @injectable()
-export class MockExtractor implements RequestConversationExtractor {
+export class MockExtractor implements RequestExtractor {
   component: Component;
 
   constructor(componentName = "MockExtractorComponent") {
