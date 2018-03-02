@@ -11,18 +11,18 @@ export const stateMachineSetup = new StateMachineSetup(assistantJs);
 
 /**
  * Initializes all needed setup types. This makes the initialization process, which is needed for a running production environment, reusable for specs.
- * @param assistantJs AssistantJS Setup object to initialize 
- * @param stateMachineSetup StateMachineSetup object to initialize 
+ * @param localAssistantJs AssistantJS Setup object to initialize 
+ * @param localStateMachineSetup StateMachineSetup object to initialize 
  * @param addOnly If set to true, states will only be added, but not registered in the dependency injection container
  */
-export function initializeSetups (assistantJs: AssistantJSSetup, stateMachineSetup: StateMachineSetup, addOnly = false) {
+export function initializeSetups (localAssistantJs: AssistantJSSetup, localStateMachineSetup: StateMachineSetup, addOnly = false) {
   // Register all additional AssistantJS components - currently none
 
   // Configure components
-  assistantJs.addConfiguration(componentConfiguration);
+  localAssistantJs.addConfiguration(componentConfiguration);
 
   // Register all states and strategies
-  stateMachineSetup.registerByConvention(addOnly);
+  localStateMachineSetup.registerByConvention(addOnly);
 }
 
 // Initialize the exported production setups
