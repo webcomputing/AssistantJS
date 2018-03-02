@@ -9,9 +9,10 @@ var resolve = require('resolve');
 
 resolve('assistant-source', { basedir: process.cwd() }, function(error, projectLocalSource) {
   var cli;
+  console.log(error, projectLocalSource);
   if (error) {
     // Use it as global module
-    cli = require('../lib/cli').cli;
+    cli = require('assistant-source').cli;
   } else {
     // Use it as local module
     cli = require(projectLocalSource).cli;

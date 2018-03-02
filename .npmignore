@@ -2,6 +2,7 @@ js
 node_modules
 src
 spec
+cli
 gulpfile.js
 tsconfig.json
 .gitignore
