@@ -7,13 +7,17 @@
     "test": "jasmine-ts spec/**/*.spec.ts"
   },
   "dependencies": {
-    "assistant-source": "latest",
+    "assistant-source": "^0.3.0",
+    "inversify-components": "^0.4.0",
+    "inversify": "4.1.1",
+    "reflect-metadata": "^0.1.12",
+    "express": "^4.16.2",
+    "redis": "^2.8.0",
     "fakeredis": "^2.0.0"
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.4",
     "jasmine-ts": "^0.2.1",
-    "reflect-metadata": "^0.1.12",
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
   }
