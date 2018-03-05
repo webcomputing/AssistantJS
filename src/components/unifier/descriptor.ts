@@ -2,13 +2,14 @@ import { ComponentDescriptor, BindingDescriptor, ExecutableExtension, Component 
 import { interfaces as inversifyInterfaces } from "inversify";
 
 import { Session } from "../services/public-interfaces";
-import { ContextDeriver as ContextDeriverI, CLIGeneratorExtension } from "../root/public-interfaces";
+import { ContextDeriver as ContextDeriverI, CLIGeneratorExtension, LoggerMiddleware } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
 import { Generator } from "./generator";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
 import { KillSessionService } from "./kill-session-service";
 import { swapHash } from "./swap-hash";
+import { createUnifierLoggerMiddleware } from "./logger-middleware";
 import { MinimalRequestExtraction, ResponseFactory, EntityDictionary, MinimalResponseHandler, PlatformGenerator } from "./public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 
@@ -63,6 +64,12 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           let killService = context.container.get(KillSessionService);
           return killService.execute();
         }
+      });
+
+      // Add unifiers logger middleware to current logger
+      bindService.bindExtension<LoggerMiddleware>(lookupService.lookup("core:root").getInterface("loggerMiddleware")).toDynamicValue(context => {
+        const currentExtraction = context.container.isBound("core:unifier:current-extraction") ? context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction") : undefined;
+        return createUnifierLoggerMiddleware(currentExtraction);
       });
     }
   }

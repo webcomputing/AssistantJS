@@ -55,5 +55,10 @@ export interface CLIGeneratorExtension {
   execute(buildPath: string): void | Promise<void>;
 }
 
+/** Interface to fulfill to add a new logger middleware / to add parameters to request-specific bunyan-instance */
+export interface LoggerMiddleware {
+  (loggerInstance: Logger): Logger;
+}
+
 /** Configuration object for AssistantJS user for root component */
 export interface RootConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

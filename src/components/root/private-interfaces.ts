@@ -3,7 +3,8 @@ import { Logger } from "./public-interfaces";
 export const componentInterfaces = {
   "contextDeriver": Symbol("request-handler"),
   "afterContextExtension": Symbol("after-context-extension"),
-  "generator": Symbol("generator")
+  "generator": Symbol("generator"),
+  "loggerMiddleware": Symbol("logger-middleware"),
 };
 
 export namespace Configuration {
