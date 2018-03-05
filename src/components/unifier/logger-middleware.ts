@@ -1,7 +1,8 @@
 import * as crypto from "crypto";
 
 import { LoggerMiddleware } from "../root/public-interfaces";
-import { MinimalRequestExtraction } from "./public-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions } from "./public-interfaces";
+import { featureIsAvailable } from "./feature-checker";
 
 
 export function createUnifierLoggerMiddleware(extraction?: MinimalRequestExtraction): LoggerMiddleware {
@@ -9,6 +10,18 @@ export function createUnifierLoggerMiddleware(extraction?: MinimalRequestExtract
     return (currentLogger) => currentLogger;
   }
 
-  const sessionSlug = crypto.createHash('sha1').update(extraction.sessionID).digest('hex').slice(0, 7);
-  return (currentLogger) => currentLogger.child({ sessionSlug: sessionSlug });
+  let loggingParams: { sessionSlug: string; device?: string, platform: string; };
+
+  // Append created session slug and platform name to logging params
+  loggingParams = {
+    sessionSlug: crypto.createHash('sha1').update(extraction.sessionID).digest('hex').slice(0, 7),
+    platform: extraction.platform
+  };
+
+  // Append device name to logging params - if given
+  if (featureIsAvailable<OptionalExtractions.DeviceExtraction>(extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
+    loggingParams.device = extraction.device;
+  }
+
+  return (currentLogger) => currentLogger.child(loggingParams);
 }
