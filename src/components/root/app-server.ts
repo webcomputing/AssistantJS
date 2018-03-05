@@ -47,7 +47,7 @@ export class ServerApplication implements MainApplication {
 
   /** Binds GenericRequestHandler to request after extracting context */
   handleRequest(request: express.Request, response: express.Response, container: Container) {
-    const requestId: string = cuid();
+    const requestId: string = cuid.slug();
     this.log(`Incomming request: ${request.method} ${request.path}`, requestId);
 
     // Create generic request context
