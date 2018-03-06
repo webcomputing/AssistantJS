@@ -10,6 +10,7 @@ import * as commander from "commander";
 
 // Import node.js filesystem module
 import * as fs from "fs";
+import { Component } from "inversify-components";
 
 // Get package.json data
 const pjson = require("../package.json");
@@ -34,7 +35,7 @@ export function cli(argv, resolvedIndex) {
   }
 
   /** Copies a file from source to destination by replacing name */
-  const copyAndReplace = function(name: string, source: string, destination: string) {
+  const copyAndReplace = function (name: string, source: string, destination: string) {
     const contents = fs.readFileSync(source, 'utf8');
     fs.writeFileSync(destination, contents.replace(/\{\{__NAME__\}\}/g, name));
   }
@@ -56,11 +57,11 @@ export function cli(argv, resolvedIndex) {
 
     // Create copyInstructions: [0] => source directory, [1] => target directory
     let copyInstructions = [
-      ['components.ts', 'config/components.ts'], 
+      ['components.ts', 'config/components.ts'],
       ['jasmine.json', 'spec/support/jasmine.json'], ['setup.js', 'spec/helpers/setup.js'],
       ['application.ts', 'app/states/application.ts'], ['main.ts', 'app/states/main.ts']
     ];
-    
+
     // Merge root files into array
     copyInstructions = copyInstructions.concat(['.gitignore', 'index.ts', 'tsconfig.json', 'README.md', 'package.json'].map(rootFile => [rootFile, rootFile]));
 
@@ -82,7 +83,49 @@ export function cli(argv, resolvedIndex) {
       fs.writeFileSync(projectPath + filePath, "{}");
     });
   }
-  
+
+  const listComponents = function () {
+    console.log("AVAILABLE COMPONENTS:");
+    const assistantJSSetup: AssistantJSSetup = grabSetup();
+    const components = assistantJSSetup.container.componentRegistry.registeredComponents as {
+      [name: string]: Component<{}>;
+    };
+
+    for (const key in components) {
+      if (components.hasOwnProperty(key)) {
+        console.log(`component: '${key}'`);
+      }
+    }
+    console.log("FINISHED LISTING COMPONENTS");
+  }
+
+  const listExtensionPoints = function (componentName?: string) {
+    console.log("AVAILABLE EXTENSION POINTS:");
+    if (componentName) {
+      console.log(`filtering for '${componentName}'`);
+    }
+    const assistantJSSetup: AssistantJSSetup = grabSetup();
+    const components = assistantJSSetup.container.componentRegistry.registeredComponents as {
+      [name: string]: Component<{}>;
+    };
+
+    for (const outerKey in components) {
+      if (components.hasOwnProperty(outerKey) && (componentName ? outerKey === componentName : true)) {
+        const component = components[outerKey];
+        const symbolArray = component.interfaces as {
+          [name: string]: symbol;
+        };
+        if (Object.keys(symbolArray).length > 0) {
+          console.log(`component: '${outerKey}'`);
+        }
+        for (const innerKey in symbolArray) {
+          console.log(`\t--> extension point: '${innerKey}'`);
+        }
+      }
+    }
+    console.log("FINISHED LISTING EXTENSION POINTS");
+  }
+
   // Set version to CLI
   commander.version(pjson.version);
 
@@ -99,10 +142,10 @@ export function cli(argv, resolvedIndex) {
     .command("generate")
     .alias("g")
     .description("Generates all platform configurations")
-    .action(() => { 
+    .action(() => {
       grabSetup().run(new GeneratorApplication(process.cwd() + "/builds"));
     });
-  
+
   // Register new command
   commander
     .command("new")
@@ -112,6 +155,27 @@ export function cli(argv, resolvedIndex) {
       createProject(name);
       console.log("Project created. Now run npm install and tsc!");
       console.log("Happy hacking :-)!")
+      process.exit(0);
+    });
+
+  // Register new command
+  commander
+    .command("list-components")
+    .alias("lc")
+    .description("Lists all installed components")
+    .action(() => {
+      listComponents();
+      process.exit(0);
+    })
+
+  // Register new command
+  commander
+    .command("list-extension-points")
+    .alias("lep")
+    .description("Lists available extension points (of component)")
+    .arguments('[component]')
+    .action(component => {
+      listExtensionPoints(component);
       process.exit(0);
     });
 
