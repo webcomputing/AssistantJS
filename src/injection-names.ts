@@ -5,6 +5,7 @@ export const injectionNames = {
   "redisInstance": "core:services:redis-instance",
   "stateFactory": "core:state-machine:state-factory",
   "logger": "core:root:logger",
+  "componentSpecificLoggerFactory": "core:root:component-specific-logger-factory",
   "current": {
     "translateHelper": "core:i18n:current-translate-helper",
     "stateMachine": "core:state-machine:current-state-machine",
@@ -16,6 +17,6 @@ export const injectionNames = {
     "responseFactory": "core:unifier:current-response-factory",
     "entityDictionary": "core:unifier:current-entity-dictionary",
     "responseHandler": "core:unifier:current-response-handler",
-    "logger": "core:root:current-logger"
+    "logger": "core:root:current-logger",
   }
 }

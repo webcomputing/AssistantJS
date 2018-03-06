@@ -1,8 +1,9 @@
 import { ComponentDescriptor, Component } from "inversify-components";
 import { GenericRequestHandler } from "./generic-request-handler";
 import { defaultBunyan } from "./default-bunyan";
-import { RequestContext, Logger, LoggerMiddleware } from "./public-interfaces";
+import { RequestContext, Logger, LoggerMiddleware, ComponentSpecificLoggerFactory } from "./public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
+import { componentSpecificLoggerFactoryByContainer } from "./component-specific-logger-factory";
 
 import { componentInterfaces as temp } from "../unifier/private-interfaces";
 
@@ -20,6 +21,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService("logger").toDynamicValue(context => {
         return context.container.get<Component<Configuration.Runtime>>("meta:component//core:root").configuration.bunyanInstance;
       });
+
+      bindService.bindGlobalService<ComponentSpecificLoggerFactory>("component-specific-logger-factory").toDynamicValue(
+        context => componentSpecificLoggerFactoryByContainer(context.container)
+      );
     },
     request: (bindService) => {
       bindService.bindGlobalService("current-logger").toDynamicValue(context => {
