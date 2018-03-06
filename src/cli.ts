@@ -84,6 +84,21 @@ export function cli(argv, resolvedIndex) {
     });
   }
 
+  const listComponents = function () {
+    console.log("AVAILABLE COMPONENTS:");
+    const assistantJSSetup: AssistantJSSetup = grabSetup();
+    const components = assistantJSSetup.container.componentRegistry.registeredComponents as {
+      [name: string]: Component<{}>;
+    };
+
+    for (const key in components) {
+      if (components.hasOwnProperty(key)) {
+        console.log(`component: '${key}'`);
+      }
+    }
+    console.log("FINISHED LISTING COMPONENTS");
+  }
+
   const listExtensionPoints = function (componentName?: string) {
     console.log("AVAILABLE EXTENSION POINTS:");
     if (componentName) {
@@ -145,8 +160,18 @@ export function cli(argv, resolvedIndex) {
 
   // Register new command
   commander
+    .command("list-components")
+    .alias("lc")
+    .description("Lists all installed components")
+    .action(() => {
+      listComponents();
+      process.exit(0);
+    })
+
+  // Register new command
+  commander
     .command("list-extension-points")
-    .alias("ep")
+    .alias("lep")
     .description("Lists available extension points (of component)")
     .arguments('[component]')
     .action(component => {
