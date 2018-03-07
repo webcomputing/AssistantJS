@@ -28,10 +28,10 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
 
   /**
    * 
-   * @param {unifierInterfaces.ResponseFactory} responseFactory Current response factory
-   * @param {i18nInterfaces.TranslateHelper} translateHelper Current translate helper
-   * @param {unifierInterfaces.MinimalRequestExtraction} extraction Extraction of current request
-   * @param {rootInterfaces.Logger} logger Logger, prepared to log information about the current request
+   * @param {ResponseFactory} responseFactory Current response factory
+   * @param {TranslateHelper} translateHelper Current translate helper
+   * @param {MinimalRequestExtraction} extraction Extraction of current request
+   * @param {Logger} logger Logger, prepared to log information about the current request
    */
   constructor(
     responseFactory: ResponseFactory, 
@@ -42,7 +42,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
 
   /**
    * As an alternative to passing all objects on it's own, you can also pass a set of them
-   * @param {stateMachineInterfaces.StateSetupSet} stateSetupSet A set containing response factory, translate helper and extraction.
+   * @param {StateSetupSet} stateSetupSet A set containing response factory, translate helper and extraction.
    */
   constructor(stateSetupSet: State.SetupSet)
 

@@ -18,7 +18,7 @@ export class MainState extends ApplicationState {
   }
 
   /**
-   * The invokeGenericIntent method (unifierInterfaces.GenericIntent.invoke) is your "main entrance" into your application. 
+   * The invokeGenericIntent method (GenericIntent.invoke) is your "main entrance" into your application. 
    * It is called as soon as the application is launched, e. g. if user says "launch xxxxx".
    */
   invokeGenericIntent(machine: Transitionable) {

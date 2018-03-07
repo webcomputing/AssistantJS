@@ -95,7 +95,7 @@ describe("MainState", function () {
 
     describe("invokeGenericIntent", function() {
       beforeEach(async function(done) {
-        this.responseHandler = await this.currentPlatformHelper.pretendIntentCalled(unifierInterfaces.GenericIntent.Invoke);
+        this.responseHandler = await this.currentPlatformHelper.pretendIntentCalled(GenericIntent.Invoke);
         done();
       });
 
