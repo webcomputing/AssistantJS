@@ -21,9 +21,8 @@ describe("translateValuesFor", function() {
     });
 
     it("does not change behaviour of translateHelper.t", function() {
-      pending("We need to make configurations strictly JSON based in order to make this work.");
-      /* this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
-      expect(this.translateHelper.t("templateSyntaxSmall") as string).not.toContain(arraySplitter); */
+      this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+      expect(this.translateHelper.t("templateSyntaxSmall") as string).not.toContain(arraySplitter);
     });
   });
 });

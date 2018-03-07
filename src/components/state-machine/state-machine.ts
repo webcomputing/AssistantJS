@@ -1,61 +1,75 @@
 import { injectable, inject } from "inversify";
 import { Hooks } from "inversify-components";
-import { GenericIntent, intent } from "../unifier/interfaces";
-import { Session } from "../services/interfaces";
-import { log } from "../../setup";
+import { GenericIntent, intent } from "../unifier/public-interfaces";
+import { Session } from "../services/public-interfaces";
+import { Logger } from "../root/public-interfaces";
 
-import { State, StateMachine as StateMachineInterface, componentInterfaces, MetaState } from "./interfaces";
+import { State, Transitionable } from "./public-interfaces";
+import { componentInterfaces } from "./private-interfaces";
 
 @injectable()
-export class StateMachine implements StateMachineInterface {
+export class StateMachine implements Transitionable {
   intentHistory: { stateName: string; intentMethodName: string }[] = [];
-
-  private getCurrentState: () => Promise<{instance: State, name: string}>;
-  private stateNames: string[];
-  private currentSessionFactory: () => Session;
-  private pipeFactory: Hooks.PipeFactory;
-
+  
   constructor(
-    @inject("core:state-machine:current-state-provider") getCurrentState: any,
-    @inject("core:state-machine:state-names") stateNames: string[],
-    @inject("core:unifier:current-session-factory") currentSessionFactory: () => Session,
-    @inject("core:hook-pipe-factory") pipeFactory: Hooks.PipeFactory
-  ) {
-    this.getCurrentState = getCurrentState;
-    this.stateNames = stateNames;
-    this.currentSessionFactory = currentSessionFactory;
-    this.pipeFactory = pipeFactory;
-  }
+    @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{instance: State.Required, name: string}>,
+    @inject("core:state-machine:state-names") private stateNames: string[],
+    @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
+    @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
+    @inject("core:root:current-logger") private logger: Logger
+  ) { }
 
   async handleIntent(intent: intent, ...args: any[]) {
     let currentState = await this.getCurrentState();
 
     let intentMethod = this.deriveIntentMethod(intent);
     this.intentHistory.push({stateName: currentState.name, intentMethodName: intentMethod});
-    log("Handling intent '" + intentMethod + "' on state " + currentState.name);
+    this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
-    // Run beforeIntent-hooks as filter
-    return new Promise<void>((resolve, reject) => {
-      this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runAsFilter(() => {
-        if (typeof(currentState.instance[intentMethod]) === "function") {
-          try {
-            // Call given intent
-            Promise.resolve(currentState.instance[intentMethod](this, ...args)).then(() => {
-              // Run afterIntent hooks
-              this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runWithResultset(() => {});
+    try {
+      // Run beforeIntent-hooks as filter
+      const hookResults = await this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runAsFilter();
 
-              // Done
-              resolve();
-            }).catch(reason => this.handleOrReject(reason, currentState.instance, currentState.name, intentMethod, reject, resolve, ...args));
-          } catch(e) {
-            this.handleOrReject(e, currentState.instance, currentState.name, intentMethod, reject, resolve, ...args);
-          }
-        } else {
-          // -> Intent does not exist on state class, so call unhandledGenericIntent instead
-          this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args).catch(reason => this.handleOrReject(reason, currentState.instance, currentState.name, intentMethod, reject, resolve, ...args)).then(() => resolve());
+      // Abort if not all hooks returned a "success" result
+      if (!hookResults.success) {
+        this.logger.info("One of your hooks did not return a successful result. Aborting planned state machine execution.");
+        return;
+      }
+
+      // Check if there is a "beforeIntent_" method available
+      if (typeof(currentState.instance["beforeIntent_"]) === "function") {
+        const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
+
+        if (typeof callbackResult !== "boolean") {
+          throw new Error(`You have to return either true or false in your beforeIntent_ callback. Called beforeIntent_ for ${currentState.name}#${intentMethod}. `);
         }
-      }, () => resolve());
-    });
+
+        if (!callbackResult) {
+          this.logger.info("Your beforeIntent_ callback returned false. Aborting planned state machine execution.");
+          return;
+        }
+      }
+
+      // Check if intentMethod is available in currentState
+      if (typeof(currentState.instance[intentMethod]) === "function") {
+        // Call given intent
+        await Promise.resolve(currentState.instance[intentMethod](this, ...args));
+
+        // Call afterIntent_ method if present
+        if (typeof currentState.instance["afterIntent_"] === "function") {
+          ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
+        }
+
+        // Run afterIntent hooks
+        await this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runWithResultset();
+      } else {
+        // -> Intent does not exist on state class, so call unhandledGenericIntent instead
+        await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);
+      }
+    } catch(e) {
+      // Handle exception by error handler
+      await this.handleOrReject(e, currentState.instance, currentState.name, intentMethod, ...args);
+    }
   }
 
   async transitionTo(state: string) {
@@ -76,14 +90,12 @@ export class StateMachine implements StateMachineInterface {
 
   /* Private helper methods */
 
-  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). Calls rejectMethod() instead.*/
-  private handleOrReject(error: Error, state: State, stateName: string, intentMethod: string, rejectMethod: Function, resolveMethod: Function, ...args) {
+  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again.*/
+  private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
     if (typeof state["errorFallback"] === "function") {
-      Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args))
-        .then(() => resolveMethod())
-        .catch(e => rejectMethod(e));
+      await Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args));
     } else {
-      rejectMethod(error);
+      throw error;
     }
   }
 

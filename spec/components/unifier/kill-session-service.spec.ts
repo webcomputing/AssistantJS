@@ -1,6 +1,6 @@
 import { createRequestScope } from "../../support/util/setup";
-import { DestroyableSession } from "../../../src/components/services/interfaces";
-import { componentInterfaces } from "../../../src/components/unifier/interfaces";
+import { Session } from "../../../src/components/services/public-interfaces";
+import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { KillSessionService } from "../../../src/components/unifier/kill-session-service";
 import { Hooks } from "inversify-components";
 
@@ -13,14 +13,14 @@ describe("KillSessionService", function() {
     /** Sets some example session data */
     this.setSessionData = () => {
       this.currentSessionFactory = this.container.inversifyInstance.get("core:unifier:current-session-factory");
-      let currentSession: DestroyableSession = this.currentSessionFactory();
+      let currentSession: Session = this.currentSessionFactory();
 
       return currentSession.set("testField", "testValue");
     };
 
     /** Gets the mock session data */
     this.getSessionData = () => {
-      let currentSession: DestroyableSession = this.currentSessionFactory();
+      let currentSession: Session = this.currentSessionFactory();
       return currentSession.get("testField"); 
     }
   });
@@ -72,9 +72,9 @@ describe("KillSessionService", function() {
 
       beforeEach(function() {
         this.successfulHookSymbol = Symbol();
-        let successfulHook: Hooks.Hook = (success, failure) => { 
+        let successfulHook: Hooks.Hook = () => { 
           this.calledHooks.push(this.successfulHookSymbol);
-          success();
+          return true;
         };
         this.addHook(componentInterfaces.beforeKillSession, successfulHook)
       });
@@ -83,9 +83,9 @@ describe("KillSessionService", function() {
 
         beforeEach(function() {
           this.failingHookSymbol = Symbol();
-          let failHooks: Hooks.Hook = (success, failure) => { 
+          let failHooks: Hooks.Hook = () => { 
             this.calledHooks.push(this.failingHookSymbol);
-            failure();
+            return false;
           };
           this.addHook(componentInterfaces.beforeKillSession, failHooks)
         });
@@ -105,9 +105,9 @@ describe("KillSessionService", function() {
         describe("with an afterKillSession hook", function() {
           beforeEach(function() {
             this.afterHookSymbol = Symbol();
-            let afterHook: Hooks.Hook = (success, failure) => { 
+            let afterHook: Hooks.Hook = () => { 
               this.calledHooks.push(this.afterHookSymbol);
-              success();
+              return true;
             };
             this.addHook(componentInterfaces.afterKillSession, afterHook)
           });

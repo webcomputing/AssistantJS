@@ -1,16 +1,18 @@
 import { ContainerImpl } from "inversify-components";
 import * as express from "express";
 import * as fakeRedis from "fakeredis";
+import { createLogger } from "bunyan"
 
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { StateMachineSetup } from "./components/state-machine/setup";
-import { StateConstructor, StateMachine } from "./components/state-machine/interfaces";
-import { RequestContext } from "./components/root/interfaces";
-import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/interfaces";
-import { Configuration } from "./components/services/interfaces";
+import { State, Transitionable } from "./components/state-machine/public-interfaces";
+import { RequestContext, Logger } from "./components/root/public-interfaces";
+import { MinimalRequestExtraction, MinimalResponseHandler, intent } from "./components/unifier/public-interfaces";
+import { Configuration } from "./components/services/private-interfaces";
 import { ServerApplication } from "./components/root/app-server"; 
 
 import { AssistantJSSetup } from "./setup";
+import { injectionNames } from "./injection-names";
 
 /** Used for managing multiple spec setups */
 let specSetupId = 0;
@@ -30,13 +32,16 @@ export class SpecSetup {
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
    * */
-  prepare(states: StateConstructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
+  prepare(states: State.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
     this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
 
     if (autoBind) this.setup.autobind();
     if (!useChilds) this.bindChildlessRequestHandlerMock();
+
+    // Change logger unless env variable is set
+    if (!(process.env.SPEC_LOGS === "true")) this.bindSpecLogger();
   }
 
   /**
@@ -57,13 +62,13 @@ export class SpecSetup {
 
     // Add minimal extraction if wanted
     if (minimalExtraction !== null) {
-      requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction");
+      requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
     }
 
     // Add minimal response handler
     if (typeof responseHandler !== "undefined") {
       if (minimalExtraction !== null) {
-        childContainer.bind<MinimalResponseHandler>(minimalExtraction.component.name + ":current-response-handler").to(responseHandler);
+        childContainer.bind<MinimalResponseHandler>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
       }
       else {
         throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");
@@ -82,7 +87,7 @@ export class SpecSetup {
   async runMachine(stateName?: string, intent?: intent) {
     if (this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") 
     && this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")) {
-      let machine = this.setup.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine")
+      let machine = this.setup.container.inversifyInstance.get<Transitionable>("core:state-machine:current-state-machine")
       let extraction = this.setup.container.inversifyInstance.get<MinimalRequestExtraction>("core:unifier:current-extraction");
 
       if (typeof stateName !== "undefined") {
@@ -96,7 +101,7 @@ export class SpecSetup {
   }
 
   /** Registers states */
-  registerStates(states: StateConstructor[]) {
+  registerStates(states: State.Constructor[]) {
     let stateMachineSetup = new StateMachineSetup(this.setup);
     states.forEach(state => stateMachineSetup.addState(state));
     stateMachineSetup.registerStates();
@@ -108,6 +113,14 @@ export class SpecSetup {
   bindChildlessRequestHandlerMock() {
     this.setup.container.inversifyInstance.unbind(GenericRequestHandler);
     this.setup.container.inversifyInstance.bind(GenericRequestHandler).to(ChildlessGenericRequestHandler);
+  }
+
+  /**
+   * Changes logger to a new one without any streams configured. Makes the logger silent.
+   */
+  bindSpecLogger() {
+    this.setup.container.inversifyInstance.unbind(injectionNames.logger);
+    this.setup.container.inversifyInstance.bind<Logger>(injectionNames.logger).toConstantValue(createLogger({ name: "assistantjs-testing", streams: [] }));
   }
 
   /** 
@@ -127,7 +140,7 @@ export class SpecSetup {
   /** Initialize default configuration -> changes redis to mock version */
   initializeDefaultConfiguration() {
     // Set redis instance to fake redis instance
-    const serviceConfiguration: Configuration = {
+    const serviceConfiguration: Configuration.Required = {
       redisClient: fakeRedis.createClient(6379, `redis-spec-setup-${++specSetupId}`, { fast: true })
     }
     this.setup.addConfiguration({"core:services": serviceConfiguration});

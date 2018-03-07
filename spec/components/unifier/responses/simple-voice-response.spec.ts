@@ -5,8 +5,10 @@ describe("VoiceResponse", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
+    this.logger = this.container.inversifyInstance.get("core:root:current-logger");
+
     spyOn(this.handler, "sendResponse").and.returnValue(true);
-    this.simpleVoiceResponse = new SimpleVoiceResponse(this.handler, false);
+    this.simpleVoiceResponse = new SimpleVoiceResponse(this.handler, false, this.logger);
   });
 
   describe("endSessionWith", function() {

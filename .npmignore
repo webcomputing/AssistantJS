@@ -6,3 +6,4 @@ gulpfile.js
 tsconfig.json
 .gitignore
 coverage
+*.tgz

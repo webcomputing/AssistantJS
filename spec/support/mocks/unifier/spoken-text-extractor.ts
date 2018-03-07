@@ -1,11 +1,11 @@
 import { injectable } from "inversify";
 
 import { Component } from "../util/component";
-import { RequestContext } from "../../../../src/components/root/interfaces";
-import { RequestConversationExtractor } from "../../../../src/components/unifier/interfaces";
+import { RequestContext } from "../../../../src/components/root/public-interfaces";
+import { RequestExtractor } from "../../../../src/components/unifier/public-interfaces";
 
 @injectable()
-export class SpokenTextExtractor implements RequestConversationExtractor {
+export class SpokenTextExtractor implements RequestExtractor {
   component: Component;
 
   constructor(componentName = "SpokenTextExtractorComponent") {
@@ -14,14 +14,14 @@ export class SpokenTextExtractor implements RequestConversationExtractor {
   
   /** Always returns true */
   fits(context: RequestContext) {
-    return new Promise(resolve => {
+    return new Promise<boolean>(resolve => {
       resolve(true);
     });
   }
 
   /** Returns the whole body as extraction result + a spoken text extraction */
   extract(context: RequestContext) {
-    return new Promise(resolve => {
+    return new Promise<any>(resolve => {
       let result = Object.assign({}, context.body);
       result.spokenText = SpokenTextExtractor.spokenTextFill();
       resolve(result);

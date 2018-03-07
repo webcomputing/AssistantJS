@@ -1,4 +1,4 @@
-import { GenericIntent } from "../../../src/components/unifier/interfaces";
+import { GenericIntent } from "../../../src/components/unifier/public-interfaces";
 
 import { createRequestScope, createSpecHelper } from "../../support/util/setup";
 import { StateMachineSetup } from "../../../src/components/state-machine/setup";

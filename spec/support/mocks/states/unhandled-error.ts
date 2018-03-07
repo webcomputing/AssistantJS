@@ -1,10 +1,10 @@
-import { State } from "../../../../src/components/state-machine/interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/interfaces";
+import { State } from "../../../../src/components/state-machine/public-interfaces";
+import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 import { injectable, inject, optional } from "inversify";
 
 
 @injectable()
-export class UnhandledErrorState implements State {
+export class UnhandledErrorState implements State.Required {
   responseFactory: ResponseFactory;
   extraction: any;
   spy?: Function;

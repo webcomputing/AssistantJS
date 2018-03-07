@@ -1,5 +1,5 @@
-import { MinimalResponseHandler } from "../../../../src/components/unifier/interfaces";
-import { RequestContext } from "../../../../src/components/root/interfaces";
+import { MinimalResponseHandler } from "../../../../src/components/unifier/public-interfaces";
+import { RequestContext } from "../../../../src/components/root/public-interfaces";
 import { injectable, inject } from "inversify";
 
 @injectable()
@@ -19,6 +19,9 @@ export class RealResponseHandler extends ResponseHandler {
   }
 
   sendResponse() {
-    this.context.responseCallback(this.voiceMessage);
+    // Respond in a chaotic order to test against race conditions
+    setTimeout(() => {
+      this.context.responseCallback(this.voiceMessage);
+    }, Math.random()*1000);
   }
 }

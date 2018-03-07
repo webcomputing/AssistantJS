@@ -1,7 +1,7 @@
-import { DestroyableSession } from "./interfaces";
+import { Session as SessionInterface } from "./public-interfaces";
 import { RedisClient } from "redis";
 
-export class Session implements DestroyableSession {
+export class Session implements SessionInterface {
   id: string;
   redisInstance: RedisClient;
   maxLifeTime: number;
@@ -39,9 +39,7 @@ export class Session implements DestroyableSession {
     });
   }
 
-  delete(field?: string): Promise<void> {
-    if (typeof(field) === "undefined") return this.destroySession();
-
+  delete(field: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.hdel(this.documentID, field, err => {
         if (!err) {
@@ -53,7 +51,7 @@ export class Session implements DestroyableSession {
     });
   }
 
-  private destroySession():Promise<void> {
+  deleteAllFields():Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.del(this.documentID, (err, response) => {
         if (!err) {

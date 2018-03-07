@@ -1,6 +1,6 @@
 import { Container } from "inversify-components";
 import { withServer, RequestProxy } from "../../support/util/requester";
-import { RequestContext } from "../../../src/components/root/interfaces";
+import { RequestContext } from "../../../src/components/root/public-interfaces";
 
 describe("GenericRequestHelper", function() {
   describe("resulting context object", function() {

@@ -10,3 +10,4 @@ lib
 spec/builds
 coverage
 .nyc_output
+*.tgz

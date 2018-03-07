@@ -1,25 +1,21 @@
 import { inject, injectable } from "inversify";
 import { I18n } from "i18next";
-import { TranslateHelper as TranslateHelperInterface } from "./interfaces";
-import { MinimalRequestExtraction } from "../unifier/interfaces";
+
+import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/public-interfaces';
+import { Logger } from "../root/public-interfaces";
+import { featureIsAvailable } from '../unifier/feature-checker';
+
+import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 import { I18nContext } from "./context";
-import { log } from "../../setup";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
-  context: I18nContext;
-  extraction: MinimalRequestExtraction;
-  i18n: I18n;
-
   constructor(
-    @inject("core:i18n:instance") i18n: I18n, 
-    @inject("core:i18n:current-context") context: I18nContext,
-    @inject("core:unifier:current-extraction") extraction: MinimalRequestExtraction) 
-  {
-    this.i18n = i18n;
-    this.context = context;
-    this.extraction = extraction;
-  }
+    @inject("core:i18n:instance") public i18n: I18n, 
+    @inject("core:i18n:current-context") public context: I18nContext,
+    @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
+    @inject("core:root:current-logger") public logger: Logger
+  ) { }
 
 
   t(key?: string, locals?: {});
@@ -34,8 +30,11 @@ export class TranslateHelper implements TranslateHelperInterface {
     // Set language 
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
-    let options = Object.assign({ lng:  this.extraction.language, returnObjectTrees: false }, locals);
-    let extractorName = this.extraction.component.name;
+    const options = Object.assign({ lng:  this.extraction.language, returnObjectTrees: false }, locals);
+    const extractorName = this.extraction.platform;
+
+    // Catch up device name or set to undefined
+    const device = featureIsAvailable<OptionalExtractions.DeviceExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction) ? this.extraction.device : undefined;
 
     if (typeof key === "undefined") {
       key = "";
@@ -43,21 +42,40 @@ export class TranslateHelper implements TranslateHelperInterface {
 
     let lookupKeys: string[];
     if (key === "" || (key as string).charAt(0) === ".") {
-      lookupKeys = [
-        this.context.state + "." + this.context.intent + key + "." + extractorName, 
-        this.context.state + "." + this.context.intent + key, 
-        this.context.state + key + "." + extractorName,
-        this.context.state + key,
-        "root" + "." + this.context.intent + key + "." + extractorName, 
-        "root" + "." + this.context.intent + key, 
-        "root" + key + "." + extractorName,
-        "root" + key
-      ];
+      if (typeof device === "string") {
+        // Lookup keys shall include device specific lookups
+        lookupKeys = [
+          this.context.state + "." + this.context.intent + key + "." + extractorName + "." + device, 
+          this.context.state + "." + this.context.intent + key + "." + extractorName,
+          this.context.state + "." + this.context.intent + key, 
+          this.context.state + key + "." + extractorName + "." + device,
+          this.context.state + key + "." + extractorName,
+          this.context.state + key,
+          "root" + "." + this.context.intent + key + "." + extractorName + "." + device,
+          "root" + "." + this.context.intent + key + "." + extractorName, 
+          "root" + "." + this.context.intent + key, 
+          "root" + key + "." + extractorName + "." + device,
+          "root" + key + "." + extractorName,
+          "root" + key
+        ];
+      } else {
+        // Lookup keys shall not include device specific lookups
+        lookupKeys = [
+          this.context.state + "." + this.context.intent + key + "." + extractorName, 
+          this.context.state + "." + this.context.intent + key, 
+          this.context.state + key + "." + extractorName,
+          this.context.state + key,
+          "root" + "." + this.context.intent + key + "." + extractorName, 
+          "root" + "." + this.context.intent + key, 
+          "root" + key + "." + extractorName,
+          "root" + key
+        ];
+      }
     } else {
       lookupKeys = [key as string];
     }
 
-    log("I18N: using key resolvings %o with options/locals %o", lookupKeys, options);
+    this.logger.debug("I18N: using key resolvings %o", lookupKeys);
     return this.translateOrFail(lookupKeys, options);
   }
 
@@ -72,7 +90,7 @@ export class TranslateHelper implements TranslateHelperInterface {
       if (typeof foundTranslation === "undefined" && this.i18n.exists(lookup, options)) {
         let translation = this.i18n.t(lookup, options);
         if (typeof translation === "string") {
-          log("I18N: choosing key: " + lookup);
+          this.logger.debug("I18N: choosing key: " + lookup);
           foundTranslation = translation;
           return true;
         }

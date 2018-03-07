@@ -1,11 +1,11 @@
 import { injectable } from "inversify";
 
 import { Component } from "../util/component";
-import { RequestContext } from "../../../../src/components/root/interfaces";
-import { RequestConversationExtractor } from "../../../../src/components/unifier/interfaces";
+import { RequestContext } from "../../../../src/components/root/public-interfaces";
+import { RequestExtractor } from "../../../../src/components/unifier/public-interfaces";
 
 @injectable()
-export class MockExtractor implements RequestConversationExtractor {
+export class MockExtractor implements RequestExtractor {
   component: Component;
 
   constructor(componentName = "MockExtractorComponent") {
@@ -13,14 +13,14 @@ export class MockExtractor implements RequestConversationExtractor {
   }
   
   /** Returns true if path == "/fitting_path" */
-  fits(context: RequestContext) {
+  fits(context: RequestContext):Promise<boolean> {
     return new Promise(resolve => {
       resolve(context.path === MockExtractor.fittingPath());
     });
   }
 
   /** Returns the whole body as extraction result */
-  extract(context: RequestContext) {
+  extract(context: RequestContext): Promise<any> {
     return new Promise(resolve => {
       resolve(context.body);
     });

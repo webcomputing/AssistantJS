@@ -1,35 +1,40 @@
 import { injectable, inject, multiInject, optional } from "inversify";
+import { Component } from "inversify-components";
 
-import { log } from "../../setup";
 import { featureIsAvailable } from "./feature-checker";
-import { RequestContext, ContextDeriver as ContextDeriverI } from "../root/interfaces";
-import { componentInterfaces, RequestConversationExtractor, OptionalExtractions, MinimalRequestExtraction } from "./interfaces";
+import { injectionNames } from '../../injection-names';
+import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/public-interfaces";
+import { RequestExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
+import { Configuration, componentInterfaces } from "./private-interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
-  private extractors: RequestConversationExtractor[];
+  loggingWhitelist: Configuration.LogWhitelistSet;
 
   constructor(
-    @optional() @multiInject(componentInterfaces.requestProcessor) extractors: RequestConversationExtractor[] = []) {
-    this.extractors = extractors;
+    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestExtractor[] = [],
+    @inject(injectionNames.logger) private logger: Logger,
+    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
+  ) {
+    this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }
 
-  async derive(context: RequestContext) {
+  async derive(context: RequestContext): Promise<[any, string] | undefined> {
     const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
       const extractionResult = await extractor.extract(context);
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      log("Resolved platform context = %o", logableExtractionResult);
+      this.logger.info( { requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
       return [extractionResult, "core:unifier:current-extraction"];
     } else {
       return undefined;
     }
   }
 
-  async findExtractor(context: RequestContext): Promise<RequestConversationExtractor | null> {
-    let isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
+  async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
+    const isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
     
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
@@ -46,12 +51,12 @@ export class ContextDeriver implements ContextDeriverI {
   } 
 
   respondWithNoExtractor(context: RequestContext) {
-    log("None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
+    this.logger.warn({ requestId: context.id }, "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
     context.responseCallback("", {}, 404);
   }
 
   /** Returns list of extractors which implement most of all available optional extractor interfaces */
-  async selectExtractorsWithMostOptionalExtractions(extractors: RequestConversationExtractor[], context: RequestContext): Promise<RequestConversationExtractor[]> {
+  async selectExtractorsWithMostOptionalExtractions(extractors: RequestExtractor[], context: RequestContext): Promise<RequestExtractor[]> {
     if (extractors.length <= 1) return extractors; // Performance reasons
 
     // Build all extractions
@@ -69,8 +74,8 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   /** Returns true if given extractor supports given feature (see FeatureChecker) */
-  private extractorSupportsFeature(extraction: MinimalRequestExtraction, feature: string[]) {
-    return featureIsAvailable(extraction, feature);
+  private extractorSupportsFeature<Feature extends MinimalRequestExtraction>(extraction: MinimalRequestExtraction, feature: string[]) {
+    return featureIsAvailable<Feature>(extraction, feature);
   }
 
   /** Filters sensitive values, making the extraction result logable */
@@ -78,24 +83,27 @@ export class ContextDeriver implements ContextDeriverI {
     // Deep clone extraction object, just to be sure we don't change any values
     extraction = JSON.parse(JSON.stringify(extraction));
 
-    /** List of entity names to filter */
-    const entityNamesToFilter = ["pin", "password", "secure"];
-
     /** "filtered" String */
     const filteredPlaceholder = "**filtered**";
 
-    // Filter tokens
-    let filtered = Object.assign({}, extraction, {
-      "component": filteredPlaceholder,
-      "oAuthToken": filteredPlaceholder,
-      "temporalAuthToken": filteredPlaceholder
-    });
+    /** Sets all entries to "filteredPlaceholder" except the ones in the given whitelist */
+    const filterSet = <T>(set: T, whitelist: Configuration.LogWhitelistSet): T => {
+      // Get a merged set of all used object keys in whitelist. For example, if whitelist is ["a", {b: ["c"], d: ["e"]}, {f: "g"}], this would be {b: ["c"], d: ["e"], f: ["g"]}
+      const mergedObject = whitelist.filter(entry => typeof(entry) === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
 
-    // Filter entities
-    if (typeof filtered.entities !== "undefined") {
-      Object.keys(filtered.entities).filter(key => entityNamesToFilter.indexOf(key) > -1).forEach(key => (filtered.entities as object)[key] = filteredPlaceholder);
-    }
+      /** Check filtering for every key */
+      Object.keys(set).forEach(extractionKey => {
+        if (mergedObject.hasOwnProperty(extractionKey)) {
+          // Is filtered by object key => call filterSet with sub-whitelist recursivly
+          set[extractionKey] = filterSet(set[extractionKey], mergedObject[extractionKey]);
+        } else if (whitelist.indexOf(extractionKey) === -1) {
+          set[extractionKey] = filteredPlaceholder;
+        }
+      });
 
-    return filtered;
+      return set;
+    };
+
+    return filterSet(extraction, this.loggingWhitelist);
   }
 }

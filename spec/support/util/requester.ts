@@ -18,12 +18,10 @@ export class RequestProxy {
   }
 }
 
-export function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
-  let specSetup = new SpecSetup(assistantJs);
-
-  return specSetup.withServer(expressApp).then(stopFunction => {
-    return [new RequestProxy(), stopFunction];
-  });
+export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
+  const specSetup = new SpecSetup(assistantJs);
+  const stopFunction = await specSetup.withServer(expressApp);
+  return [new RequestProxy(), stopFunction];
 }
 
 export function expressAppWithTimeout(length = "5s") {

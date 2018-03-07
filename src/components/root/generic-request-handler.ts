@@ -4,9 +4,9 @@
  */
 import { Container, ExecutableExtension } from "inversify-components";
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
-import { log } from "../../setup";
 
-import { RequestContext, ContextDeriver, componentInterfaces } from "./interfaces";
+import { RequestContext, ContextDeriver } from "./public-interfaces";
+import { componentInterfaces } from "./private-interfaces";
 
 @injectable()
 export class GenericRequestHandler {
@@ -16,6 +16,8 @@ export class GenericRequestHandler {
    * After that, calls extensions registered @componentInterfaces.requestHandler
    */
   async execute(context: RequestContext, container: Container) {
+    // If you change any bindings here, also change spec_setup!
+
     // Create child container and append this request context to it
     let scopedRequestContainer = this.createChildContainer(container);
     this.bindContextToContainer(context, scopedRequestContainer, "core:root:current-request-context");
@@ -26,7 +28,7 @@ export class GenericRequestHandler {
     let results = await Promise.all(extensions.map(extension => extension.derive(context)));
     results.forEach(result => {
       if (typeof(result) !== "undefined") {
-        this.bindContextToContainer(result[0], scopedRequestContainer, result[1]);
+        this.bindContextToContainer(result[0], scopedRequestContainer, result[1], true);
       }
     });
 
@@ -39,9 +41,8 @@ export class GenericRequestHandler {
   }
 
   /** Binds a constant object to a given container */
-  bindContextToContainer(context: any, container: inversifyInterfaces.Container, name: string) {
-    log(`Binding context to ${name}...`);
-    container.bind(name).toConstantValue(context);
+  bindContextToContainer(context: any, container: inversifyInterfaces.Container, name: string, asDynamicValue = false) {
+    asDynamicValue ? container.bind(name).toDynamicValue(c => JSON.parse(JSON.stringify(context))) : container.bind(name).toConstantValue(context);
   }
 
   createChildContainer(container: Container): inversifyInterfaces.Container {

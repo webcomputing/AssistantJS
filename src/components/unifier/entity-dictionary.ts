@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
-import { MinimalRequestExtraction, EntityDictionary as EntityDictionaryInterface } from "./interfaces";
-import { Session } from "../services/interfaces";
+import { MinimalRequestExtraction, EntityDictionary as EntityDictionaryInterface } from "./public-interfaces";
+import { Session } from "../services/public-interfaces";
 import * as levenshtein from "fast-levenshtein";
 
 @injectable()

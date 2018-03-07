@@ -1,8 +1,8 @@
 import { ExecutableExtension } from "inversify-components";
 import { inject, injectable, optional } from "inversify";
-import { MinimalRequestExtraction } from "../unifier/interfaces";
+import { MinimalRequestExtraction } from "../unifier/public-interfaces";
 
-import { StateMachine } from "./interfaces";
+import { StateMachine } from "./state-machine";
 
 @injectable()
 export class Runner implements ExecutableExtension {

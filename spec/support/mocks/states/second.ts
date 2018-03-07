@@ -1,9 +1,9 @@
-import { State } from "../../../../src/components/state-machine/interfaces";
+import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { injectable, optional, inject } from "inversify";
 
 
 @injectable()
-export class SecondState implements State {
+export class SecondState implements State.Required {
   spy?: Function;
 
   constructor(@optional() @inject("mocks:states:call-spy") spy: Function) {
