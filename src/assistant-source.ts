@@ -28,7 +28,7 @@ export { BaseState } from "./components/state-machine/base-state";
 export { AbstractResponseHandler } from "./components/unifier/abstract-response-handler";
 export { featureIsAvailable } from "./components/unifier/feature-checker";
 export { BaseResponse } from "./components/unifier/responses/base-response";
-export { ResponseFactory } from "./components/unifier/response-factory";
+export { ResponseFactory as ResponseFactoryClass } from "./components/unifier/response-factory";
 export { cli } from "./cli";
 
 // Export SpecHelper
