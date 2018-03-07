@@ -1,33 +1,41 @@
 import { Session } from "../services/public-interfaces";
-import { RequestContext, Logger } from '../root/public-interfaces';
-import { TranslateHelper } from '../i18n/translate-helper';
-import { ResponseFactory } from '../unifier/response-factory';
-import { MinimalRequestExtraction, GenericIntent,  intent} from '../unifier/public-interfaces';
+import { RequestContext, Logger } from "../root/public-interfaces";
+import { TranslateHelper } from "../i18n/translate-helper";
+import { ResponseFactory } from "../unifier/response-factory";
+import {
+  MinimalRequestExtraction,
+  GenericIntent,
+  intent
+} from "../unifier/public-interfaces";
 
 /** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
 
- /** Namespace containing all state-specific interfaces */
+/** Namespace containing all state-specific interfaces */
 export namespace State {
   /** Main interface to implement a state */
   export interface Required {
-    /** 
+    /**
      * Method which is called automatically if no intent method was matched
      * @param machine Current transitionable interface
-     * @param originalIntentMethod Name of intent the state machine tried to call 
-    */
-    unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string): any;
+     * @param originalIntentMethod Name of intent the state machine tried to call
+     */
+    unhandledGenericIntent(
+      machine: Transitionable,
+      originalIntentMethod: string,
+      ...args: any[]
+    ): any;
 
-    /** 
+    /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
      * @param machine Current transitionable interface
      */
-    unansweredGenericIntent(machine: Transitionable): any;
+    unansweredGenericIntent(machine: Transitionable, ...args: any[]): any;
   }
 
   /** Implement this interface in your state if you need an error handler */
   export interface ErrorHandler {
-    /** 
+    /**
      * Method to be called automatically if an error occures in one of your intent methods
      * @param error The occured error object
      * @param state Current state object
@@ -36,7 +44,14 @@ export namespace State {
      * @param transitionable machine
      * @return {void}
      */
-    errorFallback(error: any, state: Required, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
+    errorFallback(
+      error: any,
+      state: Required,
+      stateName: string,
+      intentMethod: string,
+      transitionable: Transitionable,
+      ...args: any[]
+    );
   }
 
   /** Implement this interface to have a method called before every intent call */
@@ -48,7 +63,11 @@ export namespace State {
      * @param {Transitionable} machine Reference to state machine
      * @return {boolean|Promise<boolean>} If you return false instead of true, the intent method will not be called.
      */
-    beforeIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): Promise<boolean> | boolean;
+    beforeIntent_(
+      intentMethod: string,
+      machine: Transitionable,
+      ...args: any[]
+    ): Promise<boolean> | boolean;
   }
 
   /** Implement this interface to have a method called after every intent call. */
@@ -60,12 +79,16 @@ export namespace State {
      * @param {Transitionable} machine Reference to state machine
      * @return {void}
      */
-    afterIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): void;
+    afterIntent_(
+      intentMethod: string,
+      machine: Transitionable,
+      ...args: any[]
+    ): void;
   }
 
   /** Constructor of state objects */
   export interface Constructor<S extends Required = Required> {
-    new(...args: any[]): S;
+    new (...args: any[]): S;
   }
 
   /** (Injectable) factory to create state instances */
@@ -73,7 +96,7 @@ export namespace State {
     /** Returns a state by name (string).
      * @param {string} stateName Name of state. If you leave out this parameter, the main state is returned.
      * @return {State extends State.Required}
-    */
+     */
     <T extends State.Required = State.Required>(stateName?: string): T;
   }
 
@@ -89,7 +112,7 @@ export namespace State {
   export interface Meta {
     readonly name: string;
     readonly intents: intent[];
-  }  
+  }
 }
 
 /** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
