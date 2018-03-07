@@ -1,3 +1,30 @@
+version 0.3.0
+- promisifies hook api: Hooks aren't based on success() and failure() callbacks anymore, returning a Promise<boolean> instead
+- introduces beforeIntent_ and afterIntent_ methods: These methods may be implemented in states and are called before/after an intent. This may be a good alternative for state-dependent hooks.
+- fixes translateValuesFor/translateHelper call dependency bug
+- adds device recognition: Platforms are now able to emit a device name which can be used to implement device-specific behaviour
+- adds device-specific translation convention: If there is a device, AssistantJS will automatically look up keys structured like state.intent.{key}.platform.device
+- enhances BaseState: BaseState now supports abbrevations for ResponseFactory (this.prompt(), this.endSessionWith()), TranslateHelper (this.t()), platform/device recognition (getPlatform(), getDeviceOrPlatform()) and logging (this.logger)
+- groups state interfaces to a State namespace (State.Required, State.ErrorHandler, State.BeforeIntent, ...)
+- adds unique short requestId to RequestContext
+- switches to production-ready logging through bunyan: Removes dependency of "debug" module, adding bunyan instead.
+- makes bunyan instance configurable through "core:root"-configuration
+- makes logger instance injectable in all classes (as well in root as in request scope)
+- adds the current request's id, an unique session identifier (not the session id) and the current platform/device as default parameters to request-specific logger
+- makes logging opt-in-able in specs via environment variable SPEC_LOGS=true
+- enables component-specific logging (especially for external assistantjs components)
+- adds extension point enabling other components to add middlewares to request-specific logger
+- enables whitelisting of specific extraction elements with logger, uses reasonable secure default
+- changes featureChecker to use type guards
+- updates multiple dependencys (esp. typescript)
+- changes structure of configuration interfaces to improve type safety and user handling, now seperating between Configuration.Defaults and Configuration.Required and deriving Configuration.Runtime and user configuration
+- deprecates interface exports (rootInterfaces, servicesInterfaces, unifierInterfaces, ...), now exporting all interfaces directly
+- restructures internal interfaces, splits them up into public-interfaces (which are exported) and private-interfaces (which aren't)
+- moves all interfaces needed for platform generators into single PlatformGenerator namespace
+- updates scaffolding to generate new 0.3.0 structures in generated projects
+- adds interfaces for internal hooks, making them type-safe
+- adds cli command to list extension points and components
+
 version 0.2.7
 - removes local references from package-lock.json
 - adds default port to fakredis spec instance, bugfixing fast mode

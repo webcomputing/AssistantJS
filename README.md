@@ -83,9 +83,9 @@ Wondering about the empty `this.t()` calls? Translation keys are matched by appl
   },
 }
 ```
-As you can see, AssistantJS supports you in building more varied voice applications per default. Just use our template syntax (`{Allright|Okay}`) or pass all alternatives in an array. Thanks to our convention over configuration rulesets, we are greeting google assistant users different than alexa users. Oh, and as you can see, inheriting intents (like the `helpGenericIntent` above) from other states (here: `ApplicationState`) is also possible.
+As you can see, AssistantJS supports you in building more varied voice applications per default. Just use our template syntax (`{Allright|Okay}`) or pass all alternatives in an array. Thanks to our convention over configuration rulesets, we are greeting google assistant users different than alexa users. We could even greet them device-specific thanks to these conventions. Oh, and as you can see, inheriting intents (like the `helpGenericIntent` above) from other states (here: `ApplicationState`) is also possible.
 
-This is what a test for the MainState's `invokeGenericIntent` could look like:
+This is what a test (yes, you can test all assistantjs applications without hassle) for the MainState's `invokeGenericIntent` could look like:
 ```typescript
 describe("MainState", function () {
   describe("on platform = alexa", function() {
