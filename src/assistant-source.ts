@@ -38,5 +38,7 @@ export { SpecSetup } from "./spec-setup";
 export { injectionNames } from "./injection-names";
 
 // Export Mixin/Constructor interfaces
-export type Constructor<T> = new(...args: any[]) => T;
-export interface Mixin<T> { new(...args: any[]): T; };
+export type Constructor<T> = new (...args: any[]) => T;
+export interface Mixin<T> {
+  new (...args: any[]): T;
+}
