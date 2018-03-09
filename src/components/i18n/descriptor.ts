@@ -7,6 +7,7 @@ import { Configuration } from "./private-interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nContext } from "./context";
 import { arraySplitter } from "./plugins/array-returns-sample.plugin";
+import { componentInterfaces } from "./component-interfaces";
 
 let defaultConfiguration: Configuration.Defaults = {
   i18nextInstance: i18next.createInstance(),
@@ -19,6 +20,7 @@ let defaultConfiguration: Configuration.Defaults = {
 
 export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:i18n",
+  interfaces: componentInterfaces,
   defaultConfiguration: defaultConfiguration,
   bindings: {
     root: (bindService, lookupService) => {

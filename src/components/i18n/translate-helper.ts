@@ -1,12 +1,13 @@
-import { inject, injectable } from "inversify";
+import { inject, injectable, optional, multiInject } from "inversify";
 import { I18n } from "i18next";
 
 import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/public-interfaces';
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from '../unifier/feature-checker';
 
-import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
+import { TranslateHelper as TranslateHelperInterface, BeforeTranslationExtension } from "./public-interfaces";
 import { I18nContext } from "./context";
+import { componentInterfaces } from "./component-interfaces";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
@@ -14,7 +15,8 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:i18n:instance") public i18n: I18n, 
     @inject("core:i18n:current-context") public context: I18nContext,
     @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
-    @inject("core:root:current-logger") public logger: Logger
+    @inject("core:root:current-logger") public logger: Logger,
+    @optional() @multiInject(componentInterfaces.beforeTranslation) private beforeTranslationExtensions: BeforeTranslationExtension[]
   ) { }
 
 
@@ -26,6 +28,14 @@ export class TranslateHelper implements TranslateHelperInterface {
       locals = key === null ? {} : key;
       key = undefined;
     }
+
+
+    // Run generators of beforeTranslationExtensions to fill defaultTranslations/choose translation key
+    this.beforeTranslationExtensions.forEach(beforeTranslationExtension => {
+      const extensionParams = beforeTranslationExtension.execute(key as string | undefined, {...locals});
+      locals = {...locals, ...extensionParams.locals};
+      key = extensionParams.key ? extensionParams.key : key;
+    });
 
     // Set language 
     // Disable returning of objects so that lookup works properly with state keys.

@@ -31,3 +31,7 @@ export interface TranslateValuesFor {
 
 /** Configuration object for AssistantJS user for i18n component */
 export interface I18nConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
+
+export interface BeforeTranslationExtension {
+  execute(key?: string, locals?: {}): {key?: string, locals?: { [name: string]: string }};
+} 
