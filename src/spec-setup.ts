@@ -120,7 +120,7 @@ export class SpecSetup {
    */
   bindSpecLogger() {
     this.setup.container.inversifyInstance.unbind(injectionNames.logger);
-    this.setup.container.inversifyInstance.bind<Logger>(injectionNames.logger).toConstantValue(createLogger({ name: "assistantjs-testing", streams: [] }));
+    this.setup.container.inversifyInstance.bind<Logger>(injectionNames.logger).toConstantValue(createLogger({ name: "assistantjs-testing", streams: [{ level: "error", stream: process.stdout }] }));
   }
 
   /** 
