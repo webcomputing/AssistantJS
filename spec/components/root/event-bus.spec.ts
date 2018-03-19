@@ -1,8 +1,8 @@
-import { EventHandler, AssistantJSEvent } from "../../../src/components/root/public-interfaces";
-import { injectionNames } from "../../../src/injection-names";
-import { Subscriber } from "rxjs";
 import { injectable } from "inversify";
+import { Subscriber } from "rxjs";
 import { componentInterfaces } from "../../../src/components/root/private-interfaces";
+import { AssistantJSEvent, EventHandler } from "../../../src/components/root/public-interfaces";
+import { injectionNames } from "../../../src/injection-names";
 
 const mySymbol = Symbol();
 const myString = "myEvent";
@@ -13,12 +13,14 @@ class EventHandlerA implements EventHandler {
   public symbolEvents: AssistantJSEvent[] = [];
   public stringEvents: AssistantJSEvent[] = [];
 
-  getSubscriber(eventName: string | symbol) {
+  public getSubscriber(eventName: string | symbol) {
     if (eventName === mySymbol) {
       return Subscriber.create<AssistantJSEvent>(event => {
         if (event) this.symbolEvents.push(event);
       });
-    } else if (eventName === myString) {
+    }
+
+    if (eventName === myString) {
       return Subscriber.create<AssistantJSEvent>(event => {
         if (event) this.stringEvents.push(event);
       });
@@ -27,11 +29,12 @@ class EventHandlerA implements EventHandler {
 }
 
 /** Puts everything into "events" queue */
+// tslint:disable-next-line:max-classes-per-file
 @injectable()
 class EventHandlerB implements EventHandler {
   public events: AssistantJSEvent[] = [];
 
-  getSubscriber() {
+  public getSubscriber() {
     return Subscriber.create<AssistantJSEvent>(event => {
       if (event) this.events.push(event);
     });
