@@ -5,7 +5,7 @@ export const componentInterfaces = {
   afterContextExtension: Symbol("after-context-extension"),
   generator: Symbol("generator"),
   loggerMiddleware: Symbol("logger-middleware"),
-  eventBus: Symbol("event-bus"),
+  eventHandler: Symbol("event-handler"),
 };
 
 export namespace Configuration {

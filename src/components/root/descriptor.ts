@@ -27,7 +27,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindGlobalService<ComponentSpecificLoggerFactory>("component-specific-logger-factory")
         .toDynamicValue(context => componentSpecificLoggerFactoryByContainer(context.container));
 
-      bindService.bindGlobalService("event-bus").to(EventBusHandler);
+      bindService
+        .bindGlobalService("event-bus")
+        .to(EventBusHandler)
+        .inSingletonScope();
     },
     request: bindService => {
       bindService

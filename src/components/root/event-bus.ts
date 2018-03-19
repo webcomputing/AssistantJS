@@ -5,34 +5,37 @@ import { AssistantJSEvent, EventHandler, EventBus } from "./public-interfaces";
 
 @injectable()
 export class EventBusHandler implements EventBus {
-  private channels: { [category: string]: { [channel: string]: Subject<AssistantJSEvent> } } = {};
+  private subjects: { [eventName: string /* | symbol, see https://github.com/Microsoft/TypeScript/issues/1863 */]: Subject<AssistantJSEvent> } = {};
 
   constructor(
     @optional()
-    @multiInject(componentInterfaces.eventBus)
+    @multiInject(componentInterfaces.eventHandler)
     private eventHandler: EventHandler[]
   ) {}
 
-  public publish(event: AssistantJSEvent, channel: string): void {
-    this.initializeChannel(channel, event.category);
-    this.channels[event.category || "AssistantJS"][channel].next(event);
+  public getObservable(eventName: string | symbol): Observable<AssistantJSEvent> {
+    this.initializeSubject(eventName);
+    return this.subjects[eventName].asObservable();
   }
 
-  public subscribe(observer: Observer<AssistantJSEvent>, channel: string, category: string = "AssistantJS"): void {
-    this.initializeChannel(channel, category);
-    this.channels[category][channel].subscribe(observer);
+  public publish(event: AssistantJSEvent): void {
+    this.initializeSubject(event.name);
+    this.subjects[event.name].next(event);
   }
 
-  private initializeChannel(channel: string, category: string = "AssistantJS") {
-    if (!this.channels[category]) {
-      this.channels[category] = {};
-    }
-    if (!this.channels[category][channel]) {
-      this.channels[category][channel] = new Subject<AssistantJSEvent>();
+  public subscribe(eventName: string | symbol, observer: Observer<AssistantJSEvent>): void {
+    this.getObservable(eventName).subscribe(observer);
+  }
+
+  /** Asks all extensions if they want to subscribe to this event = subject */
+  private initializeSubject(eventName: string | symbol) {
+    if (!this.subjects[eventName]) {
+      this.subjects[eventName] = new Subject<AssistantJSEvent>();
+
       this.eventHandler.forEach(handler => {
-        const subscriber = handler.getSubscriber(category, channel);
+        const subscriber = handler.getSubscriber(eventName);
         if (subscriber) {
-          this.channels[category][channel].subscribe(subscriber);
+          this.subscribe(eventName, subscriber);
         }
       });
     }

@@ -1,6 +1,6 @@
 import Logger = require("bunyan");
 import { Configuration } from "./private-interfaces";
-import { Observer } from "rxjs";
+import { Observer, Observable } from "rxjs";
 
 export { Logger };
 
@@ -75,36 +75,42 @@ export interface LoggerMiddleware {
 export interface RootConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
 
 /** Event, which can be send to EventBus */
-export interface AssistantJSEvent {
-  data: {
-    type: string;
-    value: any;
-  };
-  category?: string;
+export interface AssistantJSEvent<DataType = any> {
+  /** Identification of event. If you want to emit events of an AssistantJS component, you possibly want to import it's symbol. */
+  name: symbol | string;
+
+  /** Additional data you might want (or need) to add to your event */
+  data?: DataType;
 }
 
 /** Handler-Extensions, which get notified when new channels are registered */
-export interface EventHandler {
-  getSubscriber(category: string, channel: string): Observer<AssistantJSEvent> | undefined;
+export interface EventHandler<EventDataType = any> {
+  /** If you want to subscribe to this event, you have to return an observer for it. Else return undefined. */
+  getSubscriber(eventName: symbol | string): Observer<AssistantJSEvent<EventDataType>> | undefined;
 }
 
 /**
- * EventBus, on which it is possible to publish new events and to subscribe to channels
- * gets registered as global service
+ * EventBus, on which it is possible to publish and subscribe to AssistantJSEvents.
+ * Gets registered as global service ("root:event-bus").
  */
 export interface EventBus {
   /**
-   * publishes new events to channel
-   * @param event which gets published
-   * @param channel to witch the event get published
+   * Gets an observable of a given eventName
+   * @param {string|symbol} eventName to get an observable of
+   * @return {Observable<AssistantJSEvent>} observable for this AssistantJSEvent
    */
-  publish(event: AssistantJSEvent, channel: string): void;
+  getObservable(eventName: string | symbol): Observable<AssistantJSEvent>;
 
   /**
-   * Allows subscription to a combination of channel and category
-   * @param observer for  recieving events
-   * @param channel channel on which ther event is transfered
-   * @param category (optional) if not set the observe will be subscribed to a default category
+   * Publishes an event
+   * @param {AssistantJSEvent<DataType>} event which gets published
    */
-  subscribe(observer: Observer<AssistantJSEvent>, channel: string, category?: string): void;
+  publish(event: AssistantJSEvent): void;
+
+  /**
+   * Subscribes a given observer to an event name
+   * @param {string|symbol} eventName to subscribe to
+   * @param {Observer<AssistantJSEvent<DataType>>} observer to subscribe
+   */
+  subscribe(eventName: string | symbol, observer: Observer<AssistantJSEvent>): void;
 }
