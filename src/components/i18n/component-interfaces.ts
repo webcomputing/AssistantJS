@@ -1,3 +1,4 @@
 export const componentInterfaces = {
-    "beforeTranslation": Symbol("beforeTranslation")
+    "beforeTranslation": Symbol("beforeTranslation"),
+    "missingInterpolation": Symbol("missingInterpolation")
 }

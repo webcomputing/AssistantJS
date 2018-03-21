@@ -34,4 +34,8 @@ export interface I18nConfiguration extends Partial<Configuration.Defaults>, Conf
 
 export interface BeforeTranslationExtension {
   execute(key?: string, locals?: {}): {key?: string, locals?: { [name: string]: string }};
-} 
+}
+
+export interface MissingInterpolationExtension {
+  execute(generatorClassName: string): string | undefined;
+}

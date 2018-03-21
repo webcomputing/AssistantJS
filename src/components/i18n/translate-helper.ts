@@ -29,14 +29,6 @@ export class TranslateHelper implements TranslateHelperInterface {
       key = undefined;
     }
 
-
-    // Run generators of beforeTranslationExtensions to fill defaultTranslations/choose translation key
-    this.beforeTranslationExtensions.forEach(beforeTranslationExtension => {
-      const extensionParams = beforeTranslationExtension.execute(key as string | undefined, {...locals});
-      locals = {...locals, ...extensionParams.locals};
-      key = extensionParams.key ? extensionParams.key : key;
-    });
-
     // Set language 
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!

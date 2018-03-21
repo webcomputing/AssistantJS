@@ -29,7 +29,8 @@
     "inversify-components": "^0.4.0",
     "express": "^4.16.2",
     "redis": "^2.8.0",
-    "fakeredis": "^2.0.0"
+    "fakeredis": "^2.0.0",
+    "i18next": "*"
   },
   "dependencies": {
     "@types/bunyan": "^1.8.4",
@@ -40,16 +41,17 @@
     "bunyan": "^1.8.12",
     "commander": "2.13.0",
     "cuid": "^2.0.2",
-    "fast-levenshtein": "^2.0.6",
-    "i18next": "^10.3.0",
-    "i18next-sync-fs-backend": "^1.0.0",
-    "resolve": "^1.5.0",
-    "inversify-components": "^0.4.0",
     "express": "^4.16.2",
-    "redis": "^2.8.0",
     "fakeredis": "^2.0.0",
+    "fast-levenshtein": "^2.0.6",
+    "fs": "0.0.1-security",
+    "i18next": "^10.6.0",
+    "i18next-sync-fs-backend": "^1.0.0",
+    "inversify": "^4.1.1",
+    "inversify-components": "^0.4.0",
+    "redis": "^2.8.0",
     "reflect-metadata": "^0.1.12",
-    "inversify": "4.1.1"
+    "resolve": "^1.5.0"
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.5",
@@ -65,7 +67,7 @@
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.2"
+    "typescript": "^2.7.2"
   },
   "bin": {
     "assistant": "./bin/assistant"

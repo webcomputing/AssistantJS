@@ -1,16 +1,20 @@
 import { Component } from "inversify-components";
-import { inject, injectable } from "inversify";
+import { inject, injectable, optional, multiInject } from "inversify";
 import * as i18next from "i18next";
 import * as i18nextBackend from "i18next-sync-fs-backend";
 
 import { processor, arraySplitter } from "./plugins/array-returns-sample.plugin";
 import { processor as templateParser } from "./plugins/parse-template-language.plugin";
 import { Configuration } from "./private-interfaces";
+import { componentInterfaces } from "./component-interfaces";
+import { MissingInterpolationExtension } from "./public-interfaces";
+import { Logger } from "../root/public-interfaces";
 
 @injectable()
 export class I18nextWrapper {
   private component: Component<Configuration.Runtime>;
   private configuration: Configuration.Runtime;
+  private logger: Logger;
 
   instance: i18next.I18n;
 
@@ -18,20 +22,30 @@ export class I18nextWrapper {
    * @param componentMeta Component meta data
    * @param returnOnlySample If set to true, translation calls return a sample out of many options (for production), if false, you get all options (for specs only)
    */
-  constructor(@inject("meta:component//core:i18n") componentMeta: Component<Configuration.Runtime>, returnOnlySample = true) {
+  constructor(
+    @inject("meta:component//core:i18n") componentMeta: Component<Configuration.Runtime>,
+    @optional()
+    @multiInject(componentInterfaces.missingInterpolation)
+    private missingInterpolationExtensions: MissingInterpolationExtension[],
+    @inject("core:root:current-logger") logger: Logger,
+    returnOnlySample = true
+  ) {
     this.component = componentMeta;
     this.configuration = componentMeta.configuration;
+    this.logger = logger;
 
-    if (typeof this.configuration.i18nextAdditionalConfiguration === "undefined" || 
-     this.configuration.i18nextAdditionalConfiguration === "undefined")
-     throw new Error("i18next configuration and instance must not be undefined! Please check your configuration.");
+    if (typeof this.configuration.i18nextAdditionalConfiguration === "undefined" || this.configuration.i18nextAdditionalConfiguration === "undefined")
+      throw new Error("i18next configuration and instance must not be undefined! Please check your configuration.");
 
     this.instance = Object.assign(Object.create(Object.getPrototypeOf(this.configuration.i18nextInstance)), this.configuration.i18nextInstance);
-    let i18nextConfiguration = Object.assign({ initImmediate: false }, this.configuration.i18nextAdditionalConfiguration);
+    let i18nextConfiguration = Object.assign(
+      { initImmediate: false, missingInterpolationHandler: this.onInterpolationMissing.bind(this) },
+      this.configuration.i18nextAdditionalConfiguration
+    );
 
-    if (typeof(i18nextConfiguration.postProcess) === "string") {
+    if (typeof i18nextConfiguration.postProcess === "string") {
       i18nextConfiguration.postProcess = [i18nextConfiguration.postProcess];
-    } else if (typeof(i18nextConfiguration.postProcess) === "undefined") {
+    } else if (typeof i18nextConfiguration.postProcess === "undefined") {
       i18nextConfiguration.postProcess = [];
     }
 
@@ -47,6 +61,33 @@ export class I18nextWrapper {
     // 3) Grab a sample from the array of variants
     if (returnOnlySample) i18nextConfiguration.postProcess.push("arrayReturnsSample");
 
-    this.instance.use(i18nextBackend).use(templateParser).use(processor).init(i18nextConfiguration, err => { if (err) throw err; });
+    this.instance
+      .use(i18nextBackend)
+      .use(templateParser)
+      .use(processor)
+      .init(i18nextConfiguration, err => {
+        if (err) throw err;
+      });
+  }
+
+  private onInterpolationMissing(str, match) {
+    this.logger.info("onInterpolationMissing callback called for missing value", match[0]);
+
+    let interpolationValue: string | undefined;
+
+    this.missingInterpolationExtensions.forEach(missingInterpolationExtension => {
+      interpolationValue = missingInterpolationExtension.execute(this.parseInterpolation(str));
+    });
+
+    if (typeof interpolationValue !== "undefined") {
+      return interpolationValue;
+    }
+
+    this.logger.warn(`no matching extension found for ${str}`);
+  }
+
+  private parseInterpolation(str: string) {
+    str = str.replace(/(\{{2}|\}{2})/g, "");
+    return str;
   }
 }

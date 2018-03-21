@@ -2,12 +2,13 @@ import { ComponentDescriptor, Hooks, Component } from "inversify-components";
 import { I18nextWrapper } from "./wrapper";
 import { I18n } from "i18next";
 import * as i18next from "i18next";
-import { TranslateHelper, TranslateValuesFor } from "./public-interfaces";
+import { TranslateHelper, TranslateValuesFor, MissingInterpolationExtension } from "./public-interfaces";
 import { Configuration } from "./private-interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nContext } from "./context";
 import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 import { componentInterfaces } from "./component-interfaces";
+import { Logger, injectionNames } from "../../assistant-source";
 
 let defaultConfiguration: Configuration.Defaults = {
   i18nextInstance: i18next.createInstance(),
@@ -27,7 +28,8 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<I18nextWrapper>("wrapper").to(I18nextWrapper).inSingletonScope();
 
       bindService.bindGlobalService<I18nextWrapper>("spec-wrapper").toDynamicValue(context => {
-        return new I18nextWrapper(context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"), false);
+        console.log(context.container.getAll<MissingInterpolationExtension>(componentInterfaces.missingInterpolation));
+        return new I18nextWrapper(context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"), context.container.getAll<MissingInterpolationExtension>(componentInterfaces.missingInterpolation), context.container.get<Logger>(injectionNames.current.logger), false);
       }).inSingletonScope();
 
       // Registers a spec helper function which returns all possible values instead of a sample one
