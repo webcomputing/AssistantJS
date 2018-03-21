@@ -87,7 +87,6 @@ export class I18nextWrapper {
   }
 
   private parseInterpolation(interpolation: string) {
-    console.log()
     interpolation = interpolation.replace(/(\{{2}|\}{2})/g, "");
     return interpolation;
   }
