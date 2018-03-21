@@ -76,18 +76,19 @@ export class I18nextWrapper {
     let interpolationValue: string | undefined;
 
     this.missingInterpolationExtensions.forEach(missingInterpolationExtension => {
-      interpolationValue = missingInterpolationExtension.execute(this.parseInterpolation(str));
+      interpolationValue = missingInterpolationExtension.execute(this.parseInterpolation(match[0]));
     });
 
     if (typeof interpolationValue !== "undefined") {
       return interpolationValue;
     }
 
-    this.logger.warn(`no matching extension found for ${str}`);
+    this.logger.warn(`no matching extension found for ${match[0]}`);
   }
 
-  private parseInterpolation(str: string) {
-    str = str.replace(/(\{{2}|\}{2})/g, "");
-    return str;
+  private parseInterpolation(interpolation: string) {
+    console.log()
+    interpolation = interpolation.replace(/(\{{2}|\}{2})/g, "");
+    return interpolation;
   }
 }
