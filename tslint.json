@@ -13,6 +13,7 @@
         "static-method-regex": "^[a-z][\\w\\d]+$",
         "function-regex": "^([a-z][\\w\\d]+)|(([A-Z][\\w\\d]+)Mixin)$"
       }
-    ]
+    ],
+    "array-type": false
   }
 }
