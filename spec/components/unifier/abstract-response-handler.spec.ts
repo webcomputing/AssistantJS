@@ -64,6 +64,7 @@ describe("AbstractResponseHandler", function(this: CurrentThisContext) {
         });
         it("calls execute on injected ReponseHandlers", async function(this: CurrentThisContext) {
           expect((this.beforeResponseHandler as BeforeResponseHandler).execute).toHaveBeenCalledTimes(1);
+          expect((this.beforeResponseHandler as BeforeResponseHandler).execute).toHaveBeenCalledWith(this.instance);
         });
       });
     });
@@ -91,6 +92,7 @@ describe("AbstractResponseHandler", function(this: CurrentThisContext) {
       });
       it("calls execute on injected ReponseHandlers", async function(this: CurrentThisContext) {
         expect((this.afterResponseHandler as AfterResponseHandler).execute).toHaveBeenCalledTimes(1);
+        expect((this.afterResponseHandler as AfterResponseHandler).execute).toHaveBeenCalledWith(this.instance);
       });
     });
   });

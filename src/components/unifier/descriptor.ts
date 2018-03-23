@@ -11,6 +11,8 @@ import { KillSessionService } from "./kill-session-service";
 import { createUnifierLoggerMiddleware } from "./logger-middleware";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import {
+  AfterResponseHandler,
+  BeforeResponseHandler,
   EntityDictionary,
   MinimalRequestExtraction,
   MinimalResponseHandler,
@@ -66,18 +68,12 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       });
 
       bindService.bindGlobalService<ResponseHandlerExtensions>("response-handler-extensions").toDynamicValue(context => {
-        let afterExtensions;
-        let beforeExtensions;
-        try {
-          afterExtensions = context.container.getAll(componentInterfaces.afterSendResponse);
-        } catch (e) {
-          afterExtensions = [];
-        }
-        try {
-          beforeExtensions = context.container.getAll(componentInterfaces.beforeSendResponse);
-        } catch (e) {
-          beforeExtensions = [];
-        }
+        const afterExtensions = context.container.isBound(componentInterfaces.afterSendResponse)
+          ? context.container.getAll<BeforeResponseHandler>(componentInterfaces.afterSendResponse)
+          : [];
+        const beforeExtensions = context.container.isBound(componentInterfaces.beforeSendResponse)
+          ? context.container.getAll<AfterResponseHandler>(componentInterfaces.beforeSendResponse)
+          : [];
 
         return {
           afterExtensions,
