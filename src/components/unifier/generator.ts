@@ -57,20 +57,16 @@ export class Generator implements CLIGeneratorExtension {
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
 
         // Build Slots and Dictionary for possible entitySets
-        let slots = {};
-        let dictionary = {};
+        const slots = {};
+        const dictionary = {};
         Object.keys(entitySets).forEach(key => {
-          let synonyms;
           // Values can either be given as string array or as object with property 'synonyms'
-          if (
-            entitySets[key].values[language].some(cValue => {
-              return typeof cValue === "string";
-            })
-          ) {
-            synonyms = entitySets[key].values[language];
-          } else {
-            synonyms = entitySets[key].values[language].map(cValue => cValue["synonyms"]).reduce((prev, curr) => prev.concat(curr), []);
-          }
+          const synonymKey = "synonyms";
+          const synonyms = entitySets[key].values[language].some(cValue => {
+            return typeof cValue === "string";
+          })
+            ? entitySets[key].values[language]
+            : entitySets[key].values[language].map(cValue => cValue[synonymKey]).reduce((prev, curr) => prev.concat(curr), []);
           slots[entitySets[key].mapsTo] = "LITERAL";
           dictionary[key] = synonyms;
         });
@@ -206,9 +202,8 @@ export class Generator implements CLIGeneratorExtension {
     if (typeof parameterMapping[param as string] === "undefined") {
       // param is part of an entitySet
       return `{${param}|${this.configuration.entitySets[param].mapsTo}}`;
-    } else {
-      return "{-|" + param + "}";
     }
+    return "{-|" + param + "}";
   }
 
   private mergeUtterances(target: { [intent: string]: string[] }, source: { [intent: string]: string[] }) {
