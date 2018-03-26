@@ -78,6 +78,11 @@ export class I18nextWrapper {
       });
   }
 
+  /**
+   * handles missing interpolation in translation.js
+   * @param str translation-string
+   * @param match interpolation that is missing
+   */
   private onInterpolationMissing(str, match) {
     this.logger.info("onInterpolationMissing callback called for missing value", match[0]);
 
