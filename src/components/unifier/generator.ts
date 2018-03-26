@@ -164,6 +164,13 @@ export class Generator implements CLIGeneratorExtension {
     await Promise.all(promises);
   }
 
+  /**
+   * Builds utterances for the given templateStrings
+   * @param {string[]} templateStrings that are the specified utterance-strings per intent from translation.json
+   * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
+   * @param {any} slots to give to alexa-utterances or empty object if there are no entitySets
+   * @param {any} dictionary to give to alexa-utterances or empty object if there are no entitySets
+   */
   public buildUtterances(templateStrings: string[], parameterMapping: PlatformGenerator.EntityMapping, slots: any, dictionary: any): string[] {
     return (
       templateStrings
