@@ -94,11 +94,22 @@ export namespace GenericIntent {
    * are only callable implicitly, for example GenericIntent.Invoke if the voice app is launched.
    * @param platform intent to check
    */
-  export function isSpeakable(intent: GenericIntent) {
+  export function isSpeakable(currIntent: GenericIntent) {
     const unspeakableIntents: GenericIntent[] = [GenericIntent.Invoke, GenericIntent.Unanswered, GenericIntent.Unhandled];
 
-    return unspeakableIntents.indexOf(intent) === -1;
+    return unspeakableIntents.indexOf(currIntent) === -1;
   }
+}
+
+/** A custom entity set to use in your utterances and AssistantJS configuration */
+export interface EntitySet {
+  /** Name of AssistantJS entity to link with this entity set */
+  mapsTo: string;
+  /**
+   * Allowed values of this entity set. Needs language id as hash key and a list
+   * of string values or objects with string value and possible synonyms.
+   */
+  values: { [language: string]: Array<string | { value: string; synonyms: string[] }> };
 }
 
 /** Manages access to entities */
@@ -200,9 +211,9 @@ export namespace PlatformGenerator {
 }
 
 /** Extension interface for request extractors */
-export interface RequestExtractor<Configuration = {}> {
+export interface RequestExtractor<ComponentConfiguration = {}> {
   /** Link to component metadata */
-  component: Component<Configuration>;
+  component: Component<ComponentConfiguration>;
 
   /**
    * Checks if given context can be processed by this extractor
@@ -236,8 +247,8 @@ export interface CommonRequestExtraction {
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
-export interface PlatformRequestExtraction<Configuration = {}> extends CommonRequestExtraction {
-  component: Component<Configuration>;
+export interface PlatformRequestExtraction<ComponentConfiguration = {}> extends CommonRequestExtraction {
+  component: Component<ComponentConfiguration>;
 }
 
 /** The minimum set of information a RequestExtractor has to extract from a request */
@@ -275,6 +286,7 @@ export namespace OptionalExtractions {
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */
+  // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
     /** Are OAuth tokens available? */
     OAuthExtraction: ["oAuthToken"],
@@ -354,6 +366,7 @@ export namespace OptionalHandlerFeatures {
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */
+  // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
     /** Can we force the existance of OAuth tokens? */
     AuthenticationHandler: ["forceAuthenticated"],

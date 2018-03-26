@@ -1,3 +1,5 @@
+import { EntitySet } from "./public-interfaces";
+
 export const componentInterfaces = {
   afterKillSession: Symbol("hooks-after-kill-session"),
   afterSendResponse: Symbol("after-send-response"),
@@ -22,6 +24,9 @@ export namespace Configuration {
     /** Maps all entities of your app to their respective internal types. You later have to map these types to platform-specific types. */
     entities: { [type: string]: string[] };
 
+    /** Sets of custom entities and allowed / example entity values */
+    entitySets: { [name: string]: EntitySet };
+
     /** If set to false, created response objects will throw an exception if an unsupported feature if used */
     failSilentlyOnUnsupportedFeatures: boolean;
 
@@ -30,6 +35,7 @@ export namespace Configuration {
   }
 
   /** Required configuration options, no defaults are used here */
+  // tslint:disable-next-line:no-empty-interface
   export interface Required {}
 
   /** Available configuration settings in a runtime application */
