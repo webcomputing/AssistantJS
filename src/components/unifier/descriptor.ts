@@ -1,7 +1,6 @@
 import { interfaces as inversifyInterfaces } from "inversify";
 import { BindingDescriptor, Component, ComponentDescriptor, ExecutableExtension } from "inversify-components";
 
-import { Voiceable } from "../../../dts/assistant-source";
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
@@ -56,14 +55,12 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<inversifyInterfaces.Factory<Session>>("current-session-factory").toFactory<Session>(context => {
         return () => {
           const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-
           return context.container.get<inversifyInterfaces.Factory<Session>>("core:services:session-factory")(currentExtraction.sessionID);
         };
       });
 
       bindService.bindGlobalService<MinimalResponseHandler>("current-response-handler").toDynamicValue(context => {
         const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-
         return context.container.get<MinimalResponseHandler>(currentExtraction.platform + ":current-response-handler");
       });
 

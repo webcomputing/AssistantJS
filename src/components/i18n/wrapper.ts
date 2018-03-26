@@ -1,22 +1,24 @@
 import { Component } from "inversify-components";
-import { inject, injectable, optional, multiInject } from "inversify";
+import { componentInterfaces } from "./component-interfaces";
+import { Configuration } from "./private-interfaces";
+
 import * as i18next from "i18next";
 import * as i18nextBackend from "i18next-sync-fs-backend";
-
-import { processor, arraySplitter } from "./plugins/array-returns-sample.plugin";
-import { processor as templateParser } from "./plugins/parse-template-language.plugin";
-import { Configuration } from "./private-interfaces";
-import { componentInterfaces } from "./component-interfaces";
-import { MissingInterpolationExtension } from "./public-interfaces";
+import { inject, injectable, multiInject, optional } from "inversify";
+import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
+
+import { arraySplitter, processor } from "./plugins/array-returns-sample.plugin";
+import { processor as templateParser } from "./plugins/parse-template-language.plugin";
+import { MissingInterpolationExtension } from "./public-interfaces";
 
 @injectable()
 export class I18nextWrapper {
+  public instance: i18next.I18n;
   private component: Component<Configuration.Runtime>;
   private configuration: Configuration.Runtime;
   private logger: Logger;
 
-  instance: i18next.I18n;
 
   /**
    * @param componentMeta Component meta data
@@ -27,21 +29,27 @@ export class I18nextWrapper {
     @optional()
     @multiInject(componentInterfaces.missingInterpolation)
     private missingInterpolationExtensions: MissingInterpolationExtension[],
-    @inject("core:root:current-logger") logger: Logger,
+    @inject(injectionNames.logger) logger: Logger,
     returnOnlySample = true
   ) {
+    if (typeof missingInterpolationExtensions === "undefined") {
+      // tslint:disable-next-line:no-parameter-reassignment
+      missingInterpolationExtensions = [];
+    }
+
     this.component = componentMeta;
     this.configuration = componentMeta.configuration;
     this.logger = logger;
 
-    if (typeof this.configuration.i18nextAdditionalConfiguration === "undefined" || this.configuration.i18nextAdditionalConfiguration === "undefined")
+    if (typeof this.configuration.i18nextAdditionalConfiguration === "undefined" || this.configuration.i18nextAdditionalConfiguration === "undefined") {
       throw new Error("i18next configuration and instance must not be undefined! Please check your configuration.");
+    }
 
     this.instance = Object.assign(Object.create(Object.getPrototypeOf(this.configuration.i18nextInstance)), this.configuration.i18nextInstance);
-    let i18nextConfiguration = Object.assign(
-      { initImmediate: false, missingInterpolationHandler: this.onInterpolationMissing.bind(this) },
-      this.configuration.i18nextAdditionalConfiguration
-    );
+    const i18nextConfiguration = {
+      ...{ initImmediate: false, missingInterpolationHandler: this.onInterpolationMissing.bind(this) },
+      ...this.configuration.i18nextAdditionalConfiguration,
+    };
 
     if (typeof i18nextConfiguration.postProcess === "string") {
       i18nextConfiguration.postProcess = [i18nextConfiguration.postProcess];
@@ -87,7 +95,7 @@ export class I18nextWrapper {
   }
 
   private parseInterpolation(interpolation: string) {
-    interpolation = interpolation.replace(/(\{{2}|\}{2})/g, "");
-    return interpolation;
+    const interpolationValue = interpolation.replace(/(\{{2}|\}{2})/g, "");
+    return interpolationValue;
   }
 }
