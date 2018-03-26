@@ -46,6 +46,8 @@ export class Generator implements CLIGeneratorExtension {
     // Combine all registered parameter mappings to single object
     const parameterMapping = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
 
+    const entitySets = this.configuration.entitySets;
+
     // Get utterance templates per language
     const templatesPerLanguage = this.getUtteranceTemplatesPerLanguage();
 
@@ -53,6 +55,25 @@ export class Generator implements CLIGeneratorExtension {
     const promises = Object.keys(templatesPerLanguage)
       .map(language => {
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
+
+        // Build Slots and Dictionary for possible entitySets
+        let slots = {};
+        let dictionary = {};
+        Object.keys(entitySets).forEach(key => {
+          let synonyms;
+          // Values can either be given as string array or as object with property 'synonyms'
+          if (
+            entitySets[key].values[language].some(cValue => {
+              return typeof cValue === "string";
+            })
+          ) {
+            synonyms = entitySets[key].values[language];
+          } else {
+            synonyms = entitySets[key].values[language].map(cValue => cValue["synonyms"]).reduce((prev, curr) => prev.concat(curr), []);
+          }
+          slots[entitySets[key].mapsTo] = "LITERAL";
+          dictionary[key] = synonyms;
+        });
 
         // Create language specific build dir
         const languageSpecificBuildDir = buildDir + "/" + language;
@@ -66,7 +87,7 @@ export class Generator implements CLIGeneratorExtension {
 
         // ... convert templates into built utterances
         Object.keys(currentTemplates).forEach(currIntent => {
-          currentTemplates[currIntent] = this.buildUtterances(currentTemplates[currIntent]);
+          currentTemplates[currIntent] = this.buildUtterances(currentTemplates[currIntent], parameterMapping, slots, dictionary);
         });
 
         // ... build the GenerateIntentConfiguration[] array based on these utterances and the found intents
@@ -102,7 +123,9 @@ export class Generator implements CLIGeneratorExtension {
               .filter((element, position, self) => self.indexOf(element) === position);
 
           // Check for parameters in utterances which have no mapping
-          const unmatchedParameter = parameters.find(name => typeof parameterMapping[name as string] === "undefined");
+          const unmatchedParameter = parameters.find(
+            name => typeof parameterMapping[name as string] === "undefined" && typeof entitySets[name as string] === "undefined"
+          );
           if (typeof unmatchedParameter === "string") {
             throw Error(
               "Unknown entity '" +
@@ -141,12 +164,12 @@ export class Generator implements CLIGeneratorExtension {
     await Promise.all(promises);
   }
 
-  public buildUtterances(templateStrings: string[]): string[] {
+  public buildUtterances(templateStrings: string[], parameterMapping: PlatformGenerator.EntityMapping, slots: any, dictionary: any): string[] {
     return (
       templateStrings
-        // conert {{param}} into {-|param} for alexa-utterances
-        .map(templateString => templateString.replace(/\{\{(\w+)\}\}/g, (match, param) => "{-|" + param + "}"))
-        .map(templateString => generateUtterances(templateString))
+        // convert {{param}} into alexa-utterances-specific format
+        .map(templateString => templateString.replace(/\{\{(\w+)\}\}/g, (match, param) => this.getEntity(param, parameterMapping)))
+        .map(templateString => generateUtterances(templateString, slots, dictionary))
         .reduce((prev, curr) => prev.concat(curr), [])
     );
   }
@@ -164,6 +187,21 @@ export class Generator implements CLIGeneratorExtension {
     });
 
     return utterances;
+  }
+
+  /**
+   * Creates an alexa-utterances-specific format of an entity declaration,
+   * {-|param} for existing entities and {param|MAPPED_ENTITY} for entitySets
+   * @param {string} param that is either an existing entity name or an entitySet name
+   * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
+   */
+  private getEntity(param: string, parameterMapping: PlatformGenerator.EntityMapping): string {
+    if (typeof parameterMapping[param as string] === "undefined") {
+      // param is part of an entitySet
+      return `{${param}|${this.configuration.entitySets[param].mapsTo}}`;
+    } else {
+      return "{-|" + param + "}";
+    }
   }
 
   private mergeUtterances(target: { [intent: string]: string[] }, source: { [intent: string]: string[] }) {
