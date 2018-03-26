@@ -1,18 +1,20 @@
 import { EntitySet } from "./public-interfaces";
 
 export const componentInterfaces = {
+  afterKillSession: Symbol("hooks-after-kill-session"),
+  afterSendResponse: Symbol("after-send-response"),
+  beforeKillSession: Symbol("hooks-before-kill-session"),
+  beforeSendResponse: Symbol("before-send-response"),
+  entityMapping: Symbol("entity-mapping"),
+  platformGenerator: Symbol("platform-generator"),
   requestProcessor: Symbol("request-processor"),
   sessionEndedCallback: Symbol("session-ended-callback"),
-  platformGenerator: Symbol("platform-generator"),
   utteranceTemplateService: Symbol("utterance-template-service"),
-  entityMapping: Symbol("entity-mapping"),
-  beforeKillSession: Symbol("hooks-before-kill-session"),
-  afterKillSession: Symbol("hooks-after-kill-session"),
 };
 
 export namespace Configuration {
   /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
-  export type LogWhitelistSet = Array<string | { [keyName: string]: LogWhitelistSet }>;
+  export type LogWhitelistSet = (string | { [keyName: string]: LogWhitelistSet })[];
 
   /** Configuration defaults -> all of these keys are optional for user */
   export interface Defaults {

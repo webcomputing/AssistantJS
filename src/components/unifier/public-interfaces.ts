@@ -408,3 +408,19 @@ export interface PlatformSpecHelper {
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
+
+/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
+export interface BeforeResponseHandler {
+  execute(responseHandler: MinimalResponseHandler);
+}
+
+/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
+export interface AfterResponseHandler {
+  execute(responseHandler: MinimalResponseHandler);
+}
+
+/** Interface to get all Before- and AfterResponseHandler */
+export interface ResponseHandlerExtensions {
+  beforeExtensions: BeforeResponseHandler[];
+  afterExtensions: AfterResponseHandler[];
+}
