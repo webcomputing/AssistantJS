@@ -1,11 +1,11 @@
-import { ExecutableExtension, Component } from "inversify-components";
+import { Component, ExecutableExtension } from "inversify-components";
+import { SpecSetup } from "../../spec-setup";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
-import { SpecSetup } from "../../spec-setup";
+import { Configuration } from "./private-interfaces";
 import { CardResponse } from "./responses/card-response";
 import { ChatResponse } from "./responses/chat-response";
 import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
-import { Configuration } from "./private-interfaces";
 
 /** Intent type - intents are either strings or type of GenericIntent */
 export declare type intent = string | GenericIntent;
@@ -33,7 +33,7 @@ export interface ResponseFactory {
   /** Creates and sends an empty response */
   createAndSendEmptyResponse(): {};
 
-  /** 
+  /**
    * Sends a authentication prompt if available on current platform (else throws exception), possibly allows to add a message to it
    * @param text String to add say in authentication prompt
    */
@@ -84,7 +84,7 @@ export enum GenericIntent {
   Cancel,
 
   /** Say: "Stop" */
-  Stop
+  Stop,
 }
 
 /** Intents which are not specific to a given platform. */
@@ -95,11 +95,7 @@ export namespace GenericIntent {
    * @param platform intent to check
    */
   export function isSpeakable(intent: GenericIntent) {
-    let unspeakableIntents: GenericIntent[] = [
-      GenericIntent.Invoke,
-      GenericIntent.Unanswered,
-      GenericIntent.Unhandled
-    ];
+    const unspeakableIntents: GenericIntent[] = [GenericIntent.Invoke, GenericIntent.Unanswered, GenericIntent.Unhandled];
 
     return unspeakableIntents.indexOf(intent) === -1;
   }
@@ -108,7 +104,7 @@ export namespace GenericIntent {
 /** Manages access to entities */
 export interface EntityDictionary {
   /** Object containing all current entities */
-  store: {[name: string]: any};
+  store: { [name: string]: any };
 
   /** Checks if the given entity is contained in the store */
   contains(name: string): boolean;
@@ -119,35 +115,40 @@ export interface EntityDictionary {
   /** Sets a value of an entity. */
   set(name: string, value: any);
 
-  /** 
+  /**
    * Returns the element in validValues which is as close as possible to the entity value for name.
    * Returns undefined if there is no entity for name. Calculates a Levenshtein distance to find out the closest valid value.
    * @param name Name of the entity
    * @param validValues List of all valid values
-   * @param maxDistance If given, returns undefined if the closest match's Levenshtein distance is > than this value 
-  */
+   * @param maxDistance If given, returns undefined if the closest match's Levenshtein distance is > than this value
+   */
   getClosest(name: string, validValues: string[], maxDistance?: number): string | undefined;
 
-  /** 
+  /**
    * Returns a list containing all values from validValues and their distances to the entity value.
    * Returns undefined if there is no entity for name. Calculates a Levenshtein distance to find out the distance values.
    * @param name Name of the entity
    * @param validValues List of all valid values
-  */
-  getDistanceSet(name: string, validValues: string[]): undefined | {
-    value: string;
-    distance: number;
-  }[];
+   */
+  getDistanceSet(
+    name: string,
+    validValues: string[]
+  ):
+    | undefined
+    | Array<{
+        value: string;
+        distance: number;
+      }>;
 
-  /** 
+  /**
    * Stores current entity dictionary to a given session to allow restoring all contained entities later.
    * @param session The session to store into
    * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
    */
   storeToSession(session: Session, storeKey?: string): Promise<void>;
 
-  /** 
-   * Reads current entity dictionary from given session and merges with entities in this request. 
+  /**
+   * Reads current entity dictionary from given session and merges with entities in this request.
    * @param session The session to read from (same as in storeToSession)
    * @param preferCurrentStore If set to true (default), entities in this request overwrite stored ones (in case of same names). Else it's the other way around.
    * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
@@ -176,7 +177,7 @@ export namespace PlatformGenerator {
      * @param {string} langauge Language to get intent-specific utterances for
      * @return {[intent: string]: string[]} Hash having intent as key and utterances as values
      */
-    getUtterancesFor(language: string): {[intent: string]: string[]};
+    getUtterancesFor(language: string): { [intent: string]: string[] };
   }
 
   /** Extension interface to implement a platform generator */
@@ -186,7 +187,7 @@ export namespace PlatformGenerator {
      * @param {string} langauge langauge to build in
      * @param {string} buildDir path of the build directory
      * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
-     * @param {EntityMapping} entityMapping Mapping of entity types and names 
+     * @param {EntityMapping} entityMapping Mapping of entity types and names
      * @return {void|Promise<void>}
      */
     execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[], entityMapping: EntityMapping): void | Promise<void>;
@@ -199,11 +200,11 @@ export namespace PlatformGenerator {
 }
 
 /** Extension interface for request extractors */
-export interface RequestExtractor<Configuration={}> {
+export interface RequestExtractor<Configuration = {}> {
   /** Link to component metadata */
   component: Component<Configuration>;
 
-  /** 
+  /**
    * Checks if given context can be processed by this extractor
    * @param {RequestContext} context Given request context
    * @return {Promise<boolean>} True if current context can be processed by this extractor
@@ -213,7 +214,7 @@ export interface RequestExtractor<Configuration={}> {
   /**
    * Extracts information out of request. The minimum set of information to extract is described by MinimalRequestExtraction.
    * @param {RequestContext} context Request context to extract information from
-   * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information. 
+   * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information.
    *   See also OptionalExtration interface for more information.
    */
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
@@ -222,7 +223,7 @@ export interface RequestExtractor<Configuration={}> {
 /** Common fields between PlatformRequestExtraction and MinimalRequestExtraction */
 export interface CommonRequestExtraction {
   /** Set of entities */
-  entities?: { [name: string]: any; };
+  entities?: { [name: string]: any };
 
   /** Intent to call */
   readonly intent: intent;
@@ -235,7 +236,7 @@ export interface CommonRequestExtraction {
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
-export interface PlatformRequestExtraction<Configuration={}> extends CommonRequestExtraction {
+export interface PlatformRequestExtraction<Configuration = {}> extends CommonRequestExtraction {
   component: Component<Configuration>;
 }
 
@@ -266,10 +267,10 @@ export namespace OptionalExtractions {
   }
 
   export interface DeviceExtraction extends MinimalRequestExtraction {
-    /** 
+    /**
      * Name of platform-specific device, name is given and filled by platform.
      * NULLL values are not allowed here: If a platform supports devices, it has to return the used one.
-    */
+     */
     device: string;
   }
 
@@ -285,8 +286,8 @@ export namespace OptionalExtractions {
     TemporalAuthExtraction: ["temporalAuthToken"],
 
     /** Are information about the used device available? */
-    DeviceExtraction: ["device"]
-  }
+    DeviceExtraction: ["device"],
+  };
 }
 /** Minimum interface a response handler has to fulfill */
 export interface MinimalResponseHandler {
@@ -298,10 +299,10 @@ export interface MinimalResponseHandler {
   sendResponse(): void;
 }
 
-/** 
- * In addition to the basic features every response handler has to support (see MinimalResponseHandler), 
+/**
+ * In addition to the basic features every response handler has to support (see MinimalResponseHandler),
  * every response handler may also support a subset of these features
-*/
+ */
 export namespace OptionalHandlerFeatures {
   /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
   export interface AuthenticationHandler extends MinimalResponseHandler {
@@ -352,7 +353,6 @@ export namespace OptionalHandlerFeatures {
     }
   }
 
-
   /** For internal feature checking since TypeScript does not emit interfaces */
   export const FeatureChecker = {
     /** Can we force the existance of OAuth tokens? */
@@ -374,8 +374,8 @@ export namespace OptionalHandlerFeatures {
     ImageCard: ["cardBody", "cardTitle", "cardImage"],
 
     /** Does this response handler support suggestion chips? */
-    SuggestionChip: ["suggestionChips"]
-  }
+    SuggestionChip: ["suggestionChips"],
+  };
 }
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
@@ -383,15 +383,31 @@ export interface PlatformSpecHelper {
   /** Link to assistantJS SpecSetup */
   specSetup: SpecSetup;
 
-  /** 
+  /**
    * Pretends call of given intent (and entities, ...)
    * @param {intent} intent intent to call
    * @param {boolean} autoStart if set to true, setup.runMachine() will be called automatically
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
+  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
+
+/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
+export interface BeforeResponseHandler {
+  execute(responseHandler: MinimalResponseHandler);
+}
+
+/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
+export interface AfterResponseHandler {
+  execute(responseHandler: MinimalResponseHandler);
+}
+
+/** Interface to get all Before- and AfterResponseHandler */
+export interface ResponseHandlerExtensions {
+  beforeExtensions: BeforeResponseHandler[];
+  afterExtensions: AfterResponseHandler[];
+}
