@@ -1,7 +1,6 @@
 import { interfaces as inversifyInterfaces } from "inversify";
 import { BindingDescriptor, Component, ComponentDescriptor, ExecutableExtension } from "inversify-components";
 
-import { Voiceable } from "../../../dts/assistant-source";
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
@@ -28,6 +27,7 @@ import { swapHash } from "./swap-hash";
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
   entities: {},
+  entitySets: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"],
 };
