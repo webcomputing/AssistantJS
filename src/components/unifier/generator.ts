@@ -199,7 +199,7 @@ export class Generator implements CLIGeneratorExtension {
    * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
    */
   private getEntity(param: string, parameterMapping: PlatformGenerator.EntityMapping): string {
-    if (typeof parameterMapping[param as string] === "undefined") {
+    if (typeof parameterMapping[param as string] === "undefined" && typeof this.configuration.entitySets[param] !== "undefined") {
       // param is part of an entitySet
       return `{${param}|${this.configuration.entitySets[param].mapsTo}}`;
     }
