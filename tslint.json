@@ -14,5 +14,6 @@
         "function-regex": "^([a-z][\\w\\d]+)|(([A-Z][\\w\\d]+)Mixin)$"
       }
     ]
-  }
+  },
+  "prefer-array-literal": [true, {"allow-type-parameters": true } ]
 }
