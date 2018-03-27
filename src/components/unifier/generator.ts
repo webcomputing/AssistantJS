@@ -136,9 +136,9 @@ export class Generator implements CLIGeneratorExtension {
           }
 
           buildIntentConfigs.push({
+            utterances,
             entities: parameters,
             intent: currIntent,
-            utterances,
           });
         });
 

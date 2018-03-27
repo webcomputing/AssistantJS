@@ -3,7 +3,7 @@
   "rules": {
     "interface-name":[true, "never-prefix"],
     "only-arrow-functions": false,
-    "object-shorthand-properties-first": false,
+    "object-shorthand-properties-first": true,
     "no-namespace": false,
     "no-increment-decrement": false,
     "ter-prefer-arrow-callback": false,
