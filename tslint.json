@@ -15,5 +15,5 @@
       }
     ]
   },
-  "prefer-array-literal": [true, {"allow-type-parameters": true } ]
+  "prefer-array-literal": [ true, { "allow-type-parameters": true } ]
 }
