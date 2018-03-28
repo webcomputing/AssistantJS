@@ -61,12 +61,14 @@ export class Generator implements CLIGeneratorExtension {
         const dictionary = {};
         Object.keys(entitySets).forEach(key => {
           // Values can either be given as string array or as object with property 'synonyms'
-          const synonymKey = "synonyms";
-          const synonyms = entitySets[key].values[language].some(cValue => {
-            return typeof cValue === "string";
-          })
-            ? entitySets[key].values[language]
-            : entitySets[key].values[language].map(cValue => cValue[synonymKey]).reduce((prev, curr) => prev.concat(curr), []);
+          const synonyms: string[] = [];
+          entitySets[key].values[language].forEach(cValue => {
+            if (typeof cValue === "string") {
+              synonyms.push(cValue);
+            } else {
+              synonyms.push(...cValue.synonyms);
+            }
+          });
           slots[entitySets[key].mapsTo] = "LITERAL";
           dictionary[key] = synonyms;
         });
@@ -165,10 +167,15 @@ export class Generator implements CLIGeneratorExtension {
    * Builds utterances for the given templateStrings
    * @param {string[]} templateStrings that are the specified utterance-strings per intent from translation.json
    * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
-   * @param {any} slots to give to alexa-utterances or empty object if there are no entitySets
-   * @param {any} dictionary to give to alexa-utterances or empty object if there are no entitySets
+   * @param { [name: string]: string } [slots] to give to alexa-utterances
+   * @param { [name: string]: string[] } [dictionary] to give to alexa-utterances
    */
-  public buildUtterances(templateStrings: string[], parameterMapping: PlatformGenerator.EntityMapping, slots: any, dictionary: any): string[] {
+  public buildUtterances(
+    templateStrings: string[],
+    parameterMapping: PlatformGenerator.EntityMapping,
+    slots?: { [name: string]: string },
+    dictionary?: { [name: string]: string[] }
+  ): string[] {
     return (
       templateStrings
         // convert {{param}} into alexa-utterances-specific format
@@ -200,7 +207,7 @@ export class Generator implements CLIGeneratorExtension {
    * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
    */
   private getEntity(param: string, parameterMapping: PlatformGenerator.EntityMapping): string {
-    if (typeof parameterMapping[param as string] === "undefined" && typeof this.configuration.entitySets[param] !== "undefined") {
+    if (typeof parameterMapping[param] === "undefined" && typeof this.configuration.entitySets[param] !== "undefined") {
       // param is part of an entitySet
       return `{${param}|${this.configuration.entitySets[param].mapsTo}}`;
     }
