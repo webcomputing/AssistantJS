@@ -109,6 +109,7 @@ export interface EntitySet {
    * Allowed values of this entity set. Needs language id as hash key and a list
    * of string values or objects with string value and possible synonyms.
    */
+  // tslint:disable-next-line:prefer-array-literal
   values: { [language: string]: Array<string | { value: string; synonyms: string[] }> };
 }
 
@@ -146,6 +147,7 @@ export interface EntityDictionary {
     validValues: string[]
   ):
     | undefined
+    // tslint:disable-next-line:prefer-array-literal
     | Array<{
         value: string;
         distance: number;
@@ -305,13 +307,18 @@ export namespace OptionalExtractions {
   };
 }
 /** Minimum interface a response handler has to fulfill */
-export interface MinimalResponseHandler {
+export interface MinimalResponseHandler extends VoiceMessage {
   /** If set to false, the session should go on after sending the response */
   endSession: boolean;
-  /** Voice message to speak to the user */
-  voiceMessage: string | null;
+
   /** Called automatically if the response should be sent */
   sendResponse(): void;
+}
+
+/** Minimum interface for an VoiceMessage */
+export interface VoiceMessage {
+  /** Voice message to speak to the user */
+  voiceMessage: string | null;
 }
 
 /**
@@ -332,15 +339,15 @@ export namespace OptionalHandlerFeatures {
   }
 
   /** If implemented, the response handler's platform supports reprompts */
-  export interface Reprompt extends MinimalResponseHandler {
+  export interface RepromptHandler extends MinimalResponseHandler {
     /** Reprompts for the current voice message */
     reprompts: string[] | null;
   }
 
   export namespace GUI {
     export namespace Card {
-      /** If implemented, the response handler's platform supports simple cards, containing text title and body */
-      export interface Simple extends MinimalResponseHandler {
+      /** Minimal Interface to represent a simple Card */
+      export interface SimpleCard {
         /** The card's title */
         cardTitle: string | null;
 
@@ -348,24 +355,36 @@ export namespace OptionalHandlerFeatures {
         cardBody: string | null;
       }
 
-      /* If implemented, the response handler's platform supports simple cards containing an image */
-      export interface Image extends Simple {
+      /** If implemented, the response handler's platform supports simple cards, containing text title and body */
+      export interface SimpleHandler extends MinimalResponseHandler, SimpleCard {}
+
+      /* Minimal Interface to represent a minimal Card */
+      export interface ImageCard extends SimpleCard {
         /** The image to display in the card */
         cardImage: string | null;
       }
+
+      /* If implemented, the response handler's platform supports simple cards containing an image */
+      export interface ImageHandler extends SimpleHandler, ImageCard {}
     }
 
-    /** If implemented, the response handler's platform supports suggestion chips */
-    export interface SuggestionChip extends MinimalResponseHandler {
+    /** Minimal Interface to represent SuggestionChips */
+    export interface SuggestionChips {
       /** The suggestion chips to show */
       suggestionChips: string[] | null;
     }
 
-    /** If implemented, the response handler's platform supports chat messages, which may differ to the given voice message */
-    export interface ChatBubble extends MinimalResponseHandler {
+    /** If implemented, the response handler's platform supports suggestion chips */
+    export interface SuggestionChipHandler extends MinimalResponseHandler, SuggestionChips {}
+
+    /** Minimal Interface to represent ChatBubbles */
+    export interface ChatBubbles {
       /** An array containing all chat messages / chat bubbles to display */
       chatBubbles: string[] | null;
     }
+
+    /** If implemented, the response handler's platform supports chat messages, which may differ to the given voice message */
+    export interface ChatBubbleHandler extends MinimalResponseHandler, ChatBubbles {}
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */

@@ -4,11 +4,11 @@ import { BaseResponse } from "./base-response";
 
 export class CardResponse extends BaseResponse {
   /** Response handler of the currently used platform */
-  protected handler: OptionalHandlerFeatures.GUI.Card.Simple & OptionalHandlerFeatures.GUI.Card.Image & MinimalResponseHandler;
+  protected handler: OptionalHandlerFeatures.GUI.Card.SimpleHandler & OptionalHandlerFeatures.GUI.Card.ImageHandler & MinimalResponseHandler;
 
   constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger) {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
-    
+
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.SimpleCard, "The currently selected platform does not support sending cards.");
   }
 
@@ -36,9 +36,9 @@ export class CardResponse extends BaseResponse {
    */
   setImage(imageURL: string) {
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.ImageCard, "The currently selected platform does not support using images in cards.");
-    
+
     this.handler.cardImage = imageURL;
-    
+
     return this;
   }
 }
