@@ -5,7 +5,7 @@ import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/public-
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from '../unifier/feature-checker';
 
-import { TranslateHelper as TranslateHelperInterface, BeforeTranslationExtension } from "./public-interfaces";
+import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 import { I18nContext } from "./context";
 import { componentInterfaces } from "./component-interfaces";
 
@@ -16,7 +16,6 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:i18n:current-context") public context: I18nContext,
     @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
     @inject("core:root:current-logger") public logger: Logger,
-    @optional() @multiInject(componentInterfaces.beforeTranslation) private beforeTranslationExtensions: BeforeTranslationExtension[]
   ) { }
 
 
