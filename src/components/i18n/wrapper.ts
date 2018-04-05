@@ -80,11 +80,11 @@ export class I18nextWrapper {
 
   /**
    * handles missing interpolation in translation.js
-   * @param str translation-string
-   * @param match interpolation that is missing
+   * @param str the whole translation-string which contains a missing interpolation, e.g. 'hello {{firstName}}'
+   * @param match array of the interpolation that is missing (as strings); first value is the missing value including separators, second is the plain value (e.g. ['{{firstName}}', 'firstName'])
    */
-  private onInterpolationMissing(str, match) {
-    this.logger.info("onInterpolationMissing callback called for missing value", match[0]);
+  private onInterpolationMissing(str: string, match: [string, string]) {
+    this.logger.debug(`AssistantJS TranslateHelper's onInterpolationMissing callback was called. Missing interpolation = '${match[0]}'`);
 
     let interpolationValue: string | undefined;
 

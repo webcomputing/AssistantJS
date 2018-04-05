@@ -38,6 +38,7 @@ export interface I18nConfiguration extends Partial<Configuration.Defaults>, Conf
 export interface MissingInterpolationExtension {
   /**
    * Returns either a string or undefined, wether or not you want to fill a missingInterpolation
+   * If a string is returned, it will be used to fill the missing interpolation value
    * @param missingInterpolationName name of the interpolation that is missing
    */
   execute(missingInterpolationName: string): string | undefined;
