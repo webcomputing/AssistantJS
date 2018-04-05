@@ -41,7 +41,7 @@ describe("I18nWrapper", function() {
           .inSingletonScope();
 
         this.missingInterpolationExtension = this.container.inversifyInstance.get<MissingInterpolationExtension>(componentInterfaces.missingInterpolation);
-        spyOn(this.missingInterpolationExtension, "execute");
+        spyOn(this.missingInterpolationExtension, "execute").and.callThrough();
         this.wrapper = this.container.inversifyInstance.get("core:i18n:wrapper");
         spyOn(this.wrapper.instance.options, "missingInterpolationHandler").and.callThrough();
       });
@@ -54,6 +54,11 @@ describe("I18nWrapper", function() {
       it("executes MissingInterpolationExtensions if interpolation is missing", function(this: CurrentThisContext) {
         this.wrapper.instance.t("templateSyntaxSmall");
         expect(this.missingInterpolationExtension.execute).toHaveBeenCalled();
+      });
+
+      fit("replaces interpolation with the return value of execute-method of MissingInterpolationExtension", function(this: CurrentThisContext){
+        const translation = this.wrapper.instance.t("templateSyntaxSmall");
+        expect(translation).toContain("test");
       });
     });
   });
