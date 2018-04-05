@@ -19,7 +19,6 @@ export class I18nextWrapper {
   private configuration: Configuration.Runtime;
   private logger: Logger;
 
-
   /**
    * @param componentMeta Component meta data
    * @param returnOnlySample If set to true, translation calls return a sample out of many options (for production), if false, you get all options (for specs only)
@@ -88,19 +87,16 @@ export class I18nextWrapper {
 
     let interpolationValue: string | undefined;
 
-    this.missingInterpolationExtensions.forEach(missingInterpolationExtension => {
-      interpolationValue = missingInterpolationExtension.execute(this.parseInterpolation(match[0]));
-    });
-
-    if (typeof interpolationValue !== "undefined") {
-      return interpolationValue;
+    for (const missingInterpolationExtension of this.missingInterpolationExtensions) {
+      interpolationValue = missingInterpolationExtension.execute(match[1]);
+      if (typeof interpolationValue !== "undefined") {
+        return interpolationValue;
+      }
     }
 
-    this.logger.warn(`no matching extension found for ${match[0]}`);
-  }
-
-  private parseInterpolation(interpolation: string) {
-    const interpolationValue = interpolation.replace(/(\{{2}|\}{2})/g, "");
-    return interpolationValue;
+    this.logger.warn(
+      `Missing translation interpolation for ${match[0]}. Neither you nor one of the
+      ${this.missingInterpolationExtensions.length} registered missingInterpolationExtensions provided a value. Now using "" instead.`
+    );
   }
 }
