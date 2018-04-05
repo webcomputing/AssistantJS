@@ -29,6 +29,8 @@ const configuration: Configuration.Defaults = {
   entities: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"],
+  // TODO
+  entitySets: {}
 };
 
 export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
