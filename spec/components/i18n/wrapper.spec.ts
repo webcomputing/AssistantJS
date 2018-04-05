@@ -56,7 +56,7 @@ describe("I18nWrapper", function() {
         expect(this.missingInterpolationExtension.execute).toHaveBeenCalled();
       });
 
-      fit("replaces interpolation with the return value of execute-method of MissingInterpolationExtension", function(this: CurrentThisContext){
+      it("replaces interpolation with the return value of execute-method of MissingInterpolationExtension", function(this: CurrentThisContext) {
         const translation = this.wrapper.instance.t("templateSyntaxSmall");
         expect(translation).toContain("test");
       });

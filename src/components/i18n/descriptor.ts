@@ -52,8 +52,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       });
 
       bindService.bindGlobalService<i18next.I18n>("instance").toDynamicValue(context => {
-        const wrapper = context.container.get<I18nextWrapper>("core:i18n:wrapper");
-        return wrapper.instance;
+        return context.container.get<I18nextWrapper>("core:i18n:wrapper").instance;
       });
     },
     request: (bindService, lookupService) => {
