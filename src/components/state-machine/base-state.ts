@@ -74,8 +74,8 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   }
 
   /** Prompts with current unhandled message */
-  unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
-    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
+  async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any> {
+    this.responseFactory.createVoiceResponse().prompt(await this.translateHelper.t());
   }
 
   /** Sends empty response */
@@ -88,7 +88,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * First try is `currentState.currentIntent.platform.device`.
    * @param locals If given: variables to use in response
    */
-  t(locals?: {[name: string]: string | number | object}): string;
+  t(locals?: {[name: string]: string | number | object}): Promise<string>;
   
   /**
    * Translates the given key using your json translations.
@@ -97,10 +97,10 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
    * @param locals Variables to use in reponse
    */
-  t(key?: string, locals?: {[name: string]: string | number | object}): string;
+  t(key?: string, locals?: {[name: string]: string | number | object}): Promise<string>;
 
-  t(...args: any[]) {
-    return (this.translateHelper as any).t(...args);
+  async t(...args: any[]) {
+    return await (this.translateHelper as any).t(...args);
   }
 
   /**

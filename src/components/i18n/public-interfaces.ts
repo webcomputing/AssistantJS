@@ -7,7 +7,7 @@ export interface TranslateHelper {
    * First try is `currentState.currentIntent.platform.device`.
    * @param locals If given: variables to use in response
    */
-  t(locals?: { [name: string]: string | number | object }): string;
+  t(locals?: { [name: string]: string | number | object }): Promise<string>;
 
   /**
    * Translates the given key using your json translations.
@@ -16,7 +16,7 @@ export interface TranslateHelper {
     If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
    * @param locals Variables to use in reponse
    */
-  t(key?: string, locals?: { [name: string]: string | number | object }): string;
+  t(key?: string, locals?: { [name: string]: string | number | object }): Promise<string>;
 }
 
 export interface TranslateValuesFor {
