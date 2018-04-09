@@ -26,7 +26,7 @@ export interface TranslateValuesFor {
    * @param {any} options Options to pass to i18next / translate helper
    * @return {string[]} All fitting translations
    */
-  (key: string, options?: any): string[];
+  (key: string, options?: any): Promise<string[]>;
 }
 
 /** Configuration object for AssistantJS user for i18n component */

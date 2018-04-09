@@ -46,8 +46,8 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Registers a spec helper function which returns all possible values instead of a sample one
       bindService.bindGlobalService<TranslateValuesFor>("translate-values-for").toDynamicValue(context => {
-        return (key: string, options = {}) => {
-          return (context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options) as string).split(arraySplitter);
+        return async (key: string, options = {}) => {
+          return (await context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options)).split(arraySplitter);
         };
       });
 

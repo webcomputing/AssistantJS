@@ -24,7 +24,7 @@ export namespace State {
       machine: Transitionable,
       originalIntentMethod: string,
       ...args: any[]
-    ): any;
+    ): Promise<any>;
 
     /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called

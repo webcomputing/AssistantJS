@@ -9,8 +9,8 @@ describe("translateValuesFor", function() {
     this.translateValuesFor = this.container.inversifyInstance.get(injectionNames.i18nTranslateValuesFor);
   })
 
-  it("returns all values of given key", function() {
-    const results = this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+  it("returns all values of given key", async function() {
+    const results = await this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
     expect(results).toEqual(["hello my name", "hi my name", "welcome my name"]);
   });
 
@@ -20,8 +20,8 @@ describe("translateValuesFor", function() {
       this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
     });
 
-    it("does not change behaviour of translateHelper.t", function() {
-      this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+    it("does not change behaviour of translateHelper.t", async function() {
+      await this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
       expect(this.translateHelper.t("templateSyntaxSmall") as string).not.toContain(arraySplitter);
     });
   });
