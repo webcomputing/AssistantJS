@@ -108,7 +108,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]) {
+  prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): void | Promise<void> {
     return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 

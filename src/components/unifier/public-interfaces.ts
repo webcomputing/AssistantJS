@@ -48,14 +48,14 @@ export interface Voiceable {
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith(text: string): void;
+  endSessionWith(text: string): void | Promise<void>;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]): void;
+  prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): void | Promise<void>;
 }
 
 // Currently, we are not allowed to use camelCase here! So try to just use a single word!
