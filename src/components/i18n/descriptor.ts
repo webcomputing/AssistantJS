@@ -35,9 +35,6 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .toDynamicValue(context => {
           return new I18nextWrapper(
             context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"),
-            context.container.isBound(componentInterfaces.missingInterpolation)
-              ? context.container.getAll<MissingInterpolationExtension>(componentInterfaces.missingInterpolation)
-              : [],
             context.container.get<Logger>(injectionNames.logger),
             false
           );
@@ -46,7 +43,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Registers a spec helper function which returns all possible values instead of a sample one
       bindService.bindGlobalService<TranslateValuesFor>("translate-values-for").toDynamicValue(context => {
-        return async (key: string, options = {}) => {
+        return async (key: string, options = {}): Promise<string[]> => {
           return (await context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options)).split(arraySplitter);
         };
       });

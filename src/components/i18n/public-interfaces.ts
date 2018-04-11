@@ -41,5 +41,5 @@ export interface MissingInterpolationExtension {
    * If a string is returned, it will be used to fill the missing interpolation value
    * @param missingInterpolationName name of the interpolation that is missing
    */
-  execute(missingInterpolationName: string): string | undefined;
+  execute(missingInterpolationName: string): string | undefined | Promise<string | undefined>;
 }
