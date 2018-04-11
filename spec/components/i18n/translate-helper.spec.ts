@@ -263,34 +263,3 @@ describe("TranslateHelper", function() {
     });
   });
 });
-
-/**
- *     describe("missingInterpolationHandler", function() {
-      beforeEach(function(this: CurrentThisContext) {
-        @injectable()
-        class MockMissingInterpolationExtension implements MissingInterpolationExtension {
-          public execute(generatorClassName: string): string | undefined {
-            return "test";
-          }
-        }
-
-        this.container.inversifyInstance
-          .bind(componentInterfaces.missingInterpolation)
-          .to(MockMissingInterpolationExtension)
-          .inSingletonScope();
-
-        this.missingInterpolationExtension = this.container.inversifyInstance.get<MissingInterpolationExtension>(componentInterfaces.missingInterpolation);
-        spyOn(this.missingInterpolationExtension, "execute").and.callThrough();
-      });
-
-      it("executes MissingInterpolationExtensions if interpolation is missing", function(this: CurrentThisContext) {
-        this.wrapper.instance.t("templateSyntaxSmall");
-        expect(this.missingInterpolationExtension.execute).toHaveBeenCalled();
-      });
-
-      it("replaces interpolation with the return value of execute-method of MissingInterpolationExtension", function(this: CurrentThisContext) {
-        const translation = this.wrapper.instance.t("templateSyntaxSmall");
-        expect(translation).toContain("test");
-      });
-    });
- */
