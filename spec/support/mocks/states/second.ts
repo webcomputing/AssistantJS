@@ -10,7 +10,7 @@ export class SecondState implements State.Required {
     this.spy = spy;
   }
 
-  unhandledGenericIntent(...args: any[]) {
+  async unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
   }
 

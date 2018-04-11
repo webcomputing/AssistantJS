@@ -25,7 +25,7 @@ export class MainState extends BaseState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  unhandledGenericIntent(...args: any[]) {
+  async unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
   }
 
