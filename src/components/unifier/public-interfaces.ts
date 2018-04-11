@@ -179,6 +179,9 @@ export namespace PlatformGenerator {
 
     /** Configured entities of this intent */
     entities: string[];
+
+    /** Configured entitySet of this intent */
+    entitySets: { [name: string]: EntitySet };
   }
 
   /** Service extension, gets utterances by language */
