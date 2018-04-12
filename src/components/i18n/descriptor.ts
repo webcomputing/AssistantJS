@@ -6,8 +6,9 @@ import { Configuration } from "./private-interfaces";
 
 import { injectionNames, Logger } from "../../assistant-source";
 import { I18nContext } from "./context";
-import { MissingInterpolationExtension, TranslateHelper, TranslateValuesFor } from "./public-interfaces";
+import { MissingInterpolationExtension, TranslateHelper, TranslateValuesFor, InterpolationResolver } from "./public-interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
+import { InterpolationResolver as InterpolationResolverImpl } from "./interpolation-resolver";
 import { I18nextWrapper } from "./wrapper";
 
 const defaultConfiguration: Configuration.Defaults = {
@@ -41,10 +42,23 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         })
         .inSingletonScope();
 
+      bindService
+        .bindGlobalService<InterpolationResolver>("interpolation-resolver")
+        .to(InterpolationResolverImpl)
+        .inSingletonScope();
+
       // Registers a spec helper function which returns all possible values instead of a sample one
       bindService.bindGlobalService<TranslateValuesFor>("translate-values-for").toDynamicValue(context => {
         return async (key: string, options = {}): Promise<string[]> => {
-          return (await context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options)).split(arraySplitter);
+          const translations: string[] = (await context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options)).split(arraySplitter);
+
+          return Promise.all(
+            translations.map(async translation => {
+              return (translation = await context.container
+                .get<InterpolationResolver>("core:i18n:interpolation-resolver")
+                .resolveMissingInterpolations(translation));
+            })
+          );
         };
       });
 

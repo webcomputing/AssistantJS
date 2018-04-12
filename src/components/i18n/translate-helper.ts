@@ -5,7 +5,7 @@ import { OptionalExtractions, MinimalRequestExtraction } from "../unifier/public
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
 
-import { TranslateHelper as TranslateHelperInterface, MissingInterpolationExtension } from "./public-interfaces";
+import { TranslateHelper as TranslateHelperInterface, MissingInterpolationExtension, InterpolationResolver } from "./public-interfaces";
 import { I18nContext } from "./context";
 import { componentInterfaces } from "./component-interfaces";
 
@@ -16,15 +16,8 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:i18n:current-context") public context: I18nContext,
     @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
     @inject("core:root:current-logger") public logger: Logger,
-    @optional()
-    @multiInject(componentInterfaces.missingInterpolation)
-    private missingInterpolationExtensions: MissingInterpolationExtension[]
-  ) {
-    if (typeof missingInterpolationExtensions === "undefined") {
-      // tslint:disable-next-line:no-parameter-reassignment
-      missingInterpolationExtensions = [];
-    }
-  }
+    @inject("core:i18n:interpolation-resolver") public interpolationResolver: InterpolationResolver
+  ) {}
 
   async t(key?: string, locals?: {});
   async t(key: {});
@@ -88,33 +81,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     this.logger.debug("I18N: using key resolvings %o", lookupKeys);
     let translatedValue = this.translateOrFail(lookupKeys, options);
 
-    while (translatedValue.includes("*~~") && translatedValue.includes("~~*")) {
-      const interpolation = translatedValue
-        .split("*~~")[1]
-        .split("~~*")[0];
-
-      let interpolationValue: string | undefined;
-
-
-      for(let missingInterpolationExtension of this.missingInterpolationExtensions){
-        interpolationValue = await missingInterpolationExtension.execute(interpolation);
-
-        if (typeof interpolationValue !== "undefined") {
-          translatedValue = translatedValue.replace("*~~"+interpolation+"~~*", interpolationValue);
-          break;
-        }
-      }
-
-      if(typeof interpolationValue === "undefined"){
-        this.logger.warn(
-          `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the
-          ${this.missingInterpolationExtensions.length} registered missingInterpolationExtensions provided a value. Now using "" instead.`
-        );
-  
-        translatedValue = translatedValue.replace("*~~"+interpolation+"~~*", "")
-      }
-    }
-    return translatedValue;
+    return this.interpolationResolver.resolveMissingInterpolations(translatedValue);
   }
 
   /**
@@ -124,20 +91,16 @@ export class TranslateHelper implements TranslateHelperInterface {
   private translateOrFail(lookups: string[], options = {}) {
     let foundTranslation: string | undefined;
 
-    
-    for (let lookup of lookups){
-
+    for (let lookup of lookups) {
       if (this.i18n.exists(lookup, options)) {
         let translation = this.i18n.t(lookup, options);
         if (typeof translation === "string") {
           this.logger.debug("I18N: choosing key: " + lookup);
-          return translation;          
+          return translation;
         }
       }
-    };
+    }
 
-
-      throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
-
+    throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
   }
 }

@@ -19,6 +19,14 @@ export interface TranslateHelper {
   t(key?: string, locals?: { [name: string]: string | number | object }): Promise<string>;
 }
 
+export interface InterpolationResolver {
+  /**
+   * resolves all missing interpolations in the given translation iteratively by executing missingInterpolation extensions
+   * @param translatedValue text containing missing interpolations
+   */
+  resolveMissingInterpolations(translatedValue: string): Promise<string>;
+}
+
 export interface TranslateValuesFor {
   /**
    * Returns all translations for a given key, especially useful for specs
