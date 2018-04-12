@@ -88,29 +88,32 @@ export class TranslateHelper implements TranslateHelperInterface {
     this.logger.debug("I18N: using key resolvings %o", lookupKeys);
     let translatedValue = this.translateOrFail(lookupKeys, options);
 
-    if ((translatedValue as string).includes("*~~") && (translatedValue as string).includes("~~*")) {
-      const interpolation = (translatedValue as string)
+    while (translatedValue.includes("*~~") && translatedValue.includes("~~*")) {
+      const interpolation = translatedValue
         .split("*~~")[1]
         .split("~~*")[0];
 
       let interpolationValue: string | undefined;
 
-      for (const missingInterpolationExtension of this.missingInterpolationExtensions) {
+
+      for(let missingInterpolationExtension of this.missingInterpolationExtensions){
         interpolationValue = await missingInterpolationExtension.execute(interpolation);
 
         if (typeof interpolationValue !== "undefined") {
-          return (translatedValue as string).replace("*~~"+interpolation+"~~*", interpolationValue);
+          translatedValue = translatedValue.replace("*~~"+interpolation+"~~*", interpolationValue);
+          break;
         }
       }
 
-      this.logger.warn(
-        `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the
-        ${this.missingInterpolationExtensions.length} registered missingInterpolationExtensions provided a value. Now using "" instead.`
-      );
-
-      (translatedValue as string) = "";
+      if(typeof interpolationValue === "undefined"){
+        this.logger.warn(
+          `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the
+          ${this.missingInterpolationExtensions.length} registered missingInterpolationExtensions provided a value. Now using "" instead.`
+        );
+  
+        translatedValue = translatedValue.replace("*~~"+interpolation+"~~*", "")
+      }
     }
-
     return translatedValue;
   }
 
@@ -119,25 +122,22 @@ export class TranslateHelper implements TranslateHelperInterface {
    * i18n.exists() won't work here: it returns true for keys returning an object, even if returnObjectTrees is false. t() then returns undefined.
    */
   private translateOrFail(lookups: string[], options = {}) {
-    let foundTranslation: string | undefined = undefined;
+    let foundTranslation: string | undefined;
 
-    lookups.some(lookup => {
-      if (typeof foundTranslation === "undefined" && this.i18n.exists(lookup, options)) {
+    
+    for (let lookup of lookups){
+
+      if (this.i18n.exists(lookup, options)) {
         let translation = this.i18n.t(lookup, options);
         if (typeof translation === "string") {
           this.logger.debug("I18N: choosing key: " + lookup);
-          foundTranslation = translation;
-          return true;
+          return translation;          
         }
       }
+    };
 
-      return false;
-    });
 
-    if (typeof foundTranslation === "undefined") {
       throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
-    } else {
-      return foundTranslation;
-    }
+
   }
 }
