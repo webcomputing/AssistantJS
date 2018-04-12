@@ -46,6 +46,8 @@ export class Generator implements CLIGeneratorExtension {
     // Combine all registered parameter mappings to single object
     const parameterMapping = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
 
+    const entitySets = this.configuration.entitySets;
+
     // Get utterance templates per language
     const templatesPerLanguage = this.getUtteranceTemplatesPerLanguage();
 
@@ -53,6 +55,23 @@ export class Generator implements CLIGeneratorExtension {
     const promises = Object.keys(templatesPerLanguage)
       .map(language => {
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
+
+        // Build Slots and Dictionary for possible entitySets
+        const slots = {};
+        const dictionary = {};
+        Object.keys(entitySets).forEach(key => {
+          // Values can either be given as string array or as object with property 'synonyms'
+          const synonyms: string[] = [];
+          entitySets[key].values[language].forEach(cValue => {
+            if (typeof cValue === "string") {
+              synonyms.push(cValue);
+            } else {
+              synonyms.push(...cValue.synonyms);
+            }
+          });
+          slots[entitySets[key].mapsTo] = "LITERAL";
+          dictionary[key] = synonyms;
+        });
 
         // Create language specific build dir
         const languageSpecificBuildDir = buildDir + "/" + language;
@@ -66,7 +85,7 @@ export class Generator implements CLIGeneratorExtension {
 
         // ... convert templates into built utterances
         Object.keys(currentTemplates).forEach(currIntent => {
-          currentTemplates[currIntent] = this.buildUtterances(currentTemplates[currIntent]);
+          currentTemplates[currIntent] = this.buildUtterances(currentTemplates[currIntent], parameterMapping, slots, dictionary);
         });
 
         // ... build the GenerateIntentConfiguration[] array based on these utterances and the found intents
@@ -102,7 +121,9 @@ export class Generator implements CLIGeneratorExtension {
               .filter((element, position, self) => self.indexOf(element) === position);
 
           // Check for parameters in utterances which have no mapping
-          const unmatchedParameter = parameters.find(name => typeof parameterMapping[name as string] === "undefined");
+          const unmatchedParameter = parameters.find(
+            name => typeof parameterMapping[name as string] === "undefined" && typeof entitySets[name as string] === "undefined"
+          );
           if (typeof unmatchedParameter === "string") {
             throw Error(
               "Unknown entity '" +
@@ -117,9 +138,10 @@ export class Generator implements CLIGeneratorExtension {
           }
 
           buildIntentConfigs.push({
+            entitySets,
+            utterances,
             entities: parameters,
             intent: currIntent,
-            utterances,
           });
         });
 
@@ -141,12 +163,24 @@ export class Generator implements CLIGeneratorExtension {
     await Promise.all(promises);
   }
 
-  public buildUtterances(templateStrings: string[]): string[] {
+  /**
+   * Builds utterances for the given templateStrings
+   * @param {string[]} templateStrings that are the specified utterance-strings per intent from translation.json
+   * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
+   * @param { [name: string]: string } [slots] to give to alexa-utterances
+   * @param { [name: string]: string[] } [dictionary] to give to alexa-utterances
+   */
+  public buildUtterances(
+    templateStrings: string[],
+    parameterMapping: PlatformGenerator.EntityMapping,
+    slots?: { [name: string]: string },
+    dictionary?: { [name: string]: string[] }
+  ): string[] {
     return (
       templateStrings
-        // conert {{param}} into {-|param} for alexa-utterances
-        .map(templateString => templateString.replace(/\{\{(\w+)\}\}/g, (match, param) => "{-|" + param + "}"))
-        .map(templateString => generateUtterances(templateString))
+        // convert {{param}} into alexa-utterances-specific format
+        .map(templateString => templateString.replace(/\{\{(\w+)\}\}/g, (match, param) => this.getEntity(param, parameterMapping)))
+        .map(templateString => generateUtterances(templateString, slots, dictionary))
         .reduce((prev, curr) => prev.concat(curr), [])
     );
   }
@@ -164,6 +198,20 @@ export class Generator implements CLIGeneratorExtension {
     });
 
     return utterances;
+  }
+
+  /**
+   * Creates an alexa-utterances-specific format of an entity declaration,
+   * {-|param} for existing entities and {param|MAPPED_ENTITY} for entitySets
+   * @param {string} param that is either an existing entity name or an entitySet name
+   * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
+   */
+  private getEntity(param: string, parameterMapping: PlatformGenerator.EntityMapping): string {
+    if (typeof parameterMapping[param] === "undefined" && typeof this.configuration.entitySets[param] !== "undefined") {
+      // param is part of an entitySet
+      return `{${param}|${this.configuration.entitySets[param].mapsTo}}`;
+    }
+    return "{-|" + param + "}";
   }
 
   private mergeUtterances(target: { [intent: string]: string[] }, source: { [intent: string]: string[] }) {
