@@ -68,7 +68,11 @@ export namespace State {
     new (...args: any[]): S;
   }
 
-  /** (Injectable) factory to create state instances */
+  /**
+   * Returns a state by name (string).
+   * @param {string} stateName Name of state. If you leave out this parameter, the main state is returned.
+   * @return {State extends State.Required}
+   */
   export type Factory = <T extends State.Required = State.Required>(stateName?: string) => T;
 
   /** Set containing all objects needed to setup a BaseState. */

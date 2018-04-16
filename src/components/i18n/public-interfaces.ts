@@ -19,6 +19,12 @@ export interface TranslateHelper {
   t(key?: string, locals?: { [name: string]: string | number | object }): string;
 }
 
+/**
+ * Returns all translations for a given key, especially useful for specs
+ * @param {string} key Key of the translation
+ * @param {any} options Options to pass to i18next / translate helper
+ * @return {string[]} All fitting translations
+ */
 export type TranslateValuesFor = (key: string, options?: any) => string[];
 
 /** Configuration object for AssistantJS user for i18n component */

@@ -31,10 +31,17 @@ export interface Session {
   deleteAllFields(): Promise<void>;
 }
 
-/** Factory function which returns a session for a given session id */
+/**
+ * Returns a session object for a given id
+ * @param {string} id  Id of the session to return
+ * @return {Session}
+ */
 export type SessionFactory = (id: string) => Session;
 
-/** Factory function which returns the current session (based on extraction result) */
+/**
+ * Returns a session object based on the current extraction result
+ * @return {Session}
+ */
 export type CurrentSessionFactory = () => Session;
 
 /** Configuration object for AssistantJS user for services component */
