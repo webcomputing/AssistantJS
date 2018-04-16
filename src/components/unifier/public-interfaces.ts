@@ -265,24 +265,24 @@ export interface MinimalRequestExtraction extends CommonRequestExtraction {
 /** Optional, additional informations which extractors may extract from a request */
 export namespace OptionalExtractions {
   /** Interface for extraction of oauth key */
-  export interface OAuthExtraction extends MinimalRequestExtraction {
+  export interface OAuth {
     /** The oauth token, or null, if not present in current extraction */
     oAuthToken: string | null;
   }
 
   /** Interface for extraction of platform-specific temporal auth */
-  export interface TemporalAuthExtraction extends MinimalRequestExtraction {
+  export interface TemporalAuth {
     /** The temporal auth token, or null, if not present in current extraction */
     temporalAuthToken: string | null;
   }
 
   /** Interface for extraction of spoken text */
-  export interface SpokenTextExtraction extends MinimalRequestExtraction {
+  export interface SpokenText {
     /** The spoken text. NULL values are not allowed here: If a platform supports spoken-text-extraxtion, it has to return to spoken text. */
     spokenText: string;
   }
 
-  export interface DeviceExtraction extends MinimalRequestExtraction {
+  export interface Device {
     /**
      * Name of platform-specific device, name is given and filled by platform.
      * NULLL values are not allowed here: If a platform supports devices, it has to return the used one.
@@ -327,19 +327,19 @@ export interface VoiceMessage {
  */
 export namespace OptionalHandlerFeatures {
   /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
-  export interface AuthenticationHandler extends MinimalResponseHandler {
+  export interface Authentication {
     /** If set to true, the assistant will be informed about a missing oauth token */
     forceAuthenticated: boolean;
   }
 
   /** If implemented, a response handler is able to parse SSML voice message */
-  export interface SSMLHandler extends MinimalResponseHandler {
+  export interface SSML {
     /** If set to true, this voice message is in SSML format */
     isSSML: boolean;
   }
 
   /** If implemented, the response handler's platform supports reprompts */
-  export interface RepromptHandler extends MinimalResponseHandler {
+  export interface Reprompt {
     /** Reprompts for the current voice message */
     reprompts: string[] | null;
   }
@@ -347,7 +347,7 @@ export namespace OptionalHandlerFeatures {
   export namespace GUI {
     export namespace Card {
       /** Minimal Interface to represent a simple Card */
-      export interface SimpleCard {
+      export interface Simple {
         /** The card's title */
         cardTitle: string | null;
 
@@ -355,17 +355,11 @@ export namespace OptionalHandlerFeatures {
         cardBody: string | null;
       }
 
-      /** If implemented, the response handler's platform supports simple cards, containing text title and body */
-      export interface SimpleHandler extends MinimalResponseHandler, SimpleCard {}
-
-      /* Minimal Interface to represent a minimal Card */
-      export interface ImageCard extends SimpleCard {
+      /* Interface to represent a Card with Image */
+      export interface Image {
         /** The image to display in the card */
         cardImage: string | null;
       }
-
-      /* If implemented, the response handler's platform supports simple cards containing an image */
-      export interface ImageHandler extends SimpleHandler, ImageCard {}
     }
 
     /** Minimal Interface to represent SuggestionChips */
@@ -374,17 +368,11 @@ export namespace OptionalHandlerFeatures {
       suggestionChips: string[] | null;
     }
 
-    /** If implemented, the response handler's platform supports suggestion chips */
-    export interface SuggestionChipHandler extends MinimalResponseHandler, SuggestionChips {}
-
     /** Minimal Interface to represent ChatBubbles */
     export interface ChatBubbles {
       /** An array containing all chat messages / chat bubbles to display */
       chatBubbles: string[] | null;
     }
-
-    /** If implemented, the response handler's platform supports chat messages, which may differ to the given voice message */
-    export interface ChatBubbleHandler extends MinimalResponseHandler, ChatBubbles {}
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */
