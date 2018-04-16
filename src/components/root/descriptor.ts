@@ -1,9 +1,9 @@
-import { ComponentDescriptor, Component } from "inversify-components";
-import { GenericRequestHandler } from "./generic-request-handler";
-import { defaultBunyan } from "./default-bunyan";
-import { RequestContext, Logger, LoggerMiddleware, ComponentSpecificLoggerFactory } from "./public-interfaces";
-import { componentInterfaces, Configuration } from "./private-interfaces";
+import { Component, ComponentDescriptor } from "inversify-components";
 import { componentSpecificLoggerFactoryByContainer } from "./component-specific-logger-factory";
+import { defaultBunyan } from "./default-bunyan";
+import { GenericRequestHandler } from "./generic-request-handler";
+import { componentInterfaces, Configuration } from "./private-interfaces";
+import { ComponentSpecificLoggerFactory, Logger, LoggerMiddleware, RequestContext } from "./public-interfaces";
 
 import { componentInterfaces as temp } from "../unifier/private-interfaces";
 import { EventBusHandler } from "./event-bus";

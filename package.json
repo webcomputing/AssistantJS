@@ -43,7 +43,7 @@
     "express": "^4.16.2",
     "fakeredis": "^2.0.0",
     "fast-levenshtein": "^2.0.6",
-    "i18next": "^10.3.0",
+    "i18next": "^10.6.0",
     "i18next-sync-fs-backend": "^1.0.0",
     "inversify": "4.1.1",
     "inversify-components": "^0.4.0",
@@ -66,9 +66,9 @@
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "tslint": "^5.8.0",
+    "typescript": "^2.7.2",
     "tslint-config-airbnb": "^5.8.0",
-    "tslint-config-prettier": "^1.10.0",
-    "typescript": "^2.6.2"
+    "tslint-config-prettier": "^1.10.0"
   },
   "bin": {
     "assistant": "./bin/assistant"

@@ -21,49 +21,54 @@ export function cli(argv, resolvedIndex) {
     if (!resolvedIndex) {
       throw new Error("Could not find your local js/index.js. Are you in the correct directory? Did you run 'tsc'?");
     } else {
-      if (typeof resolvedIndex.assistantJs === "undefined")
+      if (typeof resolvedIndex.assistantJs === "undefined") {
         throw new Error("Found your local js/index.js, but assistantJs attribute was undefined. Do you export 'assistantJs' in your js/index.js?");
+      }
 
       // Configure and return setup
-      let setup: AssistantJSSetup = resolvedIndex.assistantJs;
+      const setup: AssistantJSSetup = resolvedIndex.assistantJs;
 
       // Register internal components if not done already
       if (!setup.allInternalComponentsAreRegistered()) setup.registerInternalComponents();
       setup.autobind();
       return setup;
     }
-  }
+  };
 
   /** Copies a file from source to destination by replacing name */
-  const copyAndReplace = function (name: string, source: string, destination: string) {
-    const contents = fs.readFileSync(source, 'utf8');
+  const copyAndReplace = function(name: string, source: string, destination: string) {
+    const contents = fs.readFileSync(source, "utf8");
     fs.writeFileSync(destination, contents.replace(/\{\{__NAME__\}\}/g, name));
-  }
+  };
 
   /** Initializes new assistantjs project (prototyped currently) */
-  const createProject = function (name: string) {
+  const createProject = function(name: string) {
     // Path to new project
     const projectPath = process.cwd() + "/" + name + "/";
     const scaffoldDir = __dirname + "/../scaffold/";
 
     // Create directories
-    console.log("Creating project directory..")
+    console.log("Creating project directory..");
     fs.mkdirSync(projectPath.substr(0, projectPath.length - 1));
 
-    ["app", "app/states", "app/states/mixins", "builds", "config", "config/locales", "config/locales/en", "spec", "spec/helpers", "spec/support"].forEach(directory => {
-      console.log("Creating " + directory + "..");
-      fs.mkdirSync(projectPath + directory);
-    });
+    ["app", "app/states", "app/states/mixins", "builds", "config", "config/locales", "config/locales/en", "spec", "spec/helpers", "spec/support"].forEach(
+      directory => {
+        console.log("Creating " + directory + "..");
+        fs.mkdirSync(projectPath + directory);
+      }
+    );
 
     // Create copyInstructions: [0] => source directory, [1] => target directory
     let copyInstructions = [
-      ['components.ts', 'config/components.ts'],
-      ['jasmine.json', 'spec/support/jasmine.json'], ['setup.js', 'spec/helpers/setup.js'],
-      ['application.ts', 'app/states/application.ts'], ['main.ts', 'app/states/main.ts']
+      ["components.ts", "config/components.ts"],
+      ["jasmine.json", "spec/support/jasmine.json"],
+      ["setup.js", "spec/helpers/setup.js"],
+      ["application.ts", "app/states/application.ts"],
+      ["main.ts", "app/states/main.ts"],
     ];
 
     // Merge root files into array
-    copyInstructions = copyInstructions.concat(['.gitignore', 'index.ts', 'tsconfig.json', 'README.md', 'package.json'].map(rootFile => [rootFile, rootFile]));
+    copyInstructions = copyInstructions.concat([".gitignore", "index.ts", "tsconfig.json", "README.md", "package.json"].map(rootFile => [rootFile, rootFile]));
 
     // Copy templates!
     copyInstructions.forEach(copyInstruction => {
@@ -74,7 +79,7 @@ export function cli(argv, resolvedIndex) {
     // Create empty files
     ["builds/.keep"].forEach(touchableFile => {
       console.log("Touching " + touchableFile + "..");
-      fs.closeSync(fs.openSync(projectPath + touchableFile, 'w'));
+      fs.closeSync(fs.openSync(projectPath + touchableFile, "w"));
     });
 
     // Create empty json files
@@ -82,9 +87,9 @@ export function cli(argv, resolvedIndex) {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(projectPath + filePath, "{}");
     });
-  }
+  };
 
-  const listComponents = function () {
+  const listComponents = function() {
     console.log("AVAILABLE COMPONENTS:");
     const assistantJSSetup: AssistantJSSetup = grabSetup();
     const components = assistantJSSetup.container.componentRegistry.registeredComponents as {
@@ -97,9 +102,9 @@ export function cli(argv, resolvedIndex) {
       }
     }
     console.log("FINISHED LISTING COMPONENTS");
-  }
+  };
 
-  const listExtensionPoints = function (componentName?: string) {
+  const listExtensionPoints = function(componentName?: string) {
     console.log("AVAILABLE EXTENSION POINTS:");
     if (componentName) {
       console.log(`filtering for '${componentName}'`);
@@ -124,7 +129,7 @@ export function cli(argv, resolvedIndex) {
       }
     }
     console.log("FINISHED LISTING EXTENSION POINTS");
-  }
+  };
 
   // Set version to CLI
   commander.version(pjson.version);
@@ -134,8 +139,10 @@ export function cli(argv, resolvedIndex) {
     .command("server")
     .alias("s")
     .description("Starts the server")
-    .option('-p, --port [port]', 'Makes the server listen at the given port')
-    .action(() => grabSetup().run(new ServerApplication(commander.port ? commander.port : 3000)));
+    .option("-p, --port [port]", "Makes the server listen at the given port")
+    .action(cmd => {
+      grabSetup().run(new ServerApplication(cmd.port ? cmd.port : 3000));
+    });
 
   // Register generate command
   commander
@@ -150,11 +157,11 @@ export function cli(argv, resolvedIndex) {
   commander
     .command("new")
     .description("Creates a new and preconfigured assistantJS application")
-    .arguments('[name]')
+    .arguments("[name]")
     .action(name => {
       createProject(name);
       console.log("Project created. Now run npm install and tsc!");
-      console.log("Happy hacking :-)!")
+      console.log("Happy hacking :-)!");
       process.exit(0);
     });
 
@@ -166,14 +173,14 @@ export function cli(argv, resolvedIndex) {
     .action(() => {
       listComponents();
       process.exit(0);
-    })
+    });
 
   // Register new command
   commander
     .command("list-extension-points")
     .alias("lep")
     .description("Lists available extension points (of component)")
-    .arguments('[component]')
+    .arguments("[component]")
     .action(component => {
       listExtensionPoints(component);
       process.exit(0);
