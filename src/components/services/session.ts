@@ -51,7 +51,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  deleteAllFields():Promise<void> {
+  deleteAllFields(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.del(this.documentID, (err, response) => {
         if (!err) {
@@ -63,7 +63,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  private get documentID () {
+  private get documentID() {
     return "session-" + this.id;
   }
 }

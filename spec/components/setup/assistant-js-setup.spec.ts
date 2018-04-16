@@ -1,4 +1,4 @@
-import { AssistantJSSetup } from '../../../src/setup';
+import { AssistantJSSetup } from "../../../src/setup";
 
 describe("AssistantJSSetup", function() {
   describe("allInternalComponentsAreRegistered", function() {

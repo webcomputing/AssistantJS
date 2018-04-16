@@ -11,7 +11,7 @@ describe("GenericRequestHelper", function() {
 
     beforeEach(async function(done) {
       [request, stopServer] = await withServer(this.assistantJs);
-      await request.post("/any-given-route", {a: "b"}, {"header-a": "b"});
+      await request.post("/any-given-route", { a: "b" }, { "header-a": "b" });
       done();
     });
 
@@ -21,7 +21,7 @@ describe("GenericRequestHelper", function() {
 
     it("is fetchable via dependency injection", function() {
       expect(() => {
-        (this.container as Container).inversifyInstance.get<RequestContext>(diContextName)
+        (this.container as Container).inversifyInstance.get<RequestContext>(diContextName);
       }).not.toThrow();
     });
 
@@ -30,8 +30,8 @@ describe("GenericRequestHelper", function() {
 
       // Multiple expections for performance reasons
       expect(requestContext.method).toBe("POST");
-      expect(requestContext.headers).toEqual(jasmine.objectContaining({"header-a": "b"}));
-      expect(requestContext.body).toEqual({a: "b"});
+      expect(requestContext.headers).toEqual(jasmine.objectContaining({ "header-a": "b" }));
+      expect(requestContext.body).toEqual({ a: "b" });
       expect(requestContext.path).toBe("/any-given-route");
     });
   });

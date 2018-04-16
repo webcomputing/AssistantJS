@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { Component } from "inversify-components";
 
-import { injectionNames } from '../../injection-names';
+import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
 import { ResponseFactory as ResponseFactoryInterface, MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "./public-interfaces";
 import { Configuration } from "./private-interfaces";
@@ -44,7 +44,7 @@ export class ResponseFactory implements ResponseFactoryInterface {
     } else {
       ssml = new SimpleVoiceResponse(this.handler, this.failSilentlyOnUnsupportedFeatures, this.logger);
     }
-    
+
     return new VoiceResponse(new SimpleVoiceResponse(this.handler, this.failSilentlyOnUnsupportedFeatures, this.logger), ssml);
   }
 

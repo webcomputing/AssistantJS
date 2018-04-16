@@ -21,7 +21,7 @@ describe("VoiceResponse", function() {
       this.voiceResponse.endSessionWith(input);
       expect(this.voiceResponse.ssml.endSessionWith).toHaveBeenCalledWith(input);
       expect(this.voiceResponse.simple.endSessionWith).not.toHaveBeenCalled();
-    })
+    });
   });
 
   describe("without ssml input", function() {
@@ -31,6 +31,6 @@ describe("VoiceResponse", function() {
       this.voiceResponse.endSessionWith(input);
       expect(this.voiceResponse.simple.endSessionWith).toHaveBeenCalledWith(input);
       expect(this.voiceResponse.ssml.endSessionWith).not.toHaveBeenCalled();
-    })
+    });
   });
-})
+});

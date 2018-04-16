@@ -5,7 +5,6 @@ import { ResponseFactory } from "../../../../src/components/unifier/public-inter
 import { TranslateHelper } from "../../../../src/components/i18n/public-interfaces";
 import { injectable, inject, optional } from "inversify";
 
-
 @injectable()
 export class MainState extends BaseState implements State.Required {
   responseFactory: ResponseFactory;
@@ -17,7 +16,9 @@ export class MainState extends BaseState implements State.Required {
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
     @inject("core:root:current-logger") logger: Logger,
-    @optional() @inject("mocks:states:call-spy") spy: Function
+    @optional()
+    @inject("mocks:states:call-spy")
+    spy: Function
   ) {
     super(responseFactory, translateHelper, extraction, logger);
     this.extraction = extraction;

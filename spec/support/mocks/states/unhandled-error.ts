@@ -2,7 +2,6 @@ import { State } from "../../../../src/components/state-machine/public-interface
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 import { injectable, inject, optional } from "inversify";
 
-
 @injectable()
 export class UnhandledErrorState implements State.Required {
   responseFactory: ResponseFactory;
@@ -12,7 +11,9 @@ export class UnhandledErrorState implements State.Required {
   constructor(
     @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
     @inject("core:unifier:current-extraction") extraction: any,
-    @optional() @inject("mocks:states:call-spy") spy: Function
+    @optional()
+    @inject("mocks:states:call-spy")
+    spy: Function
   ) {
     this.extraction = extraction;
     this.spy = spy;

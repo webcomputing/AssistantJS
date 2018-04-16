@@ -27,7 +27,7 @@ describe("ResponseFactory", function() {
 
   it("uses handler correctly as di argument", function() {
     expect(this.handler).toEqual(this.responseFactory.handler);
-  })
+  });
 
   describe("with extraction as a MinimalRequestExtraction", function() {
     describe("createVoiceResponse", function() {
@@ -44,7 +44,7 @@ describe("ResponseFactory", function() {
     describe("createSimpleVoiceResponse", function() {
       it("creates instance correctly", function() {
         expect(this.responseFactory.createSimpleVoiceResponse().constructor).toEqual(SimpleVoiceResponse);
-      })
+      });
     });
 
     describe("createSSMLResponse", function() {
@@ -142,7 +142,7 @@ describe("ResponseFactory", function() {
 
       it("sends an empty response", function() {
         this.sent = false;
-        this.handler = Object.assign(this.handler, { sendResponse: () => this.sent = true });
+        this.handler = Object.assign(this.handler, { sendResponse: () => (this.sent = true) });
         this.responseFactory.handler = this.handler;
 
         this.responseFactory.createAndSendEmptyResponse();
@@ -168,7 +168,7 @@ describe("ResponseFactory", function() {
         expect(this.responseFactory.createVoiceResponse().simple.constructor).toEqual(SimpleVoiceResponse);
         expect(this.responseFactory.createVoiceResponse().ssml.constructor).toEqual(SSMLResponse);
       });
-    })
+    });
   });
 
   describe("with handler as chat messages enabled handler", function() {
@@ -201,8 +201,8 @@ describe("ResponseFactory", function() {
     beforeEach(function() {
       this.sent = false;
       this.handler = Object.assign(this.handler, {
-        sendResponse: () => this.sent = true,
-        forceAuthenticated: false
+        sendResponse: () => (this.sent = true),
+        forceAuthenticated: false,
       });
       this.responseFactory.handler = this.handler;
     });

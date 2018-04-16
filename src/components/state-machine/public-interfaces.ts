@@ -2,11 +2,7 @@ import { Session } from "../services/public-interfaces";
 import { RequestContext, Logger } from "../root/public-interfaces";
 import { TranslateHelper } from "../i18n/translate-helper";
 import { ResponseFactory } from "../unifier/response-factory";
-import {
-  MinimalRequestExtraction,
-  GenericIntent,
-  intent
-} from "../unifier/public-interfaces";
+import { MinimalRequestExtraction, GenericIntent, intent } from "../unifier/public-interfaces";
 
 /** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
@@ -20,11 +16,7 @@ export namespace State {
      * @param machine Current transitionable interface
      * @param originalIntentMethod Name of intent the state machine tried to call
      */
-    unhandledGenericIntent(
-      machine: Transitionable,
-      originalIntentMethod: string,
-      ...args: any[]
-    ): any;
+    unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any;
 
     /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
@@ -44,14 +36,7 @@ export namespace State {
      * @param transitionable machine
      * @return {void}
      */
-    errorFallback(
-      error: any,
-      state: Required,
-      stateName: string,
-      intentMethod: string,
-      transitionable: Transitionable,
-      ...args: any[]
-    );
+    errorFallback(error: any, state: Required, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
   }
 
   /** Implement this interface to have a method called before every intent call */
@@ -63,11 +48,7 @@ export namespace State {
      * @param {Transitionable} machine Reference to state machine
      * @return {boolean|Promise<boolean>} If you return false instead of true, the intent method will not be called.
      */
-    beforeIntent_(
-      intentMethod: string,
-      machine: Transitionable,
-      ...args: any[]
-    ): Promise<boolean> | boolean;
+    beforeIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): Promise<boolean> | boolean;
   }
 
   /** Implement this interface to have a method called after every intent call. */
@@ -79,11 +60,7 @@ export namespace State {
      * @param {Transitionable} machine Reference to state machine
      * @return {void}
      */
-    afterIntent_(
-      intentMethod: string,
-      machine: Transitionable,
-      ...args: any[]
-    ): void;
+    afterIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): void;
   }
 
   /** Constructor of state objects */

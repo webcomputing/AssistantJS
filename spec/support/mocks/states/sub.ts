@@ -7,13 +7,14 @@ import { MainState } from "./main";
 
 @injectable()
 export class SubState extends MainState {
-
   constructor(
     @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") tHelper: any,
     @inject("core:root:current-logger") logger: Logger,
-    @optional() @inject("mocks:states:call-spy") spy: Function
+    @optional()
+    @inject("mocks:states:call-spy")
+    spy: Function
   ) {
     super(responseFactory, extraction, tHelper, logger, spy);
   }

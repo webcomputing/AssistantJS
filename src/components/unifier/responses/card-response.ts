@@ -8,7 +8,7 @@ export class CardResponse extends BaseResponse {
 
   constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger) {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
-    
+
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.SimpleCard, "The currently selected platform does not support sending cards.");
   }
 
@@ -36,9 +36,9 @@ export class CardResponse extends BaseResponse {
    */
   setImage(imageURL: string) {
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.ImageCard, "The currently selected platform does not support using images in cards.");
-    
+
     this.handler.cardImage = imageURL;
-    
+
     return this;
   }
 }

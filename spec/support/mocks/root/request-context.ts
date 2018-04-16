@@ -9,7 +9,7 @@ export function createContext(method = "POST", path = "/fitting_path", body = ex
     path: path,
     body: body,
     headers: headers,
-    responseCallback: responseCallback
+    responseCallback: responseCallback,
   };
 }
 

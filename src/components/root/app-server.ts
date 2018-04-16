@@ -15,7 +15,7 @@ export class ServerApplication implements MainApplication {
   private expressRunningInstance;
   private logger: undefined | Logger;
 
-  constructor (port = 3000, listeningCallback = (app: ServerApplication) => {}, expressApp: Express = express(), registerOwnMiddleware = true) {
+  constructor(port = 3000, listeningCallback = (app: ServerApplication) => {}, expressApp: Express = express(), registerOwnMiddleware = true) {
     this.listeningCallback = listeningCallback;
     this.app = expressApp;
     this.port = port;
@@ -57,7 +57,7 @@ export class ServerApplication implements MainApplication {
       method: request.method,
       headers: request.headers as any,
       body: request.body,
-      responseCallback: this.createResponseCallback(response, requestId)
+      responseCallback: this.createResponseCallback(response, requestId),
     };
 
     // Call express independent request handler with this context
@@ -68,7 +68,7 @@ export class ServerApplication implements MainApplication {
   createResponseCallback(response: express.Response, requestId: string, nanoTimestamp = process.hrtime()): ResponseCallback {
     return (body, headers, statusCode = 200) => {
       if (typeof headers !== "undefined") {
-        Object.keys(headers).forEach((key) => {
+        Object.keys(headers).forEach(key => {
           response.setHeader(key, headers[key]);
         });
       }
@@ -76,13 +76,13 @@ export class ServerApplication implements MainApplication {
       this.log("Sending response with status code " + statusCode + "...", requestId);
       response.status(statusCode).send(body);
       let timeNeeded = process.hrtime(nanoTimestamp);
-      this.log("Sent response. Handled request in " + (timeNeeded[0] * 1000 + timeNeeded[1]/1000000) + "ms.", requestId);
-    }
+      this.log("Sent response. Handled request in " + (timeNeeded[0] * 1000 + timeNeeded[1] / 1000000) + "ms.", requestId);
+    };
   }
 
   /** Stops the server */
   stop() {
-    if (typeof this.expressRunningInstance !== "undefined") { 
+    if (typeof this.expressRunningInstance !== "undefined") {
       this.expressRunningInstance.close();
       this.log("Server stopped.");
     }

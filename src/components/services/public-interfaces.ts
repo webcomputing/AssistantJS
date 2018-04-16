@@ -5,7 +5,7 @@ export interface Session {
   /** Id of session */
   id: string;
 
-  /** 
+  /**
    * Gets the value of a given session field
    * @param {string} field name of field to get the value of
    * @return {Promise<string>} value of field

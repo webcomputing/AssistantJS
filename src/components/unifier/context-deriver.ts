@@ -2,7 +2,7 @@ import { injectable, inject, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 
 import { featureIsAvailable } from "./feature-checker";
-import { injectionNames } from '../../injection-names';
+import { injectionNames } from "../../injection-names";
 import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/public-interfaces";
 import { RequestExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
 import { Configuration, componentInterfaces } from "./private-interfaces";
@@ -12,7 +12,9 @@ export class ContextDeriver implements ContextDeriverI {
   loggingWhitelist: Configuration.LogWhitelistSet;
 
   constructor(
-    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestExtractor[] = [],
+    @optional()
+    @multiInject(componentInterfaces.requestProcessor)
+    private extractors: RequestExtractor[] = [],
     @inject(injectionNames.logger) private logger: Logger,
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
   ) {
@@ -26,7 +28,7 @@ export class ContextDeriver implements ContextDeriverI {
       const extractionResult = await extractor.extract(context);
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      this.logger.info( { requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
+      this.logger.info({ requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
       return [extractionResult, "core:unifier:current-extraction"];
     } else {
       return undefined;
@@ -34,24 +36,27 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
-    const isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
+    const isRunable = await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context)));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
-    
+
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
-    if (runnableExtensions.length > 1) throw new Error("Multiple extractors fit to this request. "+ 
-      "Please check your registerend platforms for duplicate extractors.");
+    if (runnableExtensions.length > 1)
+      throw new Error("Multiple extractors fit to this request. " + "Please check your registerend platforms for duplicate extractors.");
 
     if (runnableExtensions.length !== 1) {
       this.respondWithNoExtractor(context);
       return null;
     }
-    if (typeof(runnableExtensions[0]) === "undefined") throw new TypeError("Single found extractor was undefined!");
+    if (typeof runnableExtensions[0] === "undefined") throw new TypeError("Single found extractor was undefined!");
 
     return runnableExtensions[0];
-  } 
+  }
 
   respondWithNoExtractor(context: RequestContext) {
-    this.logger.warn({ requestId: context.id }, "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
+    this.logger.warn(
+      { requestId: context.id },
+      "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404."
+    );
     context.responseCallback("", {}, 404);
   }
 
@@ -89,7 +94,7 @@ export class ContextDeriver implements ContextDeriverI {
     /** Sets all entries to "filteredPlaceholder" except the ones in the given whitelist */
     const filterSet = <T>(set: T, whitelist: Configuration.LogWhitelistSet): T => {
       // Get a merged set of all used object keys in whitelist. For example, if whitelist is ["a", {b: ["c"], d: ["e"]}, {f: "g"}], this would be {b: ["c"], d: ["e"], f: ["g"]}
-      const mergedObject = whitelist.filter(entry => typeof(entry) === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
+      const mergedObject = whitelist.filter(entry => typeof entry === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
 
       /** Check filtering for every key */
       Object.keys(set).forEach(extractionKey => {

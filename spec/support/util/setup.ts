@@ -27,20 +27,27 @@ import { IntentCallbackState } from "../mocks/states/intent-callbacks";
  */
 export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecSetup {
   let assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
-  assistantJs.prepare([MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState], autoBind, useChilds, autoSetup);
+  assistantJs.prepare(
+    [MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState],
+    autoBind,
+    useChilds,
+    autoSetup
+  );
   return assistantJs;
 }
-
 
 /**
  * Creates request scope in container manually, without firing a request.
  * @param specSetup Return value of createSpecHelper()
- * @param minimalExtraction Extraction result to add to di container for scope opening. 
+ * @param minimalExtraction Extraction result to add to di container for scope opening.
  * You can pass null if you don't want to pass a result. If you don't pass anything, mocks/unifier/extraction will be used
  * @param requestContext Request context to add to di container for scope opening. If you don't pass one, mocks/root/request-context will be used
  */
-export function createRequestScope(specSetup: SpecSetup, minimalExtraction: MinimalRequestExtraction | null = extraction, 
-  requestContext: RequestContext = context, responseHandler: { new(...args: any[]): MinimalResponseHandler } = ResponseHandler)
-{
+export function createRequestScope(
+  specSetup: SpecSetup,
+  minimalExtraction: MinimalRequestExtraction | null = extraction,
+  requestContext: RequestContext = context,
+  responseHandler: { new (...args: any[]): MinimalResponseHandler } = ResponseHandler
+) {
   specSetup.createRequestScope(minimalExtraction, requestContext, responseHandler);
 }

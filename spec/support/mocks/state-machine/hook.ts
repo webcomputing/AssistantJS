@@ -5,14 +5,14 @@ import { componentInterfaces } from "../../../../src/components/state-machine/pr
 export const TestIntentFilterHook: Hooks.Hook = (mode, state, stateName, intent, machine) => {
   if (intent === "testIntent") return false;
   else return true;
-}
+};
 
 /** Creates a hook which calls given function with called intent */
 export function createSpyHook(spyFunction: Function): Hooks.Hook {
   return (mode, state, stateName, intent, machine, ...args) => {
     spyFunction(intent, stateName, state, mode, machine, ...args);
     return true;
-  }
+  };
 }
 
 /**

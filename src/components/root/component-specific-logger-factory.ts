@@ -3,7 +3,7 @@ import { ComponentSpecificLoggerFactory, Logger } from "./public-interfaces";
 
 export const componentSpecificLoggerFactoryByContainer = (container: inversifyInterfaces.Container): ComponentSpecificLoggerFactory => {
   return (componentName, scope) => {
-    if (scope !== 'root' && scope !== 'request' && typeof scope !== "undefined") {
+    if (scope !== "root" && scope !== "request" && typeof scope !== "undefined") {
       throw new Error("Given scope of componentSpecificLoggerFactory must be either 'root' or 'request'!");
     }
 
@@ -19,7 +19,7 @@ export const componentSpecificLoggerFactoryByContainer = (container: inversifyIn
       }
     }
 
-    const logger = scope === 'request' ? container.get<Logger>("core:root:current-logger") : container.get<Logger>("core:root:logger");
+    const logger = scope === "request" ? container.get<Logger>("core:root:current-logger") : container.get<Logger>("core:root:logger");
     return logger.child({ component: componentName });
   };
 };

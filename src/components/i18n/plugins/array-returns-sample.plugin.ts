@@ -5,8 +5,8 @@ export const processor = {
     let dialogOptions = value.split(arraySplitter);
 
     if (dialogOptions.length === 1) return value;
-    return  dialogOptions[Math.floor(Math.random() * dialogOptions.length)]; // Returns random element
-  }
+    return dialogOptions[Math.floor(Math.random() * dialogOptions.length)]; // Returns random element
+  },
 };
 
 export const arraySplitter = "||||||||||||||||||||||||||||||";

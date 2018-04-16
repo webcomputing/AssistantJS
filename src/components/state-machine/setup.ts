@@ -8,9 +8,9 @@ import { AssistantJSSetup } from "../../setup";
 
 export class StateMachineSetup {
   private assistantJS: AssistantJSSetup;
-  private stateClasses: {[name: string]: State.Constructor} = {};
+  private stateClasses: { [name: string]: State.Constructor } = {};
   private metaStates: State.Meta[] = [];
-  
+
   /** If set to true, states are registered in singleton scope. This may be pretty useful for testing. */
   registerStatesInSingleton = false;
 
@@ -18,7 +18,7 @@ export class StateMachineSetup {
     this.assistantJS = assistantJS;
   }
 
-  /** 
+  /**
    * [Sync!] Adds all classes in a specific directory as states.
    * @param addOnly If set to true, this method only calls "addState", but not "registerStates" finally
    * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
@@ -27,7 +27,7 @@ export class StateMachineSetup {
   registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/states") {
     fs.readdirSync(baseDirectory + dictionary).forEach(file => {
       let suffixParts = file.split(".");
-      let suffix = suffixParts[suffixParts.length-1];
+      let suffix = suffixParts[suffixParts.length - 1];
 
       // Load if file is a JavaScript file
       if (suffix !== "js") return;
@@ -36,7 +36,7 @@ export class StateMachineSetup {
       Object.keys(classModule).forEach(exportName => {
         this.addState(classModule[exportName]);
       });
-    })
+    });
 
     if (!addOnly) this.registerStates();
   }
@@ -77,18 +77,18 @@ export class StateMachineSetup {
             let binding = bindService.bindExtension<State.Required>(stateInterface).to(this.stateClasses[stateName]);
             let scope = this.registerStatesInSingleton ? binding.inSingletonScope() : binding;
             scope.whenTargetTagged("name", stateName);
-          })
-        }
-      }
-    }
+          });
+        },
+      },
+    };
   }
 
   /** Creates a valid metastate object based on name and intents */
   static createMetaState(name: string, intents: string[]): State.Meta {
     return {
       name: name,
-      intents: intents
-    }
+      intents: intents,
+    };
   }
 
   /** Returns a states name based on its constructor */
@@ -102,22 +102,22 @@ export class StateMachineSetup {
 
     // Return empty set if prototype is undefined - this also breaks recursive calls
     if (typeof prototype === "undefined") return [];
-    
+
     // Get super intents to allow inheritance of state classes
     const superIntents = StateMachineSetup.deriveStateIntents(Object.getPrototypeOf(stateClass));
 
-    return superIntents.concat(Object.getOwnPropertyNames(prototype)
-      .filter(method => method.endsWith("Intent") && method !== "unhandledGenericIntent" && method !== "unansweredGenericIntent")
-      .map(method => {
-
-        if (method.endsWith("GenericIntent")) {
-          let baseString = method.replace("GenericIntent", "");
-          return GenericIntent[baseString.charAt(0).toUpperCase() + baseString.slice(1)];
-        } else {
-          let baseString = method.replace("Intent", "");
-          return baseString.charAt(0).toLowerCase() + baseString.slice(1);
-        }
-
-    }));
+    return superIntents.concat(
+      Object.getOwnPropertyNames(prototype)
+        .filter(method => method.endsWith("Intent") && method !== "unhandledGenericIntent" && method !== "unansweredGenericIntent")
+        .map(method => {
+          if (method.endsWith("GenericIntent")) {
+            let baseString = method.replace("GenericIntent", "");
+            return GenericIntent[baseString.charAt(0).toUpperCase() + baseString.slice(1)];
+          } else {
+            let baseString = method.replace("Intent", "");
+            return baseString.charAt(0).toLowerCase() + baseString.slice(1);
+          }
+        })
+    );
   }
 }

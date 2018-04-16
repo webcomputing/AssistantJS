@@ -10,8 +10,11 @@ export class UnauthenticatedResponse extends BaseResponse {
   constructor(handler: MinimalResponseHandler, voiceResponse: VoiceResponse, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger, text: string = "") {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
 
-    this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.AuthenticationHandler, "The currently used platform does not allow sending authentication failures.");
-    
+    this.reportIfUnavailable(
+      OptionalHandlerFeatures.FeatureChecker.AuthenticationHandler,
+      "The currently used platform does not allow sending authentication failures."
+    );
+
     this.handler.forceAuthenticated = true;
 
     voiceResponse.endSessionWith(text);

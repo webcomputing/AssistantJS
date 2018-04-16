@@ -11,7 +11,7 @@ describe("CardResponse", function() {
     this.buildCardHandler = (additionalFeatures = {}) => {
       this.handler = Object.assign(this.handler, Object.assign({ cardBody: null, cardTitle: null }, additionalFeatures));
       this.responseFactory.handler = this.handler;
-    }
+    };
   });
 
   describe("with a handler not supporting cards", function() {
@@ -66,4 +66,4 @@ describe("CardResponse", function() {
       });
     });
   });
-})
+});

@@ -10,4 +10,4 @@ export function swapHash(configHash) {
   });
 
   return result;
-};
+}

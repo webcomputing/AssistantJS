@@ -10,9 +10,8 @@ import { componentInterfaces } from "./private-interfaces";
 
 @injectable()
 export class GenericRequestHandler {
-
-  /** 
-   * Creates a DI child container and adds request context to it. 
+  /**
+   * Creates a DI child container and adds request context to it.
    * After that, calls extensions registered @componentInterfaces.requestHandler
    */
   async execute(context: RequestContext, container: Container) {
@@ -27,7 +26,7 @@ export class GenericRequestHandler {
     let extensions = scopedRequestContainer.getAll<ContextDeriver>(componentInterfaces.contextDeriver);
     let results = await Promise.all(extensions.map(extension => extension.derive(context)));
     results.forEach(result => {
-      if (typeof(result) !== "undefined") {
+      if (typeof result !== "undefined") {
         this.bindContextToContainer(result[0], scopedRequestContainer, result[1], true);
       }
     });

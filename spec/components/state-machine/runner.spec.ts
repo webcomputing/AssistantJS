@@ -14,16 +14,14 @@ describe("Runner", function() {
   });
 
   describe("when there is an extraction result", function() {
-    it ("calls state machine", function() {
+    it("calls state machine", function() {
       this.runner.execute();
       expect(this.stateMachine.handleIntent).toHaveBeenCalled();
-      
     });
 
-    it ("calls state machine with intent", function() {
+    it("calls state machine with intent", function() {
       this.runner.execute();
       expect(this.stateMachine.handleIntent).toHaveBeenCalledWith(extraction.intent);
-      
     });
   });
 
@@ -32,7 +30,7 @@ describe("Runner", function() {
       this.runner.extraction = undefined;
     });
 
-    it ("does not call state machine", function() {
+    it("does not call state machine", function() {
       this.runner.execute();
       expect(this.stateMachine.handleIntent).not.toHaveBeenCalled();
     });

@@ -11,9 +11,9 @@ export class MockExtractor implements RequestExtractor {
   constructor(componentName = "MockExtractorComponent") {
     this.component = new Component(componentName);
   }
-  
+
   /** Returns true if path == "/fitting_path" */
-  fits(context: RequestContext):Promise<boolean> {
+  fits(context: RequestContext): Promise<boolean> {
     return new Promise(resolve => {
       resolve(context.path === MockExtractor.fittingPath());
     });

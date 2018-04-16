@@ -10,11 +10,11 @@ import { SpecSetup } from "../../../src/spec-setup";
 /** Proxy for request-promise to use in combination with running server */
 export class RequestProxy {
   get(path, headers = {}) {
-    return request({uri: `http://localhost:3000${path}`, simple: false, headers: headers, resolveWithFullResponse: true});
+    return request({ uri: `http://localhost:3000${path}`, simple: false, headers: headers, resolveWithFullResponse: true });
   }
 
   post(path, body, headers = {}) {
-    return request.post({uri: `http://localhost:3000${path}`, simple: false, body: body, headers: headers, resolveWithFullResponse: true, json: true});
+    return request.post({ uri: `http://localhost:3000${path}`, simple: false, body: body, headers: headers, resolveWithFullResponse: true, json: true });
   }
 }
 

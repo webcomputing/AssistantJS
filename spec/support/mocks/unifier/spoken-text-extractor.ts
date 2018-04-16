@@ -11,7 +11,7 @@ export class SpokenTextExtractor implements RequestExtractor {
   constructor(componentName = "SpokenTextExtractorComponent") {
     this.component = new Component(componentName);
   }
-  
+
   /** Always returns true */
   fits(context: RequestContext) {
     return new Promise<boolean>(resolve => {

@@ -17,5 +17,5 @@ export const processor = {
 
     // Join with array splitter again to make it usable for other plugins
     return dialogOptions.join(arraySplitter);
-  }
+  },
 };

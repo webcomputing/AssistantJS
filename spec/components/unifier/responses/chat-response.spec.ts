@@ -7,7 +7,7 @@ describe("ChatResponse", function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.logger = this.container.inversifyInstance.get("core:root:current-logger");
-    
+
     this.handler.chatBubbles = null;
     this.chatResponse = new ChatResponse(this.handler, false, this.logger);
   });

@@ -20,6 +20,6 @@ describe("I18nContext", function() {
       this.context = this.container.inversifyInstance.get("core:i18n:current-context");
       expect(this.context.intent).toEqual(expected.intent);
       expect(this.context.state).toEqual(expected.state);
-    })
-  })
+    });
+  });
 });

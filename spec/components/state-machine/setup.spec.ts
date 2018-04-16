@@ -25,7 +25,7 @@ describe("StateMachineSetup", function() {
     beforeEach(function() {
       this.setup.addState(MainState);
       this.setup.addState(SecondState, explicitName, explicitIntents);
-    })
+    });
 
     it("adds state to internal stateClasses", function() {
       expect(Object.keys(this.setup.stateClasses).length).toBe(2);

@@ -10,7 +10,9 @@ export class Runner implements ExecutableExtension {
   machine: StateMachine;
 
   constructor(
-    @inject("core:unifier:current-extraction") @optional() extraction: any,
+    @inject("core:unifier:current-extraction")
+    @optional()
+    extraction: any,
     @inject("core:state-machine:current-state-machine") machine: StateMachine
   ) {
     this.extraction = extraction;

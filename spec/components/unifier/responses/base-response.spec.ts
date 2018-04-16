@@ -7,7 +7,7 @@ describe("BaseResponse", function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.logger = this.container.inversifyInstance.get("core:root:current-logger");
-    
+
     // Add some supported features
     this.handler.supportedFeature = null;
 

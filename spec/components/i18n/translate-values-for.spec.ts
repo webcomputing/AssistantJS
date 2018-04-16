@@ -7,10 +7,10 @@ describe("translateValuesFor", function() {
   beforeEach(function() {
     configureI18nLocale(this.container, false);
     this.translateValuesFor = this.container.inversifyInstance.get(injectionNames.i18nTranslateValuesFor);
-  })
+  });
 
   it("returns all values of given key", function() {
-    const results = this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+    const results = this.translateValuesFor("templateSyntaxSmall", { name: "my name" });
     expect(results).toEqual(["hello my name", "hi my name", "welcome my name"]);
   });
 
@@ -21,7 +21,7 @@ describe("translateValuesFor", function() {
     });
 
     it("does not change behaviour of translateHelper.t", function() {
-      this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+      this.translateValuesFor("templateSyntaxSmall", { name: "my name" });
       expect(this.translateHelper.t("templateSyntaxSmall") as string).not.toContain(arraySplitter);
     });
   });

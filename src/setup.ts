@@ -31,7 +31,7 @@ export class AssistantJSSetup {
     this.registerComponents([component]);
   }
 
-  registerComponents(components: ComponentDescriptor[] | {[name: string]: ComponentDescriptor}) {
+  registerComponents(components: ComponentDescriptor[] | { [name: string]: ComponentDescriptor }) {
     components = typeof components === "object" ? Object.keys(components).map(k => components[k]) : components;
 
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
@@ -42,7 +42,7 @@ export class AssistantJSSetup {
   }
 
   configure() {
-    if (typeof this.configuration === "undefined") return; 
+    if (typeof this.configuration === "undefined") return;
     Object.keys(this.configuration).forEach(componentName => this.configureComponent(componentName, this.configuration[componentName]));
   }
 
@@ -50,7 +50,7 @@ export class AssistantJSSetup {
     this.container.componentRegistry.lookup(componentName).addConfiguration(configuration);
   }
 
-  /** 
+  /**
    * @param autoConfigure If set to true, calls this.configure() afterwards
    */
   autobind(autoConfigure = true) {

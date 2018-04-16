@@ -26,7 +26,7 @@ describe("VoiceResponse", function() {
 
     it("sends response", function() {
       expect(this.handler.sendResponse).toHaveBeenCalled();
-    })
+    });
   });
 
   describe("prompt", function() {
@@ -66,4 +66,4 @@ describe("VoiceResponse", function() {
       });
     });
   });
-})
+});

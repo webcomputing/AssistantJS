@@ -1,4 +1,4 @@
-import {createUnifierLoggerMiddleware} from '../../../src/components/unifier/logger-middleware';
+import { createUnifierLoggerMiddleware } from "../../../src/components/unifier/logger-middleware";
 
 describe("created function of createUnifierLoggerMiddleware", function() {
   beforeEach(function() {
@@ -19,7 +19,7 @@ describe("created function of createUnifierLoggerMiddleware", function() {
 
   describe("with a valid extraction given", function() {
     beforeEach(function() {
-      this.params = {"sessionID": "mySessionID", "platform": "myPlatform"};
+      this.params = { sessionID: "mySessionID", platform: "myPlatform" };
     });
 
     it("returns child logger with sessionID", function() {
@@ -34,7 +34,7 @@ describe("created function of createUnifierLoggerMiddleware", function() {
 
     describe("with device given in extraction", function() {
       it("returns child logger with device name", function() {
-        this.params = {device: "myDevice", ...this.params};
+        this.params = { device: "myDevice", ...this.params };
         const childLogger = createUnifierLoggerMiddleware(this.params)(this.logger);
         expect(childLogger.fields.device).toEqual("myDevice");
       });
