@@ -31,7 +31,7 @@ export class EntityDictionary implements EntityDictionaryInterface {
     if (typeof entityValue === "undefined") return undefined;
 
     // Try an exact match for performance reasons
-    const exactMatch = validValues.filter(validValue => validValue === entityValue)[0];
+    const exactMatch = validValues.filter(validValue => validValue.toLowerCase() === entityValue.toLowerCase())[0];
     if (typeof exactMatch !== "undefined") return exactMatch;
 
     // Do levenshtein
