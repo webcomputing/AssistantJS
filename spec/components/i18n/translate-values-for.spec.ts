@@ -1,7 +1,7 @@
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { injectionNames } from "../../../src/injection-names";
-import { createRequestScope } from "../../support/util/setup";
 import { arraySplitter } from "../../../src/components/i18n/plugins/array-returns-sample.plugin";
+import { injectionNames } from "../../../src/injection-names";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 describe("translateValuesFor", function() {
   beforeEach(function() {

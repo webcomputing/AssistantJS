@@ -30,6 +30,8 @@ const configuration: Configuration.Defaults = {
   entitySets: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"],
+  // TODO
+  entitySets: {}
 };
 
 export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
@@ -56,14 +58,12 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<inversifyInterfaces.Factory<Session>>("current-session-factory").toFactory<Session>(context => {
         return () => {
           const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-
           return context.container.get<inversifyInterfaces.Factory<Session>>("core:services:session-factory")(currentExtraction.sessionID);
         };
       });
 
       bindService.bindGlobalService<MinimalResponseHandler>("current-response-handler").toDynamicValue(context => {
         const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-
         return context.container.get<MinimalResponseHandler>(currentExtraction.platform + ":current-response-handler");
       });
 

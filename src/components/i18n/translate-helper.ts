@@ -1,4 +1,4 @@
-import { inject, injectable } from "inversify";
+import { inject, injectable, optional, multiInject } from "inversify";
 import { I18n } from "i18next";
 
 import { OptionalExtractions, MinimalRequestExtraction} from '../unifier/public-interfaces';
@@ -7,6 +7,7 @@ import { featureIsAvailable } from '../unifier/feature-checker';
 
 import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 import { I18nContext } from "./context";
+import { componentInterfaces } from "./component-interfaces";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
@@ -14,7 +15,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:i18n:instance") public i18n: I18n, 
     @inject("core:i18n:current-context") public context: I18nContext,
     @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
-    @inject("core:root:current-logger") public logger: Logger
+    @inject("core:root:current-logger") public logger: Logger,
   ) { }
 
 
