@@ -310,6 +310,8 @@ export interface MinimalResponseHandler {
   endSession: boolean;
   /** Voice message to speak to the user */
   voiceMessage: string | null;
+  /** Request timestamp from request body. Timestamp is provided as an ISO 8601 formatted string (for example, 2015-05-13T12:34:56Z). */
+  requestTimestamp: Date;
   /** Called automatically if the response should be sent */
   sendResponse(): void;
 }

@@ -1,20 +1,31 @@
-import { inject, injectable, multiInject, optional } from "inversify";
+import {
+  inject,
+  injectable,
+  multiInject,
+  optional
+  } from "inversify";
 import { ExecutableExtension } from "inversify-components";
 import * as util from "util";
-
 import { RequestContext, ResponseCallback } from "../root/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
-import { AfterResponseHandler, BeforeResponseHandler, MinimalResponseHandler, ResponseHandlerExtensions } from "./public-interfaces";
+import {
+  AfterResponseHandler,
+  BeforeResponseHandler,
+  MinimalResponseHandler,
+  ResponseHandlerExtensions
+  } from "./public-interfaces";
+
 
 @injectable() /** Take this class as base class for implementing response handler, if needed */
 export abstract class AbstractResponseHandler implements MinimalResponseHandler {
   public endSession: boolean;
   public voiceMessage: string | null = null;
-
+  public requestTimestamp: Date;
   public responseCallback: ResponseCallback;
   public killSession: () => Promise<void>;
 
   private canSendResponse: boolean = true;
+
 
   constructor(
     @inject("core:root:current-request-context") extraction: RequestContext,

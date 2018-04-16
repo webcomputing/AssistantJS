@@ -1,10 +1,11 @@
-import { MinimalResponseHandler } from "../../../../src/components/unifier/public-interfaces";
+import { inject, injectable } from "inversify";
 import { RequestContext } from "../../../../src/components/root/public-interfaces";
-import { injectable, inject } from "inversify";
+import { MinimalResponseHandler } from "../../../../src/components/unifier/public-interfaces";
 
 @injectable()
 export class ResponseHandler implements MinimalResponseHandler {
   endSession: boolean = false;
+  requestTimestamp: Date = new Date();
   voiceMessage: string = "";
   sendResponse() {}
 }
