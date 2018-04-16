@@ -53,6 +53,12 @@ describe("EntityDictionary", function() {
           });
         });
 
+        describe("with case-insensitivity", function() {
+          it("gets exact match", function() {
+            expect(this.entities.getClosest("myEntity", this.upperCaseDistanceSet)).toBe("MyEntity");
+          });
+        });
+
         describe("with maxDistance undefined", function() {
           it("returns closest match", function() {
             expect(this.entities.getClosest("myEntity", this.distanceSet)).toBe("hisEntity");
