@@ -1,5 +1,5 @@
-import { createRequestScope } from "../../support/util/setup";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 describe("I18nContext", function() {
   beforeEach(function() {

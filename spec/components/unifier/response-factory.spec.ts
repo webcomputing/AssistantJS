@@ -2,11 +2,11 @@ import { MinimalRequestExtraction } from "../../../src/components/unifier/public
 import { createRequestScope } from "../../support/util/setup";
 
 import { ResponseFactory } from "../../../src/components/unifier/response-factory";
+import { EmptyResponse } from "../../../src/components/unifier/responses/empty-response";
 import { SimpleVoiceResponse } from "../../../src/components/unifier/responses/simple-voice-response";
-import { VoiceResponse } from "../../../src/components/unifier/responses/voice-response";
 import { SSMLResponse } from "../../../src/components/unifier/responses/ssml-response";
 import { UnauthenticatedResponse } from "../../../src/components/unifier/responses/unauthenticated-response";
-import { EmptyResponse } from "../../../src/components/unifier/responses/empty-response";
+import { VoiceResponse } from "../../../src/components/unifier/responses/voice-response";
 
 import { Container } from "inversify-components";
 import { ChatResponse } from "../../../src/components/unifier/responses/chat-response";
@@ -142,7 +142,7 @@ describe("ResponseFactory", function() {
 
       it("sends an empty response", function() {
         this.sent = false;
-        this.handler = Object.assign(this.handler, { sendResponse: () => (this.sent = true) });
+        this.handler = {...this.handler,  sendResponse: () => (this.sent = true)};
         this.responseFactory.handler = this.handler;
 
         this.responseFactory.createAndSendEmptyResponse();
@@ -153,7 +153,7 @@ describe("ResponseFactory", function() {
 
   describe("with handler as SSML enabled handler", function() {
     beforeEach(function() {
-      this.handler = Object.assign(this.handler, { isSSML: false });
+      this.handler = {...this.handler,  isSSML: false};
       this.responseFactory.handler = this.handler;
     });
 
@@ -173,7 +173,7 @@ describe("ResponseFactory", function() {
 
   describe("with handler as chat messages enabled handler", function() {
     beforeEach(function() {
-      this.handler = Object.assign(this.handler, { chatBubbles: null });
+      this.handler = {...this.handler,  chatBubbles: null};
       this.responseFactory.handler = this.handler;
     });
 
@@ -186,7 +186,7 @@ describe("ResponseFactory", function() {
 
   describe("with handler as suggestion chips enabled handler", function() {
     beforeEach(function() {
-      this.handler = Object.assign(this.handler, { suggestionChips: null });
+      this.handler = {...this.handler,  suggestionChips: null};
       this.responseFactory.handler = this.handler;
     });
 
@@ -200,10 +200,9 @@ describe("ResponseFactory", function() {
   describe("with handler as OAuth enabled handler", function() {
     beforeEach(function() {
       this.sent = false;
-      this.handler = Object.assign(this.handler, {
+      this.handler = {...this.handler, 
         sendResponse: () => (this.sent = true),
-        forceAuthenticated: false,
-      });
+        forceAuthenticated: false};
       this.responseFactory.handler = this.handler;
     });
 

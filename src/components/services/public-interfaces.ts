@@ -32,23 +32,10 @@ export interface Session {
 }
 
 /** Factory function which returns a session for a given session id */
-export interface SessionFactory {
-  /**
-   * Returns a session object for a given id
-   * @param {string} id  Id of the session to return
-   * @return {Session}
-   */
-  (id: string): Session;
-}
+export type SessionFactory = (id: string) => Session;
 
 /** Factory function which returns the current session (based on extraction result) */
-export interface CurrentSessionFactory {
-  /**
-   * Returns a session object based on the current extraction result
-   * @return {Session}
-   */
-  (): Session;
-}
+export type CurrentSessionFactory = () => Session;
 
 /** Configuration object for AssistantJS user for services component */
 export interface ServicesConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

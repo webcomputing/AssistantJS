@@ -1,8 +1,8 @@
-import { Session } from "../services/public-interfaces";
-import { RequestContext, Logger } from "../root/public-interfaces";
 import { TranslateHelper } from "../i18n/translate-helper";
+import { Logger, RequestContext } from "../root/public-interfaces";
+import { Session } from "../services/public-interfaces";
+import { GenericIntent, intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { ResponseFactory } from "../unifier/response-factory";
-import { MinimalRequestExtraction, GenericIntent, intent } from "../unifier/public-interfaces";
 
 /** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
@@ -69,13 +69,7 @@ export namespace State {
   }
 
   /** (Injectable) factory to create state instances */
-  export interface Factory {
-    /** Returns a state by name (string).
-     * @param {string} stateName Name of state. If you leave out this parameter, the main state is returned.
-     * @return {State extends State.Required}
-     */
-    <T extends State.Required = State.Required>(stateName?: string): T;
-  }
+  export type Factory = <T extends State.Required = State.Required>(stateName?: string) => T;
 
   /** Set containing all objects needed to setup a BaseState. */
   export interface SetupSet {
@@ -95,7 +89,7 @@ export namespace State {
 /** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
 export interface Transitionable {
   /** History of all called intent methods */
-  intentHistory: { stateName: string; intentMethodName: string }[];
+  intentHistory: Array<{ stateName: string; intentMethodName: string }>;
 
   /** Checks if given state exists */
   stateExists(state: string): boolean;

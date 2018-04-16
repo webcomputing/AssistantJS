@@ -10,11 +10,11 @@ export class VoiceResponse implements Voiceable {
     this.ssml = ssml;
   }
 
-  endSessionWith(text: string) {
+  public endSessionWith(text: string) {
     this.delegatorBasedOnInput(text).endSessionWith(text);
   }
 
-  prompt(text: string, ...reprompts: string[]) {
+  public prompt(text: string, ...reprompts: string[]) {
     this.delegatorBasedOnInput(text).prompt(text, ...reprompts);
   }
 

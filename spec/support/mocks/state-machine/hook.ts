@@ -1,4 +1,4 @@
-import { Hooks, Container } from "inversify-components";
+import { Container, Hooks } from "inversify-components";
 import { componentInterfaces } from "../../../../src/components/state-machine/private-interfaces";
 
 /** Hook wich returns a unsuccessful result if called intent is "test" */
@@ -22,6 +22,6 @@ export function createSpyHook(spyFunction: Function): Hooks.Hook {
  * @param hook Hook to bind
  */
 export function registerHook(container: Container, beforeIntent = true, hook = TestIntentFilterHook) {
-  let binding = beforeIntent ? componentInterfaces.beforeIntent : componentInterfaces.afterIntent;
+  const binding = beforeIntent ? componentInterfaces.beforeIntent : componentInterfaces.afterIntent;
   container.inversifyInstance.bind(binding).toFunction(hook);
 }

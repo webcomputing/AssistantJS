@@ -1,4 +1,4 @@
-import { MinimalRequestExtraction, intent, GenericIntent } from "../../../../src/components/unifier/public-interfaces";
+import { GenericIntent, intent, MinimalRequestExtraction } from "../../../../src/components/unifier/public-interfaces";
 import { Component } from "../util/component";
 
 export function createExtraction(
@@ -8,10 +8,10 @@ export function createExtraction(
   language = "de"
 ): MinimalRequestExtraction {
   return {
-    intent: intent,
+    intent,
     sessionID: sessionId,
-    entities: entities,
-    language: language,
+    entities,
+    language,
     platform: "ExtractorComponent",
   };
 }

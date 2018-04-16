@@ -1,12 +1,12 @@
 import { Container } from "inversify-components";
 import { componentInterfaces as rootComponentInterfaces } from "../../../src/components/root/private-interfaces";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
-import { withServer, RequestProxy, expressAppWithTimeout } from "../../support/util/requester";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { expressAppWithTimeout, RequestProxy, withServer } from "../../support/util/requester";
 
-import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
 import { createContext } from "../../support/mocks/root/request-context";
-import { extraction, createExtraction } from "../../support/mocks/unifier/extraction";
+import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
+import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
 import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
 
 describe("ContextDeriver", function() {
@@ -52,7 +52,7 @@ describe("ContextDeriver", function() {
         });
 
         it("sets 'core:unifier:current-extraction' to extraction result", function() {
-          let extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
+          const extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
           expect(extraction).toEqual(extractionData);
         });
       });
@@ -76,7 +76,7 @@ describe("ContextDeriver", function() {
           });
 
           it("uses feature richer extractor", function() {
-            let extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
+            const extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
             expect(extraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
           });
         });
@@ -107,7 +107,7 @@ describe("ContextDeriver", function() {
 
           this.expectLoggingWithExtraction = extraction => {
             expect(this.deriver.logger.info).toHaveBeenCalledWith(
-              { requestId: "mock-fixed-request-id", extraction: extraction },
+              { requestId: "mock-fixed-request-id", extraction },
               "Resolved current extraction by platform."
             );
           };
@@ -152,7 +152,7 @@ describe("ContextDeriver", function() {
         describe("with default whitelist", function() {
           it("filters everything except intent, language and platform", async function(done) {
             await this.deriver.derive(this.mockRequestContext);
-            this.expectLoggingWithExtraction(Object.assign({}, this.mockExtraction, { sessionID: "**filtered**", entities: "**filtered**" }));
+            this.expectLoggingWithExtraction({...this.mockExtraction,  sessionID: "**filtered**", entities: "**filtered**"});
             done();
           });
         });

@@ -1,9 +1,9 @@
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { injectionNames } from "../../../src/injection-names";
+import { BaseState } from "../../../src/components/state-machine/base-state";
 import { State } from "../../../src/components/state-machine/public-interfaces";
 import { Voiceable } from "../../../src/components/unifier/public-interfaces";
+import { injectionNames } from "../../../src/injection-names";
 import { SpecSetup } from "../../../src/spec-setup";
-import { BaseState } from "../../../src/components/state-machine/base-state";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {

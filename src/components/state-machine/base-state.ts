@@ -1,8 +1,8 @@
 import { injectable, unmanaged } from "inversify";
-import { Voiceable, MinimalRequestExtraction, ResponseFactory, OptionalExtractions } from "../unifier/public-interfaces";
-import { featureIsAvailable } from "../unifier/feature-checker";
-import { RequestContext, Logger } from "../root/public-interfaces";
 import { TranslateHelper } from "../i18n/public-interfaces";
+import { Logger, RequestContext } from "../root/public-interfaces";
+import { featureIsAvailable } from "../unifier/feature-checker";
+import { MinimalRequestExtraction, OptionalExtractions, ResponseFactory, Voiceable } from "../unifier/public-interfaces";
 import { State, Transitionable } from "./public-interfaces";
 
 /**
@@ -14,16 +14,16 @@ import { State, Transitionable } from "./public-interfaces";
 @injectable()
 export abstract class BaseState implements State.Required, Voiceable, TranslateHelper {
   /** Current response factory */
-  responseFactory: ResponseFactory;
+  public responseFactory: ResponseFactory;
 
   /** Current translate helper */
-  translateHelper: TranslateHelper;
+  public translateHelper: TranslateHelper;
 
   /** Current extracion result */
-  extraction: MinimalRequestExtraction;
+  public extraction: MinimalRequestExtraction;
 
   /** Current request-specific logger */
-  logger: Logger;
+  public logger: Logger;
 
   /**
    *
@@ -48,8 +48,9 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   ) {
     if (typeof (responseFactoryOrSet as State.SetupSet).responseFactory === "undefined") {
       // Did not pass StateSetupSet
-      if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined")
+      if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined") {
         throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
+      }
 
       this.responseFactory = responseFactoryOrSet as ResponseFactory;
       this.translateHelper = translateHelper;
@@ -57,8 +58,9 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
       this.logger = logger;
     } else {
       // Did pass StateSetupSet
-      if (typeof translateHelper !== "undefined" || typeof extraction !== "undefined" || typeof logger !== "undefined")
+      if (typeof translateHelper !== "undefined" || typeof extraction !== "undefined" || typeof logger !== "undefined") {
         throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
+      }
 
       this.responseFactory = (responseFactoryOrSet as State.SetupSet).responseFactory;
       this.translateHelper = (responseFactoryOrSet as State.SetupSet).translateHelper;
@@ -68,12 +70,12 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   }
 
   /** Prompts with current unhandled message */
-  unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
+  public unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
     this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
   }
 
   /** Sends empty response */
-  unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
+  public unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
     this.responseFactory.createAndSendEmptyResponse();
   }
 
@@ -82,7 +84,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * First try is `currentState.currentIntent.platform.device`.
    * @param locals If given: variables to use in response
    */
-  t(locals?: { [name: string]: string | number | object }): string;
+  public t(locals?: { [name: string]: string | number | object }): string;
 
   /**
    * Translates the given key using your json translations.
@@ -91,9 +93,9 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
    * @param locals Variables to use in reponse
    */
-  t(key?: string, locals?: { [name: string]: string | number | object }): string;
+  public t(key?: string, locals?: { [name: string]: string | number | object }): string;
 
-  t(...args: any[]) {
+  public t(...args: any[]) {
     return (this.translateHelper as any).t(...args);
   }
 
@@ -102,7 +104,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]) {
+  public prompt(text: string, ...reprompts: string[]) {
     return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 
@@ -110,17 +112,17 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith(text: string) {
+  public endSessionWith(text: string) {
     return this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 
   /** Returns name of current platform */
-  getPlatform(): string {
+  public getPlatform(): string {
     return this.extraction.platform;
   }
 
   /** Returns name of current device. If the current platform does not support different devices, returns name of current platform. */
-  getDeviceOrPlatform(): string {
+  public getDeviceOrPlatform(): string {
     if (featureIsAvailable<OptionalExtractions.DeviceExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
       return this.extraction.device;
     } else {

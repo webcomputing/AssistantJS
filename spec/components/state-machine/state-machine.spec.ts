@@ -1,7 +1,7 @@
-import { createRequestScope } from "../../support/util/setup";
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { registerHook, createSpyHook } from "../../support/mocks/state-machine/hook";
 import { Container } from "inversify-components";
+import { createSpyHook, registerHook } from "../../support/mocks/state-machine/hook";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 describe("StateMachine", function() {
   beforeEach(function() {
@@ -326,7 +326,7 @@ describe("StateMachine", function() {
   describe("transitionTo", function() {
     it("transitions to given state", async function(done) {
       await this.stateMachine.transitionTo("SecondState");
-      let currentState = await this.stateMachine.getCurrentState();
+      const currentState = await this.stateMachine.getCurrentState();
       expect(currentState.name).toEqual("SecondState");
       done();
     });

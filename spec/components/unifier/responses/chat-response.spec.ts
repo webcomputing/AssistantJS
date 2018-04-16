@@ -1,6 +1,6 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { ResponseFactory } from "../../../../src/components/unifier/response-factory";
 import { ChatResponse } from "../../../../src/components/unifier/responses/chat-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("ChatResponse", function() {
   beforeEach(function() {

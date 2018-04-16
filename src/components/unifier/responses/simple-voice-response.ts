@@ -1,5 +1,5 @@
 import { Logger } from "../../root/public-interfaces";
-import { MinimalResponseHandler, Voiceable, OptionalHandlerFeatures } from "../public-interfaces";
+import { MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../public-interfaces";
 import { BaseResponse } from "./base-response";
 
 export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
@@ -10,13 +10,13 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
   }
 
-  endSessionWith(text: string) {
+  public endSessionWith(text: string) {
     this.handler.endSession = true;
     this.handler.voiceMessage = this.prepareText(text);
     this.handler.sendResponse();
   }
 
-  prompt(text: string, ...reprompts: string[]) {
+  public prompt(text: string, ...reprompts: string[]) {
     this.handler.endSession = false;
     this.handler.voiceMessage = this.prepareText(text);
     this.attachRepromptsIfAny(reprompts);

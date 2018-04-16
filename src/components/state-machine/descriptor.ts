@@ -1,17 +1,17 @@
-import { ComponentDescriptor, BindingDescriptor } from "inversify-components";
+import { BindingDescriptor, ComponentDescriptor } from "inversify-components";
 
 import { injectionNames } from "../../injection-names";
 
-import { Session } from "../services/public-interfaces";
-import { MinimalRequestExtraction, intent } from "../unifier/public-interfaces";
-import { ResponseFactory } from "../unifier/response-factory";
-import { Logger } from "../root/public-interfaces";
 import { TranslateHelper } from "../i18n/translate-helper";
+import { Logger } from "../root/public-interfaces";
+import { Session } from "../services/public-interfaces";
+import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
+import { ResponseFactory } from "../unifier/response-factory";
 
+import { componentInterfaces } from "./private-interfaces";
+import { MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
-import { State, MAIN_STATE_NAME } from "./public-interfaces";
-import { componentInterfaces } from "./private-interfaces";
 
 export const descriptor: ComponentDescriptor = {
   name: "core:state-machine",
@@ -29,8 +29,9 @@ export const descriptor: ComponentDescriptor = {
           }
 
           // Throw message if no states are defined
-          if (!context.container.isBound(componentInterfaces.state))
+          if (!context.container.isBound(componentInterfaces.state)) {
             throw new Error("There are no states defined. You have to define states in order to use the state machine.");
+          }
 
           // Throw message if searched state is not defined
           if (!context.container.isBoundTagged(componentInterfaces.state, "name", stateName)) throw new Error("There is no state defined: '" + stateName + "'");
@@ -56,7 +57,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Returns all intents
       bindService.bindGlobalService<intent[]>("used-intents").toDynamicValue(context => {
-        let meta = context.container.get<State.Meta[]>("core:state-machine:meta-states");
+        const meta = context.container.get<State.Meta[]>("core:state-machine:meta-states");
         return meta
           .map(m => m.intents)
           .reduce((previous, current) => previous.concat(current), [])
@@ -98,12 +99,12 @@ export const descriptor: ComponentDescriptor = {
       // Provider for current state. Returns current state or MAIN STATE if no state is present.
       bindService.bindGlobalService("current-state-provider").toProvider<{ instance: State.Required; name: string }>(context => {
         return () => {
-          let factory = context.container.get<Function>("core:state-machine:state-factory");
+          const factory = context.container.get<Function>("core:state-machine:state-factory");
           return context.container
             .get<() => Promise<string>>("core:state-machine:current-state-name-provider")()
             .then(name => {
               if (name === null) name = MAIN_STATE_NAME;
-              return { instance: factory(name), name: name };
+              return { instance: factory(name), name };
             });
         };
       });

@@ -1,7 +1,7 @@
 import { Logger } from "../../root/public-interfaces";
 import { MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../public-interfaces";
-import { VoiceResponse } from "./voice-response";
 import { BaseResponse } from "./base-response";
+import { VoiceResponse } from "./voice-response";
 
 export class UnauthenticatedResponse extends BaseResponse {
   /** Response handler of the currently used platform */

@@ -1,6 +1,6 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { ResponseFactory } from "../../../../src/components/unifier/response-factory";
 import { BaseResponse } from "../../../../src/components/unifier/responses/base-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("BaseResponse", function() {
   beforeEach(function() {

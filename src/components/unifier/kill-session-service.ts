@@ -1,8 +1,8 @@
 import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
-import { componentInterfaces } from "./private-interfaces";
 import { Logger } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
+import { componentInterfaces } from "./private-interfaces";
 
 /** Destroys redis session after session ended */
 @injectable()
@@ -13,8 +13,8 @@ export class KillSessionService {
     @inject("core:root:current-logger") public logger: Logger
   ) {}
 
-  async execute() {
-    let currentSession = this.sessionFactory();
+  public async execute() {
+    const currentSession = this.sessionFactory();
 
     // Create hook pipes
     const beforeKillSessionHooks = this.pipeFactory(componentInterfaces.beforeKillSession).withArguments(currentSession);

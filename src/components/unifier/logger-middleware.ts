@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
 
 import { LoggerMiddleware } from "../root/public-interfaces";
-import { MinimalRequestExtraction, OptionalExtractions } from "./public-interfaces";
 import { featureIsAvailable } from "./feature-checker";
+import { MinimalRequestExtraction, OptionalExtractions } from "./public-interfaces";
 
 export function createUnifierLoggerMiddleware(extraction?: MinimalRequestExtraction): LoggerMiddleware {
   if (typeof extraction === "undefined" || typeof extraction.sessionID === "undefined") {

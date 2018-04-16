@@ -1,13 +1,13 @@
 import { Container } from "inversify-components";
-import { withServer, RequestProxy } from "../../support/util/requester";
 import { RequestContext } from "../../../src/components/root/public-interfaces";
+import { RequestProxy, withServer } from "../../support/util/requester";
 
 describe("GenericRequestHelper", function() {
   describe("resulting context object", function() {
     let request: RequestProxy;
     let stopServer: Function;
     let requestContext: RequestContext;
-    let diContextName = "core:root:current-request-context";
+    const diContextName = "core:root:current-request-context";
 
     beforeEach(async function(done) {
       [request, stopServer] = await withServer(this.assistantJs);
@@ -26,7 +26,7 @@ describe("GenericRequestHelper", function() {
     });
 
     it("contains all request information", function() {
-      let requestContext = (this.container as Container).inversifyInstance.get<RequestContext>(diContextName);
+      const requestContext = (this.container as Container).inversifyInstance.get<RequestContext>(diContextName);
 
       // Multiple expections for performance reasons
       expect(requestContext.method).toBe("POST");

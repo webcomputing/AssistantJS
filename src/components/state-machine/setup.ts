@@ -1,10 +1,10 @@
-import { ComponentDescriptor } from "inversify-components";
 import * as fs from "fs";
+import { ComponentDescriptor } from "inversify-components";
 
 import { State } from "./public-interfaces";
 
-import { GenericIntent } from "../unifier/public-interfaces";
 import { AssistantJSSetup } from "../../setup";
+import { GenericIntent } from "../unifier/public-interfaces";
 
 export class StateMachineSetup {
   private assistantJS: AssistantJSSetup;
@@ -12,7 +12,7 @@ export class StateMachineSetup {
   private metaStates: State.Meta[] = [];
 
   /** If set to true, states are registered in singleton scope. This may be pretty useful for testing. */
-  registerStatesInSingleton = false;
+  public registerStatesInSingleton = false;
 
   constructor(assistantJS: AssistantJSSetup) {
     this.assistantJS = assistantJS;
@@ -24,14 +24,14 @@ export class StateMachineSetup {
    * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
    * @param dictionary Dictionary which contains state classes, defaults to "states"
    */
-  registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/states") {
+  public registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/states") {
     fs.readdirSync(baseDirectory + dictionary).forEach(file => {
-      let suffixParts = file.split(".");
-      let suffix = suffixParts[suffixParts.length - 1];
+      const suffixParts = file.split(".");
+      const suffix = suffixParts[suffixParts.length - 1];
 
       // Load if file is a JavaScript file
       if (suffix !== "js") return;
-      let classModule = require(baseDirectory + dictionary + "/" + file);
+      const classModule = require(baseDirectory + dictionary + "/" + file);
 
       Object.keys(classModule).forEach(exportName => {
         this.addState(classModule[exportName]);
@@ -42,12 +42,12 @@ export class StateMachineSetup {
   }
 
   /** Adds a state to setup */
-  addState(stateClass: State.Constructor, name?: string, intents?: string[]) {
+  public addState(stateClass: State.Constructor, name?: string, intents?: string[]) {
     name = typeof name === "undefined" ? StateMachineSetup.deriveStateName(stateClass) : name;
     intents = typeof intents === "undefined" ? StateMachineSetup.deriveStateIntents(stateClass) : intents;
 
     // Create and add meta state
-    let metaState = StateMachineSetup.createMetaState(name, intents);
+    const metaState = StateMachineSetup.createMetaState(name, intents);
     this.metaStates.push(metaState);
 
     // Add state class
@@ -55,27 +55,27 @@ export class StateMachineSetup {
   }
 
   /** Registers all states in dependency injection container */
-  registerStates() {
+  public registerStates() {
     this.assistantJS.registerComponent(this.toComponentDescriptor());
   }
 
   /** Builds a component descriptor out of all added states (and meta states) */
-  toComponentDescriptor(): ComponentDescriptor {
+  public toComponentDescriptor(): ComponentDescriptor {
     return {
       name: "core:state-machine:states",
       bindings: {
         root: (bindService, lookupService) => {
-          let metaStateInterface = lookupService.lookup("core:state-machine").getInterface("metaState");
+          const metaStateInterface = lookupService.lookup("core:state-machine").getInterface("metaState");
 
           this.metaStates.forEach(metaState => bindService.bindExtension<State.Meta>(metaStateInterface).toConstantValue(metaState));
         },
 
         request: (bindService, lookupService) => {
-          let stateInterface = lookupService.lookup("core:state-machine").getInterface("state");
+          const stateInterface = lookupService.lookup("core:state-machine").getInterface("state");
 
           Object.keys(this.stateClasses).forEach(stateName => {
-            let binding = bindService.bindExtension<State.Required>(stateInterface).to(this.stateClasses[stateName]);
-            let scope = this.registerStatesInSingleton ? binding.inSingletonScope() : binding;
+            const binding = bindService.bindExtension<State.Required>(stateInterface).to(this.stateClasses[stateName]);
+            const scope = this.registerStatesInSingleton ? binding.inSingletonScope() : binding;
             scope.whenTargetTagged("name", stateName);
           });
         },
@@ -84,21 +84,21 @@ export class StateMachineSetup {
   }
 
   /** Creates a valid metastate object based on name and intents */
-  static createMetaState(name: string, intents: string[]): State.Meta {
+  public static createMetaState(name: string, intents: string[]): State.Meta {
     return {
-      name: name,
-      intents: intents,
+      name,
+      intents,
     };
   }
 
   /** Returns a states name based on its constructor */
-  static deriveStateName(stateClass: State.Constructor): string {
+  public static deriveStateName(stateClass: State.Constructor): string {
     return stateClass.name;
   }
 
   /** Derives names of intents based on a state class */
-  static deriveStateIntents(stateClass: State.Constructor): string[] {
-    let prototype = stateClass.prototype;
+  public static deriveStateIntents(stateClass: State.Constructor): string[] {
+    const prototype = stateClass.prototype;
 
     // Return empty set if prototype is undefined - this also breaks recursive calls
     if (typeof prototype === "undefined") return [];
@@ -111,10 +111,10 @@ export class StateMachineSetup {
         .filter(method => method.endsWith("Intent") && method !== "unhandledGenericIntent" && method !== "unansweredGenericIntent")
         .map(method => {
           if (method.endsWith("GenericIntent")) {
-            let baseString = method.replace("GenericIntent", "");
+            const baseString = method.replace("GenericIntent", "");
             return GenericIntent[baseString.charAt(0).toUpperCase() + baseString.slice(1)];
           } else {
-            let baseString = method.replace("Intent", "");
+            const baseString = method.replace("Intent", "");
             return baseString.charAt(0).toLowerCase() + baseString.slice(1);
           }
         })

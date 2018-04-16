@@ -1,7 +1,7 @@
-import { State } from "../../../../src/components/state-machine/public-interfaces";
+import { inject, injectable, optional } from "inversify";
 import { Logger } from "../../../../src/components/root/public-interfaces";
+import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
-import { optional, inject, injectable } from "inversify";
 
 import { MainState } from "./main";
 
@@ -19,7 +19,7 @@ export class SubState extends MainState {
     super(responseFactory, extraction, tHelper, logger, spy);
   }
 
-  helpGenericIntent(...args: any[]) {
+  public helpGenericIntent(...args: any[]) {
     this.spyIfExistent("help", ...args);
   }
 }

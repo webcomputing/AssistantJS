@@ -1,6 +1,6 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { ResponseFactory } from "../../../../src/components/unifier/response-factory";
 import { SuggestionChipsResponse } from "../../../../src/components/unifier/responses/suggestion-chips-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("SuggestionChipsResponse", function() {
   beforeEach(function() {

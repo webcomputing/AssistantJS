@@ -1,6 +1,6 @@
-import { createRequestScope } from "../../support/util/setup";
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { injectionNames } from "../../../src/injection-names";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 describe("TranslateHelper", function() {
   beforeEach(function() {

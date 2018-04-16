@@ -15,7 +15,7 @@ const defaultConfiguration: Configuration.Defaults = {
 export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:root",
   interfaces: componentInterfaces,
-  defaultConfiguration: defaultConfiguration,
+  defaultConfiguration,
   bindings: {
     root: bindService => {
       bindService.bindLocalServiceToSelf(GenericRequestHandler);

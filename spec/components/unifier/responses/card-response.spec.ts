@@ -1,6 +1,6 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { ResponseFactory } from "../../../../src/components/unifier/response-factory";
 import { CardResponse } from "../../../../src/components/unifier/responses/card-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("CardResponse", function() {
   beforeEach(function() {
@@ -9,7 +9,7 @@ describe("CardResponse", function() {
     this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
 
     this.buildCardHandler = (additionalFeatures = {}) => {
-      this.handler = Object.assign(this.handler, Object.assign({ cardBody: null, cardTitle: null }, additionalFeatures));
+      this.handler = {...this.handler, ...{ cardBody: null, cardTitle: null, ...additionalFeatures}};
       this.responseFactory.handler = this.handler;
     };
   });

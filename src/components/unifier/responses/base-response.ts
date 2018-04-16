@@ -1,6 +1,6 @@
 import { Logger } from "../../root/public-interfaces";
-import { MinimalResponseHandler } from "../public-interfaces";
 import { featureIsAvailable } from "../feature-checker";
+import { MinimalResponseHandler } from "../public-interfaces";
 
 export class BaseResponse {
   /**
@@ -29,7 +29,7 @@ export class BaseResponse {
   }
 
   /** Checks whether a given feature (see FeatureChecker) is available, by checking if all given attributes are present in handler */
-  static featureIsAvailable<Feature extends MinimalResponseHandler>(handler: MinimalResponseHandler, feature: string[]) {
+  public static featureIsAvailable<Feature extends MinimalResponseHandler>(handler: MinimalResponseHandler, feature: string[]) {
     return featureIsAvailable<Feature>(handler, feature);
   }
 }

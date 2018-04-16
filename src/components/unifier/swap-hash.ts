@@ -1,5 +1,5 @@
 export function swapHash(configHash) {
-  let result = {};
+  const result = {};
   Object.keys(configHash).forEach(parameterType => {
     configHash[parameterType].forEach(parameter => {
       result[parameter] = parameterType;

@@ -1,15 +1,15 @@
-import { injectable, inject, multiInject, optional } from "inversify";
+import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 
-import { featureIsAvailable } from "./feature-checker";
 import { injectionNames } from "../../injection-names";
-import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/public-interfaces";
-import { RequestExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
-import { Configuration, componentInterfaces } from "./private-interfaces";
+import { ContextDeriver as ContextDeriverI, Logger, RequestContext } from "../root/public-interfaces";
+import { featureIsAvailable } from "./feature-checker";
+import { componentInterfaces, Configuration } from "./private-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions, RequestExtractor } from "./public-interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
-  loggingWhitelist: Configuration.LogWhitelistSet;
+  public loggingWhitelist: Configuration.LogWhitelistSet;
 
   constructor(
     @optional()
@@ -21,7 +21,7 @@ export class ContextDeriver implements ContextDeriverI {
     this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }
 
-  async derive(context: RequestContext): Promise<[any, string] | undefined> {
+  public async derive(context: RequestContext): Promise<[any, string] | undefined> {
     const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
@@ -35,13 +35,14 @@ export class ContextDeriver implements ContextDeriverI {
     }
   }
 
-  async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
+  public async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
     const isRunable = await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context)));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
 
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
-    if (runnableExtensions.length > 1)
+    if (runnableExtensions.length > 1) {
       throw new Error("Multiple extractors fit to this request. " + "Please check your registerend platforms for duplicate extractors.");
+    }
 
     if (runnableExtensions.length !== 1) {
       this.respondWithNoExtractor(context);
@@ -52,7 +53,7 @@ export class ContextDeriver implements ContextDeriverI {
     return runnableExtensions[0];
   }
 
-  respondWithNoExtractor(context: RequestContext) {
+  public respondWithNoExtractor(context: RequestContext) {
     this.logger.warn(
       { requestId: context.id },
       "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404."
@@ -61,20 +62,20 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   /** Returns list of extractors which implement most of all available optional extractor interfaces */
-  async selectExtractorsWithMostOptionalExtractions(extractors: RequestExtractor[], context: RequestContext): Promise<RequestExtractor[]> {
+  public async selectExtractorsWithMostOptionalExtractions(extractors: RequestExtractor[], context: RequestContext): Promise<RequestExtractor[]> {
     if (extractors.length <= 1) return extractors; // Performance reasons
 
     // Build all extractions
-    let extractions = await Promise.all(extractors.map(e => e.extract(context)));
+    const extractions = await Promise.all(extractors.map(e => e.extract(context)));
 
     // Count supported features per extractor / extraction
-    let featureSupportings = extractions.map(e => {
+    const featureSupportings = extractions.map(e => {
       return Object.keys(OptionalExtractions.FeatureChecker).reduce((prev, curr) => {
         return this.extractorSupportsFeature(e, OptionalExtractions.FeatureChecker[curr]) ? prev + 1 : prev;
       }, 0);
     });
 
-    let maximumFeatureSupport = Math.max(...featureSupportings);
+    const maximumFeatureSupport = Math.max(...featureSupportings);
     return extractors.filter((extractor, index) => featureSupportings[index] === maximumFeatureSupport);
   }
 
