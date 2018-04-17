@@ -1,0 +1,5 @@
+install:
+  - npm install
+script: 
+  - gulp
+  - npm test
