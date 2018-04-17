@@ -1,7 +1,7 @@
 import { GenericIntent } from "../../../src/components/unifier/public-interfaces";
 
-import { createRequestScope, createSpecHelper } from "../../support/util/setup";
 import { StateMachineSetup } from "../../../src/components/state-machine/setup";
+import { createRequestScope, createSpecHelper } from "../../support/util/setup";
 
 import { MainState } from "../../support/mocks/states/main";
 import { SecondState } from "../../support/mocks/states/second";
@@ -25,7 +25,7 @@ describe("StateMachineSetup", function() {
     beforeEach(function() {
       this.setup.addState(MainState);
       this.setup.addState(SecondState, explicitName, explicitIntents);
-    })
+    });
 
     it("adds state to internal stateClasses", function() {
       expect(Object.keys(this.setup.stateClasses).length).toBe(2);
@@ -37,7 +37,7 @@ describe("StateMachineSetup", function() {
 
     describe("without explicit name", function() {
       it("adds state to stateClases by name of constructor", function() {
-        expect(this.setup.stateClasses["MainState"]).toEqual(MainState);
+        expect(this.setup.stateClasses.MainState).toEqual(MainState);
       });
 
       it("adds state to metaStates with constructor name", function() {
@@ -70,7 +70,7 @@ describe("StateMachineSetup", function() {
 
   describe(".deriveStateIntents", function() {
     it("derives child intents corectly", function() {
-      let expectation = implicitMainStateIntents.concat([GenericIntent.Help]) as string[];
+      const expectation = implicitMainStateIntents.concat([GenericIntent.Help]) as string[];
       expect(StateMachineSetup.deriveStateIntents(SubState)).toEqual(expectation);
     });
 

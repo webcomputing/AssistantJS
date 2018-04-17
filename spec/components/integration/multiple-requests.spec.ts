@@ -1,12 +1,12 @@
 import { Container } from "inversify-components";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
-import { withServer, RequestProxy } from "../../support/util/requester";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { RequestProxy, withServer } from "../../support/util/requester";
 import { createSpecHelper } from "../../support/util/setup";
-import { configureI18nLocale } from '../../support/util/i18n-configuration';
 
-import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
-import { RealResponseHandler } from "../../support/mocks/unifier/handler";
 import { extraction } from "../../support/mocks/unifier/extraction";
+import { RealResponseHandler } from "../../support/mocks/unifier/handler";
+import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
 
 import { RequestPromise } from "request-promise";
 
@@ -24,7 +24,7 @@ describe("with child containers enabled", function() {
   describe("when multiple requests fired", function() {
     const FIRE_AMOUNT = 50;
 
-    const extractionData = {intent: "answer", message: "My message", platform: extraction.platform };
+    const extractionData = { intent: "answer", message: "My message", platform: extraction.platform };
     let request: RequestProxy;
     let stopServer: Function;
 
@@ -39,18 +39,20 @@ describe("with child containers enabled", function() {
     });
 
     it("handles all of them correctly", async function(done) {
-      let requests: Promise<any>[] = [];
+      const requests: Array<Promise<any>> = [];
       let extractions: any[];
 
-      for(let i = 0; i < FIRE_AMOUNT; i++) {
-        extraction[i] = Object.assign({}, extractionData, { message: "My message " + i });
-        requests.push(new Promise<any>((resolve, reject) => {
-          request.post(MockExtractor.fittingPath(), extraction[i]).then(value => resolve(value));
-        }));
+      for (let i = 0; i < FIRE_AMOUNT; i++) {
+        extraction[i] = {...extractionData,  message: "My message " + i};
+        requests.push(
+          new Promise<any>((resolve, reject) => {
+            request.post(MockExtractor.fittingPath(), extraction[i]).then(value => resolve(value));
+          })
+        );
       }
-      
-      let fulfilledPromises = await Promise.all(requests);
-      for(let i in fulfilledPromises) {
+
+      const fulfilledPromises = await Promise.all(requests);
+      for (const i in fulfilledPromises) {
         expect(fulfilledPromises[i].body).toEqual(extraction[i].message);
       }
 
@@ -60,5 +62,5 @@ describe("with child containers enabled", function() {
     afterEach(function() {
       stopServer();
     });
-  })
+  });
 });

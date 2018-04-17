@@ -1,59 +1,59 @@
-import { Container, MainApplication, ContainerImpl, ComponentDescriptor } from "inversify-components";
-import { injectable, inject, multiInject } from "inversify";
+import { inject, injectable, multiInject } from "inversify";
+import { ComponentDescriptor, Container, ContainerImpl, MainApplication } from "inversify-components";
 
 import * as internalComponents from "./components/index";
 
 export class AssistantJSSetup {
-  static globalContainer = new ContainerImpl();
+  public static globalContainer = new ContainerImpl();
 
-  container: Container;
-  configuration: { [componentName: string]: any } = {};
+  public container: Container;
+  public configuration: { [componentName: string]: any } = {};
 
   constructor(container: Container = AssistantJSSetup.globalContainer) {
     this.container = container;
   }
 
-  run(app: MainApplication) {
+  public run(app: MainApplication) {
     this.container.setMainApplication(app);
     this.container.runMain();
   }
 
   /** Returns true if internal components have already been registered */
-  allInternalComponentsAreRegistered() {
+  public allInternalComponentsAreRegistered() {
     return Object.keys(internalComponents).filter(k => !this.container.componentRegistry.isRegistered(internalComponents[k].name)).length === 0;
   }
 
-  registerInternalComponents() {
+  public registerInternalComponents() {
     Object.keys(internalComponents).forEach(k => this.registerComponent(internalComponents[k]));
   }
 
-  registerComponent(component: ComponentDescriptor) {
+  public registerComponent(component: ComponentDescriptor) {
     this.registerComponents([component]);
   }
 
-  registerComponents(components: ComponentDescriptor[] | {[name: string]: ComponentDescriptor}) {
+  public registerComponents(components: ComponentDescriptor[] | { [name: string]: ComponentDescriptor }) {
     components = typeof components === "object" ? Object.keys(components).map(k => components[k]) : components;
 
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
   }
 
-  addConfiguration(configuration: { [componentName: string]: any }) {
-    this.configuration = Object.assign(this.configuration, configuration);
+  public addConfiguration(configuration: { [componentName: string]: any }) {
+    this.configuration = {...this.configuration, ...configuration};
   }
 
-  configure() {
-    if (typeof this.configuration === "undefined") return; 
+  public configure() {
+    if (typeof this.configuration === "undefined") return;
     Object.keys(this.configuration).forEach(componentName => this.configureComponent(componentName, this.configuration[componentName]));
   }
 
-  configureComponent(componentName: string, configuration: any) {
+  public configureComponent(componentName: string, configuration: any) {
     this.container.componentRegistry.lookup(componentName).addConfiguration(configuration);
   }
 
-  /** 
+  /**
    * @param autoConfigure If set to true, calls this.configure() afterwards
    */
-  autobind(autoConfigure = true) {
+  public autobind(autoConfigure = true) {
     this.container.componentRegistry.autobind(this.container.inversifyInstance);
     if (autoConfigure) this.configure();
   }

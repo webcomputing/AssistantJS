@@ -1,7 +1,7 @@
+import { injectable, multiInject, optional } from "inversify";
+import { Observable, Observer, Subject } from "rxjs";
 import { componentInterfaces } from "./private-interfaces";
-import { multiInject, optional, injectable } from "inversify";
-import { Subject, Observable, Observer } from "rxjs";
-import { AssistantJSEvent, EventHandler, EventBus } from "./public-interfaces";
+import { AssistantJSEvent, EventBus, EventHandler } from "./public-interfaces";
 
 @injectable()
 export class EventBusHandler implements EventBus {

@@ -8,15 +8,13 @@ describe("injectionNames", function() {
   describe("in root scope", function() {
     rootScopeKeys.forEach(injection => {
       describe(injection, function() {
-
         it("is injectable", function() {
           expect(() => {
             this.container.inversifyInstance.get(injectionNames[injection]);
           }).not.toThrow();
         });
-
       });
-    })
+    });
   });
 
   describe("in current scope", function() {
@@ -26,13 +24,11 @@ describe("injectionNames", function() {
 
     currentScopeKeys.forEach(injection => {
       describe(injection, function() {
-
         it("is injectable", function() {
           expect(() => {
             this.container.inversifyInstance.get(injectionNames.current[injection]);
           }).not.toThrow();
         });
-
       });
     });
   });

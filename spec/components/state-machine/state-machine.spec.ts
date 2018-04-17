@@ -1,8 +1,7 @@
-import { createRequestScope } from "../../support/util/setup";
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { registerHook, createSpyHook } from "../../support/mocks/state-machine/hook";
 import { Container } from "inversify-components";
-
+import { createSpyHook, registerHook } from "../../support/mocks/state-machine/hook";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 describe("StateMachine", function() {
   beforeEach(function() {
@@ -14,9 +13,9 @@ describe("StateMachine", function() {
   describe("handleIntent", function() {
     beforeEach(function() {
       this.stateSpyResult = [];
-      this.stateSpy = (...args: any[]) => this.stateSpyResult = args;
+      this.stateSpy = (...args: any[]) => (this.stateSpyResult = args);
       (this.container as Container).inversifyInstance.bind("mocks:states:call-spy").toFunction(this.stateSpy);
-    })
+    });
 
     it("always operates on current intent", async function(done) {
       await this.stateMachine.handleIntent("test");
@@ -27,7 +26,7 @@ describe("StateMachine", function() {
       expect(this.stateSpyResult[0].constructor.name).toEqual("SecondState");
 
       done();
-    })
+    });
 
     it("adds state/intent combination to history", async function(done) {
       await this.stateMachine.handleIntent("test");
@@ -177,7 +176,7 @@ describe("StateMachine", function() {
 
         it("calls hook after executing unhandledGenericIntent", function() {
           expect(this.spyResult[0]).toEqual("unhandledGenericIntent");
-        })
+        });
       });
 
       it("calls hook", async function(done) {
@@ -241,7 +240,7 @@ describe("StateMachine", function() {
 
         it("calls hook two times", function() {
           expect(this.spyResult.length).toEqual(2);
-        })
+        });
 
         it("calls hook with unhandledGenericIntent", function() {
           expect(this.spyResult[1]).toEqual("unhandledGenericIntent");
@@ -257,7 +256,7 @@ describe("StateMachine", function() {
       beforeEach(function() {
         this.intentSpyResult = [];
         this.intentSpy = (...args: any[]) => this.intentSpyResult.push(args.slice(1));
-  
+
         (this.container as Container).inversifyInstance.unbind("mocks:states:call-spy");
         (this.container as Container).inversifyInstance.bind("mocks:states:call-spy").toFunction(this.intentSpy);
       });
@@ -297,7 +296,8 @@ describe("StateMachine", function() {
 
         describe("when beforeIntent does not return a boolean", function() {
           it("throws exception", function() {
-            return this.stateMachine.handleIntent("illegal")
+            return this.stateMachine
+              .handleIntent("illegal")
               .then(fail)
               .catch(e => expect(true).toBeTruthy());
           });
@@ -326,7 +326,7 @@ describe("StateMachine", function() {
   describe("transitionTo", function() {
     it("transitions to given state", async function(done) {
       await this.stateMachine.transitionTo("SecondState");
-      let currentState = await this.stateMachine.getCurrentState();
+      const currentState = await this.stateMachine.getCurrentState();
       expect(currentState.name).toEqual("SecondState");
       done();
     });
@@ -335,7 +335,7 @@ describe("StateMachine", function() {
       it("throws an exception", function() {
         expect(() => this.currentState.transitionTo("SubState")).toThrowError();
       });
-    })
+    });
   });
 
   describe("redirectTo", function() {

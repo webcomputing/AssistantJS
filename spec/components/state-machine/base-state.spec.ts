@@ -1,10 +1,10 @@
-import {configureI18nLocale} from '../../support/util/i18n-configuration';
-import { injectionNames } from '../../../src/injection-names';
-import { State } from '../../../src/components/state-machine/public-interfaces';
-import { Voiceable } from '../../../src/components/unifier/public-interfaces';
-import { SpecSetup } from '../../../src/spec-setup';
-import { BaseState } from '../../../src/components/state-machine/base-state';
-import { createRequestScope } from '../../support/util/setup';
+import { BaseState } from "../../../src/components/state-machine/base-state";
+import { State } from "../../../src/components/state-machine/public-interfaces";
+import { Voiceable } from "../../../src/components/unifier/public-interfaces";
+import { injectionNames } from "../../../src/injection-names";
+import { SpecSetup } from "../../../src/spec-setup";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {
   state: BaseState;
@@ -36,7 +36,7 @@ describe("BaseState", function() {
 
         this.state.prompt(message, ...reprompts);
         expect(this.voiceResponseMock.prompt).toHaveBeenCalledWith(message, ...reprompts);
-      })
+      });
     });
 
     describe("endSessionWith", function() {
@@ -46,7 +46,7 @@ describe("BaseState", function() {
 
         this.state.endSessionWith(message);
         expect(this.voiceResponseMock.endSessionWith).toHaveBeenCalledWith(message);
-      })
+      });
     });
   });
 
@@ -57,11 +57,11 @@ describe("BaseState", function() {
       });
 
       it("redirects to translateHelper.t", function() {
-        const params = ["mySpecificKeys.keyOne", {"localOne": "valueOne"}];
+        const params = ["mySpecificKeys.keyOne", { localOne: "valueOne" }];
         this.state.t(...params);
         expect(this.state.translateHelper.t).toHaveBeenCalledWith(...params);
       });
-    })
+    });
   });
 
   describe("getPlatform", function() {
@@ -76,15 +76,15 @@ describe("BaseState", function() {
         expect(this.state.getDeviceOrPlatform()).toEqual("ExtractorComponent");
       });
     });
-    
+
     describe("with device present in extraction result", function() {
       beforeEach(function() {
-        Object.assign(this.state.extraction, { "device": "device1" });
+        Object.assign(this.state.extraction, { device: "device1" });
       });
 
       it("returns current device string", function() {
         expect(this.state.getDeviceOrPlatform()).toEqual("device1");
       });
-    })
+    });
   });
 });

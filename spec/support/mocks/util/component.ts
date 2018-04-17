@@ -1,8 +1,8 @@
 import { Component as ComponentI, InterfaceDescriptor } from "inversify-components";
 
 export class Component implements ComponentI {
-  readonly name: string;
-  readonly interfaces: InterfaceDescriptor;
+  public readonly name: string;
+  public readonly interfaces: InterfaceDescriptor;
   private _configuration: {};
 
   get configuration() {
@@ -15,7 +15,7 @@ export class Component implements ComponentI {
     this._configuration = configuration;
   }
 
-  getInterface(name: string) {
+  public getInterface(name: string) {
     if (!this.interfaces.hasOwnProperty(name)) {
       throw new Error("Component " + this.name + " does not offer interface symbol " + name);
     }
@@ -23,7 +23,7 @@ export class Component implements ComponentI {
     return this.interfaces[name];
   }
 
-  addConfiguration(c: {}) {
-    this._configuration = Object.assign(this._configuration, c);
+  public addConfiguration(c: {}) {
+    this._configuration = {...this._configuration, ...c};
   }
 }

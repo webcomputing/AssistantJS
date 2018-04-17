@@ -1,5 +1,5 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { SimpleVoiceResponse } from "../../../../src/components/unifier/responses/simple-voice-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("VoiceResponse", function() {
   beforeEach(function() {
@@ -26,7 +26,7 @@ describe("VoiceResponse", function() {
 
     it("sends response", function() {
       expect(this.handler.sendResponse).toHaveBeenCalled();
-    })
+    });
   });
 
   describe("prompt", function() {
@@ -66,4 +66,4 @@ describe("VoiceResponse", function() {
       });
     });
   });
-})
+});

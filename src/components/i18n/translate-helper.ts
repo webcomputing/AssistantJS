@@ -1,5 +1,5 @@
-import { inject, injectable, optional, multiInject } from "inversify";
 import { I18n } from "i18next";
+import { inject, injectable, multiInject, optional } from "inversify";
 
 import { OptionalExtractions, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { Logger } from "../root/public-interfaces";
@@ -31,7 +31,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     // Set language
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
-    const options = Object.assign({ lng: this.extraction.language, returnObjectTrees: false }, locals);
+    const options = { ...{ lng: this.extraction.language, returnObjectTrees: false }, ...locals };
     const extractorName = this.extraction.platform;
 
     // Catch up device name or set to undefined

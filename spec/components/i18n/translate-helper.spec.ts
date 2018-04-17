@@ -1,5 +1,3 @@
-import { createRequestScope } from "../../support/util/setup";
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { injectionNames } from "../../../src/injection-names";
 import { MissingInterpolationExtension } from "../../../src/assistant-source";
 import { injectable } from "inversify";
@@ -7,6 +5,8 @@ import { Container } from "inversify-components";
 import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
 import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
 import { TranslateHelper } from "../../../src/components/i18n/translate-helper";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {
   container: Container;
@@ -17,7 +17,6 @@ interface CurrentThisContext {
 describe("TranslateHelper", function() {
   beforeEach(function() {
     configureI18nLocale(this.container, false);
-
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
   });

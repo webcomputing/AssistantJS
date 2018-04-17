@@ -23,7 +23,7 @@ const defaultConfiguration: Configuration.Defaults = {
 export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:i18n",
   interfaces: componentInterfaces,
-  defaultConfiguration: defaultConfiguration,
+  defaultConfiguration,
   bindings: {
     root: (bindService, lookupService) => {
       bindService

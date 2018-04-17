@@ -8,7 +8,7 @@ export class SSMLResponse extends SimpleVoiceResponse {
 
   constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger) {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
-    
+
     this.reportIfUnavailable(OptionalHandlerFeatures.FeatureChecker.SSMLHandler, "The currently selected platform does not allow SSML.");
   }
 
