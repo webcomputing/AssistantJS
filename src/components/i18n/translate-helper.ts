@@ -35,7 +35,10 @@ export class TranslateHelper implements TranslateHelperInterface {
     const extractorName = this.extraction.platform;
 
     // Catch up device name or set to undefined
-    const device = featureIsAvailable<OptionalExtractions.DeviceExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)
+    const device = featureIsAvailable<OptionalExtractions.Device & MinimalRequestExtraction>(
+      this.extraction,
+      OptionalExtractions.FeatureChecker.DeviceExtraction
+    )
       ? this.extraction.device
       : undefined;
 

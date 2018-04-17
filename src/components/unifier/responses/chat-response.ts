@@ -4,7 +4,7 @@ import { BaseResponse } from "./base-response";
 
 export class ChatResponse extends BaseResponse {
   /** Response handler of the currently used platform */
-  protected handler: OptionalHandlerFeatures.GUI.ChatBubble & MinimalResponseHandler;
+  protected handler: OptionalHandlerFeatures.GUI.ChatBubbles & MinimalResponseHandler;
 
   constructor(handler: MinimalResponseHandler, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger) {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);

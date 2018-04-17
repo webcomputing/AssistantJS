@@ -5,20 +5,20 @@ import { MinimalRequestExtraction, MinimalResponseHandler } from "./public-inter
  * @param {MinimalRequestExtraction} container The extraction result which might contain the given feature
  * @param {string[]} feature The feature to check. Just pass a value of the FeatureChecker object from OptionalExtractions
  */
-export function featureIsAvailable<FeatureInterface extends MinimalRequestExtraction>(
+export function featureIsAvailable<FeatureInterface>(
   container: MinimalRequestExtraction,
   feature: string[]
-): container is FeatureInterface;
+): container is FeatureInterface & MinimalRequestExtraction;
 
 /**
  * Checks whether a given feature is supported by a response handler.
  * @param {MinimalResponseHandler} container The response handler which might support the feature
  * @param {string[]} feature The feature to check. Just pass a value of the FeatureChecker object from OptionalFeatures
  */
-export function featureIsAvailable<FeatureInterface extends MinimalResponseHandler>(
+export function featureIsAvailable<FeatureInterface>(
   container: MinimalResponseHandler,
   feature: string[]
-): container is FeatureInterface;
+): container is FeatureInterface & MinimalResponseHandler;
 
 export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction | MinimalResponseHandler, feature: string[]) {
   const objectKeys = Object.keys(container);

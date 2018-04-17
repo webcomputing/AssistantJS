@@ -39,7 +39,9 @@ export class ResponseFactory implements ResponseFactoryInterface {
 
   public createVoiceResponse() {
     let ssml: Voiceable;
-    if (BaseResponse.featureIsAvailable<OptionalHandlerFeatures.SSMLHandler>(this.handler, OptionalHandlerFeatures.FeatureChecker.SSMLHandler)) {
+    if (
+      BaseResponse.featureIsAvailable<OptionalHandlerFeatures.SSML & MinimalResponseHandler>(this.handler, OptionalHandlerFeatures.FeatureChecker.SSMLHandler)
+    ) {
       ssml = new SSMLResponse(this.handler, this.failSilentlyOnUnsupportedFeatures, this.logger);
     } else {
       ssml = new SimpleVoiceResponse(this.handler, this.failSilentlyOnUnsupportedFeatures, this.logger);
