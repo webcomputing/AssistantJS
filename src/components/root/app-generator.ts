@@ -7,9 +7,9 @@ import * as fs from "fs";
 // This class is the main application thread. Therefore it acts like a singleton!
 export class GeneratorApplication implements MainApplication {
   private baseDir: string;
-  private buildNr: number;
-  private buildDir: string;
-  private container: Container;
+  private buildNr!: number;
+  private buildDir!: string;
+  private container!: Container;
 
   constructor(baseDir: string) {
     this.baseDir = baseDir;
