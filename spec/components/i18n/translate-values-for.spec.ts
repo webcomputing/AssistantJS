@@ -6,17 +6,18 @@ import { createRequestScope } from "../../support/util/setup";
 describe("translateValuesFor", function() {
   beforeEach(function() {
     configureI18nLocale(this.container, false);
-    this.translateValuesFor = this.container.inversifyInstance.get(injectionNames.i18nTranslateValuesFor);
+    createRequestScope(this.specHelper);
+    this.translateValuesFor = this.container.inversifyInstance.get(injectionNames.current.i18nTranslateValuesFor);
   })
 
   it("returns all values of given key", async function() {
+
     const results = await this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
     expect(results).toEqual(["hello my name", "hi my name", "welcome my name"]);
   });
 
   describe("combined with translateHelper.t", function() {
     beforeEach(function() {
-      createRequestScope(this.specHelper);
       this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
     });
 

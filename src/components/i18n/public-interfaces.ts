@@ -24,7 +24,7 @@ export interface InterpolationResolver {
    * resolves all missing interpolations in the given translation iteratively by executing missingInterpolation extensions
    * @param translatedValue text containing missing interpolations
    */
-  resolveMissingInterpolations(translatedValue: string): Promise<string>;
+  resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string>;
 }
 
 export interface TranslateValuesFor {
@@ -49,5 +49,5 @@ export interface MissingInterpolationExtension {
    * If a string is returned, it will be used to fill the missing interpolation value
    * @param missingInterpolationName name of the interpolation that is missing
    */
-  execute(missingInterpolationName: string): string | undefined | Promise<string | undefined>;
+  execute(missingInterpolationName: string, translateHelper: TranslateHelper): string | undefined | Promise<string | undefined>;
 }

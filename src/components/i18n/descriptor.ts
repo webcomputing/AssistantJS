@@ -47,42 +47,46 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .to(InterpolationResolverImpl)
         .inSingletonScope();
 
-      // Registers a spec helper function which returns all possible values instead of a sample one
-      bindService.bindGlobalService<TranslateValuesFor>("translate-values-for").toDynamicValue(context => {
-        return async (key: string, options = {}): Promise<string[]> => {
-          const translations: string[] = (await context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options)).split(arraySplitter);
-
-          return Promise.all(
-            translations.map(async translation => {
-              return (translation = await context.container
-                .get<InterpolationResolver>("core:i18n:interpolation-resolver")
-                .resolveMissingInterpolations(translation));
-            })
-          );
-        };
-      });
-
-      bindService.bindGlobalService<i18next.I18n>("instance").toDynamicValue(context => {
-        return context.container.get<I18nextWrapper>("core:i18n:wrapper").instance;
-      });
-    },
-    request: (bindService, lookupService) => {
-      bindService.bindGlobalService<TranslateHelper>("current-translate-helper").to(TranslateHelperImpl);
-      bindService
+        
+        bindService.bindGlobalService<i18next.I18n>("instance").toDynamicValue(context => {
+          return context.container.get<I18nextWrapper>("core:i18n:wrapper").instance;
+        });
+      },
+      request: (bindService, lookupService) => {
+        bindService.bindGlobalService<TranslateHelper>("current-translate-helper").to(TranslateHelperImpl);
+        
+        bindService
         .bindGlobalService<I18nContext>("current-context")
         .to(I18nContext)
         .inSingletonScope();
+        
+        // Hook into beforeIntent and save current state and current intent into I18nContext (see above)
+        // Since I18nContext is a singleton in request scope, it will be the same context instance for this request.
+        bindService.bindExtension<Hooks.Hook>(lookupService.lookup("core:state-machine").getInterface("beforeIntent")).toDynamicValue(context => {
+          return (mode, state, stateName, intent) => {
+            const currentI18nContext = context.container.get<I18nContext>("core:i18n:current-context");
+            currentI18nContext.intent = intent;
+            currentI18nContext.state = stateName.charAt(0).toLowerCase() + stateName.slice(1);
+            return { success: true, result: currentI18nContext };
+          };
+        });
 
-      // Hook into beforeIntent and save current state and current intent into I18nContext (see above)
-      // Since I18nContext is a singleton in request scope, it will be the same context instance for this request.
-      bindService.bindExtension<Hooks.Hook>(lookupService.lookup("core:state-machine").getInterface("beforeIntent")).toDynamicValue(context => {
-        return (mode, state, stateName, intent) => {
-          const currentI18nContext = context.container.get<I18nContext>("core:i18n:current-context");
-          currentI18nContext.intent = intent;
-          currentI18nContext.state = stateName.charAt(0).toLowerCase() + stateName.slice(1);
-          return { success: true, result: currentI18nContext };
-        };
-      });
+        // Registers a spec helper function which returns all possible values instead of a sample one
+        bindService.bindGlobalService<TranslateValuesFor>("current-translate-values-for").toDynamicValue(context => {
+          return async (key: string, options = {}): Promise<string[]> => {
+            const translations: string[] = (context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options)).split(arraySplitter);
+            const translateHelper  = context.container.get<TranslateHelper>("core:i18n:current-translate-helper");
+
+            return Promise.all(
+              translations.map(async translation => {
+                return (translation = await context.container
+                  .get<InterpolationResolver>("core:i18n:interpolation-resolver")
+                  .resolveMissingInterpolations(translation, translateHelper));
+              })
+            );
+          };
+        });
+      },
     },
-  },
-};
+  };
+  

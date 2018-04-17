@@ -81,7 +81,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     this.logger.debug("I18N: using key resolvings %o", lookupKeys);
     let translatedValue = this.translateOrFail(lookupKeys, options);
 
-    return this.interpolationResolver.resolveMissingInterpolations(translatedValue);
+    return this.interpolationResolver.resolveMissingInterpolations(translatedValue, this);
   }
 
   /**
