@@ -5,6 +5,10 @@
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "outDir": "lib",
+    "skipLibCheck": true
   }
 }

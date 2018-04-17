@@ -16,8 +16,8 @@
     "inversify"
   ],
   "scripts": {
-    "test": "jasmine-ts \"**/*.spec.ts\"",
-    "coverage": "nyc -e .ts -x \"*.spec.ts\" jasmine-ts \"**/*.spec.ts\""
+    "test": "gulp test",
+    "coverage": "gulp test-coverage"
   },
   "homepage": "http://www.assistantjs.org",
   "bugs": "https://github.com/webcomputing/AssistantJS/issues",
@@ -56,10 +56,13 @@
     "@types/jasmine": "^2.8.5",
     "@types/request-promise": "^4.1.40",
     "connect-timeout": "^1.9.0",
-    "gulp": "3.9.1",
-    "gulp-sourcemaps": "^2.6.3",
-    "gulp-tslint": "^8.1.2",
-    "gulp-typescript": "3.2.4",
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.4.0",
+    "gulp-shell": "^0.6.5",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-tslint": "^8.1.3",
+    "gulp-typescript": "^4.0.1",
+    "gulp-watch": "^5.0.0",
     "jasmine-spec-reporter": "^4.2.1",
     "jasmine-ts": "^0.2.1",
     "nyc": "^11.4.1",
