@@ -1,3 +1,4 @@
+<p align="right"><a href="https://travis-ci.org/webcomputing/AssistantJS"><img src="https://travis-ci.org/webcomputing/AssistantJS.svg?branch=develop"></a></p>
 <p align="center"><img src="http://www.antonius-ostermann.de/assets/images/assistantjs.png"></p>
 AssistantJS enables you to develop ambitious platform-agnostic voice applications with ease. Don't write duplicate code - use the generic AssistantJS
 state machine to implement your voice application and it runs on amazon alexa, google assistant and dialogflow (formerly known as api.ai) simultaneously. To fasten development,
