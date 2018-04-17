@@ -5,7 +5,7 @@ export interface Session {
   /** Id of session */
   id: string;
 
-  /** 
+  /**
    * Gets the value of a given session field
    * @param {string} field name of field to get the value of
    * @return {Promise<string>} value of field
@@ -31,24 +31,18 @@ export interface Session {
   deleteAllFields(): Promise<void>;
 }
 
-/** Factory function which returns a session for a given session id */
-export interface SessionFactory {
-  /**
-   * Returns a session object for a given id
-   * @param {string} id  Id of the session to return
-   * @return {Session}
-   */
-  (id: string): Session;
-}
+/**
+ * Returns a session object for a given id
+ * @param {string} id  Id of the session to return
+ * @return {Session}
+ */
+export type SessionFactory = (id: string) => Session;
 
-/** Factory function which returns the current session (based on extraction result) */
-export interface CurrentSessionFactory {
-  /**
-   * Returns a session object based on the current extraction result
-   * @return {Session}
-   */
-  (): Session;
-}
+/**
+ * Returns a session object based on the current extraction result
+ * @return {Session}
+ */
+export type CurrentSessionFactory = () => Session;
 
 /** Configuration object for AssistantJS user for services component */
 export interface ServicesConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

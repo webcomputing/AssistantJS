@@ -1,13 +1,13 @@
-import { inject, injectable, optional, multiInject } from "inversify";
 import { I18n } from "i18next";
+import { inject, injectable, multiInject, optional } from "inversify";
 
-import { OptionalExtractions, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
+import { MinimalRequestExtraction, OptionalExtractions } from "../unifier/public-interfaces";
 
-import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
-import { I18nContext } from "./context";
 import { componentInterfaces } from "./component-interfaces";
+import { I18nContext } from "./context";
+import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
@@ -18,9 +18,9 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:root:current-logger") public logger: Logger
   ) {}
 
-  t(key?: string, locals?: {});
-  t(key: {});
-  t(key?: string | {}, locals = {}) {
+  public t(key?: string, locals?: {});
+  public t(key: {});
+  public t(key?: string | {}, locals = {}) {
     // To make it compatible with other signature
     if (typeof key === "object") {
       locals = key === null ? {} : key;
@@ -30,7 +30,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     // Set language
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
-    const options = Object.assign({ lng: this.extraction.language, returnObjectTrees: false }, locals);
+    const options = { lng: this.extraction.language, returnObjectTrees: false, ...locals };
     const extractorName = this.extraction.platform;
 
     // Catch up device name or set to undefined
@@ -89,11 +89,11 @@ export class TranslateHelper implements TranslateHelperInterface {
    * i18n.exists() won't work here: it returns true for keys returning an object, even if returnObjectTrees is false. t() then returns undefined.
    */
   private translateOrFail(lookups: string[], options = {}) {
-    let foundTranslation: string | undefined = undefined;
+    let foundTranslation: string | undefined;
 
     lookups.some(lookup => {
       if (typeof foundTranslation === "undefined" && this.i18n.exists(lookup, options)) {
-        let translation = this.i18n.t(lookup, options);
+        const translation = this.i18n.t(lookup, options);
         if (typeof translation === "string") {
           this.logger.debug("I18N: choosing key: " + lookup);
           foundTranslation = translation;

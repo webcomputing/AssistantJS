@@ -1,13 +1,13 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { ResponseFactory } from "../../../../src/components/unifier/response-factory";
 import { BaseResponse } from "../../../../src/components/unifier/responses/base-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("BaseResponse", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.logger = this.container.inversifyInstance.get("core:root:current-logger");
-    
+
     // Add some supported features
     this.handler.supportedFeature = null;
 

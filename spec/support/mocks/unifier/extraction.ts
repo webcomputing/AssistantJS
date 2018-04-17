@@ -1,14 +1,19 @@
-import { MinimalRequestExtraction, intent, GenericIntent } from "../../../../src/components/unifier/public-interfaces";
+import { GenericIntent, intent, MinimalRequestExtraction } from "../../../../src/components/unifier/public-interfaces";
 import { Component } from "../util/component";
 
-export function createExtraction(intent: intent = GenericIntent.Yes, entities = {}, sessionId = "session-" + Math.random(), language = "de"): MinimalRequestExtraction {
+export function createExtraction(
+  intent: intent = GenericIntent.Yes,
+  entities = {},
+  sessionId = "session-" + Math.random(),
+  language = "de"
+): MinimalRequestExtraction {
   return {
-    intent: intent,
+    intent,
     sessionID: sessionId,
-    entities: entities,
-    language: language,
-    platform: "ExtractorComponent"
-  }
+    entities,
+    language,
+    platform: "ExtractorComponent",
+  };
 }
 
 export const extraction = createExtraction();

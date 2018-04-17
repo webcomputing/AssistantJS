@@ -1,32 +1,35 @@
+import { inject, injectable, optional } from "inversify";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { injectable, optional, inject } from "inversify";
-
 
 @injectable()
 export class SecondState implements State.Required {
-  spy?: Function;
+  public spy?: Function;
 
-  constructor(@optional() @inject("mocks:states:call-spy") spy: Function) {
+  constructor(
+    @optional()
+    @inject("mocks:states:call-spy")
+    spy: Function
+  ) {
     this.spy = spy;
   }
 
-  unhandledGenericIntent(...args: any[]) {
+  public unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
   }
 
-  unansweredGenericIntent(...args: any[]) {
+  public unansweredGenericIntent(...args: any[]) {
     this.spyIfExistent("unanswered", ...args);
   }
 
-  testIntent(...args: any[]) {
+  public testIntent(...args: any[]) {
     this.spyIfExistent("test", ...args);
   }
 
-  noGenericIntent(...args: any[]) {
+  public noGenericIntent(...args: any[]) {
     this.spyIfExistent("no", ...args);
   }
 
-  errorIntent(...args: any[]) {
+  public errorIntent(...args: any[]) {
     this.spyIfExistent("error", ...args);
     throw new Error("Error!");
   }

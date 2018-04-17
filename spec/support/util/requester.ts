@@ -1,20 +1,20 @@
 import * as request from "request-promise";
 export { RequestPromise } from "request-promise";
-import { Container } from "inversify-components";
-import * as express from "express";
 import * as timeout from "connect-timeout";
+import * as express from "express";
+import { Container } from "inversify-components";
 
 import { AssistantJSSetup } from "../../../src/setup";
 import { SpecSetup } from "../../../src/spec-setup";
 
 /** Proxy for request-promise to use in combination with running server */
 export class RequestProxy {
-  get(path, headers = {}) {
-    return request({uri: `http://localhost:3000${path}`, simple: false, headers: headers, resolveWithFullResponse: true});
+  public get(path, headers = {}) {
+    return request({ uri: `http://localhost:3000${path}`, simple: false, headers, resolveWithFullResponse: true });
   }
 
-  post(path, body, headers = {}) {
-    return request.post({uri: `http://localhost:3000${path}`, simple: false, body: body, headers: headers, resolveWithFullResponse: true, json: true});
+  public post(path, body, headers = {}) {
+    return request.post({ uri: `http://localhost:3000${path}`, simple: false, body, headers, resolveWithFullResponse: true, json: true });
   }
 }
 

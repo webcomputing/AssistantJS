@@ -125,8 +125,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   public getDeviceOrPlatform(): string {
     if (featureIsAvailable<OptionalExtractions.Device & MinimalRequestExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
       return this.extraction.device;
-    } else {
-      return this.getPlatform();
     }
+    return this.getPlatform();
   }
 }

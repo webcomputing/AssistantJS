@@ -1,6 +1,6 @@
 import Logger = require("bunyan");
+import { Observable, Observer } from "rxjs";
 import { Configuration } from "./private-interfaces";
-import { Observer, Observable } from "rxjs";
 
 export { Logger };
 
@@ -56,20 +56,16 @@ export interface CLIGeneratorExtension {
   execute(buildPath: string): void | Promise<void>;
 }
 
-export interface ComponentSpecificLoggerFactory {
-  /**
-   * Factory to build a component-specific logger
-   * @param {string} componentName Name of current component
-   * @param {'root'|'request'} scope If given, returned logger will live in the given dependency scope. If not given, detects used scope by availability; will prefer 'request' if available.
-   * @return {Logger}
-   */
-  (componentName: string, scope?: "root" | "request"): Logger;
-}
+/**
+ * Factory to build a component-specific logger
+ * @param {string} componentName Name of current component
+ * @param {'root'|'request'} scope If given, returned logger will live in the given dependency scope. If not given, detects used scope by availability; will prefer 'request' if available.
+ * @return {Logger}
+ */
+export type ComponentSpecificLoggerFactory = (componentName: string, scope?: "root" | "request") => Logger;
 
 /** Interface to fulfill to add a new logger middleware / to add parameters to request-specific bunyan-instance */
-export interface LoggerMiddleware {
-  (loggerInstance: Logger): Logger;
-}
+export type LoggerMiddleware = (loggerInstance: Logger) => Logger;
 
 /** Configuration object for AssistantJS user for root component */
 export interface RootConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

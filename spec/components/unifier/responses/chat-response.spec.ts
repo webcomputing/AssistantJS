@@ -1,13 +1,13 @@
-import { createRequestScope } from "../../../support/util/setup";
 import { ResponseFactory } from "../../../../src/components/unifier/response-factory";
 import { ChatResponse } from "../../../../src/components/unifier/responses/chat-response";
+import { createRequestScope } from "../../../support/util/setup";
 
 describe("ChatResponse", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.logger = this.container.inversifyInstance.get("core:root:current-logger");
-    
+
     this.handler.chatBubbles = null;
     this.chatResponse = new ChatResponse(this.handler, false, this.logger);
   });

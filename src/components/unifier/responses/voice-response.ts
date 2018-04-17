@@ -10,17 +10,17 @@ export class VoiceResponse implements Voiceable {
     this.ssml = ssml;
   }
 
-  endSessionWith(text: string) {
+  public endSessionWith(text: string) {
     this.delegatorBasedOnInput(text).endSessionWith(text);
   }
 
-  prompt(text: string, ...reprompts: string[]) {
+  public prompt(text: string, ...reprompts: string[]) {
     this.delegatorBasedOnInput(text).prompt(text, ...reprompts);
   }
 
   private delegatorBasedOnInput(text: string) {
     if (typeof text === "undefined" || text === null) text = "";
-    
+
     if (text.includes("</") || text.includes("/>")) {
       return this.ssml;
     } else {

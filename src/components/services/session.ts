@@ -1,10 +1,10 @@
-import { Session as SessionInterface } from "./public-interfaces";
 import { RedisClient } from "redis";
+import { Session as SessionInterface } from "./public-interfaces";
 
 export class Session implements SessionInterface {
-  id: string;
-  redisInstance: RedisClient;
-  maxLifeTime: number;
+  public id: string;
+  public redisInstance: RedisClient;
+  public maxLifeTime: number;
 
   constructor(id: string, redisInstance: RedisClient, maxLifeTime: number) {
     this.id = id;
@@ -12,7 +12,7 @@ export class Session implements SessionInterface {
     this.maxLifeTime = maxLifeTime;
   }
 
-  async get(field: string): Promise<string> {
+  public async get(field: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       this.redisInstance.hget(this.documentID, field, (err, value) => {
         if (!err) {
@@ -24,7 +24,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  async set(field: string, value: string): Promise<void> {
+  public async set(field: string, value: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.hset(this.documentID, field, value, err => {
         if (!err) {
@@ -39,7 +39,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  delete(field: string): Promise<void> {
+  public delete(field: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.hdel(this.documentID, field, err => {
         if (!err) {
@@ -51,7 +51,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  deleteAllFields():Promise<void> {
+  public deleteAllFields(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.del(this.documentID, (err, response) => {
         if (!err) {
@@ -63,7 +63,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  private get documentID () {
+  private get documentID() {
     return "session-" + this.id;
   }
 }

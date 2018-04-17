@@ -5,8 +5,8 @@ export namespace Configuration {
   export interface Defaults {
     /** A valid instance of i18next needed */
     i18nextInstance: i18next.I18n;
-    /** 
-     * Additional options to configure with i18next. 
+    /**
+     * Additional options to configure with i18next.
      * This MUST contain a backend-path in backend: {loadPath: ...}!
      * See i18next for more details.
      */
@@ -17,5 +17,5 @@ export namespace Configuration {
   export interface Required {}
 
   /** Available configuration settings in a runtime application */
-  export interface Runtime extends Defaults, Required {};
+  export interface Runtime extends Defaults, Required {}
 }

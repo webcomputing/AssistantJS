@@ -4,7 +4,7 @@ import { arraySplitter } from "./array-returns-sample.plugin";
 export const processor = {
   type: "postProcessor",
   name: "parseTemplateLanguage",
-  process: function(value: string, key, options, translator) {
+  process(value: string, key, options, translator) {
     // Get already split-up values
     let dialogOptions = value.split(arraySplitter);
 
@@ -17,5 +17,5 @@ export const processor = {
 
     // Join with array splitter again to make it usable for other plugins
     return dialogOptions.join(arraySplitter);
-  }
+  },
 };

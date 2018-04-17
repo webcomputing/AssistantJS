@@ -1,6 +1,6 @@
-import { createRequestScope } from "../../support/util/setup";
-import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { injectionNames } from "../../../src/injection-names";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { createRequestScope } from "../../support/util/setup";
 
 describe("TranslateHelper", function() {
   beforeEach(function() {
@@ -32,11 +32,9 @@ describe("TranslateHelper", function() {
     });
 
     it("supports template syntax", function() {
-      expect([
-        "Can I help you, Sir?",
-        "May I help you, Sir?",
-        "Would you like me to help you?"
-      ]).toContain(this.translateHelper.t("templateSyntax", { var: "Sir" }));
+      expect(["Can I help you, Sir?", "May I help you, Sir?", "Would you like me to help you?"]).toContain(
+        this.translateHelper.t("templateSyntax", { var: "Sir" })
+      );
     });
 
     it("looks for match in array syntax before evaluation template syntax", function() {
@@ -66,7 +64,7 @@ describe("TranslateHelper", function() {
             describe("when extraction contains device", function() {
               beforeEach(function() {
                 this.context.intent = "deviceDependentIntent";
-                Object.assign(this.translateHelper.extraction, { device: 'device1' });
+                Object.assign(this.translateHelper.extraction, { device: "device1" });
               });
 
               it("returns state-intent-key-extractor-device specific translation", function() {
@@ -76,8 +74,8 @@ describe("TranslateHelper", function() {
           });
 
           describe("when key is not given", function() {
-            it('returns platform-specific translation for intent', function() {
-              this.context.intent = 'platformSpecificIntent';
+            it("returns platform-specific translation for intent", function() {
+              this.context.intent = "platformSpecificIntent";
               expect(this.translateHelper.t()).toEqual("platform-specific-intent");
             });
           });
@@ -123,8 +121,8 @@ describe("TranslateHelper", function() {
 
             describe("when extraction data contains device", function() {
               beforeEach(function() {
-                this.context.state = "deviceDependentState"
-                Object.assign(this.translateHelper.extraction, { device: 'device1' });
+                this.context.state = "deviceDependentState";
+                Object.assign(this.translateHelper.extraction, { device: "device1" });
               });
 
               it("returns state-platform-device specific translation", function() {
@@ -150,11 +148,10 @@ describe("TranslateHelper", function() {
       });
     });
 
-
     describe("when state namespace does not eixst", function() {
       beforeEach(function() {
         this.context.state = "notExisting";
-      })
+      });
 
       describe("when intent namespace exist", function() {
         describe("when extractor namespace exist", function() {
@@ -165,7 +162,7 @@ describe("TranslateHelper", function() {
 
             describe("when device exists in extraction result", function() {
               beforeEach(function() {
-                Object.assign(this.translateHelper.extraction, { device: 'device1' });
+                Object.assign(this.translateHelper.extraction, { device: "device1" });
               });
 
               it("returns root-intent-platform-device-specific value", function() {
@@ -175,8 +172,8 @@ describe("TranslateHelper", function() {
           });
 
           describe("when key is not given", function() {
-            it('returns platform-specific translation for intent', function() {
-              this.context.intent = 'secondPlatformSpecificIntent';
+            it("returns platform-specific translation for intent", function() {
+              this.context.intent = "secondPlatformSpecificIntent";
               expect(this.translateHelper.t()).toEqual("root-platform-specific-intent");
             });
           });
@@ -196,7 +193,6 @@ describe("TranslateHelper", function() {
         });
       });
 
-
       describe("without intent namespace", function() {
         describe("with extractor existing", function() {
           describe("when key given", function() {
@@ -209,9 +205,9 @@ describe("TranslateHelper", function() {
         describe("with extractor existing", function() {
           it("returns platform specific translation on state level", function() {
             expect(this.translateHelper.t()).toEqual("root-only-platform-given");
-          })
+          });
         });
       });
     });
-  })
+  });
 });
