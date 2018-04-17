@@ -123,7 +123,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
 
   /** Returns name of current device. If the current platform does not support different devices, returns name of current platform. */
   public getDeviceOrPlatform(): string {
-    if (featureIsAvailable<OptionalExtractions.Device & MinimalRequestExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
+    if (featureIsAvailable<OptionalExtractions.Device>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
       return this.extraction.device;
     }
     return this.getPlatform();

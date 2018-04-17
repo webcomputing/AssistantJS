@@ -22,7 +22,7 @@ export function createUnifierLoggerMiddleware(extraction?: MinimalRequestExtract
   };
 
   // Append device name to logging params - if given
-  if (featureIsAvailable<OptionalExtractions.Device & MinimalRequestExtraction>(extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
+  if (featureIsAvailable<OptionalExtractions.Device>(extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)) {
     loggingParams.device = extraction.device;
   }
 
