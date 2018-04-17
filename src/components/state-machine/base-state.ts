@@ -70,7 +70,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   }
 
   /** Prompts with current unhandled message */
-  async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any> {
+  public async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any> {
     this.responseFactory.createVoiceResponse().prompt(await this.translateHelper.t());
   }
 
@@ -84,7 +84,8 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * First try is `currentState.currentIntent.platform.device`.
    * @param locals If given: variables to use in response
    */
-  t(locals?: {[name: string]: string | number | object}): Promise<string>;
+  // tslint:disable-next-line:function-name
+  public async t(locals?: {[name: string]: string | number | object}): Promise<string>;
   
   /**
    * Translates the given key using your json translations.
@@ -93,10 +94,12 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
    * @param locals Variables to use in reponse
    */
-  t(key?: string, locals?: {[name: string]: string | number | object}): Promise<string>;
+  // tslint:disable-next-line:function-name
+  public async t(key?: string, locals?: {[name: string]: string | number | object}): Promise<string>;
 
-  async t(...args: any[]) {
-    return await (this.translateHelper as any).t(...args);
+  // tslint:disable-next-line:function-name
+  public async t(...args: any[]) {
+    return (this.translateHelper as any).t(...args);
   }
 
   /**
@@ -104,7 +107,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): void | Promise<void> {
+  public async prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): Promise<void> {
     return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 
@@ -112,7 +115,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public endSessionWith(text: string) {
+  public async endSessionWith(text: string): Promise<void> {
     return this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 

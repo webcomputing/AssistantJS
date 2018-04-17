@@ -1,24 +1,33 @@
 {
-  "extends": ["tslint:latest", "tslint-config-airbnb", "tslint-config-prettier"],
-  "rules": {
+  "extends": [
+    "tslint:latest",
+    "tslint-config-airbnb",
+    "tslint-config-prettier"
+  ],
+  "rules": {
     "no-floating-promises": true,
     "no-unused-expression": true,
-    "interface-name":[true, "never-prefix"],
-    "only-arrow-functions": false,
-    "object-shorthand-properties-first": true,
-    "object-literal-sort-keys": false,
-    "no-namespace": false,
-    "no-increment-decrement": false,
-    "ter-prefer-arrow-callback": false,
-    "import-name": false,
-    "function-name": [ true, 
-      { 
-        "static-method-regex": "^[a-z][\\w\\d]+$",
-        "function-regex": "^([a-z][\\w\\d]+)|(([A-Z][\\w\\d]+)Mixin)$"
-      }
-    ],
-    "member-ordering": [ true,
-      { 
+    "interface-name": [
+      true,
+      "never-prefix"
+    ],
+    "only-arrow-functions": false,
+    "object-shorthand-properties-first": true,
+    "object-literal-sort-keys": false,
+    "no-namespace": false,
+    "no-increment-decrement": false,
+    "ter-prefer-arrow-callback": false,
+    "import-name": false,
+    "function-name": [
+      true,
+      {
+        "static-method-regex": "^[a-z][\\w\\d]+$",
+        "function-regex": "^([a-z][\\w\\d]+)|(([A-Z][\\w\\d]+)Mixin)$"
+      }
+    ],
+    "member-ordering": [
+      true,
+      {
         "order": [
           "public-static-field",
           "protected-static-field",
@@ -38,6 +47,12 @@
         ]
       }
     ],
-    "prefer-array-literal": [ true, { "allow-type-parameters": true } ]
-  }
+    "prefer-array-literal": [
+      true,
+      {
+        "allow-type-parameters": true
+      }
+    ]
+  }
 }
+  

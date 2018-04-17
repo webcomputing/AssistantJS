@@ -28,11 +28,12 @@ export class InterpolationResolver implements InterpolationResolverInterface {
       const interpolation = translatedValue.split("*~~")[1].split("~~*")[0];
       let interpolationValue: string | undefined;
 
-      for (let missingInterpolationExtension of this.missingInterpolationExtensions) {
-        interpolationValue = await missingInterpolationExtension.execute(interpolation, translateHelper);
-
-        if (typeof interpolationValue !== "undefined") {
-          translatedValue = translatedValue.replace("*~~" + interpolation + "~~*", interpolationValue);
+      const missingInterpolationExtensionsPromises = this.missingInterpolationExtensions.map((missingInterpolationExtension) => missingInterpolationExtension.execute(interpolation, translateHelper));
+      const interpolationValues = await Promise.all(missingInterpolationExtensionsPromises);
+      
+      for (let value of interpolationValues) {
+        if (typeof value !== "undefined") {
+          translatedValue = translatedValue.replace("*~~" + interpolation + "~~*", value);
           break;
         }
       }

@@ -10,18 +10,18 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
   }
 
-  public endSessionWith(text: string) {
+  public endSessionWith(text: string): Promise<void> | void {
     this.handler.endSession = true;
     this.handler.voiceMessage = this.prepareText(text);
     this.handler.sendResponse();
   }
 
-  prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): void | Promise<void> {
+  public prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): Promise<void> | void {
     this.handler.endSession = false;
     let promiseA: Promise<any> | undefined;
     let promiseB: Promise<any> | undefined;
-    let repromptPromises: [number[], Promise<string>[]] = [[], []];
-    let repromptStrings: [number[], string[]] = [[], []];
+    const repromptPromises: [number[], Array<Promise<string>>] = [[], []];
+    const repromptStrings: [number[], string[]] = [[], []];
 
     reprompts.forEach((reprompt, index) => {
       if (typeof reprompt === "string") {
@@ -45,53 +45,44 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
       this.attachRepromptsIfAny(reprompts as string[]);
       this.handler.sendResponse();
       return;
-    } else {
-      promiseB = Promise.all(repromptPromises[1]).then((resolvedPromises: string[]) => {
-        let unifiedReprompts: string[] = [];
+    }
+    promiseB = Promise.all(repromptPromises[1]).then((resolvedPromises: string[]) => {
+      const unifiedReprompts: string[] = [];
 
-        for (let i = 0; i < reprompts.length; i++) {
-          let element = repromptStrings.find(element => {
-            return element[0] === i;
-          });
+      for (let i = 0; i < reprompts.length; i++) {
+        const element = repromptStrings.find(value => {
+          return value[0] === i;
+        });
 
-          if (typeof element !== "undefined") {
-            unifiedReprompts.push(repromptStrings[1][i]);
-          } else {
-            unifiedReprompts.push(resolvedPromises[i]);
-          }
+        if (typeof element !== "undefined") {
+          unifiedReprompts.push(repromptStrings[1][i]);
+        } else {
+          unifiedReprompts.push(resolvedPromises[i]);
         }
-        this.attachRepromptsIfAny(unifiedReprompts as string[]);
-      });
+      }
+      this.attachRepromptsIfAny(unifiedReprompts as string[]);
+    });
 
-      if(!promiseA && !promiseB ){
-        this.handler.sendResponse();
+    if (!promiseA && !promiseB) {
+      this.handler.sendResponse();
+    } else {
+      if (promiseA && !promiseB) {
+        promiseA.then(() => {
+          this.handler.sendResponse();
+        });
       } else {
-        if(promiseA && !promiseB){
-          promiseA.then(() => {
+        if (!promiseA && promiseB) {
+          promiseB.then(() => {
             this.handler.sendResponse();
           });
         } else {
-          if(!promiseA && promiseB) {
-            promiseB.then(() => {
-              this.handler.sendResponse();
-            });
-          } else {
-            Promise.all([promiseA, promiseB]).then(() => {
-              this.handler.sendResponse();
-            })
-          }
+          Promise.all([promiseA, promiseB]).then(() => {
+            this.handler.sendResponse();
+          });
         }
       }
-      return;
     }
-  }
-
-  /** checks if an object has any own properties */
-  private isEmpty(obj) {
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) return false;
-    }
-    return true;
+    return;
   }
 
   /** Attaches reprompts to handler */
@@ -105,5 +96,13 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
   /** Easy overwrite functionality for text preprocessing */
   protected prepareText(text: string) {
     return text;
+  }
+
+  /** checks if an object has any own properties */
+  private isEmpty(obj) {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) return false;
+    }
+    return true;
   }
 }

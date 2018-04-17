@@ -52,11 +52,7 @@ describe("TranslateHelper", function() {
       // Regularly, "5" should have a probabilty of 1/10
       // In a bug case, the prob is much higher (around 1024/1033 ~ 99%)
       const testSize = 100;
-      const probabilitySet: string[] = await Promise.all(
-        [...Array(testSize)].map(async (x): Promise<string> => {
-          return await this.translateHelper.t("templateProbs");
-        })
-      );
+      const probabilitySet = await Promise.all([...Array(testSize)].map(async (x): Promise<string> => this.translateHelper.t("templateProbs")));
       const occuredAmount = probabilitySet.filter(x => x.charAt(0) === "5").length / testSize;
 
       expect(occuredAmount).toBeCloseTo(0.15, 0.15); // Expected amount is 10%, let's check for 0%-30%.
@@ -70,7 +66,6 @@ describe("TranslateHelper", function() {
         } catch (e) {
           expect(e.message).toContain("I18n key lookup could not be resolved");
         }
-        //expect(async () => await this.translateHelper.t(".notExisting")).toThrow();
       });
     });
 
@@ -231,7 +226,7 @@ describe("TranslateHelper", function() {
       });
     });
   });
-  
+
   describe("missingInterpolationHandler", function() {
     beforeEach(function(this: CurrentThisContext) {
       @injectable()
@@ -259,6 +254,11 @@ describe("TranslateHelper", function() {
     it("replaces interpolation with the return value of execute-method of MissingInterpolationExtension", async function(this: CurrentThisContext) {
       const translation = await this.translateHelper.t("templateSyntaxSmall");
       expect(translation).toContain("test");
+    });
+
+    it("does not call missingInterpolationExtensions if all interpolations are present", async function(this: CurrentThisContext){
+      await this.translateHelper.t("mySpecificKeys.keyOne");
+      expect(this.missingInterpolationExtension.execute).not.toHaveBeenCalled();
     });
   });
 });
