@@ -30,11 +30,14 @@ export class TranslateHelper implements TranslateHelperInterface {
     // Set language
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
-    const options = { lng: this.extraction.language, returnObjectTrees: false, ...locals};
+    const options = { lng: this.extraction.language, returnObjectTrees: false, ...locals };
     const extractorName = this.extraction.platform;
 
     // Catch up device name or set to undefined
-    const device = featureIsAvailable<OptionalExtractions.DeviceExtraction>(this.extraction, OptionalExtractions.FeatureChecker.DeviceExtraction)
+    const device = featureIsAvailable<OptionalExtractions.Device & MinimalRequestExtraction>(
+      this.extraction,
+      OptionalExtractions.FeatureChecker.DeviceExtraction
+    )
       ? this.extraction.device
       : undefined;
 
