@@ -85,8 +85,8 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param locals If given: variables to use in response
    */
   // tslint:disable-next-line:function-name
-  public async t(locals?: {[name: string]: string | number | object}): Promise<string>;
-  
+  public async t(locals?: { [name: string]: string | number | object }): Promise<string>;
+
   /**
    * Translates the given key using your json translations.
    * @param key String of the key to look for. If you pass a relative key (beginning with '.'), this method will apply several conventions.
@@ -95,7 +95,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param locals Variables to use in reponse
    */
   // tslint:disable-next-line:function-name
-  public async t(key?: string, locals?: {[name: string]: string | number | object}): Promise<string>;
+  public async t(key?: string, locals?: { [name: string]: string | number | object }): Promise<string>;
 
   // tslint:disable-next-line:function-name
   public async t(...args: any[]) {
@@ -107,7 +107,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  public async prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): Promise<void> {
+  public prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): void | Promise<void> {
     return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 
@@ -115,7 +115,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public async endSessionWith(text: string): Promise<void> {
+  public endSessionWith(text: string): void | Promise<void> {
     return this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 
