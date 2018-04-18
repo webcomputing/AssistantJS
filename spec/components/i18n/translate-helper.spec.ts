@@ -1,10 +1,10 @@
-import { injectionNames } from "../../../src/injection-names";
-import { MissingInterpolationExtension } from "../../../src/assistant-source";
 import { injectable } from "inversify";
 import { Container } from "inversify-components";
-import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
+import { MissingInterpolationExtension } from "../../../src/assistant-source";
 import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
 import { TranslateHelper } from "../../../src/components/i18n/translate-helper";
+import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
+import { injectionNames } from "../../../src/injection-names";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
