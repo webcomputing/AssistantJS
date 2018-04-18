@@ -1,8 +1,8 @@
-import { InterpolationResolver as InterpolationResolverInterface, MissingInterpolationExtension } from "./public-interfaces";
-import { inject, optional, multiInject, injectable } from "inversify";
-import { componentInterfaces } from "./component-interfaces";
-import { Logger } from "../root/public-interfaces";
+import { inject, injectable, multiInject, optional } from "inversify";
 import { injectionNames } from "../../injection-names";
+import { Logger } from "../root/public-interfaces";
+import { componentInterfaces } from "./component-interfaces";
+import { InterpolationResolver as InterpolationResolverInterface, MissingInterpolationExtension } from "./public-interfaces";
 import { TranslateHelper } from "./translate-helper";
 
 @injectable()
@@ -24,29 +24,29 @@ export class InterpolationResolver implements InterpolationResolverInterface {
    * @param translatedValue text containing missing interpolations
    */
   public async resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string> {
-    while (translatedValue.includes("*~~") && translatedValue.includes("~~*")) {
-      const interpolation = translatedValue.split("*~~")[1].split("~~*")[0];
-      let interpolationValue: string | undefined;
+    let text = translatedValue;
 
-      const missingInterpolationExtensionsPromises = this.missingInterpolationExtensions.map((missingInterpolationExtension) => missingInterpolationExtension.execute(interpolation, translateHelper));
+    while (text.includes("*~~") && text.includes("~~*")) {
+      const interpolation = text.split("*~~")[1].split("~~*")[0];
+      const missingInterpolationExtensionsPromises = this.missingInterpolationExtensions.map(missingInterpolationExtension =>
+        missingInterpolationExtension.execute(interpolation, translateHelper)
+      );
       const interpolationValues = await Promise.all(missingInterpolationExtensionsPromises);
-      
-      for (let value of interpolationValues) {
+
+      for (const value of interpolationValues) {
         if (typeof value !== "undefined") {
-          translatedValue = translatedValue.replace("*~~" + interpolation + "~~*", value);
-          break;
+          text = text.replace("*~~" + interpolation + "~~*", value);
+          return text;
         }
       }
+      this.logger.warn(
+        `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the ${
+          this.missingInterpolationExtensions.length
+        } registered missingInterpolationExtensions provided a value. Now using "" instead.`
+      );
 
-      if (typeof interpolationValue === "undefined") {
-        this.logger.warn(
-          `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the
-          ${this.missingInterpolationExtensions.length} registered missingInterpolationExtensions provided a value. Now using "" instead.`
-        );
-
-        translatedValue = translatedValue.replace("*~~" + interpolation + "~~*", "");
-      }
+      text = text.replace("*~~" + interpolation + "~~*", "");
     }
-    return translatedValue;
+    return text;
   }
 }
