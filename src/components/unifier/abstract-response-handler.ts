@@ -8,7 +8,7 @@ import { AfterResponseHandler, BeforeResponseHandler, MinimalResponseHandler, Re
 
 @injectable() /** Take this class as base class for implementing response handler, if needed */
 export abstract class AbstractResponseHandler implements MinimalResponseHandler {
-  public endSession: boolean;
+  public endSession: boolean = false;
   public voiceMessage: string | null = null;
 
   public responseCallback: ResponseCallback;

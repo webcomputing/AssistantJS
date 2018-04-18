@@ -5,7 +5,7 @@ import { VoiceResponse } from "./voice-response";
 
 export class UnauthenticatedResponse extends BaseResponse {
   /** Response handler of the currently used platform */
-  protected handler: MinimalResponseHandler & OptionalHandlerFeatures.Authentication;
+  protected handler!: MinimalResponseHandler & OptionalHandlerFeatures.Authentication;
 
   constructor(handler: MinimalResponseHandler, voiceResponse: VoiceResponse, failSilentlyOnUnsupportedFeatures: boolean, logger: Logger, text: string = "") {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);

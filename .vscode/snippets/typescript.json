@@ -1,0 +1,26 @@
+{
+	"beforeEach (async + CurrentThisContext)": {
+		"prefix": "bef",
+		"body": [
+			"beforeEach(async function(this: CurrentThisContext) {",
+			"\t$1",
+			"});"
+		],
+		"description": "beforeEach function is called once before each spec"
+	},
+	"describe": {
+		"prefix": "desc",
+		"body": "describe(\"${1:with...}\", function() {\n\t$2\n});",
+		"description": "creates a suite of tests"
+	},
+	"expect": {
+		"prefix": "exp",
+		"body": "expect($1)$0",
+		"description": "takes a value, called the actual."
+	},
+	"it (async + CurrentThisContext)": {
+		"prefix": "it",
+		"body": "it(\"${1:returns...}\", async function(this: CurrentThisContext) {\n\t$2\n});",
+		"description": "creates a test method"
+	}
+}

@@ -30,7 +30,8 @@ describe("GenericRequestHelper", function() {
 
       // Multiple expections for performance reasons
       expect(requestContext.method).toBe("POST");
-      expect(requestContext.headers).toEqual(jasmine.objectContaining({ "header-a": "b" }));
+
+      expect(requestContext.headers).toEqual(jasmine.objectContaining({ "header-a": "b" } as any));
       expect(requestContext.body).toEqual({ a: "b" });
       expect(requestContext.path).toBe("/any-given-route");
     });

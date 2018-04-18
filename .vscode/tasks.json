@@ -1,0 +1,25 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "gulp",
+      "task": "default",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "build-sources-and-maps",
+      "type": "gulp",
+      "task": "build-sources-and-maps"
+    },
+    {
+      "type": "gulp",
+      "task": "specs-watcher",
+      "problemMatcher": []
+    }
+  ]
+}
