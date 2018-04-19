@@ -1,4 +1,4 @@
-import { MinimalResponseHandler, Voiceable } from "../public-interfaces";
+import { ConditionalType, MinimalResponseHandler, Voiceable } from "../public-interfaces";
 import { BaseResponse } from "./base-response";
 
 export class VoiceResponse implements Voiceable {
@@ -10,34 +10,22 @@ export class VoiceResponse implements Voiceable {
     this.ssml = ssml;
   }
 
-  public endSessionWith(text: string | Promise<string>) {
+  public endSessionWith<T extends string | Promise<string>>(text: T): ConditionalType<T> {
     if (typeof text === "string") {
-      return (this.delegatorBasedOnInput(text) as Voiceable).endSessionWith(text);
+      return this.delegatorBasedOnInput(text as string).endSessionWith(text as string) as ConditionalType<T>;
     }
-    return (this.delegatorBasedOnInput(text) as Promise<Voiceable>).then(voiceable => {
-      return voiceable.endSessionWith(text);
-    });
+    return (text as Promise<string>).then(evText => this.delegatorBasedOnInput(evText as string).endSessionWith(evText as string)) as ConditionalType<T>;
   }
 
-  public prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>) {
+  public prompt<T extends string | Promise<string>>(text: T, ...reprompts: Array<string | Promise<string>>): ConditionalType<T> {
     if (typeof text === "string") {
-      return (this.delegatorBasedOnInput(text) as Voiceable).prompt(text, ...reprompts);
+      return this.delegatorBasedOnInput(text as string).prompt(text as string, ...reprompts) as ConditionalType<T>;
     }
-    return (this.delegatorBasedOnInput(text) as Promise<Voiceable>).then(voiceable => {
-      return voiceable.prompt(text, ...reprompts);
-    });
+
+    return (text as Promise<string>).then(evText => this.delegatorBasedOnInput(evText as string).prompt(evText as string, ...reprompts)) as ConditionalType<T>;
   }
 
-  private delegatorBasedOnInput(text: string | Promise<string>) {
-    if (typeof text !== "string") {
-      return text.then(value => {
-        if (value.includes("</") || value.includes("/>")) {
-          return this.ssml;
-        }
-        return this.simple;
-      });
-    }
-
+  private delegatorBasedOnInput(text: string) {
     if (text.includes("</") || text.includes("/>")) {
       return this.ssml;
     }

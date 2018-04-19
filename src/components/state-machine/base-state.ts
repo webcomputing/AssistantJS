@@ -2,7 +2,7 @@ import { injectable, unmanaged } from "inversify";
 import { TranslateHelper } from "../i18n/public-interfaces";
 import { Logger, RequestContext } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
-import { MinimalRequestExtraction, OptionalExtractions, ResponseFactory, Voiceable } from "../unifier/public-interfaces";
+import { ConditionalType, MinimalRequestExtraction, OptionalExtractions, ResponseFactory, Voiceable } from "../unifier/public-interfaces";
 import { State, Transitionable } from "./public-interfaces";
 
 /**
@@ -107,7 +107,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  public prompt(text: string | Promise<string>, ...reprompts: Array<string | Promise<string>>): void | Promise<void> {
+  public prompt<T extends string | Promise<string>>(text: T, ...reprompts: Array<string | Promise<string>>): ConditionalType<T> {
     return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 
@@ -115,7 +115,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public endSessionWith(text: string): void | Promise<void> {
+  public endSessionWith<T extends string | Promise<string>>(text: T): ConditionalType<T> {
     return this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 
