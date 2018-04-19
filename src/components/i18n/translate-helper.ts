@@ -48,6 +48,7 @@ export class TranslateHelper implements TranslateHelperInterface {
       : undefined;
 
     if (typeof key === "undefined") {
+      // tslint:disable-next-line:no-parameter-reassignment
       key = "";
     }
 
