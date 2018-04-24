@@ -6,3 +6,5 @@ export const componentInterfaces = {
   beforeIntent: Symbol("before-intent-hook"),
   afterIntent: Symbol("after-intent-hook"),
 };
+
+export const COMPONENT_NAME = "state-machine";

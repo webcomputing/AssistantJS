@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.5",
+    "@types/reflect-metadata": "0.0.5",
     "@types/request-promise": "^4.1.40",
     "connect-timeout": "^1.9.0",
     "gulp": "^3.9.1",

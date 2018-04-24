@@ -107,3 +107,11 @@ export interface Transitionable {
   /** Jumps to given intent in current state */
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
+
+export interface Filter {
+  execute(...args: any[]): { state: string; intent: string; args: any } | undefined;
+}
+
+export interface FilterClass {
+  new (...args: any[]): Filter;
+}
