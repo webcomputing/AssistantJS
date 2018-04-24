@@ -29,6 +29,9 @@ export interface Session {
 
   /** Deletes the whole session object */
   deleteAllFields(): Promise<void>;
+
+  /** Checks if any fields to this session are set */
+  exists(): Promise<boolean>;
 }
 
 /**
