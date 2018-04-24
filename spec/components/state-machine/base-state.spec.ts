@@ -12,7 +12,7 @@ interface CurrentThisContext {
   voiceResponseMock: Voiceable;
 }
 
-fdescribe("BaseState", function() {
+describe("BaseState", function() {
   beforeEach(function(this: CurrentThisContext) {
     configureI18nLocale((this as any).container, false);
     createRequestScope(this.specHelper);
