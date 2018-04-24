@@ -236,19 +236,30 @@ export interface RequestExtractor<ComponentConfiguration = {}> {
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
 
+/**
+ * Extension interface to modify extractions after the Extractor has made them
+ */
+export interface RequestExtractionModifier {
+  /**
+   * Modifies the RequestExtraction
+   * @param extraction the original or previous extraction
+   */
+  modify(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction>;
+}
+
 /** Common fields between PlatformRequestExtraction and MinimalRequestExtraction */
 export interface CommonRequestExtraction {
   /** Set of entities */
   entities?: { [name: string]: any };
 
   /** Intent to call */
-  readonly intent: intent;
+  intent: intent;
 
   /** Given session id */
-  readonly sessionID: string;
+  sessionID: string;
 
   /** Language of this request */
-  readonly language: string;
+  language: string;
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
@@ -259,7 +270,7 @@ export interface PlatformRequestExtraction<ComponentConfiguration = {}> extends 
 /** The minimum set of information a RequestExtractor has to extract from a request */
 export interface MinimalRequestExtraction extends CommonRequestExtraction {
   /** Name of platform responsible for this extraction (equals to component.name) */
-  readonly platform: string;
+  platform: string;
 }
 
 /** Optional, additional informations which extractors may extract from a request */

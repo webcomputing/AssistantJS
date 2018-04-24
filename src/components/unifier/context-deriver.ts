@@ -5,7 +5,7 @@ import { injectionNames } from "../../injection-names";
 import { ContextDeriver as ContextDeriverI, Logger, RequestContext } from "../root/public-interfaces";
 import { featureIsAvailable } from "./feature-checker";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { MinimalRequestExtraction, OptionalExtractions, RequestExtractor } from "./public-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions, RequestExtractor, RequestExtractionModifier } from "./public-interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
@@ -15,6 +15,9 @@ export class ContextDeriver implements ContextDeriverI {
     @optional()
     @multiInject(componentInterfaces.requestProcessor)
     private extractors: RequestExtractor[] = [],
+    @optional()
+    @multiInject(componentInterfaces.requestModifier)
+    private extractionModifiers: RequestExtractionModifier[] = [],
     @inject(injectionNames.logger) private logger: Logger,
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
   ) {
@@ -25,7 +28,11 @@ export class ContextDeriver implements ContextDeriverI {
     const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
-      const extractionResult = await extractor.extract(context);
+      let extractionResult = await extractor.extract(context);
+
+      // allow changing extractions from extension
+      extractionResult = await this.changeExtraction(extractionResult);
+
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
       this.logger.info({ requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
@@ -51,6 +58,22 @@ export class ContextDeriver implements ContextDeriverI {
     if (typeof runnableExtensions[0] === "undefined") throw new TypeError("Single found extractor was undefined!");
 
     return runnableExtensions[0];
+  }
+
+  /**
+   * this method allows the Extensions with the interface RequestExtractionModifier at the extensionpoint 'requestModifier' to
+   * change the RequestExtraction after the requestProcessor has set them
+   */
+  private async changeExtraction(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction> {
+    let result: MinimalRequestExtraction = extraction;
+
+    if (this.extractionModifiers) {
+      for (const extractionModifier of this.extractionModifiers) {
+        result = await extractionModifier.modify(result);
+      }
+    }
+
+    return result;
   }
 
   public respondWithNoExtractor(context: RequestContext) {

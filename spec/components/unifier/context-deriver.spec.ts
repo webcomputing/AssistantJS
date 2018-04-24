@@ -8,6 +8,9 @@ import { createContext } from "../../support/mocks/root/request-context";
 import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
 import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
+import { MockRequestExtractionSessionModifier } from "../../support/mocks/unifier/mock-request-session-modifier";
+import { MinimalRequestExtraction } from "../../../src/assistant-source";
+import { MockRequestExtractionModifier } from "../../support/mocks/unifier/mock-request-modifier";
 
 describe("ContextDeriver", function() {
   describe("with server started", function() {
@@ -88,16 +91,16 @@ describe("ContextDeriver", function() {
     beforeEach(function() {
       (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
       (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+
+      // Craete mock extraction and a fitting request context for it
+      this.mockExtraction = createExtraction("myTest", { testEntity: "value1", testEntity2: "value2" });
+      this.mockRequestContext = createContext("POST", "/fitting_path", this.mockExtraction);
     });
 
     describe("derive", function() {
       beforeEach(function() {
         // Grab deriver
         this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
-
-        // Craete mock extraction and a fitting request context for it
-        this.mockExtraction = createExtraction("myTest", { testEntity: "value1", testEntity2: "value2" });
-        this.mockRequestContext = createContext("POST", "/fitting_path", this.mockExtraction);
       });
 
       describe("logging", function() {
@@ -152,9 +155,48 @@ describe("ContextDeriver", function() {
         describe("with default whitelist", function() {
           it("filters everything except intent, language and platform", async function(done) {
             await this.deriver.derive(this.mockRequestContext);
-            this.expectLoggingWithExtraction({...this.mockExtraction,  sessionID: "**filtered**", entities: "**filtered**"});
+            this.expectLoggingWithExtraction({ ...this.mockExtraction, sessionID: "**filtered**", entities: "**filtered**" });
             done();
           });
+        });
+      });
+    });
+
+    describe("with RequestExtractionModifier registerd", function() {
+      describe("without RequestExtractionModifier", function() {
+        beforeEach(async function() {
+          this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
+        });
+
+        it("does not change RequestExtraction", async function() {
+          const result = await this.deriver.derive(this.mockRequestContext);
+          expect((result[0] as MinimalRequestExtraction).sessionID).toBe(this.mockExtraction.sessionID);
+        });
+      });
+
+      describe("with one RequestExtractionModifier", function() {
+        beforeEach(async function() {
+          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestModifier).to(MockRequestExtractionSessionModifier);
+          this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
+        });
+
+        it("returns changed RequestExtraction", async function() {
+          const result = await this.deriver.derive(this.mockRequestContext);
+          expect((result[0] as MinimalRequestExtraction).sessionID).toBe("my-new-session-id");
+        });
+      });
+
+      describe("with multiple RequestExtractionModifier", function() {
+        beforeEach(async function() {
+          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestModifier).to(MockRequestExtractionSessionModifier);
+          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestModifier).to(MockRequestExtractionModifier);
+          this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
+        });
+
+        it("changes to last RequestModifier", async function() {
+          const result = await this.deriver.derive(this.mockRequestContext);
+          expect((result[0] as MinimalRequestExtraction).sessionID).toBe("my-second-session-id");
+          expect((result[0] as MinimalRequestExtraction).intent).toBe("my-new-intent");
         });
       });
     });
