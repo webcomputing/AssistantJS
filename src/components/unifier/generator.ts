@@ -82,7 +82,7 @@ export class Generator implements CLIGeneratorExtension {
               curr.forEach(parameter => (prev as string[]).push(parameter.replace(/\{|\}/g, "")));
             }
             return prev;
-          }, [])
+          }, []) || []
 
           // Remove duplicates from this one array
           .filter((element, position, self) => self.indexOf(element) === position);
