@@ -55,10 +55,22 @@ export class BeforeIntentHook {
   };
 
   private retrieveStateFilterFromMetadata(): FilterClass | undefined {
-    return Reflect.getMetadata(filterMetadataKey, this.state.constructor).filter;
+    if (Reflect.hasMetadata(filterMetadataKey, this.state.constructor)) {
+      return Reflect.getMetadata(filterMetadataKey, this.state.constructor).filter;
+    }
+
+    return undefined;
   }
 
   private retrieveIntentFilterFromMetadata(): FilterClass | undefined {
-    return Reflect.getMetadata(filterMetadataKey, this.state[this.intent]).filter;
+    if (
+      typeof this.intent !== "undefined" &&
+      typeof this.state[this.intent] !== "undefined" &&
+      Reflect.hasMetadata(filterMetadataKey, this.state[this.intent])
+    ) {
+      return Reflect.getMetadata(filterMetadataKey, this.state[this.intent]).filter;
+    }
+
+    return undefined;
   }
 }

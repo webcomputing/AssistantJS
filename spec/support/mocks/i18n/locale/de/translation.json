@@ -81,5 +81,15 @@
     "8",
     "9",
     "10"
-  ] 
+  ],
+  "filter": {
+    "stateA": {
+      "intentA": "FilterAState - filterTestAIntent",
+      "intentB": "FilterAState - filterTestBIntent"
+    },
+    "stateB": {
+      "intentA": "FilterBState - filterTestAIntent",
+      "intentB": "FilterBState - filterTestBIntent"
+    }
+  }
 }
