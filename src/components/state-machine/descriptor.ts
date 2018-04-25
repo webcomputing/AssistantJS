@@ -100,10 +100,17 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService("current-state-provider").toProvider<{ instance: State.Required; name: string }>(context => {
         return () => {
           const factory = context.container.get<Function>("core:state-machine:state-factory");
+          const currentSessionFactory = context.container.get<() => Session>("core:unifier:current-session-factory");
           return context.container
             .get<() => Promise<string>>("core:state-machine:current-state-name-provider")()
-            .then(name => {
-              if (name === null) name = MAIN_STATE_NAME;
+            .then(async name => {
+              if (name === null) {
+                name = MAIN_STATE_NAME;
+
+                // set MainState to session
+                await currentSessionFactory().set("__current_state", name);
+              }
+
               return { instance: factory(name), name };
             });
         };
