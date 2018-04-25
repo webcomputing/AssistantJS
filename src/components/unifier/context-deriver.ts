@@ -5,7 +5,7 @@ import { injectionNames } from "../../injection-names";
 import { ContextDeriver as ContextDeriverI, Logger, RequestContext } from "../root/public-interfaces";
 import { featureIsAvailable } from "./feature-checker";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { MinimalRequestExtraction, OptionalExtractions, RequestExtractor, RequestExtractionModifier } from "./public-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions, RequestExtractionModifier, RequestExtractor } from "./public-interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
@@ -30,6 +30,9 @@ export class ContextDeriver implements ContextDeriverI {
     if (extractor !== null) {
       let extractionResult = await extractor.extract(context);
 
+      // change sessionId
+      extractionResult = this.unifySession(extractionResult);
+
       // allow changing extractions from extension
       extractionResult = await this.changeExtraction(extractionResult);
 
@@ -37,9 +40,9 @@ export class ContextDeriver implements ContextDeriverI {
 
       this.logger.info({ requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
       return [extractionResult, "core:unifier:current-extraction"];
-    } else {
-      return undefined;
     }
+
+    return undefined;
   }
 
   public async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
@@ -58,22 +61,6 @@ export class ContextDeriver implements ContextDeriverI {
     if (typeof runnableExtensions[0] === "undefined") throw new TypeError("Single found extractor was undefined!");
 
     return runnableExtensions[0];
-  }
-
-  /**
-   * this method allows the Extensions with the interface RequestExtractionModifier at the extensionpoint 'requestModifier' to
-   * change the RequestExtraction after the requestProcessor has set them
-   */
-  private async changeExtraction(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction> {
-    let result: MinimalRequestExtraction = extraction;
-
-    if (this.extractionModifiers) {
-      for (const extractionModifier of this.extractionModifiers) {
-        result = await extractionModifier.modify(result);
-      }
-    }
-
-    return result;
   }
 
   public respondWithNoExtractor(context: RequestContext) {
@@ -100,6 +87,33 @@ export class ContextDeriver implements ContextDeriverI {
 
     const maximumFeatureSupport = Math.max(...featureSupportings);
     return extractors.filter((extractor, index) => featureSupportings[index] === maximumFeatureSupport);
+  }
+
+  /**
+   * this method allows the Extensions with the interface RequestExtractionModifier at the extensionpoint 'requestModifier' to
+   * change the RequestExtraction after the requestProcessor has set them
+   */
+  private async changeExtraction(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction> {
+    let result: MinimalRequestExtraction = extraction;
+
+    if (this.extractionModifiers) {
+      for (const extractionModifier of this.extractionModifiers) {
+        result = await extractionModifier.modify(result);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Adds plattform as prefix for every session
+   * @param extractionResult exractionResult with session and platform
+   */
+  private unifySession(extractionResult: MinimalRequestExtraction): MinimalRequestExtraction {
+    if (extractionResult.sessionID) {
+      extractionResult.sessionID = extractionResult.platform + "-" + extractionResult.sessionID;
+    }
+    return extractionResult;
   }
 
   /** Returns true if given extractor supports given feature (see FeatureChecker) */

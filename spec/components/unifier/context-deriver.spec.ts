@@ -4,13 +4,13 @@ import { componentInterfaces } from "../../../src/components/unifier/private-int
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { expressAppWithTimeout, RequestProxy, withServer } from "../../support/util/requester";
 
+import { MinimalRequestExtraction } from "../../../src/assistant-source";
 import { createContext } from "../../support/mocks/root/request-context";
 import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
-import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
-import { MockRequestExtractionSessionModifier } from "../../support/mocks/unifier/mock-request-session-modifier";
-import { MinimalRequestExtraction } from "../../../src/assistant-source";
 import { MockRequestExtractionModifier } from "../../support/mocks/unifier/mock-request-modifier";
+import { MockRequestExtractionSessionModifier } from "../../support/mocks/unifier/mock-request-session-modifier";
+import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
 
 describe("ContextDeriver", function() {
   describe("with server started", function() {
