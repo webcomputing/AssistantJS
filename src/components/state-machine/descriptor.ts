@@ -8,7 +8,7 @@ import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { ResponseFactory } from "../unifier/response-factory";
 
-import { Hooks } from "../../assistant-source";
+import { Filter, Hooks } from "../../assistant-source";
 import { BeforeIntentHook } from "./before-intent-hook";
 import { componentInterfaces } from "./private-interfaces";
 import { MAIN_STATE_NAME, State } from "./public-interfaces";

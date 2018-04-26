@@ -8,6 +8,7 @@ import componentConfiguration from "./config/components";
  */
 export const assistantJs = new AssistantJSSetup();
 export const stateMachineSetup = new StateMachineSetup(assistantJs);
+export const filterSetup = new FilterSetup(assistantJs);
 
 /**
  * Initializes all needed setup types. This makes the initialization process, which is needed for a running production environment, reusable for specs.
@@ -23,6 +24,7 @@ export function initializeSetups (localAssistantJs: AssistantJSSetup, localState
 
   // Register all states and strategies
   localStateMachineSetup.registerByConvention(addOnly);
+  filterSetup.registerByConvention(addOnly)
 }
 
 // Initialize the exported production setups

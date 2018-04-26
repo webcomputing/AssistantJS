@@ -7,10 +7,11 @@ import { ServerApplication } from "./components/root/app-server";
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { Logger, RequestContext } from "./components/root/public-interfaces";
 import { Configuration } from "./components/services/private-interfaces";
-import { State, Transitionable } from "./components/state-machine/public-interfaces";
+import { Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
 import { StateMachineSetup } from "./components/state-machine/setup";
 import { intent, MinimalRequestExtraction, MinimalResponseHandler } from "./components/unifier/public-interfaces";
 
+import { FilterSetup } from "./components/state-machine/filter-setup";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
@@ -31,11 +32,12 @@ export class SpecSetup {
    * @param autobind If true, calls setup.autobind()
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
-   * */
-  public prepare(states: State.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
+   */
+  public prepare(states: State.Constructor[] = [], filters: Filter.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
     this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
+    if (filters.length > 0) this.registerFilters(filters);
 
     if (autoBind) this.setup.autobind();
     if (!useChilds) this.bindChildlessRequestHandlerMock();
@@ -111,6 +113,13 @@ export class SpecSetup {
     const stateMachineSetup = new StateMachineSetup(this.setup);
     states.forEach(state => stateMachineSetup.addState(state));
     stateMachineSetup.registerStates();
+  }
+
+  /** Registers filters */
+  public registerFilters(filters: Filter.Constructor[]) {
+    const filterSetup = new FilterSetup(this.setup);
+    filters.forEach(filter => filterSetup.addFilter(filter));
+    filterSetup.registerFilters();
   }
 
   /**

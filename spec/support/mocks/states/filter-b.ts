@@ -5,8 +5,8 @@ import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { filter } from "../../../../src/components/state-machine/filter";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
-import { TestFilterA } from "../state-machine/test-filter-a";
-import { TestFilterB } from "../state-machine/test-filter-b";
+import { TestFilterA } from "../filters/test-filter-a";
+import { TestFilterB } from "../filters/test-filter-b";
 
 @injectable()
 @filter(TestFilterA)

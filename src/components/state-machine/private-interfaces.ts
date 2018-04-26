@@ -1,6 +1,7 @@
 export const componentInterfaces = {
   state: Symbol("state"),
   metaState: Symbol("meta state"),
+  filter: Symbol("filter"),
 
   // Hooks
   beforeIntent: Symbol("before-intent-hook"),

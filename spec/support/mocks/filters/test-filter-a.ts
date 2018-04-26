@@ -1,6 +1,8 @@
+import { injectable } from "inversify";
 import { Filter } from "../../../../src/assistant-source";
 
-export class TestFilterA implements Filter {
+@injectable()
+export class TestFilterA implements Filter.Required {
   public execute() {
     const redirect = {
       state: "FilterAState",

@@ -108,10 +108,13 @@ export interface Transitionable {
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
 
-export interface Filter {
-  execute(...args: any[]): { state: string; intent: string; args: any } | undefined;
-}
+export namespace Filter {
+  export interface Required {
+    execute(...args: any[]): { state: string; intent: string; args: any } | undefined;
+  }
 
-export interface FilterClass {
-  new (...args: any[]): Filter;
+  /** Constructor of state objects */
+  export interface Constructor<F extends Required = Required> {
+    new (...args: any[]): F;
+  }
 }

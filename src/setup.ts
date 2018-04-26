@@ -2,6 +2,7 @@ import { inject, injectable, multiInject } from "inversify";
 import { ComponentDescriptor, Container, ContainerImpl, MainApplication } from "inversify-components";
 
 import * as internalComponents from "./components/index";
+import { componentInterfaces } from "./components/state-machine/private-interfaces";
 
 export class AssistantJSSetup {
   public static globalContainer = new ContainerImpl();
@@ -38,7 +39,7 @@ export class AssistantJSSetup {
   }
 
   public addConfiguration(configuration: { [componentName: string]: any }) {
-    this.configuration = {...this.configuration, ...configuration};
+    this.configuration = { ...this.configuration, ...configuration };
   }
 
   public configure() {

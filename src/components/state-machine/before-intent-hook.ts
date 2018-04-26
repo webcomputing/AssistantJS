@@ -1,9 +1,9 @@
-import { inject, injectable } from "inversify";
-import { Filter, FilterClass, Hooks } from "../../assistant-source";
+import { inject, injectable, multiInject } from "inversify";
+import { Filter, Hooks } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
 import { ComponentSpecificLoggerFactory, Logger } from "../root/public-interfaces";
 import { filterMetadataKey } from "./filter";
-import { COMPONENT_NAME } from "./private-interfaces";
+import { COMPONENT_NAME, componentInterfaces } from "./private-interfaces";
 import { State } from "./public-interfaces";
 
 @injectable()
@@ -12,9 +12,16 @@ export class BeforeIntentHook {
   private stateName!: string;
   private intent!: string;
   private logger: Logger;
+  private filters: Filter.Required[];
 
-  constructor(@inject(injectionNames.componentSpecificLoggerFactory) loggerFactory: ComponentSpecificLoggerFactory) {
+  constructor(
+    @inject(injectionNames.componentSpecificLoggerFactory) loggerFactory: ComponentSpecificLoggerFactory,
+    @multiInject(componentInterfaces.filter)
+    @inject(componentInterfaces.filter)
+    filters: Filter.Required[]
+  ) {
     this.logger = loggerFactory(COMPONENT_NAME);
+    this.filters = filters;
   }
 
   /** Hook method, the only method which will be called */
@@ -27,6 +34,7 @@ export class BeforeIntentHook {
     const stateFilter = this.retrieveStateFilterFromMetadata();
     const intentFilter = this.retrieveIntentFilterFromMetadata();
 
+    let fittingFilter: Filter.Required | undefined;
     let redirect: { state: string; intent: string; args?: any[] } | undefined;
 
     if (typeof stateFilter === "undefined") {
@@ -34,7 +42,8 @@ export class BeforeIntentHook {
         return true;
       }
 
-      redirect = new intentFilter().execute();
+      fittingFilter = this.filters.find(filter => filter.constructor === intentFilter);
+      redirect = fittingFilter ? fittingFilter.execute() : undefined;
 
       if (redirect) {
         await machine.transitionTo(redirect.state);
@@ -44,7 +53,8 @@ export class BeforeIntentHook {
       return false;
     }
 
-    redirect = new stateFilter().execute();
+    fittingFilter = this.filters.find(filter => filter.constructor === stateFilter);
+    redirect = fittingFilter ? fittingFilter.execute() : undefined;
 
     if (redirect) {
       await machine.transitionTo(redirect.state);
@@ -54,12 +64,12 @@ export class BeforeIntentHook {
     return true;
   };
 
-  private retrieveStateFilterFromMetadata(): FilterClass | undefined {
+  private retrieveStateFilterFromMetadata(): Filter.Constructor | undefined {
     const metadata = Reflect.getMetadata(filterMetadataKey, this.state.constructor);
     return metadata ? metadata.filter : undefined;
   }
 
-  private retrieveIntentFilterFromMetadata(): FilterClass | undefined {
+  private retrieveIntentFilterFromMetadata(): Filter.Constructor | undefined {
     if (typeof this.intent !== "undefined" && typeof this.state[this.intent] !== "undefined") {
       const metadata = Reflect.getMetadata(filterMetadataKey, this.state[this.intent]);
       return metadata ? metadata.filter : undefined;
