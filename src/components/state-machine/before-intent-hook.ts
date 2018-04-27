@@ -2,7 +2,7 @@ import { inject, injectable, multiInject } from "inversify";
 import { Filter, Hooks } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
 import { ComponentSpecificLoggerFactory, Logger } from "../root/public-interfaces";
-import { filterMetadataKey } from "./filter";
+import { filterMetadataKey } from "./filter-decorator";
 import { COMPONENT_NAME, componentInterfaces } from "./private-interfaces";
 import { State } from "./public-interfaces";
 

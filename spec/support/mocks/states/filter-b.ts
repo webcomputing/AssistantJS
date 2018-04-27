@@ -2,7 +2,7 @@ import { inject, injectable, optional } from "inversify";
 import { TranslateHelper } from "../../../../src/components/i18n/public-interfaces";
 import { Logger } from "../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
-import { filter } from "../../../../src/components/state-machine/filter";
+import { filter } from "../../../../src/components/state-machine/filter-decorator";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 import { TestFilterA } from "../filters/test-filter-a";
