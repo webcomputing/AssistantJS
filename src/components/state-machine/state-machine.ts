@@ -6,6 +6,7 @@ import { GenericIntent, intent } from "../unifier/public-interfaces";
 
 import { componentInterfaces } from "./private-interfaces";
 import { State, Transitionable } from "./public-interfaces";
+import { stayInContextMetadataKey } from "./stay-in-context-decorator";
 
 @injectable()
 export class StateMachine implements Transitionable {
@@ -13,16 +14,16 @@ export class StateMachine implements Transitionable {
 
   constructor(
     @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{ instance: State.Required; name: string }>,
+    @inject("core:state-machine:context-states-provider") private getContextStates: () => Promise<[{ instance: State.Required; name: string }]>,
     @inject("core:state-machine:state-names") private stateNames: string[],
     @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
     @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
     @inject("core:root:current-logger") private logger: Logger
   ) {}
 
-  public async handleIntent(intent: intent, ...args: any[]) {
+  public async handleIntent(requestedIntent: intent, ...args: any[]) {
     const currentState = await this.getCurrentState();
-
-    const intentMethod = this.deriveIntentMethod(intent);
+    const intentMethod = this.deriveIntentMethod(requestedIntent);
     this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
     this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
@@ -39,6 +40,7 @@ export class StateMachine implements Transitionable {
       }
 
       // Check if there is a "beforeIntent_" method available
+      // tslint:disable-next-line:no-string-literal
       if (typeof currentState.instance["beforeIntent_"] === "function") {
         const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
 
@@ -60,6 +62,7 @@ export class StateMachine implements Transitionable {
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
         // Call afterIntent_ method if present
+        // tslint:disable-next-line:no-string-literal
         if (typeof currentState.instance["afterIntent_"] === "function") {
           ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
         }
@@ -69,8 +72,16 @@ export class StateMachine implements Transitionable {
           .withArguments(currentState.instance, currentState.name, intentMethod, this, ...args)
           .runWithResultset();
       } else {
-        // -> Intent does not exist on state class, so call unhandledGenericIntent instead
-        await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);
+        const contextStates = await this.getContextStates();
+        const fittingState = contextStates.find(state => typeof state[intentMethod] === "function");
+
+        if (fittingState) {
+          this.transitionTo((fittingState as { instance: State.Required; name: string }).name);
+          this.handleIntent(intentMethod);
+        } else {
+          // -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead
+          await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);
+        }
       }
     } catch (e) {
       // Handle exception by error handler
@@ -81,12 +92,21 @@ export class StateMachine implements Transitionable {
   public async transitionTo(state: string) {
     if (this.stateNames.indexOf(state) === -1) throw Error("Cannot transition to " + state + ": State does not exist!");
 
+    // add current state to context if context meta data is present
+    const currentState = await this.getCurrentState();
+    const contextMetaData = this.retrieveStayInContextDataFromMetadataForState((currentState.instance as any).constructor);
+
+    if (contextMetaData) {
+      const contextStatesNames = (await this.getContextStates()).map(contextState => contextState.name);
+      contextStatesNames.push(currentState.name);
+      this.currentSessionFactory().set("__context_states", JSON.stringify(contextStatesNames));
+    }
     return this.currentSessionFactory().set("__current_state", state);
   }
 
-  public async redirectTo(state: string, intent: intent, ...args: any[]) {
+  public async redirectTo(state: string, requestedIntent: intent, ...args: any[]) {
     await this.transitionTo(state);
-    return this.handleIntent(intent, ...args);
+    return this.handleIntent(requestedIntent, ...args);
   }
 
   public stateExists(state: string) {
@@ -95,9 +115,11 @@ export class StateMachine implements Transitionable {
 
   /* Private helper methods */
 
-  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again.*/
+  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
+    // tslint:disable-next-line:no-string-literal
     if (typeof state["errorFallback"] === "function") {
+      // tslint:disable-next-line:no-string-literal
       await Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args));
     } else {
       throw error;
@@ -105,10 +127,10 @@ export class StateMachine implements Transitionable {
   }
 
   /** If you change this: Have a look at registering of states / automatic intent recognition, too! */
-  private deriveIntentMethod(intent: intent): string {
-    if (typeof intent === "string" && intent.endsWith("Intent")) return intent;
+  private deriveIntentMethod(requestedIntent: intent): string {
+    if (typeof requestedIntent === "string" && requestedIntent.endsWith("Intent")) return requestedIntent;
 
-    const baseString = (typeof intent === "string" ? intent : GenericIntent[intent].toLowerCase() + "Generic") + "Intent";
+    const baseString = (typeof requestedIntent === "string" ? requestedIntent : GenericIntent[requestedIntent].toLowerCase() + "Generic") + "Intent";
     return baseString.charAt(0).toLowerCase() + baseString.slice(1);
   }
 
@@ -118,5 +140,11 @@ export class StateMachine implements Transitionable {
 
   private getAfterIntentCallbacks() {
     return this.pipeFactory(componentInterfaces.afterIntent);
+  }
+
+  // tslint:disable-next-line:ban-types
+  private retrieveStayInContextDataFromMetadataForState(currentStateClass: State.Constructor): Date | number | Function | State.Constructor {
+    const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
+    return metadata ? metadata.stayInContext : undefined;
   }
 }

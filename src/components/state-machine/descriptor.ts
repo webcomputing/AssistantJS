@@ -108,6 +108,20 @@ export const descriptor: ComponentDescriptor = {
             });
         };
       });
+
+      // Provider for context states. Returns array of states or empty array if no state is present.
+      bindService.bindGlobalService("context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
+        return () => {
+          const factory = context.container.get<Function>("core:state-machine:state-factory");
+          return context.container
+            .get<() => Session>("core:unifier:current-session-factory")()
+            .get("__context_states")
+            .then(contextStates => {
+              const contextStatesArr: string[] = JSON.parse(contextStates);
+              return Array.isArray(contextStatesArr) ? contextStatesArr.map(stateName => ({ instance: factory(stateName), name: stateName })) : [];
+            });
+        };
+      });
     },
   },
 };
