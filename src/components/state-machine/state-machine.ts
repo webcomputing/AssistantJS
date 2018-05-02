@@ -73,11 +73,11 @@ export class StateMachine implements Transitionable {
           .runWithResultset();
       } else {
         const contextStates = await this.getContextStates();
-        const fittingState = contextStates.find(state => typeof state[intentMethod] === "function");
+        const fittingState = contextStates.find(state => typeof state.instance[intentMethod] === "function");
 
         if (fittingState) {
           this.transitionTo((fittingState as { instance: State.Required; name: string }).name);
-          this.handleIntent(intentMethod);
+          await this.handleIntent(intentMethod);
         } else {
           // -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead
           await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);

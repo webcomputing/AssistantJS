@@ -9,6 +9,8 @@ import { AssistantJSSetup } from "../../../src/setup";
 import { SpecSetup } from "../../../src/spec-setup";
 
 import { context } from "../mocks/root/request-context";
+import { ContextAState } from "../mocks/states/context-a";
+import { ContextBState } from "../mocks/states/context-b";
 import { IntentCallbackState } from "../mocks/states/intent-callbacks";
 import { MainState } from "../mocks/states/main";
 import { PlainState } from "../mocks/states/plain";
@@ -28,7 +30,7 @@ import { ResponseHandler } from "../mocks/unifier/handler";
 export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecSetup {
   const assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
   assistantJs.prepare(
-    [MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState],
+    [MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState, ContextAState, ContextBState],
     autoBind,
     useChilds,
     autoSetup
