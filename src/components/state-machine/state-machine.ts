@@ -14,7 +14,7 @@ export class StateMachine implements Transitionable {
 
   constructor(
     @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{ instance: State.Required; name: string }>,
-    @inject("core:state-machine:context-states-provider") private getContextStates: () => Promise<[{ instance: State.Required; name: string }]>,
+    @inject("core:state-machine:context-states-provider") private getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>,
     @inject("core:state-machine:state-names") private stateNames: string[],
     @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
     @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
@@ -91,16 +91,27 @@ export class StateMachine implements Transitionable {
 
   public async transitionTo(state: string) {
     if (this.stateNames.indexOf(state) === -1) throw Error("Cannot transition to " + state + ": State does not exist!");
+    let contextStates = await this.getContextStates();
 
     // add current state to context if context meta data is present
     const currentState = await this.getCurrentState();
     const contextMetaData = this.retrieveStayInContextDataFromMetadataForState((currentState.instance as any).constructor);
 
     if (contextMetaData) {
-      const contextStatesNames = (await this.getContextStates()).map(contextState => contextState.name);
-      contextStatesNames.push(currentState.name);
-      this.currentSessionFactory().set("__context_states", JSON.stringify(contextStatesNames));
+      contextStates.push(currentState);
     }
+
+    // execute callbacks of context states and filter by result
+    contextStates = contextStates.filter(contextState =>
+      this.retrieveStayInContextDataFromMetadataForState((contextState.instance as any).constructor)(
+        currentState.name,
+        state,
+        contextStates.map(cState => cState.name)
+      )
+    );
+    // set remaining context states as new context
+    this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
+
     return this.currentSessionFactory().set("__current_state", state);
   }
 
@@ -143,7 +154,7 @@ export class StateMachine implements Transitionable {
   }
 
   // tslint:disable-next-line:ban-types
-  private retrieveStayInContextDataFromMetadataForState(currentStateClass: State.Constructor): Date | number | Function | State.Constructor {
+  private retrieveStayInContextDataFromMetadataForState(currentStateClass: State.Constructor): (...args: any[]) => boolean {
     const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
     return metadata ? metadata.stayInContext : undefined;
   }

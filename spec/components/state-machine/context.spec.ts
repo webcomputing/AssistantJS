@@ -34,7 +34,7 @@ describe("state context decorators", function() {
       await this.stateMachine.transitionTo("ContextBState");
     });
 
-    fit("uses exampleAIntent of ContextAState", async function(this: CurrentThisContext) {
+    it("uses exampleAIntent of ContextAState", async function(this: CurrentThisContext) {
       await this.stateMachine.handleIntent("exampleAIntent");
       expect(await this.responseHandler.voiceMessage).toBe("exampleAIntent");
     });
