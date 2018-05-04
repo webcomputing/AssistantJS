@@ -6,9 +6,9 @@ import { State, Transitionable } from "../../../../src/components/state-machine/
 import { stayInContext } from "../../../../src/components/state-machine/stay-in-context-decorator";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 
-@stayInContext(context => false)
+@stayInContext(context => true)
 @injectable()
-export class ContextBState extends BaseState implements State.Required {
+export class ContextCState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;
   public extraction: any;
 
@@ -23,7 +23,7 @@ export class ContextBState extends BaseState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  public async exampleBIntent(machine: Transitionable) {
+  public async exampleCIntent(machine: Transitionable) {
     // do something
   }
 }

@@ -76,7 +76,7 @@ export class StateMachine implements Transitionable {
         const fittingState = contextStates.find(state => typeof state.instance[intentMethod] === "function");
 
         if (fittingState) {
-          this.transitionTo((fittingState as { instance: State.Required; name: string }).name);
+          await this.transitionTo((fittingState as { instance: State.Required; name: string }).name);
           await this.handleIntent(intentMethod);
         } else {
           // -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead
@@ -97,7 +97,8 @@ export class StateMachine implements Transitionable {
     const currentState = await this.getCurrentState();
     const contextMetaData = this.retrieveStayInContextDataFromMetadataForState((currentState.instance as any).constructor);
 
-    if (contextMetaData) {
+    // add to context if not present already
+    if (contextMetaData && contextStates.map(cState => cState.name).indexOf(currentState.name) === -1) {
       contextStates.push(currentState);
     }
 
@@ -106,7 +107,8 @@ export class StateMachine implements Transitionable {
       this.retrieveStayInContextDataFromMetadataForState((contextState.instance as any).constructor)(
         currentState.name,
         state,
-        contextStates.map(cState => cState.name)
+        contextStates.map(cState => cState.name),
+        this.intentHistory
       )
     );
     // set remaining context states as new context

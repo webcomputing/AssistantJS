@@ -1,16 +1,15 @@
 import { Container } from "inversify-components";
-import { MinimalResponseHandler, SpecSetup, TranslateHelper } from "../../../src/assistant-source";
+import { GenericIntent, SpecSetup, State } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { injectionNames } from "../../../src/injection-names";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {
-  responseHandler: MinimalResponseHandler;
   specHelper: SpecSetup;
   stateMachine: StateMachine;
   container: Container;
-  translateHelper: TranslateHelper;
+  getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>;
 }
 
 describe("state context decorators", function() {
@@ -18,27 +17,70 @@ describe("state context decorators", function() {
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
-    this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
-    this.responseHandler = this.container.inversifyInstance.get<MinimalResponseHandler>("core:unifier:current-response-handler");
-    this.container.inversifyInstance.unbind("core:unifier:current-response-handler");
-    this.container.inversifyInstance
-      .bind("core:unifier:current-response-handler")
-      .toDynamicValue(context => {
-        return this.responseHandler;
-      })
-      .inSingletonScope();
+    this.getContextStates = this.container.inversifyInstance.get<() => Promise<Array<{ instance: State.Required; name: string }>>>(
+      "core:state-machine:context-states-provider"
+    );
   });
+
   describe("stayInContext decorator", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      await this.stateMachine.transitionTo("ContextAState");
-      await this.stateMachine.transitionTo("ContextBState");
+      spyOn(this.stateMachine, "handleIntent").and.callThrough();
     });
 
-    it("uses exampleAIntent of ContextAState", async function(this: CurrentThisContext) {
-      await this.stateMachine.handleIntent("exampleAIntent");
-      expect(await this.responseHandler.voiceMessage).toBe("exampleAIntent");
+    describe("with transitioning from state A to B", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState"]);
+      });
+
+      it("uses exampleAIntent of ContextAState", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("exampleAIntent");
+        expect(this.stateMachine.handleIntent).toHaveBeenCalledTimes(2);
+        expect(this.stateMachine.handleIntent).not.toHaveBeenCalledWith(GenericIntent.Unhandled, "exampleAIntent");
+      });
+    });
+
+    describe("with transitioning from A to B to C", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextCState"]);
+      });
+
+      it("does not add states which stayInContext decorator callback returns false to context", async function(this: CurrentThisContext) {
+        const contextStates = await this.getContextStates();
+        expect(contextStates.map(state => state.name)).not.toContain("ContextBState");
+      });
+
+      it("uses undhandledGenericIntent of ContextCState", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("exampleBIntent");
+        expect(this.stateMachine.handleIntent).toHaveBeenCalledWith(GenericIntent.Unhandled, "exampleBIntent");
+      });
+
+      it("just adds states to context at leaving state by transition", async function(this: CurrentThisContext) {
+        const contextStates = await this.getContextStates();
+        expect(contextStates.length).toBe(1);
+        expect(contextStates.map(state => state.name)).toContain("ContextAState");
+        expect(contextStates.map(state => state.name)).not.toContain("ContextCState");
+      });
+    });
+
+    describe("with transitioning from A to B to C to A to B", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextCState", "ContextAState", "ContextBState"]);
+      });
+
+      it("just adds a certain class of state  to context once", async function(this: CurrentThisContext) {
+        const contextStates = await this.getContextStates();
+        const contextStatesNames = contextStates.map(state => state.name);
+        expect(contextStates.length).toBe(2);
+        expect(contextStatesNames.indexOf("ContextAState")).toBe(contextStatesNames.lastIndexOf("ContextAState"));
+      });
     });
   });
 
   describe("clearContext decorator", function() {});
 });
+
+async function doStateTransitions(stateMachine: StateMachine, states: string[]) {
+  for (const state of states) {
+    await stateMachine.transitionTo(state);
+  }
+}

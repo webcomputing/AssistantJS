@@ -24,7 +24,6 @@ export class ContextAState extends BaseState implements State.Required {
   }
 
   public async exampleAIntent(machine: Transitionable) {
-    await this.responseFactory.createSimpleVoiceResponse().prompt("exampleAIntent");
-    await machine.transitionTo("ContextBState");
+    // do something
   }
 }
