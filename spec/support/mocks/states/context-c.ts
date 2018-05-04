@@ -2,11 +2,13 @@ import { inject, injectable, optional } from "inversify";
 import { TranslateHelper } from "../../../../src/components/i18n/public-interfaces";
 import { Logger } from "../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
+import { clearContext } from "../../../../src/components/state-machine/clear-context-decorator";
 import { State, Transitionable } from "../../../../src/components/state-machine/public-interfaces";
 import { stayInContext } from "../../../../src/components/state-machine/stay-in-context-decorator";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 
-@stayInContext(context => true)
+@stayInContext((current, next, context, history) => true)
+@clearContext((current, context, history) => true)
 @injectable()
 export class ContextCState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;

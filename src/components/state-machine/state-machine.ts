@@ -4,6 +4,7 @@ import { Logger } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { GenericIntent, intent } from "../unifier/public-interfaces";
 
+import { clearContextMetadataKey } from "./clear-context-decorator";
 import { componentInterfaces } from "./private-interfaces";
 import { State, Transitionable } from "./public-interfaces";
 import { stayInContextMetadataKey } from "./stay-in-context-decorator";
@@ -26,6 +27,13 @@ export class StateMachine implements Transitionable {
     const intentMethod = this.deriveIntentMethod(requestedIntent);
     this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
     this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
+
+    // execute clearContext callback if decorator is present
+    const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata((currentState.instance as any).constructor);
+
+    if (clearContextCallbackFn && clearContextCallbackFn(currentState, (await this.getContextStates()).map(cState => cState.name), this.intentHistory)) {
+      this.currentSessionFactory().set("__context_states", JSON.stringify([]));
+    }
 
     try {
       // Run beforeIntent-hooks as filter
@@ -95,16 +103,16 @@ export class StateMachine implements Transitionable {
 
     // add current state to context if context meta data is present
     const currentState = await this.getCurrentState();
-    const contextMetaData = this.retrieveStayInContextDataFromMetadataForState((currentState.instance as any).constructor);
+    const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata((currentState.instance as any).constructor);
 
     // add to context if not present already
-    if (contextMetaData && contextStates.map(cState => cState.name).indexOf(currentState.name) === -1) {
+    if (stayInContextCallbackFn && contextStates.map(cState => cState.name).indexOf(currentState.name) === -1) {
       contextStates.push(currentState);
     }
 
     // execute callbacks of context states and filter by result
     contextStates = contextStates.filter(contextState =>
-      this.retrieveStayInContextDataFromMetadataForState((contextState.instance as any).constructor)(
+      (this.retrieveStayInContextCallbackFromMetadata((contextState.instance as any).constructor) as ((...args: any[]) => boolean))(
         currentState.name,
         state,
         contextStates.map(cState => cState.name),
@@ -155,9 +163,13 @@ export class StateMachine implements Transitionable {
     return this.pipeFactory(componentInterfaces.afterIntent);
   }
 
-  // tslint:disable-next-line:ban-types
-  private retrieveStayInContextDataFromMetadataForState(currentStateClass: State.Constructor): (...args: any[]) => boolean {
+  private retrieveStayInContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
     const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
     return metadata ? metadata.stayInContext : undefined;
+  }
+
+  private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
+    const metadata = Reflect.getMetadata(clearContextMetadataKey, currentStateClass);
+    return metadata ? metadata.clearContext : undefined;
   }
 }

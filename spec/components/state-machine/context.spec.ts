@@ -39,9 +39,9 @@ describe("state context decorators", function() {
       });
     });
 
-    describe("with transitioning from A to B to C", function() {
+    describe("with transitioning from A to B to A", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextCState"]);
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextAState"]);
       });
 
       it("does not add states which stayInContext decorator callback returns false to context", async function(this: CurrentThisContext) {
@@ -49,7 +49,7 @@ describe("state context decorators", function() {
         expect(contextStates.map(state => state.name)).not.toContain("ContextBState");
       });
 
-      it("uses undhandledGenericIntent of ContextCState", async function(this: CurrentThisContext) {
+      it("uses undhandledGenericIntent of ContextAState", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("exampleBIntent");
         expect(this.stateMachine.handleIntent).toHaveBeenCalledWith(GenericIntent.Unhandled, "exampleBIntent");
       });
@@ -57,20 +57,18 @@ describe("state context decorators", function() {
       it("just adds states to context at leaving state by transition", async function(this: CurrentThisContext) {
         const contextStates = await this.getContextStates();
         expect(contextStates.length).toBe(1);
-        expect(contextStates.map(state => state.name)).toContain("ContextAState");
-        expect(contextStates.map(state => state.name)).not.toContain("ContextCState");
       });
     });
 
-    describe("with transitioning from A to B to C to A to B", function() {
+    describe("with transitioning from A to B to A to B", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextCState", "ContextAState", "ContextBState"]);
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextAState", "ContextBState"]);
       });
 
-      it("just adds a certain class of state  to context once", async function(this: CurrentThisContext) {
+      it("just adds a certain class of state to context once", async function(this: CurrentThisContext) {
         const contextStates = await this.getContextStates();
         const contextStatesNames = contextStates.map(state => state.name);
-        expect(contextStates.length).toBe(2);
+        expect(contextStates.length).toBe(1);
         expect(contextStatesNames.indexOf("ContextAState")).toBe(contextStatesNames.lastIndexOf("ContextAState"));
       });
     });
