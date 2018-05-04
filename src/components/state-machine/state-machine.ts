@@ -30,7 +30,6 @@ export class StateMachine implements Transitionable {
 
     // execute clearContext callback if decorator is present
     const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata((currentState.instance as any).constructor);
-
     if (clearContextCallbackFn && clearContextCallbackFn(currentState, (await this.getContextStates()).map(cState => cState.name), this.intentHistory)) {
       this.currentSessionFactory().set("__context_states", JSON.stringify([]));
     }

@@ -74,7 +74,32 @@ describe("state context decorators", function() {
     });
   });
 
-  describe("clearContext decorator", function() {});
+  describe("clearContext decorator", function() {
+    describe("with transitioning from A to C", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextCState"]);
+      });
+
+      it("removes ContextAState from context", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("exampleCIntent");
+        const contextStates = await this.getContextStates();
+        expect(contextStates.length).toBe(0);
+      });
+    });
+
+    describe("with transitioning from A to D", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextDState"]);
+      });
+
+      it("keeps ContextAState in context", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("exampleDIntent");
+        const contextStates = await this.getContextStates();
+        expect(contextStates.length).toBe(1);
+        expect(contextStates.map(state => state.name)).toContain("ContextAState");
+      });
+    });
+  });
 });
 
 async function doStateTransitions(stateMachine: StateMachine, states: string[]) {

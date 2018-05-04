@@ -20,6 +20,7 @@ import { UnhandledErrorState } from "../mocks/states/unhandled-error";
 import { UnhandledErrorWithFallbackState } from "../mocks/states/unhandled-error-with-fallback";
 import { extraction } from "../mocks/unifier/extraction";
 import { ResponseHandler } from "../mocks/unifier/handler";
+import { ContextDState } from "../mocks/states/context-d";
 
 /**
  * Creates a test assistant js setup
@@ -41,6 +42,7 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
       ContextAState,
       ContextBState,
       ContextCState,
+      ContextDState,
     ],
     autoBind,
     useChilds,
