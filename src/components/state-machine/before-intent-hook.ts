@@ -1,4 +1,4 @@
-import { inject, injectable, multiInject } from "inversify";
+import { inject, injectable, multiInject, optional } from "inversify";
 import "reflect-metadata";
 import { Filter, Hooks } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
@@ -17,12 +17,12 @@ export class BeforeIntentHook {
 
   constructor(
     @inject(injectionNames.componentSpecificLoggerFactory) loggerFactory: ComponentSpecificLoggerFactory,
+    @optional()
     @multiInject(componentInterfaces.filter)
-    @inject(componentInterfaces.filter)
     filters: Filter.Required[]
   ) {
     this.logger = loggerFactory(COMPONENT_NAME);
-    this.filters = filters;
+    this.filters = typeof filters !== "undefined" ? filters : [];
   }
 
   /** Hook method, the only method which will be called */
