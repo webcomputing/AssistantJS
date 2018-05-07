@@ -3,7 +3,7 @@ import { Filter } from "../../../../src/assistant-source";
 
 @injectable()
 export class TestFilterA implements Filter.Required {
-  public execute() {
+  public async execute() {
     const redirect = {
       state: "FilterAState",
       intent: "filterTestBIntent",
