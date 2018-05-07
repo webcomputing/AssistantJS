@@ -1,4 +1,5 @@
 import { inject, injectable, multiInject } from "inversify";
+import "reflect-metadata";
 import { Filter, Hooks } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
 import { ComponentSpecificLoggerFactory, Logger } from "../root/public-interfaces";
