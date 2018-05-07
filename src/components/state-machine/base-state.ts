@@ -2,7 +2,7 @@ import { injectable, unmanaged } from "inversify";
 import { TranslateHelper } from "../i18n/public-interfaces";
 import { Logger, RequestContext } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
-import { MinimalRequestExtraction, OptionalExtractions, ResponseFactory, Voiceable } from "../unifier/public-interfaces";
+import { ConditionalTypeA, ConditionalTypeB, MinimalRequestExtraction, OptionalExtractions, ResponseFactory, Voiceable } from "../unifier/public-interfaces";
 import { State, Transitionable } from "./public-interfaces";
 
 /**
@@ -70,8 +70,8 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   }
 
   /** Prompts with current unhandled message */
-  public unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any {
-    this.responseFactory.createVoiceResponse().prompt(this.translateHelper.t());
+  public async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any> {
+    this.responseFactory.createVoiceResponse().prompt(await this.translateHelper.t());
   }
 
   /** Sends empty response */
@@ -84,7 +84,8 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * First try is `currentState.currentIntent.platform.device`.
    * @param locals If given: variables to use in response
    */
-  public t(locals?: { [name: string]: string | number | object }): string;
+  // tslint:disable-next-line:function-name
+  public async t(locals?: { [name: string]: string | number | object }): Promise<string>;
 
   /**
    * Translates the given key using your json translations.
@@ -93,9 +94,11 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
    * @param locals Variables to use in reponse
    */
-  public t(key?: string, locals?: { [name: string]: string | number | object }): string;
+  // tslint:disable-next-line:function-name
+  public async t(key?: string, locals?: { [name: string]: string | number | object }): Promise<string>;
 
-  public t(...args: any[]) {
+  // tslint:disable-next-line:function-name
+  public async t(...args: any[]) {
     return (this.translateHelper as any).t(...args);
   }
 
@@ -104,7 +107,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  public prompt(text: string, ...reprompts: string[]) {
+  public prompt<T extends string | Promise<string>, S extends string | Promise<string>>(text: T, ...reprompts: S[]): void {
     return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
   }
 
@@ -112,7 +115,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public endSessionWith(text: string) {
+  public endSessionWith<T extends string | Promise<string>>(text: T): void {
     return this.responseFactory.createVoiceResponse().endSessionWith(text);
   }
 

@@ -20,7 +20,7 @@ export class UnhandledErrorState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  public unhandledGenericIntent(...args: any[]) {
+  public async unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
     throw new Error("Error");
   }

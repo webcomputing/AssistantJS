@@ -1,4 +1,4 @@
-import { State, BaseState } from "assistant-source";
+import { BaseState, State } from "assistant-source";
 import { injectable, unmanaged } from "inversify";
 
 @injectable()
