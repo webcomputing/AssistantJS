@@ -15,9 +15,10 @@ describe("ServerApplication", function() {
 
   describe("execute", function() {
     it("responds to empty requests with 404", async function(done) {
-      const response = await request.get("/any-given-route");
-      expect(response.statusCode).toBe(404);
-      done();
+      request.get("/any-given-route").then(response => {
+        expect(response.statusCode).toBe(404);
+        done();
+      });
     });
   });
 });
