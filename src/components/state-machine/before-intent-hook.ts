@@ -44,7 +44,7 @@ export class BeforeIntentHook {
       }
 
       fittingFilter = this.filters.find(filter => filter.constructor === intentFilter);
-      redirect = fittingFilter ? fittingFilter.execute() : undefined;
+      redirect = fittingFilter ? await fittingFilter.execute() : undefined;
 
       if (redirect) {
         await machine.transitionTo(redirect.state);
@@ -55,7 +55,7 @@ export class BeforeIntentHook {
     }
 
     fittingFilter = this.filters.find(filter => filter.constructor === stateFilter);
-    redirect = fittingFilter ? fittingFilter.execute() : undefined;
+    redirect = fittingFilter ? await fittingFilter.execute() : undefined;
 
     if (redirect) {
       await machine.transitionTo(redirect.state);

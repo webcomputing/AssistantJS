@@ -16,11 +16,7 @@ export namespace State {
      * @param machine Current transitionable interface
      * @param originalIntentMethod Name of intent the state machine tried to call
      */
-    unhandledGenericIntent(
-      machine: Transitionable,
-      originalIntentMethod: string,
-      ...args: any[]
-    ): Promise<any>;
+    unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any>;
 
     /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
@@ -114,7 +110,7 @@ export interface Transitionable {
 
 export namespace Filter {
   export interface Required {
-    execute(...args: any[]): { state: string; intent: string; args: any } | undefined;
+    execute(...args: any[]): Promise<{ state: string; intent: string; args: any } | undefined>;
   }
 
   /** Constructor of state objects */

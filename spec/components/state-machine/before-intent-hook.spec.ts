@@ -34,7 +34,7 @@ describe("BeforeIntentHook", function() {
 
     it("uses no filter", async function(this: CurrentThisContext) {
       await this.stateMachine.handleIntent("filterTestBIntent");
-      expect(this.responseHandler.voiceMessage).toBe(this.translateHelper.t("filter.stateA.intentB"));
+      expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
     });
   });
 
@@ -42,7 +42,7 @@ describe("BeforeIntentHook", function() {
     describe("without state filter decorator", function() {
       it("uses intent filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestAIntent");
-        expect(this.responseHandler.voiceMessage).toBe(this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
     });
 
@@ -53,7 +53,7 @@ describe("BeforeIntentHook", function() {
 
       it("uses state filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestAIntent");
-        expect(this.responseHandler.voiceMessage).toBe(this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
     });
   });
@@ -66,7 +66,7 @@ describe("BeforeIntentHook", function() {
 
       it("uses state filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestBIntent");
-        expect(this.responseHandler.voiceMessage).toBe(this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
     });
   });
