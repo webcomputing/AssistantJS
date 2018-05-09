@@ -1,3 +1,4 @@
+/* tslint:disable */
 import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
 import { Logger } from "../root/public-interfaces";
@@ -34,6 +35,7 @@ export class StateMachine implements Transitionable {
 
       // Abort if not all hooks returned a "success" result
       if (!hookResults.success) {
+        console.log(hookResults.failedHooks[0].hook.name);
         this.logger.info("One of your hooks did not return a successful result. Aborting planned state machine execution.");
         return;
       }

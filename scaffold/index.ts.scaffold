@@ -16,7 +16,7 @@ export const filterSetup = new FilterSetup(assistantJs);
  * @param localStateMachineSetup StateMachineSetup object to initialize 
  * @param addOnly If set to true, states will only be added, but not registered in the dependency injection container
  */
-export function initializeSetups (localAssistantJs: AssistantJSSetup, localStateMachineSetup: StateMachineSetup, addOnly = false) {
+export function initializeSetups (localAssistantJs: AssistantJSSetup, localStateMachineSetup: StateMachineSetup, localFilterSetup: FilterSetup, addOnly = false) {
   // Register all additional AssistantJS components - currently none
 
   // Configure components
@@ -24,12 +24,12 @@ export function initializeSetups (localAssistantJs: AssistantJSSetup, localState
 
   // Register all states and strategies
   localStateMachineSetup.registerByConvention(addOnly);
-  filterSetup.registerByConvention(addOnly)
+  filterSetup.registerByConvention(addOnly);
 }
 
 // Initialize the exported production setups
 assistantJs.registerInternalComponents();
-initializeSetups(assistantJs, stateMachineSetup);
+initializeSetups(assistantJs, stateMachineSetup, filterSetup);
 
 // Print stack traces of rejected promises to console if we are in a non-production environment
 // You possibly want to set up your own behaviour here

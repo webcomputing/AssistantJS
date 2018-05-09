@@ -42,3 +42,8 @@ export type Constructor<T> = new (...args: any[]) => T;
 export interface Mixin<T> {
   new (...args: any[]): T;
 }
+
+// State/Intent-Filter related exports
+export { filter } from "./components/state-machine/filter-decorator";
+export { Filter } from "./components/state-machine/public-interfaces";
+export { FilterSetup } from "./components/state-machine/filter-setup";

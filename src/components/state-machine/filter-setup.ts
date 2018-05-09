@@ -16,7 +16,7 @@ export class FilterSetup {
 
   /**
    * [Sync!] Adds all classes in a specific directory as filters.
-   * @param addOnly If set to true, this method only calls "addState", but not "registerStates" finally
+   * @param addOnly If set to true, this method only calls "addFilter", but not "registerFilters" finally
    * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
    * @param dictionary Dictionary which contains filter classes, defaults to "filters"
    */
