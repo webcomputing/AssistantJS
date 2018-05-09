@@ -110,7 +110,7 @@ export interface Transitionable {
 
 export namespace Filter {
   export interface Required {
-    execute(...args: any[]): Promise<{ state: string; intent: string; args: any } | undefined>;
+    execute(...args: any[]): Promise<{ state: string; intent: string; args: any } | boolean>;
   }
 
   /** Constructor of state objects */

@@ -35,8 +35,6 @@ export class BeforeIntentHook {
     const stateFilters = this.retrieveStateFiltersFromMetadata();
     const intentFilters = this.retrieveIntentFiltersFromMetadata();
 
-    let redirect: { state: string; intent: string; args?: any[] } | undefined;
-
     if (typeof stateFilters === "undefined") {
       if (typeof intentFilters === "undefined") {
         return true;
@@ -44,32 +42,38 @@ export class BeforeIntentHook {
 
       for (const intentFilter of intentFilters) {
         const fittingFilter = this.filters.find(filter => filter.constructor === intentFilter);
-        redirect = fittingFilter ? await fittingFilter.execute() : undefined;
-        if (redirect) {
-          break;
+        if (fittingFilter) {
+          const filterResult = await fittingFilter.execute();
+
+          if (filterResult) {
+            if (typeof filterResult === "object") {
+              await machine.transitionTo(filterResult.state);
+              await machine.handleIntent(filterResult.intent, filterResult.args);
+              return false;
+            }
+          } else {
+            return false;
+          }
         }
       }
-
-      if (redirect) {
-        await machine.transitionTo(redirect.state);
-        await machine.handleIntent(redirect.intent, redirect.args);
-        return false;
-      }
-      return false;
+      return true;
     }
 
     for (const stateFilter of stateFilters) {
       const fittingFilter = this.filters.find(filter => filter.constructor === stateFilter);
-      redirect = fittingFilter ? await fittingFilter.execute() : undefined;
-      if (redirect) {
-        break;
-      }
-    }
+      if (fittingFilter) {
+        const filterResult = await fittingFilter.execute();
 
-    if (redirect) {
-      await machine.transitionTo(redirect.state);
-      await machine.handleIntent(redirect.intent, redirect.args);
-      return false;
+        if (filterResult) {
+          if (typeof filterResult === "object") {
+            await machine.transitionTo(filterResult.state);
+            await machine.handleIntent(filterResult.intent, filterResult.args);
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
     }
     return true;
   };
