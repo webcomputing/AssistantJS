@@ -32,19 +32,23 @@ export class BeforeIntentHook {
     this.stateName = stateName;
     this.intent = intent;
 
-    const stateFilter = this.retrieveStateFilterFromMetadata();
-    const intentFilter = this.retrieveIntentFilterFromMetadata();
+    const stateFilters = this.retrieveStateFiltersFromMetadata();
+    const intentFilters = this.retrieveIntentFiltersFromMetadata();
 
-    let fittingFilter: Filter.Required | undefined;
     let redirect: { state: string; intent: string; args?: any[] } | undefined;
 
-    if (typeof stateFilter === "undefined") {
-      if (typeof intentFilter === "undefined") {
+    if (typeof stateFilters === "undefined") {
+      if (typeof intentFilters === "undefined") {
         return true;
       }
 
-      fittingFilter = this.filters.find(filter => filter.constructor === intentFilter);
-      redirect = fittingFilter ? await fittingFilter.execute() : undefined;
+      for (const intentFilter of intentFilters) {
+        const fittingFilter = this.filters.find(filter => filter.constructor === intentFilter);
+        redirect = fittingFilter ? await fittingFilter.execute() : undefined;
+        if (redirect) {
+          break;
+        }
+      }
 
       if (redirect) {
         await machine.transitionTo(redirect.state);
@@ -54,8 +58,13 @@ export class BeforeIntentHook {
       return false;
     }
 
-    fittingFilter = this.filters.find(filter => filter.constructor === stateFilter);
-    redirect = fittingFilter ? await fittingFilter.execute() : undefined;
+    for (const stateFilter of stateFilters) {
+      const fittingFilter = this.filters.find(filter => filter.constructor === stateFilter);
+      redirect = fittingFilter ? await fittingFilter.execute() : undefined;
+      if (redirect) {
+        break;
+      }
+    }
 
     if (redirect) {
       await machine.transitionTo(redirect.state);
@@ -65,12 +74,12 @@ export class BeforeIntentHook {
     return true;
   };
 
-  private retrieveStateFilterFromMetadata(): Filter.Constructor | undefined {
+  private retrieveStateFiltersFromMetadata(): Filter.Constructor[] | undefined {
     const metadata = Reflect.getMetadata(filterMetadataKey, this.state.constructor);
     return metadata ? metadata.filter : undefined;
   }
 
-  private retrieveIntentFilterFromMetadata(): Filter.Constructor | undefined {
+  private retrieveIntentFiltersFromMetadata(): Filter.Constructor[] | undefined {
     if (typeof this.intent !== "undefined" && typeof this.state[this.intent] !== "undefined") {
       const metadata = Reflect.getMetadata(filterMetadataKey, this.state[this.intent]);
       return metadata ? metadata.filter : undefined;

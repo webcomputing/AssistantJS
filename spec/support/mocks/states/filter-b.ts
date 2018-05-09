@@ -9,7 +9,7 @@ import { TestFilterA } from "../filters/test-filter-a";
 import { TestFilterB } from "../filters/test-filter-b";
 
 @injectable()
-@filter(TestFilterA)
+@filter([TestFilterA])
 export class FilterBState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;
   public extraction: any;
@@ -25,7 +25,7 @@ export class FilterBState extends BaseState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  @filter(TestFilterB)
+  @filter([TestFilterB])
   public filterTestAIntent(...args: any[]) {
     this.endSessionWith(this.t("filter.stateB.intentA"));
   }
