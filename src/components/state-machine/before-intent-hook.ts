@@ -32,35 +32,10 @@ export class BeforeIntentHook {
     this.stateName = stateName;
     this.intent = intent;
 
-    const stateFilters = this.retrieveStateFiltersFromMetadata();
-    const intentFilters = this.retrieveIntentFiltersFromMetadata();
+    const prioritizedFilters = [...this.retrieveStateFiltersFromMetadata(), ...this.retrieveIntentFiltersFromMetadata()];
 
-    if (typeof stateFilters === "undefined") {
-      if (typeof intentFilters === "undefined") {
-        return true;
-      }
-
-      for (const intentFilter of intentFilters) {
-        const fittingFilter = this.filters.find(filter => filter.constructor === intentFilter);
-        if (fittingFilter) {
-          const filterResult = await fittingFilter.execute();
-
-          if (filterResult) {
-            if (typeof filterResult === "object") {
-              await machine.transitionTo(filterResult.state);
-              await machine.handleIntent(filterResult.intent, filterResult.args);
-              return false;
-            }
-          } else {
-            return false;
-          }
-        }
-      }
-      return true;
-    }
-
-    for (const stateFilter of stateFilters) {
-      const fittingFilter = this.filters.find(filter => filter.constructor === stateFilter);
+    for (const prioritizedFilter of prioritizedFilters) {
+      const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilter);
       if (fittingFilter) {
         const filterResult = await fittingFilter.execute();
 
@@ -78,15 +53,16 @@ export class BeforeIntentHook {
     return true;
   };
 
-  private retrieveStateFiltersFromMetadata(): Filter.Constructor[] | undefined {
+  private retrieveStateFiltersFromMetadata(): Filter.Constructor[] {
     const metadata = Reflect.getMetadata(filterMetadataKey, this.state.constructor);
-    return metadata ? metadata.filters : undefined;
+    return metadata ? metadata.filters : [];
   }
 
-  private retrieveIntentFiltersFromMetadata(): Filter.Constructor[] | undefined {
+  private retrieveIntentFiltersFromMetadata(): Filter.Constructor[] {
     if (typeof this.intent !== "undefined" && typeof this.state[this.intent] !== "undefined") {
       const metadata = Reflect.getMetadata(filterMetadataKey, this.state[this.intent]);
-      return metadata ? metadata.filters : undefined;
+      return metadata ? metadata.filters : [];
     }
+    return [];
   }
 }
