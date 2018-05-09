@@ -76,13 +76,13 @@ export class BeforeIntentHook {
 
   private retrieveStateFiltersFromMetadata(): Filter.Constructor[] | undefined {
     const metadata = Reflect.getMetadata(filterMetadataKey, this.state.constructor);
-    return metadata ? metadata.filter : undefined;
+    return metadata ? metadata.filters : undefined;
   }
 
   private retrieveIntentFiltersFromMetadata(): Filter.Constructor[] | undefined {
     if (typeof this.intent !== "undefined" && typeof this.state[this.intent] !== "undefined") {
       const metadata = Reflect.getMetadata(filterMetadataKey, this.state[this.intent]);
-      return metadata ? metadata.filter : undefined;
+      return metadata ? metadata.filters : undefined;
     }
   }
 }

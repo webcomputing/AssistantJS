@@ -24,7 +24,7 @@ export class FilterAState extends BaseState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  @filter([TestFilterA, TestFilterB])
+  @filter(TestFilterA, TestFilterB)
   public filterTestAIntent(...args: any[]) {
     this.endSessionWith(this.t("filter.stateA.intentA"));
   }

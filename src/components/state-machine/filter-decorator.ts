@@ -2,8 +2,8 @@ import { Filter } from "./public-interfaces";
 
 export const filterMetadataKey = Symbol("metadata-key: filter");
 
-export function filter(filterClasses: Filter.Constructor[]) {
-  const metadata = { filter: filterClasses };
+export function filter(...args: Filter.Constructor[]) {
+  const metadata = { filters: args };
 
   return function(targetClass: any, methodName?: string) {
     if (typeof methodName === "undefined") {
