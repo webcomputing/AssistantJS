@@ -170,7 +170,7 @@ describe("ContextDeriver", function() {
 
         it("does not change RequestExtraction", async function() {
           const result = await this.deriver.derive(this.mockRequestContext);
-          expect((result[0] as MinimalRequestExtraction).sessionID).toBe(this.mockExtraction.sessionID);
+          expect(result[0] as MinimalRequestExtraction).toBe(this.mockExtraction);
         });
       });
 
