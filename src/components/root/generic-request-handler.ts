@@ -5,6 +5,7 @@
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
 import { Container, ExecutableExtension } from "inversify-components";
 
+import { AfterContextExtension } from "../state-machine/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 import { ContextDeriver, RequestContext } from "./public-interfaces";
 
@@ -35,7 +36,7 @@ export class GenericRequestHandler {
     container.componentRegistry.autobind(scopedRequestContainer, [], "request", context);
 
     // Execute additional extensions, including our state machine
-    const additionalExtensions = scopedRequestContainer.getAll<ExecutableExtension>(componentInterfaces.afterContextExtension);
+    const additionalExtensions = await Promise.all(scopedRequestContainer.getAll<AfterContextExtension>(componentInterfaces.afterContextExtension));
     additionalExtensions.forEach(e => e.execute());
   }
 

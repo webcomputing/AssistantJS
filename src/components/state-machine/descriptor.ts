@@ -11,6 +11,7 @@ import { ResponseFactory } from "../unifier/response-factory";
 import { componentInterfaces } from "./private-interfaces";
 import { MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
+import { SessionHelper } from "./session-helper";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
 export const descriptor: ComponentDescriptor = {
@@ -100,21 +101,19 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService("current-state-provider").toProvider<{ instance: State.Required; name: string }>(context => {
         return () => {
           const factory = context.container.get<Function>("core:state-machine:state-factory");
-          const currentSessionFactory = context.container.get<() => Session>("core:unifier:current-session-factory");
+
           return context.container
             .get<() => Promise<string>>("core:state-machine:current-state-name-provider")()
             .then(async name => {
-              if (name === null) {
-                name = MAIN_STATE_NAME;
+              const stateName = name === null ? MAIN_STATE_NAME : name;
 
-                // set MainState to session
-                await currentSessionFactory().set("__current_state", name);
-              }
-
-              return { instance: factory(name), name };
+              return { instance: factory(name), name: stateName };
             });
         };
       });
+
+      // add the SessionHelper as beforeStateMachine implementation
+      bindService.bindLocalService(componentInterfaces.beforeStateMachine).to(SessionHelper);
     },
   },
 };

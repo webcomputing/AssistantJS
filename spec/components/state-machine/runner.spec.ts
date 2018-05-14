@@ -1,27 +1,69 @@
 import { Container } from "inversify-components";
-import { componentInterfaces } from "../../../src/components/root/private-interfaces";
+import { AfterContextExtension, AfterStateMachine, BeforeStateMachine } from "../../../src/assistant-source";
+import { componentInterfaces as rootInterfaces } from "../../../src/components/root/private-interfaces";
+import { componentInterfaces as stateMachineInterfaces } from "../../../src/components/state-machine/private-interfaces";
+import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { extraction } from "../../support/mocks/unifier/extraction";
 import { createRequestScope } from "../../support/util/setup";
 
+interface CurrentThisContext {
+  container: Container;
+  specHelper: any;
+  stateMachine: StateMachine;
+  beforeStateMachineImpl: BeforeStateMachine;
+  afterStateMachineImpl: AfterStateMachine;
+  runner: AfterContextExtension;
+}
+
 describe("Runner", function() {
-  beforeEach(function() {
+  beforeEach(function(this: CurrentThisContext) {
     createRequestScope(this.specHelper);
 
-    this.stateMachine = (this.container as Container).inversifyInstance.get("core:state-machine:current-state-machine");
+    this.beforeStateMachineImpl = {
+      execute: () => {
+        return;
+      },
+    };
+    spyOn(this.beforeStateMachineImpl, "execute");
+    this.container.inversifyInstance.bind(stateMachineInterfaces.beforeStateMachine).toConstantValue(this.beforeStateMachineImpl);
+
+    this.afterStateMachineImpl = {
+      execute: () => {
+        return;
+      },
+    };
+    spyOn(this.afterStateMachineImpl, "execute");
+    this.container.inversifyInstance.bind(stateMachineInterfaces.afterStateMachine).toConstantValue(this.afterStateMachineImpl);
+
+    this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
     spyOn(this.stateMachine, "handleIntent");
 
-    this.runner = (this.container as Container).inversifyInstance.get(componentInterfaces.afterContextExtension);
+    this.runner = this.container.inversifyInstance.get(rootInterfaces.afterContextExtension);
   });
 
   describe("when there is an extraction result", function() {
-    it("calls state machine", function() {
-      this.runner.execute();
+    it("calls state machine", async function() {
+      await this.runner.execute();
       expect(this.stateMachine.handleIntent).toHaveBeenCalled();
     });
 
-    it("calls state machine with intent", function() {
-      this.runner.execute();
+    it("calls state machine with intent", async function() {
+      await this.runner.execute();
       expect(this.stateMachine.handleIntent).toHaveBeenCalledWith(extraction.intent);
+    });
+
+    describe("with BeforeStateMachine", function() {
+      it("does call BeforeStateMachine", async function(this: CurrentThisContext) {
+        await this.runner.execute();
+        expect(this.beforeStateMachineImpl.execute).toHaveBeenCalled();
+      });
+    });
+
+    describe("with AfterStateMachine", function() {
+      it("does call AfterStateMachine", async function(this: CurrentThisContext) {
+        await this.runner.execute();
+        expect(this.afterStateMachineImpl.execute).toHaveBeenCalled();
+      });
     });
   });
 
@@ -30,9 +72,23 @@ describe("Runner", function() {
       this.runner.extraction = undefined;
     });
 
-    it("does not call state machine", function() {
-      this.runner.execute();
+    it("does not call state machine", async function() {
+      await this.runner.execute();
       expect(this.stateMachine.handleIntent).not.toHaveBeenCalled();
+    });
+
+    describe("with BeforeStateMachine", function() {
+      it("does not call BeforeStateMachine", async function(this: CurrentThisContext) {
+        await this.runner.execute();
+        expect(this.beforeStateMachineImpl.execute).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("with AfterStateMachine", function() {
+      it("does not call AfterStateMachine", async function(this: CurrentThisContext) {
+        await this.runner.execute();
+        expect(this.afterStateMachineImpl.execute).not.toHaveBeenCalled();
+      });
     });
   });
 });
