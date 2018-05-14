@@ -1,3 +1,7 @@
+version 0.3.1
+- fixes cli command "assistant server" with given port (@AndChr)
+- makes levenshtein comparison in entity dictionary case-insensitive
+
 version 0.3.0
 - promisifies hook api: Hooks aren't based on success() and failure() callbacks anymore, returning a Promise<boolean> instead
 - introduces beforeIntent_ and afterIntent_ methods: These methods may be implemented in states and are called before/after an intent. This may be a good alternative for state-dependent hooks.
