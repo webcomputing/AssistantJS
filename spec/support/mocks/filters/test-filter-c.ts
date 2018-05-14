@@ -10,6 +10,6 @@ export class TestFilterC implements Filter.Required {
   }
   public async execute() {
     await this.machine.handleIntent("filterTestBIntent");
-    return true;
+    return false;
   }
 }

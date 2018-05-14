@@ -39,7 +39,7 @@ export class BeforeIntentHook {
       if (fittingFilter) {
         const filterResult = await fittingFilter.execute();
 
-        if (filterResult) {
+        if (typeof filterResult === "object" || filterResult === false) {
           if (typeof filterResult === "object") {
             await machine.transitionTo(filterResult.state);
             await machine.handleIntent(filterResult.intent, filterResult.args);
