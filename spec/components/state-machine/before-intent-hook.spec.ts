@@ -38,15 +38,21 @@ describe("BeforeIntentHook", function() {
     });
   });
 
-  describe("calling an intent with intent filter decorator", function() {
-    describe("without state filter decorator", function() {
+  describe("calling an intent with an intent filter decorator", function() {
+    describe("without a state filter decorator", function() {
       it("uses intent filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestAIntent");
         expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
+
+      it("uses handling of filter class instead of the original intent", async function(this: CurrentThisContext) {
+        await this.stateMachine.transitionTo("FilterCState");
+        await this.stateMachine.handleIntent("filterTestAIntent");
+        expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateC.intentB"));
+      });
     });
 
-    describe("with state filter decorator", function() {
+    describe("with a state filter decorator", function() {
       beforeEach(async function(this: CurrentThisContext) {
         await this.stateMachine.transitionTo("FilterBState");
       });
@@ -58,8 +64,8 @@ describe("BeforeIntentHook", function() {
     });
   });
 
-  describe("calling an intent with state filter decorator", function() {
-    describe("without intent filter decorator", function() {
+  describe("calling an intent with a state filter decorator", function() {
+    describe("without an intent filter decorator", function() {
       beforeEach(async function(this: CurrentThisContext) {
         await this.stateMachine.transitionTo("FilterBState");
       });

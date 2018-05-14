@@ -90,6 +90,10 @@
     "stateB": {
       "intentA": "FilterBState - filterTestAIntent",
       "intentB": "FilterBState - filterTestBIntent"
+    },
+    "stateC": {
+      "intentA": "FilterCState - filterTestAIntent",
+      "intentB": "FilterCState - filterTestBIntent"
     }
   }
 }

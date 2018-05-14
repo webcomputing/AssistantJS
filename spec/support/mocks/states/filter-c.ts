@@ -5,12 +5,10 @@ import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { filter } from "../../../../src/components/state-machine/filter-decorator";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
-import { TestFilterA } from "../filters/test-filter-a";
-import { TestFilterB } from "../filters/test-filter-b";
+import { TestFilterC } from "../filters/test-filter-c";
 
 @injectable()
-@filter(TestFilterA)
-export class FilterBState extends BaseState implements State.Required {
+export class FilterCState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;
   public extraction: any;
 
@@ -25,12 +23,12 @@ export class FilterBState extends BaseState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  @filter(TestFilterB)
+  @filter(TestFilterC)
   public filterTestAIntent(...args: any[]) {
-    this.endSessionWith(this.t("filter.stateB.intentA"));
+    this.endSessionWith(this.t("filter.stateC.intentA"));
   }
 
   public filterTestBIntent() {
-    this.endSessionWith(this.t("filter.stateB.intentB"));
+    this.endSessionWith(this.t("filter.stateC.intentB"));
   }
 }

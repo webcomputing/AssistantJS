@@ -43,9 +43,7 @@ export class BeforeIntentHook {
           if (typeof filterResult === "object") {
             await machine.transitionTo(filterResult.state);
             await machine.handleIntent(filterResult.intent, filterResult.args);
-            return false;
           }
-        } else {
           return false;
         }
       }
