@@ -10,20 +10,20 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
   }
 
-  public endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeA<T> {
-    if (typeof text !== "string") {
-      (text as Promise<string>).then(value => {
+  public endSessionWith(text: Promise<string>): Promise<void>;
+  public endSessionWith(text: string): void;
+  public endSessionWith(text: string | Promise<string>): void | Promise<void> {
+    if (this.isPromise(text)) {
+      return text.then(value => {
         this.handler.endSession = true;
         this.handler.voiceMessage = this.prepareText(value);
         this.handler.sendResponse();
-        return;
       });
     }
 
     this.handler.endSession = true;
-    this.handler.voiceMessage = this.prepareText(text as string);
-    this.handler.sendResponse();
-    return undefined as any;
+    this.handler.voiceMessage = this.prepareText(text);
+    return this.handler.sendResponse();
   }
 
   public prompt<T extends string | Promise<string>, S extends string | Promise<string>>(inputText: T, ...inputReprompts: S[]): ConditionalTypeB<T, S> {
@@ -31,8 +31,7 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
       this.handler.endSession = false;
       this.handler.voiceMessage = this.prepareText(text);
       this.attachRepromptsIfAny(reprompts);
-      this.handler.sendResponse();
-      return;
+      return this.handler.sendResponse();
     };
 
     if (typeof inputText !== "string" || inputReprompts.some(r => typeof r !== "string")) {
@@ -57,11 +56,8 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
     return text;
   }
 
-  /** checks if an object has any own properties */
-  private isEmpty(obj) {
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) return false;
-    }
-    return true;
+  /** typeguard to check if given value is string or Promise<string> */
+  private isPromise(text: string | Promise<string>): text is Promise<string> {
+    return typeof text !== "string";
   }
 }
