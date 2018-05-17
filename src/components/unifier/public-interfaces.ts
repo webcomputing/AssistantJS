@@ -301,6 +301,14 @@ export namespace OptionalExtractions {
     device: string;
   }
 
+  /** Interface for additional domainspecific Paramters */
+  export interface AdditionalParameters {
+    /**
+     * Key-Value Store for any additional paramters
+     */
+    additionalParameters: { [paramter: string]: any };
+  }
+
   /** For internal feature checking since TypeScript does not emit interfaces */
   // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
