@@ -3,7 +3,7 @@ import { Session } from "../services/public-interfaces";
 import { BeforeStateMachine } from "./public-interfaces";
 
 // Name of the session counter in database
-export const SESSION_COUNTER = "session_counter";
+export const SESSION_COUNTER = "__session_counter";
 
 /**
  * This class increments the SessionCounter before the statemachine is executed
