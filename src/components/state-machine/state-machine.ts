@@ -95,7 +95,7 @@ export class StateMachine implements Transitionable {
 
   /* Private helper methods */
 
-  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again.*/
+  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
     if (typeof state["errorFallback"] === "function") {
       await Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args));

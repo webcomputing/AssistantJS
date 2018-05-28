@@ -63,6 +63,18 @@ export class Session implements SessionInterface {
     });
   }
 
+  public exists(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.redisInstance.hlen(this.documentID, (err, response) => {
+        if (!err) {
+          resolve(response > 0);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
   private get documentID() {
     return "session-" + this.id;
   }
