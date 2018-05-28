@@ -26,7 +26,7 @@ export class Runner implements AfterContextExtension {
       await Promise.all(this.beforeStatemachineExtensions.map(ex => ex.execute()));
 
       // call state machine
-      this.machine.handleIntent(this.extraction.intent);
+      await this.machine.handleIntent(this.extraction.intent);
 
       // call all after state machine extensions
       await Promise.all(this.afterStatemachineExtensions.map(ex => ex.execute()));
