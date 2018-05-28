@@ -296,11 +296,20 @@ export namespace OptionalExtractions {
   export interface Device {
     /**
      * Name of platform-specific device, name is given and filled by platform.
-     * NULLL values are not allowed here: If a platform supports devices, it has to return the used one.
+     * NULL values are not allowed here: If a platform supports devices, it has to return the used one.
      */
     device: string;
   }
 
+  export interface Timestamp {
+    /**
+     * Timestamp of the platform-specific request.
+     * NULL values are not allowed here: If a platform supports Timestamp, it has to return this.
+     */
+    requestTimestamp: string;
+  }
+
+                                                               
   /** Interface for additional domainspecific Paramters */
   export interface AdditionalParameters {
     /**
@@ -313,16 +322,11 @@ export namespace OptionalExtractions {
   // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
     /** Are OAuth tokens available? */
-    OAuthExtraction: ["oAuthToken"],
-
-    /** Is the spoken text available? */
-    SpokenTextExtraction: ["spokenText"],
-
-    /** Is a platform-specific temporal auth token available? */
-    TemporalAuthExtraction: ["temporalAuthToken"],
-
-    /** Are information about the used device available? */
+    OAuthExtraction: ["oAuthToken"] /** Is the spoken text available? */,
+    SpokenTextExtraction: ["spokenText"] /** Is a platform-specific temporal auth token available? */,
+    TemporalAuthExtraction: ["temporalAuthToken"] /** Are information about the used device available? */,
     DeviceExtraction: ["device"],
+    TimestampExtraction: ["requestTimestamp"],
   };
 }
 /** Minimum interface a response handler has to fulfill */
