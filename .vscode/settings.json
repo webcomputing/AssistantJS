@@ -11,4 +11,5 @@
   "gitlens.codeLens.scopes": [
       "document"
   ],
+  "tslint.alwaysShowRuleFailuresAsWarnings": true
 }

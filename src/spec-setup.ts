@@ -31,7 +31,7 @@ export class SpecSetup {
    * @param autobind If true, calls setup.autobind()
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
-   * */
+   */
   public prepare(states: State.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
     this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
