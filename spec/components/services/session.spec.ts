@@ -41,19 +41,22 @@ describe("Session", function() {
       });
 
       it("returns array with my-value", async function(this: CurrentThisContext) {
-        expect(await this.session.find("my-")).toEqual(["my-value"]);
+        expect(await this.session.find("my-")).toEqual({ "my-key": "my-value" });
       });
 
       it("returns array with my-value and not-the-value", async function(this: CurrentThisContext) {
-        expect(await this.session.find("")).toEqual(["my-value", "not-the-value"]);
+        expect(await this.session.find("")).toEqual({
+          "my-key": "my-value",
+          "not-the-key": "not-the-value",
+        });
       });
 
       it("returns array with my-value and not-the-value", async function(this: CurrentThisContext) {
-        expect(await this.session.find("key")).toEqual(["my-value", "not-the-value"]);
+        expect(await this.session.find("key")).toEqual({ "my-key": "my-value", "not-the-key": "not-the-value" });
       });
 
       it("returns array with not-the-value", async function(this: CurrentThisContext) {
-        expect(await this.session.find("the")).toEqual(["not-the-value"]);
+        expect(await this.session.find("the")).toEqual({ "not-the-key": "not-the-value" });
       });
     });
   });

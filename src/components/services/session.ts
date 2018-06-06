@@ -24,17 +24,15 @@ export class Session implements SessionInterface {
     });
   }
 
-  public async find(searchName: string): Promise<string[]> {
+  public async find(searchName: string) {
     const keys = await this.keys(searchName);
-    return new Promise<string[]>((resolve, reject) => {
-      this.redisInstance.hmget(this.documentID, keys, (err, value) => {
-        if (!err) {
-          resolve(value);
-        } else {
-          reject(err);
-        }
-      });
-    });
+    const result: { [name: string]: string } = {};
+
+    for (const key of keys) {
+      result[key] = await this.get(key);
+    }
+
+    return result;
   }
 
   public async set(field: string, value: string): Promise<void> {

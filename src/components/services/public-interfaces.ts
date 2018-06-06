@@ -28,10 +28,10 @@ export interface Session {
   delete(field: string): Promise<void>;
 
   /**
-   * Gets the values of a given session field substring
+   * Get a key value list of stored session data which match the given field substring
    * @param searchName field search name
    */
-  find(searchName: string): Promise<string[]>;
+  find(searchName: string): Promise<{ [name: string]: string }>;
 
   /** Deletes the whole session object */
   deleteAllFields(): Promise<void>;
