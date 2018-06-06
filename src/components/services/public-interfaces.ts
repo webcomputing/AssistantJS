@@ -27,6 +27,12 @@ export interface Session {
    */
   delete(field: string): Promise<void>;
 
+  /**
+   * Gets the values of a given session field substring
+   * @param searchName field search name
+   */
+  find(searchName: string): Promise<string[]>;
+
   /** Deletes the whole session object */
   deleteAllFields(): Promise<void>;
 

@@ -1,6 +1,6 @@
-import { Session, SessionFactory } from "../../../src/assistant-source";
 import { Container } from "inversify-components";
 import { RedisClient } from "redis";
+import { Session, SessionFactory } from "../../../src/assistant-source";
 
 interface CurrentThisContext {
   session: Session;
@@ -29,6 +29,31 @@ describe("Session", function() {
           expect(ttl).toBeCloseTo(1800, 5);
           done();
         });
+      });
+    });
+  });
+
+  describe("find", function() {
+    describe("with existing hash", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.session.set("my-key", "my-value");
+        await this.session.set("not-the-key", "not-the-value");
+      });
+
+      it("returns array with my-value", async function(this: CurrentThisContext) {
+        expect(await this.session.find("my-")).toEqual(["my-value"]);
+      });
+
+      it("returns array with my-value and not-the-value", async function(this: CurrentThisContext) {
+        expect(await this.session.find("")).toEqual(["my-value", "not-the-value"]);
+      });
+
+      it("returns array with my-value and not-the-value", async function(this: CurrentThisContext) {
+        expect(await this.session.find("key")).toEqual(["my-value", "not-the-value"]);
+      });
+
+      it("returns array with not-the-value", async function(this: CurrentThisContext) {
+        expect(await this.session.find("the")).toEqual(["not-the-value"]);
       });
     });
   });

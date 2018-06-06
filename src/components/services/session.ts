@@ -24,6 +24,19 @@ export class Session implements SessionInterface {
     });
   }
 
+  public async find(searchName: string): Promise<string[]> {
+    const keys = await this.keys(searchName);
+    return new Promise<string[]>((resolve, reject) => {
+      this.redisInstance.hmget(this.documentID, keys, (err, value) => {
+        if (!err) {
+          resolve(value);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
   public async set(field: string, value: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.hset(this.documentID, field, value, err => {
@@ -77,5 +90,21 @@ export class Session implements SessionInterface {
 
   private get documentID() {
     return "session-" + this.id;
+  }
+
+  private async keys(searchName?: string): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.redisInstance.hkeys(this.documentID, (err, value) => {
+        if (!err) {
+          const result = searchName ? value.filter(v => v.includes(searchName)) : value;
+          resolve(result);
+
+          // Reset expire counter to maxLifeTime
+          this.redisInstance.expire(this.documentID, this.maxLifeTime);
+        } else {
+          reject(err);
+        }
+      });
+    });
   }
 }
