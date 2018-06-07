@@ -309,7 +309,6 @@ export namespace OptionalExtractions {
     requestTimestamp: string;
   }
 
-                                                               
   /** Interface for additional domainspecific Paramters */
   export interface AdditionalParameters {
     /**
@@ -327,6 +326,7 @@ export namespace OptionalExtractions {
     TemporalAuthExtraction: ["temporalAuthToken"] /** Are information about the used device available? */,
     DeviceExtraction: ["device"],
     TimestampExtraction: ["requestTimestamp"],
+    AdditionalParametersExtraction: ["additionalParameters"],
   };
 }
 /** Minimum interface a response handler has to fulfill */
