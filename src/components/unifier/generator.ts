@@ -84,8 +84,8 @@ export class Generator implements CLIGeneratorExtension {
             return prev;
           }, []) || [])
 
-          // Remove duplicates from this one array
-          .filter((element, position, self) => self.indexOf(element) === position);
+          // Remove duplicates from array
+          parameters = [...new Set(parameters)];
 
         // Check for parameters in utterances which have no mapping
         let unmatchedParameter = parameters.find(name => typeof(parameterMapping[name as string]) === "undefined");
