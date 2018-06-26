@@ -1,3 +1,6 @@
+version 0.3.2
+- fixes intent configuration in generator. Entities will be mapped with utterances only once. (@denselmann)
+
 version 0.3.1
 - fixes cli command "assistant server" with given port (@AndChr)
 - makes levenshtein comparison in entity dictionary case-insensitive
