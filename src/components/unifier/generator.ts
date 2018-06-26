@@ -71,7 +71,7 @@ export class Generator implements CLIGeneratorExtension {
         if (typeof(utterances) === "undefined") utterances = [];
 
         // Associate parameters
-        let parameters = utterances
+        let parameters = (utterances
           // Match all {parameters}
           .map(utterance => utterance.match(/\{(\w+)?\}/g))
 
@@ -82,7 +82,7 @@ export class Generator implements CLIGeneratorExtension {
               curr.forEach(parameter => (prev as string[]).push(parameter.replace(/\{|\}/g, "")));
             }
             return prev;
-          }, []) || []
+          }, []) || [])
 
           // Remove duplicates from this one array
           .filter((element, position, self) => self.indexOf(element) === position);
