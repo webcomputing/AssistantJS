@@ -1,7 +1,7 @@
 import { Hooks } from "inversify-components";
+import { KillSessionService } from "../../../src/components/services/kill-session-service";
+import { componentInterfaces } from "../../../src/components/services/private-interfaces";
 import { Session } from "../../../src/components/services/public-interfaces";
-import { KillSessionService } from "../../../src/components/unifier/kill-session-service";
-import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { createRequestScope } from "../../support/util/setup";
 
 describe("KillSessionService", function() {

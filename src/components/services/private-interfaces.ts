@@ -2,6 +2,8 @@ import { RedisClient } from "redis";
 
 export const componentInterfaces = {
   currentSessionFactory: Symbol("current-session-factory"),
+  afterKillSession: Symbol("hooks-after-kill-session"),
+  beforeKillSession: Symbol("hooks-before-kill-session"),
 };
 
 /** All session storage configuration */

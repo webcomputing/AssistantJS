@@ -2,11 +2,9 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { BindingDescriptor, Component, ComponentDescriptor, ExecutableExtension } from "inversify-components";
 
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
-import { Session } from "../services/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
 import { Generator } from "./generator";
-import { KillSessionService } from "./kill-session-service";
 import { createUnifierLoggerMiddleware } from "./logger-middleware";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import {
@@ -78,14 +76,6 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindGlobalService<EntityDictionary>("current-entity-dictionary")
         .to(EntityDictionaryImpl)
         .inSingletonScope();
-
-      bindService.bindLocalServiceToSelf(KillSessionService);
-      bindService.bindGlobalService("current-kill-session-promise").toProvider(context => {
-        return () => {
-          const killService = context.container.get(KillSessionService);
-          return killService.execute();
-        };
-      });
 
       // Add unifiers logger middleware to current logger
       bindService.bindExtension<LoggerMiddleware>(lookupService.lookup("core:root").getInterface("loggerMiddleware")).toDynamicValue(context => {

@@ -2,6 +2,7 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { Component, ComponentDescriptor } from "inversify-components";
 import { RedisClient } from "redis";
 
+import { KillSessionService } from "./kill-session-service";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
 import { RedisSessionFactory } from "./session-factories/redis-session-factory";
@@ -44,6 +45,15 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
               configuration.sessionStorage.factoryName
             }", but no named binding was found. If you configured your own session storage implementation, did you also bind it to the correct componentInterface with a named binding?`
           );
+        };
+      });
+
+      // Bind kill session service
+      bindService.bindLocalServiceToSelf(KillSessionService);
+      bindService.bindGlobalService("current-kill-session-promise").toProvider(context => {
+        return () => {
+          const killService = context.container.get(KillSessionService);
+          return killService.execute();
         };
       });
     },

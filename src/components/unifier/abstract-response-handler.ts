@@ -2,6 +2,7 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { ExecutableExtension } from "inversify-components";
 import * as util from "util";
 
+import { injectionNames } from "../../injection-names";
 import { RequestContext, ResponseCallback } from "../root/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 import { AfterResponseHandler, BeforeResponseHandler, MinimalResponseHandler, ResponseHandlerExtensions } from "./public-interfaces";
@@ -17,9 +18,9 @@ export abstract class AbstractResponseHandler implements MinimalResponseHandler 
   private canSendResponse: boolean = true;
 
   constructor(
-    @inject("core:root:current-request-context") extraction: RequestContext,
-    @inject("core:unifier:current-kill-session-promise") killSession: () => Promise<void>,
-    @inject("core:unifier:response-handler-extensions") private responseHandlerExtensions: ResponseHandlerExtensions
+    @inject(injectionNames.current.requestContext) extraction: RequestContext,
+    @inject(injectionNames.current.killSessionService) killSession: () => Promise<void>,
+    @inject(injectionNames.current.responseHandlerExtensions) private responseHandlerExtensions: ResponseHandlerExtensions
   ) {
     this.responseCallback = extraction.responseCallback;
     this.killSession = killSession;
