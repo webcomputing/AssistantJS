@@ -1,16 +1,14 @@
 import { RedisClient } from "redis";
-import { Session as SessionInterface } from "./public-interfaces";
+import { Session } from "../public-interfaces";
 
-export class Session implements SessionInterface {
-  public id: string;
-  public redisInstance: RedisClient;
-  public maxLifeTime: number;
-
-  constructor(id: string, redisInstance: RedisClient, maxLifeTime: number) {
-    this.id = id;
-    this.redisInstance = redisInstance;
-    this.maxLifeTime = maxLifeTime;
-  }
+export class RedisSession implements Session {
+  /**
+   * Creates a redis-based session
+   * @param id ID of session
+   * @param redisInstance Instance of redis handler to use
+   * @param maxLifeTime Maximum lifetime of a session
+   */
+  constructor(public id: string, private redisInstance: RedisClient, private maxLifeTime: number) {}
 
   public async get(field: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
