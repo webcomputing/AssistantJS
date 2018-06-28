@@ -1,19 +1,18 @@
-import { Session, SessionFactory } from "../../../src/assistant-source";
-import { Container } from "inversify-components";
+import * as fakeRedis from "fakeredis";
+import { Component, Container } from "inversify-components";
 import { RedisClient } from "redis";
+import { Configuration } from "../../../../src/components/services/private-interfaces";
+import { RedisSession } from "../../../../src/components/services/session-factories/redis-session";
 
 interface CurrentThisContext {
-  session: Session;
-  sessionFactory: SessionFactory;
-  container: Container;
+  session: RedisSession;
   redisInstance: RedisClient;
 }
 
 describe("Session", function() {
   beforeEach(function(this: CurrentThisContext) {
-    this.sessionFactory = this.container.inversifyInstance.get("core:services:session-factory");
-    this.redisInstance = this.container.inversifyInstance.get("core:services:redis-instance");
-    this.session = this.sessionFactory("example-session");
+    this.redisInstance = fakeRedis.createClient({ fast: true });
+    this.session = new RedisSession("example-session", this.redisInstance, 1800);
   });
 
   describe("set", function() {
