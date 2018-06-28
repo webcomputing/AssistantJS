@@ -2,15 +2,12 @@ import { Configuration } from "./private-interfaces";
 
 /** Object describing an AssistantJS session */
 export interface Session {
-  /** Id of session */
-  id: string;
-
   /**
    * Gets the value of a given session field
    * @param {string} field name of field to get the value of
-   * @return {Promise<string>} value of field
+   * @return {Promise<string | undefined>} value of field or undefined if field is not present
    */
-  get(field: string): Promise<string>;
+  get(field: string): Promise<string | undefined>;
 
   /**
    * Sets the value of a given session field

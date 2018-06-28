@@ -10,11 +10,17 @@ export class RedisSession implements Session {
    */
   constructor(public id: string, private redisInstance: RedisClient, private maxLifeTime: number) {}
 
-  public async get(field: string): Promise<string> {
+  public async get(field: string): Promise<string | undefined> {
     return new Promise<string>((resolve, reject) => {
-      this.redisInstance.hget(this.documentID, field, (err, value) => {
+      this.redisInstance.hget(this.documentID, field, (err, value: any) => {
         if (!err) {
-          resolve(value);
+          if (value === null || typeof value === "undefined") {
+            resolve(undefined);
+          } else if (typeof value === "number") {
+            resolve(value.toString());
+          } else {
+            resolve(value);
+          }
         } else {
           reject(err);
         }

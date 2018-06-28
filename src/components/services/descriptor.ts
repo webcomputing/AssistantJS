@@ -5,6 +5,7 @@ import { RedisClient } from "redis";
 import { KillSessionService } from "./kill-session-service";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
+import { PlatformSessionFactory } from "./session-factories/platform-session-factory";
 import { RedisSessionFactory } from "./session-factories/redis-session-factory";
 
 const defaultConfiguration: Configuration.Defaults = {
@@ -26,6 +27,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindExtension<SessionFactory>(componentInterfaces.currentSessionFactory)
         .to(RedisSessionFactory)
         .whenTargetNamed("redis");
+      bindService
+        .bindExtension<SessionFactory>(componentInterfaces.currentSessionFactory)
+        .to(PlatformSessionFactory)
+        .whenTargetNamed("platform");
 
       // Injection to get current session
       bindService.bindGlobalService<CurrentSessionFactory>("current-session-factory").toFactory<Session>(context => {
