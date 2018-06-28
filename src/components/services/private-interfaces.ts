@@ -32,7 +32,10 @@ export namespace Configuration {
      * In addition, you can use "custom" and bind a factory on your own to componentInterfaces.currentSessionFactory named "custom" to handle
      * everything on your own.
      */
-    sessionStorage: { factoryName: "redis"; configuration: SessionConfiguration.Redis } | { factoryName: "platform" } | { factoryName: "custom" };
+    sessionStorage:
+      | { factoryName: "redis"; configuration: SessionConfiguration.Redis }
+      | { factoryName: "platform" }
+      | { factoryName: "custom"; configuration?: any };
   }
 
   /** Required configuration options, no defaults are used here */

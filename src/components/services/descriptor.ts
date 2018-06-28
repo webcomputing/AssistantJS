@@ -3,10 +3,11 @@ import { Component, ComponentDescriptor } from "inversify-components";
 import { RedisClient } from "redis";
 
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { Session as SessionInterface } from "./public-interfaces";
-import { Session } from "./session";
+import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
+import { RedisSessionFactory } from "./session-factories/redis-session-factory";
 
 const defaultConfiguration: Configuration.Defaults = {
+  // Set default session storage to "platform". This way, we don't have any dependencies.
   sessionStorage: { factoryName: "platform" },
 };
 
@@ -15,12 +16,34 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   interfaces: componentInterfaces,
   name: "core:services",
   bindings: {
-    root: bindingService => {
-      bindingService.bindGlobalService<inversifyInterfaces.Factory<SessionInterface>>("session-factory").toFactory<SessionInterface>(context => {
-        return (sessionID: string) => {
-          const redisInstance = context.container.get<RedisClient>("core:services:redis-instance");
+    // tslint:disable-next-line:no-empty
+    root: bindingService => {},
+
+    request: (bindService, lookupService) => {
+      // Bind all AssistantJS session storages
+      bindService
+        .bindExtension<SessionFactory>(componentInterfaces.currentSessionFactory)
+        .to(RedisSessionFactory)
+        .whenTargetNamed("redis");
+
+      // Injection to get current session
+      bindService.bindGlobalService<CurrentSessionFactory>("current-session-factory").toFactory<Session>(context => {
+        return () => {
           const configuration = context.container.get<Component<Configuration.Runtime>>("meta:component//core:services").configuration;
-          return new Session(sessionID, redisInstance, configuration.maxLifeTime);
+
+          // Check if there is a session storage factory bound to this name...
+          if (context.container.isBoundNamed(componentInterfaces.currentSessionFactory, configuration.sessionStorage.factoryName)) {
+            // ... and if so, call getCurrentSession() on it with possible configuration attributes
+            return context.container
+              .getNamed<SessionFactory>(componentInterfaces.currentSessionFactory, configuration.sessionStorage.factoryName)
+              .getCurrentSession("configuration" in configuration.sessionStorage ? configuration.sessionStorage.configuration : undefined);
+          }
+
+          throw new Error(
+            `Tried to return a session storage of type "${
+              configuration.sessionStorage.factoryName
+            }", but no named binding was found. If you configured your own session storage implementation, did you also bind it to the correct componentInterface with a named binding?`
+          );
         };
       });
     },

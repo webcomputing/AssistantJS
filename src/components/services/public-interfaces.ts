@@ -34,13 +34,17 @@ export interface Session {
   exists(): Promise<boolean>;
 }
 
-export interface CurrentSessionFactory {
+/** Implement this factory if you want to create your own session storage */
+export interface SessionFactory {
   /**
    * Returns a session object based on the current extraction result
    * @return {Session}
    */
   getCurrentSession(currentSessionAttributes?: any): Session;
 }
+
+/** Returns a session object describing the current session */
+export type CurrentSessionFactory = () => Session;
 
 /** Configuration object for AssistantJS user for services component */
 export interface ServicesConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
