@@ -34,18 +34,13 @@ export interface Session {
   exists(): Promise<boolean>;
 }
 
-/**
- * Returns a session object for a given id
- * @param {string} id  Id of the session to return
- * @return {Session}
- */
-export type SessionFactory = (id: string) => Session;
-
-/**
- * Returns a session object based on the current extraction result
- * @return {Session}
- */
-export type CurrentSessionFactory = () => Session;
+export interface CurrentSessionFactory {
+  /**
+   * Returns a session object based on the current extraction result
+   * @return {Session}
+   */
+  getCurrentSession(currentSessionAttributes?: any): Session;
+}
 
 /** Configuration object for AssistantJS user for services component */
 export interface ServicesConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
