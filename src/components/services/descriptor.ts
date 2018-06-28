@@ -2,10 +2,12 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { Component, ComponentDescriptor } from "inversify-components";
 import { RedisClient } from "redis";
 
+import { BeforeResponseHandler } from "../../assistant-source";
 import { KillSessionService } from "./kill-session-service";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
 import { PlatformSessionFactory } from "./session-factories/platform-session-factory";
+import { PlatformSessionMirror } from "./session-factories/platform-session-mirror";
 import { RedisSessionFactory } from "./session-factories/redis-session-factory";
 
 const defaultConfiguration: Configuration.Defaults = {
@@ -61,6 +63,9 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           return killService.execute();
         };
       });
+
+      // Bind platform session mirror to componentInterfaces.beforeSendResponse remain in session even if nothing was changed
+      bindService.bindExtension<BeforeResponseHandler>(lookupService.lookup("core:unifier").getInterface("beforeSendResponse")).to(PlatformSessionMirror);
     },
   },
 };
