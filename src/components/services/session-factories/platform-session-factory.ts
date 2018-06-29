@@ -31,7 +31,7 @@ export class PlatformSessionFactory implements SessionFactory {
     throw new Error(
       `The currently used platform (${
         this.extraction.platform
-      }) does not support session data in it's handler. You might want to switch to a redis-based session storage.`
+      }) does not support session data in it's extraction. You might want to switch to a redis-based session storage.`
     );
   }
 }

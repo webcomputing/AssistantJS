@@ -14,9 +14,6 @@ import { intent, MinimalRequestExtraction, MinimalResponseHandler } from "./comp
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
-/** Used for managing multiple spec setups */
-let specSetupId = 0;
-
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecSetup {
   public setup: AssistantJSSetup;
@@ -33,7 +30,6 @@ export class SpecSetup {
    * @param autoSetup If set to true, registers internal components
    */
   public prepare(states: State.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
-    this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
 
@@ -151,22 +147,6 @@ export class SpecSetup {
         )
       );
     });
-  }
-
-  /** Initialize default configuration -> changes redis to mock version */
-  public initializeDefaultConfiguration() {
-    // Set redis instance to fake redis instance
-    const serviceConfiguration: Configuration.Defaults = {
-      sessionStorage: {
-        factoryName: "redis",
-        configuration: {
-          maxLifeTime: 1800,
-          redisClient: fakeRedis.createClient(6379, `redis-spec-setup-${++specSetupId}`, { fast: true }),
-        },
-      },
-    };
-
-    this.setup.addConfiguration<Configuration.Defaults>({ "core:services": serviceConfiguration });
   }
 }
 

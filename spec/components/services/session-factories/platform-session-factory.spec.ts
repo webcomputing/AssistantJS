@@ -28,6 +28,10 @@ describe("PlatformSessionFactory", function() {
 
   describe("#getCurrentSession", function() {
     describe("with responseHandler not having support for sessionData", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        delete this.handler.sessionData;
+      });
+
       describe("with extraction having support for sessionData", function() {
         beforeEach(async function(this: CurrentThisContext) {
           this.extraction.sessionData = null;
@@ -44,8 +48,14 @@ describe("PlatformSessionFactory", function() {
         this.handler.sessionData = null;
       });
 
-      it("throws error", async function(this: CurrentThisContext) {
-        expect(() => this.sessionFactory.getCurrentSession()).toThrowError();
+      describe("with extraction not having support for sessionData", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          delete this.extraction.sessionData;
+        });
+
+        it("throws error", async function(this: CurrentThisContext) {
+          expect(() => this.sessionFactory.getCurrentSession()).toThrowError();
+        });
       });
 
       describe("with extraction having support for sessionData", function() {

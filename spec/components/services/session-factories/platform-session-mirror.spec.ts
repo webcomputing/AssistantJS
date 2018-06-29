@@ -41,6 +41,10 @@ describe("PlatformSessionMirror", function() {
 
   describe("#execute", function() {
     describe("with no compatible responseHandler", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        delete this.handler.sessionData;
+      });
+
       describe("with no session data stored in extraction", function() {
         beforeEach(async function(this: CurrentThisContext) {
           this.mirror = this.buildMirror();
