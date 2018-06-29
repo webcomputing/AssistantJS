@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
-import { Session } from "../services/public-interfaces";
+import { injectionNames } from "../../injection-names";
+import { CurrentSessionFactory, Session } from "../services/public-interfaces";
 import { BeforeStateMachine } from "./public-interfaces";
 
 // Name of the session counter in database
@@ -13,7 +14,7 @@ export class SessionHelper implements BeforeStateMachine {
   /**
    * @param sessionFactory injected to save session data
    */
-  constructor(@inject("core:unifier:current-session-factory") private sessionFactory: () => Session) {}
+  constructor(@inject(injectionNames.current.sessionFactory) private sessionFactory: CurrentSessionFactory) {}
 
   /**
    * This method is the implementation of extensionpoint

@@ -9,13 +9,16 @@ interface CurrentThisContext {
   redisInstance: RedisClient;
 }
 
-describe("Session", function() {
+// Let each redis session spec run in a different fakeRedis environment
+let redisSessionSpecId = 0;
+
+describe("RedisSession", function() {
   beforeEach(function(this: CurrentThisContext) {
-    this.redisInstance = fakeRedis.createClient({ fast: true });
+    this.redisInstance = fakeRedis.createClient(6379, `redisSession-instance-${++redisSessionSpecId}`, { fast: true });
     this.session = new RedisSession("example-session", this.redisInstance, 1800);
   });
 
-  describe("set", function() {
+  describe("#set", function() {
     describe("if successful", function() {
       beforeEach(async function(done) {
         await this.session.set("my-key", "my-value");
@@ -32,7 +35,7 @@ describe("Session", function() {
     });
   });
 
-  describe("exists", function() {
+  describe("#exists", function() {
     describe("with existing hash", function() {
       beforeEach(async function(this: CurrentThisContext) {
         await this.session.set("my-key", "my-value");

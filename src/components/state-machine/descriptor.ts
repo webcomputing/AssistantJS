@@ -93,7 +93,7 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService<State.CurrentNameProvider>("current-state-name-provider").toProvider<string>(context => {
         return () => {
           return context.container
-            .get<() => Session>("core:unifier:current-session-factory")()
+            .get<() => Session>(injectionNames.current.sessionFactory)()
             .get("__current_state")
             .then(sessionValue => {
               return sessionValue ? sessionValue : MAIN_STATE_NAME;
@@ -109,7 +109,7 @@ export const descriptor: ComponentDescriptor = {
           return context.container
             .get<() => Promise<string>>("core:state-machine:current-state-name-provider")()
             .then(async stateName => {
-              return { instance: factory(name), name: stateName };
+              return { instance: factory(stateName), name: stateName };
             });
         };
       });

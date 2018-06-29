@@ -101,9 +101,9 @@ export class SpecSetup {
       }
 
       return machine.handleIntent(typeof intent === "undefined" ? extraction.intent : intent);
-    } else {
-      throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
     }
+
+    throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
   }
 
   /** Registers states */
@@ -156,10 +156,17 @@ export class SpecSetup {
   /** Initialize default configuration -> changes redis to mock version */
   public initializeDefaultConfiguration() {
     // Set redis instance to fake redis instance
-    const serviceConfiguration: Configuration.Required = {
-      redisClient: fakeRedis.createClient(6379, `redis-spec-setup-${++specSetupId}`, { fast: true }),
+    const serviceConfiguration: Configuration.Defaults = {
+      sessionStorage: {
+        factoryName: "redis",
+        configuration: {
+          maxLifeTime: 1800,
+          redisClient: fakeRedis.createClient(6379, `redis-spec-setup-${++specSetupId}`, { fast: true }),
+        },
+      },
     };
-    this.setup.addConfiguration({ "core:services": serviceConfiguration });
+
+    this.setup.addConfiguration<Configuration.Defaults>({ "core:services": serviceConfiguration });
   }
 }
 
@@ -167,6 +174,7 @@ export class SpecSetup {
  * This is an implementation of GenericRequestHandle which DOES NOT spawn a child container,
  * but uses the parent container instead. Nice for testing.
  */
+// tslint:disable-next-line:max-classes-per-file
 export class ChildlessGenericRequestHandler extends GenericRequestHandler {
   public createChildContainer(container) {
     return container.inversifyInstance;
