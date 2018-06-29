@@ -51,10 +51,13 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
     },
 
     request: (bindService, lookupService) => {
-      bindService.bindGlobalService<MinimalResponseHandler>("current-response-handler").toDynamicValue(context => {
-        const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-        return context.container.get<MinimalResponseHandler>(currentExtraction.platform + ":current-response-handler");
-      });
+      bindService
+        .bindGlobalService<MinimalResponseHandler>("current-response-handler")
+        .toDynamicValue(context => {
+          const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
+          return context.container.get<MinimalResponseHandler>(currentExtraction.platform + ":current-response-handler");
+        })
+        .inSingletonScope();
 
       bindService.bindGlobalService<ResponseHandlerExtensions>("response-handler-extensions").toDynamicValue(context => {
         const afterExtensions = context.container.isBound(componentInterfaces.afterSendResponse)
