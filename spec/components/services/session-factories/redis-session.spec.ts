@@ -26,7 +26,7 @@ describe("RedisSession", function() {
       });
 
       it("sets expires counter", function(done) {
-        // We don't have to bother about race conditions here since we are using fakredis in tests :-)
+        // We don't have to bother about race conditions here since we are using fakeredis in tests :-)
         this.redisInstance.ttl(this.session.documentID, function(err, ttl) {
           expect(ttl).toBeCloseTo(1800, 5);
           done();

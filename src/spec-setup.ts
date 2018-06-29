@@ -1,6 +1,5 @@
 import { createLogger } from "bunyan";
 import * as express from "express";
-import * as fakeRedis from "fakeredis";
 import { ContainerImpl } from "inversify-components";
 
 import { ServerApplication } from "./components/root/app-server";

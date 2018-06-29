@@ -1,6 +1,5 @@
 import { interfaces as inversifyInterfaces } from "inversify";
 import { Component, ComponentDescriptor } from "inversify-components";
-import { RedisClient } from "redis";
 
 import { BeforeResponseHandler } from "../../assistant-source";
 import { KillSessionService } from "./kill-session-service";

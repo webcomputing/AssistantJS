@@ -5,7 +5,7 @@ import { Logger } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 
-/** Destroys redis session after session ended */
+/** Destroys (redis-) session after session ended */
 @injectable()
 export class KillSessionService {
   constructor(
