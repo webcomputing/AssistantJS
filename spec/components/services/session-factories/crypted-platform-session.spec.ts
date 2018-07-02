@@ -12,7 +12,7 @@ interface CurrentThisContext {
   createSession(): CryptedPlatformSession;
 }
 
-fdescribe("CryptedPlatformSession", function() {
+describe("CryptedPlatformSession", function() {
   beforeEach(async function(this: CurrentThisContext) {
     this.handlerData = { sessionData: null };
     this.extractionData = { sessionData: null };
@@ -33,11 +33,19 @@ fdescribe("CryptedPlatformSession", function() {
   });
 
   describe("with encryption key given", function() {
-    it("takes the given one", async function(this: CurrentThisContext) {
-      const session = new CryptedPlatformSession(this.extractionData, this.handlerData, "mykey");
+    describe("with length != 32 characters", function() {
+      it("throws exception", async function(this: CurrentThisContext) {
+        expect(() => new CryptedPlatformSession(this.extractionData, this.handlerData, "12345678912345")).toThrow();
+      });
+    });
 
-      // tslint:disable-next-line:no-string-literal
-      expect(session["encryptionKey"]).toEqual("mykey");
+    describe("with length = 32 characters", function() {
+      it("takes the given one", async function(this: CurrentThisContext) {
+        const session = new CryptedPlatformSession(this.extractionData, this.handlerData, "12345678912345678912345678912345");
+
+        // tslint:disable-next-line:no-string-literal
+        expect(session["encryptionKey"]).toEqual("12345678912345678912345678912345");
+      });
     });
   });
 

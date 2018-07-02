@@ -21,7 +21,16 @@ export class CryptedPlatformSession extends PlatformSession {
    */
   constructor(extraction: OptionalExtractions.SessionData, handler: OptionalHandlerFeatures.SessionData, configuredEncryptionKey?: string) {
     super(extraction, handler);
-    this.encryptionKey = typeof configuredEncryptionKey === "string" ? configuredEncryptionKey : CryptedPlatformSession.encryptionKey;
+
+    if (typeof configuredEncryptionKey === "string") {
+      if (configuredEncryptionKey.length === 32) {
+        this.encryptionKey = configuredEncryptionKey;
+      } else {
+        throw new Error("If you configure crypted platform sessions to use your own encryption key, this key has to be 32 characters long.");
+      }
+    } else {
+      this.encryptionKey = CryptedPlatformSession.encryptionKey;
+    }
   }
 
   /** For encryption and decryption: Thanks to http://vancelucas.com/blog/stronger-encryption-and-decryption-in-node-js/ */

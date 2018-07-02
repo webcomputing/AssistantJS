@@ -121,7 +121,7 @@ describe("PlatformSession", function() {
 
     describe("after a change ommited", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.session.set("test", "test");
+        await this.session.set("test", "test");
       });
 
       it("enables new session instance to reflect this change", async function(this: CurrentThisContext) {
@@ -198,7 +198,7 @@ describe("PlatformSession", function() {
 
     describe("with multiple elements in store", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.session.set("key2", "val2");
+        await this.session.set("key2", "val2");
       });
 
       it("removes only this element from store", async function(this: CurrentThisContext) {
