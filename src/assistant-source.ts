@@ -25,8 +25,6 @@ export { GenericRequestHandler } from "./components/root/generic-request-handler
 export { defaultBunyan } from "./components/root/default-bunyan";
 export { StateMachineSetup } from "./components/state-machine/setup";
 export { BaseState } from "./components/state-machine/base-state";
-export { filter } from "./components/state-machine/filter-decorator";
-export { Filter } from "./components/state-machine/public-interfaces";
 export { FilterSetup } from "./components/state-machine/filter-setup";
 export { AbstractResponseHandler } from "./components/unifier/abstract-response-handler";
 export { featureIsAvailable } from "./components/unifier/feature-checker";
