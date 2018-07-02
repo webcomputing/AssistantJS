@@ -256,8 +256,8 @@ describe("TranslateHelper", function() {
       expect(translation).toContain("test");
     });
 
-    it("does not call missingInterpolationExtensions if all interpolations are present", async function(this: CurrentThisContext){
-      await this.translateHelper.t("mySpecificKeys.keyOne");
+    it("does not call missingInterpolationExtensions if all interpolations are present", async function(this: CurrentThisContext) {
+      await this.translateHelper.t("noInterpolation");
       expect(this.missingInterpolationExtension.execute).not.toHaveBeenCalled();
     });
   });
