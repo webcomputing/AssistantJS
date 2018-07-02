@@ -137,6 +137,3 @@ export interface BeforeStateMachine {
  * has same type like interface BeforeStateMachine
  */
 export type AfterStateMachine = BeforeStateMachine;
-
-// export counter name from session-helper
-export { SESSION_COUNTER } from "./session-helper";
