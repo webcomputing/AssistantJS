@@ -11,7 +11,6 @@ import { ResponseFactory } from "../unifier/response-factory";
 import { componentInterfaces } from "./private-interfaces";
 import { MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
-import { SessionHelper } from "./session-helper";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
 export const descriptor: ComponentDescriptor = {
@@ -111,9 +110,6 @@ export const descriptor: ComponentDescriptor = {
             });
         };
       });
-
-      // add the SessionHelper as beforeStateMachine implementation
-      bindService.bindLocalService(componentInterfaces.beforeStateMachine).to(SessionHelper);
     },
   },
 };
