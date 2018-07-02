@@ -43,7 +43,7 @@ describe("with child containers enabled", function() {
       let extractions: any[];
 
       for (let i = 0; i < FIRE_AMOUNT; i++) {
-        extraction[i] = {...extractionData,  message: "My message " + i};
+        extraction[i] = { ...extractionData, message: "My message " + i };
         requests.push(
           new Promise<any>((resolve, reject) => {
             request.post(MockExtractor.fittingPath(), extraction[i]).then(value => resolve(value));

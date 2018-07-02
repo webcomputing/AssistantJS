@@ -93,6 +93,12 @@ export namespace State {
     readonly name: string;
     readonly intents: intent[];
   }
+
+  /** Returns name of current state name. If nothing is stored in session, uses MainState */
+  export type CurrentNameProvider = () => Promise<string>;
+
+  /** Returns name and instance of current state */
+  export type CurrentProvider = () => Promise<{ instance: State.Required; name: string }>;
 }
 
 /** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
@@ -135,6 +141,3 @@ export interface BeforeStateMachine {
  * has same type like interface BeforeStateMachine
  */
 export type AfterStateMachine = BeforeStateMachine;
-
-// export counter name from session-helper
-export { SESSION_COUNTER } from "./session-helper";

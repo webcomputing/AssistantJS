@@ -1,15 +1,12 @@
 import { EntitySet } from "./public-interfaces";
 
 export const componentInterfaces = {
-  afterKillSession: Symbol("hooks-after-kill-session"),
   afterSendResponse: Symbol("after-send-response"),
-  beforeKillSession: Symbol("hooks-before-kill-session"),
   beforeSendResponse: Symbol("before-send-response"),
   entityMapping: Symbol("entity-mapping"),
   platformGenerator: Symbol("platform-generator"),
   requestProcessor: Symbol("request-processor"),
   requestModifier: Symbol("request-modifier"),
-  sessionEndedCallback: Symbol("session-ended-callback"),
   utteranceTemplateService: Symbol("utterance-template-service"),
 };
 

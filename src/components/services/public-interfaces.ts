@@ -2,15 +2,12 @@ import { Configuration } from "./private-interfaces";
 
 /** Object describing an AssistantJS session */
 export interface Session {
-  /** Id of session */
-  id: string;
-
   /**
    * Gets the value of a given session field
    * @param {string} field name of field to get the value of
-   * @return {Promise<string>} value of field
+   * @return {Promise<string | undefined>} value of field or undefined if field is not present
    */
-  get(field: string): Promise<string>;
+  get(field: string): Promise<string | undefined>;
 
   /**
    * Sets the value of a given session field
@@ -34,17 +31,16 @@ export interface Session {
   exists(): Promise<boolean>;
 }
 
-/**
- * Returns a session object for a given id
- * @param {string} id  Id of the session to return
- * @return {Session}
- */
-export type SessionFactory = (id: string) => Session;
+/** Implement this factory if you want to create your own session storage */
+export interface SessionFactory {
+  /**
+   * Returns a session object based on the current extraction result
+   * @return {Session}
+   */
+  getCurrentSession(currentSessionAttributes?: any): Session;
+}
 
-/**
- * Returns a session object based on the current extraction result
- * @return {Session}
- */
+/** Returns a session object describing the current session */
 export type CurrentSessionFactory = () => Session;
 
 /** Configuration object for AssistantJS user for services component */
