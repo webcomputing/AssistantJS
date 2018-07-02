@@ -2,7 +2,6 @@
 export const injectionNames = {
   i18nWrapper: "core:i18n:wrapper",
   i18nTranslateValuesFor: "core:i18n:translate-values-for",
-  redisInstance: "core:services:redis-instance",
   stateFactory: "core:state-machine:state-factory",
   logger: "core:root:logger",
   eventBus: "core:root:event-bus",
@@ -13,11 +12,14 @@ export const injectionNames = {
     stateNameProvider: "core:state-machine:current-state-name-provider",
     stateProvider: "core:state-machine:current-state-provider",
     stateSetupSet: "core:state-machine:current-state-setup-set",
-    sessionFactory: "core:unifier:current-session-factory",
+    sessionFactory: "core:services:current-session-factory",
     extraction: "core:unifier:current-extraction",
     responseFactory: "core:unifier:current-response-factory",
     entityDictionary: "core:unifier:current-entity-dictionary",
     responseHandler: "core:unifier:current-response-handler",
     logger: "core:root:current-logger",
+    killSessionService: "core:services:current-kill-session-promise",
+    requestContext: "core:root:current-request-context",
+    responseHandlerExtensions: "core:unifier:response-handler-extensions",
   },
 };

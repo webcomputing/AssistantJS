@@ -28,7 +28,7 @@ describe("ContextDeriver", function() {
     describe("with a valid extractor registered", function() {
       beforeEach(function() {
         (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-        (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+        (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
       });
 
       describe("when an invalid request was sent", function() {
@@ -46,7 +46,7 @@ describe("ContextDeriver", function() {
       });
 
       describe("when a valid request was sent", function() {
-        const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform };
+        const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
         beforeEach(async function(done) {
           [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
@@ -66,11 +66,11 @@ describe("ContextDeriver", function() {
         beforeEach(function() {
           (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
           (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(SpokenTextExtractor);
-          (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+          (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
         });
 
         describe("when a valid request was sent", function() {
-          const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform };
+          const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
           beforeEach(async function(done) {
             [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
@@ -78,7 +78,7 @@ describe("ContextDeriver", function() {
             done();
           });
 
-          it("uses feature richer extractor", function() {
+          it("uses extractor with more implemented features", function() {
             const extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
             expect(extraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
           });
@@ -90,14 +90,14 @@ describe("ContextDeriver", function() {
   describe("with a valid extractor configured", function() {
     beforeEach(function() {
       (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
 
       // Craete mock extraction and a fitting request context for it
       this.mockExtraction = createExtraction("myTest", { testEntity: "value1", testEntity2: "value2" });
       this.mockRequestContext = createContext("POST", "/fitting_path", this.mockExtraction);
     });
 
-    describe("derive", function() {
+    describe("#derive", function() {
       beforeEach(function() {
         // Grab deriver
         this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
@@ -129,6 +129,7 @@ describe("ContextDeriver", function() {
               intent: "myTest",
               language: "**filtered**",
               platform: "**filtered**",
+              sessionData: "**filtered**",
             });
             done();
           });
@@ -147,6 +148,7 @@ describe("ContextDeriver", function() {
               intent: "**filtered**",
               language: "**filtered**",
               platform: "**filtered**",
+              sessionData: "**filtered**",
             });
             done();
           });
@@ -155,7 +157,7 @@ describe("ContextDeriver", function() {
         describe("with default whitelist", function() {
           it("filters everything except intent, language and platform", async function(done) {
             await this.deriver.derive(this.mockRequestContext);
-            this.expectLoggingWithExtraction({ ...this.mockExtraction, sessionID: "**filtered**", entities: "**filtered**" });
+            this.expectLoggingWithExtraction({ ...this.mockExtraction, sessionID: "**filtered**", entities: "**filtered**", sessionData: "**filtered**" });
             done();
           });
         });
@@ -168,9 +170,12 @@ describe("ContextDeriver", function() {
           this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
         });
 
-        it("does not change RequestExtraction", async function() {
+        it("does not change RequestExtraction, expect for sessionid", async function() {
           const result = await this.deriver.derive(this.mockRequestContext);
-          expect(result[0] as MinimalRequestExtraction).toBe(this.mockExtraction);
+          expect(result[0] as MinimalRequestExtraction).toEqual({
+            ...this.mockExtraction,
+            sessionID: `${this.mockExtraction.platform}-${this.mockExtraction.sessionID}`,
+          });
         });
       });
 

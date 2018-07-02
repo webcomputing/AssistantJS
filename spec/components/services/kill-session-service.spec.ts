@@ -1,18 +1,19 @@
 import { Hooks } from "inversify-components";
+import { KillSessionService } from "../../../src/components/services/kill-session-service";
+import { componentInterfaces } from "../../../src/components/services/private-interfaces";
 import { Session } from "../../../src/components/services/public-interfaces";
-import { KillSessionService } from "../../../src/components/unifier/kill-session-service";
-import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
+import { injectionNames } from "../../../src/injection-names";
 import { createRequestScope } from "../../support/util/setup";
 
 describe("KillSessionService", function() {
   beforeEach(function() {
     createRequestScope(this.specHelper);
 
-    this.killSession = this.container.inversifyInstance.get("core:unifier:current-kill-session-promise");
+    this.killSession = this.container.inversifyInstance.get(injectionNames.current.killSessionService);
 
     /** Sets some example session data */
     this.setSessionData = () => {
-      this.currentSessionFactory = this.container.inversifyInstance.get("core:unifier:current-session-factory");
+      this.currentSessionFactory = this.container.inversifyInstance.get(injectionNames.current.sessionFactory);
       const currentSession: Session = this.currentSessionFactory();
 
       return currentSession.set("testField", "testValue");
@@ -50,7 +51,7 @@ describe("KillSessionService", function() {
       it("deletes session data", async function(done) {
         await this.killSession();
         const result = await this.getSessionData();
-        expect(result).toBeNull();
+        expect(result).toBeUndefined();
         done();
       });
     });
@@ -118,7 +119,7 @@ describe("KillSessionService", function() {
       it("deletes session data", async function(done) {
         await this.killSession();
         const result = await this.getSessionData();
-        expect(result).toBeNull();
+        expect(result).toBeUndefined();
         done();
       });
     });

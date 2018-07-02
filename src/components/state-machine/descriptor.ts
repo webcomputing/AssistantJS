@@ -25,6 +25,7 @@ export const descriptor: ComponentDescriptor = {
       bindService.bindGlobalService<State.Factory>("state-factory").toFactory<State.Required>(context => {
         return (stateName?: string) => {
           if (typeof stateName === "undefined" || stateName === null || stateName === "") {
+            // tslint:disable-next-line:no-parameter-reassignment
             stateName = MAIN_STATE_NAME;
           }
 
@@ -87,26 +88,27 @@ export const descriptor: ComponentDescriptor = {
         .to(StateMachineImpl)
         .inSingletonScope();
 
-      // Provider for current state name: Gets the name of the current state from session. Returns NULL if current state is not present.
-      bindService.bindGlobalService<Promise<string>>("current-state-name-provider").toProvider<string>(context => {
+      // Provider for current state name: Gets the name of the current state from session. Returns MAIN STATE if nothing is saved in session.
+      bindService.bindGlobalService<State.CurrentNameProvider>("current-state-name-provider").toProvider<string>(context => {
         return () => {
           return context.container
-            .get<() => Session>("core:unifier:current-session-factory")()
-            .get("__current_state");
+            .get<() => Session>(injectionNames.current.sessionFactory)()
+            .get("__current_state")
+            .then(sessionValue => {
+              return sessionValue ? sessionValue : MAIN_STATE_NAME;
+            });
         };
       });
 
       // Provider for current state. Returns current state or MAIN STATE if no state is present.
-      bindService.bindGlobalService("current-state-provider").toProvider<{ instance: State.Required; name: string }>(context => {
+      bindService.bindGlobalService<State.CurrentProvider>("current-state-provider").toProvider<{ instance: State.Required; name: string }>(context => {
         return () => {
-          const factory = context.container.get<Function>("core:state-machine:state-factory");
+          const factory = context.container.get<State.Factory>("core:state-machine:state-factory");
 
           return context.container
             .get<() => Promise<string>>("core:state-machine:current-state-name-provider")()
-            .then(async name => {
-              const stateName = name === null ? MAIN_STATE_NAME : name;
-
-              return { instance: factory(name), name: stateName };
+            .then(async stateName => {
+              return { instance: factory(stateName), name: stateName };
             });
         };
       });
