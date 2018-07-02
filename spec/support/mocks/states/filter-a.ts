@@ -7,6 +7,7 @@ import { State } from "../../../../src/components/state-machine/public-interface
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 import { TestFilterA } from "../filters/test-filter-a";
 import { TestFilterB } from "../filters/test-filter-b";
+import { TestFilterD } from "../filters/test-filter-d";
 
 @injectable()
 export class FilterAState extends BaseState implements State.Required {
@@ -24,12 +25,22 @@ export class FilterAState extends BaseState implements State.Required {
     this.responseFactory = responseFactory;
   }
 
-  @filter(TestFilterA, TestFilterB)
+  @filter(TestFilterA)
   public filterTestAIntent(...args: any[]) {
     this.endSessionWith(this.t("filter.stateA.intentA"));
   }
 
   public filterTestBIntent() {
     this.endSessionWith(this.t("filter.stateA.intentB"));
+  }
+
+  @filter(TestFilterD, TestFilterA)
+  public filterTestCIntent() {
+    this.endSessionWith(this.t("filter.stateA.intentC"));
+  }
+
+  @filter(TestFilterA, TestFilterB)
+  public filterTestDIntent() {
+    this.endSessionWith(this.t("filter.stateA.intentD"));
   }
 }

@@ -76,4 +76,20 @@ describe("BeforeIntentHook", function() {
       });
     });
   });
+
+  describe("calling an intent with two intent filters", function() {
+    describe("with the first one redirecting", function() {
+      it("properly redirects", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("filterTestDIntent");
+        expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+      });
+    });
+
+    describe("with the second one redirecting", function() {
+      it("properly redirects", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("filterTestCIntent");
+        expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+      });
+    });
+  });
 });

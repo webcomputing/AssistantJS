@@ -85,7 +85,9 @@
   "filter": {
     "stateA": {
       "intentA": "FilterAState - filterTestAIntent",
-      "intentB": "FilterAState - filterTestBIntent"
+      "intentB": "FilterAState - filterTestBIntent",
+      "intentC": "FilterAState - filterTestCIntent",
+      "intentD": "FilterAState - filterTestDIntent"
     },
     "stateB": {
       "intentA": "FilterBState - filterTestAIntent",
