@@ -8,6 +8,7 @@ export const componentInterfaces = {
   entityMapping: Symbol("entity-mapping"),
   platformGenerator: Symbol("platform-generator"),
   requestProcessor: Symbol("request-processor"),
+  requestModifier: Symbol("request-modifier"),
   sessionEndedCallback: Symbol("session-ended-callback"),
   utteranceTemplateService: Symbol("utterance-template-service"),
 };

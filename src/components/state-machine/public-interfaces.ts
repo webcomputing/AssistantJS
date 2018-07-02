@@ -1,3 +1,4 @@
+import { ExecutableExtension } from "inversify-components";
 import { TranslateHelper } from "../i18n/translate-helper";
 import { Logger, RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
@@ -111,3 +112,29 @@ export interface Transitionable {
   /** Jumps to given intent in current state */
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
+
+/**
+ * This interface represents extensions which are used after the context is set. e.g the StateMachine
+ */
+export interface AfterContextExtension extends ExecutableExtension {
+  execute(): any | Promise<any>;
+}
+
+/**
+ * Extensions of this type can are executed before the statemachine is executed
+ */
+export interface BeforeStateMachine {
+  /**
+   * Method which gets executed automatically, can be either sync with return tpye void or async with return type Promise<void>
+   */
+  execute(): void | Promise<void>;
+}
+
+/**
+ * Extensions of this type are executed after the statemachine is executed.
+ * has same type like interface BeforeStateMachine
+ */
+export type AfterStateMachine = BeforeStateMachine;
+
+// export counter name from session-helper
+export { SESSION_COUNTER } from "./session-helper";
