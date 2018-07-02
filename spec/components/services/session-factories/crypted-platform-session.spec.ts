@@ -75,4 +75,24 @@ describe("CryptedPlatformSession", function() {
       expect(await this.session.decrypt(crypted)).toEqual(clearText);
     });
   });
+
+  describe("#set", function() {
+    it("encrypts handlers output", async function(this: CurrentThisContext) {
+      await this.session.set("a", "b");
+      expect(this.session.decrypt(this.handlerData.sessionData as string)).toEqual(JSON.stringify({ a: "b" }));
+    });
+  });
+
+  describe("#get", function() {
+    it("works after set()", async function(this: CurrentThisContext) {
+      await this.session.set("a", "b");
+      expect(await this.session.get("a")).toEqual("b");
+    });
+
+    it("works for prefilled session", async function(this: CurrentThisContext) {
+      this.session = this.createSession();
+      this.extractionData.sessionData = await this.session.encrypt(JSON.stringify({ c: "d" }));
+      expect(await this.session.get("c")).toEqual("d");
+    });
+  });
 });
