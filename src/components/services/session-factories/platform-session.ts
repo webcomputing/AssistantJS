@@ -8,41 +8,41 @@ import { Session } from "../public-interfaces";
 export class PlatformSession implements Session {
   constructor(private extraction: OptionalExtractions.SessionData, private handler: OptionalHandlerFeatures.SessionData) {}
 
-  public get(field: string): Promise<string | undefined> {
-    return Promise.resolve(this.getLatestSessionData()[field]);
+  public async get(field: string): Promise<string | undefined> {
+    return (await this.getLatestSessionData())[field];
   }
 
-  public set(field: string, value: string): Promise<void> {
-    const existing = this.getLatestSessionData();
+  public async set(field: string, value: string): Promise<void> {
+    const existing = await this.getLatestSessionData();
     existing[field] = value;
-    return Promise.resolve(this.storeSessionData(existing));
+    return this.storeSessionData(existing);
   }
 
-  public delete(field: string): Promise<void> {
-    const existing = this.getLatestSessionData();
+  public async delete(field: string): Promise<void> {
+    const existing = await this.getLatestSessionData();
     delete existing[field];
-    return Promise.resolve(this.storeSessionData(existing));
+    return this.storeSessionData(existing);
   }
 
   public deleteAllFields(): Promise<void> {
-    return Promise.resolve(this.storeSessionData({}));
+    return this.storeSessionData({});
   }
 
-  public exists(): Promise<boolean> {
-    return Promise.resolve(Object.keys(this.getLatestSessionData()).length > 0);
+  public async exists(): Promise<boolean> {
+    return Object.keys(await this.getLatestSessionData()).length > 0;
   }
 
   /**
    * Returns latest session data. Gets them from extraction or checks if nothing is already stored in handler.
    * We have to priorize the handler's data to get eventually changed data
    */
-  protected getLatestSessionData() {
+  protected getLatestSessionData(): Promise<{ [key: string]: string }> {
     if (this.handler.sessionData === null) {
       // Current handler does not have any session data yet. So this is the first call. Let's get session data from extraction
       // and update handler if there is anything in extraction
       if (this.extraction.sessionData === null) {
         // There is nothing in extraction, too. Let's return {} and don't update handler yet.
-        return {};
+        return Promise.resolve({});
       }
 
       // There is sth in extraction's sessionData. We have to return it decoded
@@ -55,18 +55,18 @@ export class PlatformSession implements Session {
   }
 
   /** Stores current session data -> sets them to handler */
-  protected storeSessionData(newSessionData: { [key: string]: string }) {
+  protected async storeSessionData(newSessionData: { [key: string]: string }) {
     // We cannot send this to null if there are no elements left, because this will always fall back to extraction (if there is data in extraction.)
-    this.handler.sessionData = this.encode(newSessionData);
+    this.handler.sessionData = await this.encode(newSessionData);
   }
 
   /** Decodes stored session data */
-  protected decode(encodedSessionData: string) {
-    return JSON.parse(encodedSessionData);
+  protected async decode(encodedSessionData: string): Promise<{ [key: string]: string }> {
+    return Promise.resolve(JSON.parse(encodedSessionData));
   }
 
   /** Encodes stored session data */
-  protected encode(encodedSessionData: object) {
-    return JSON.stringify(encodedSessionData);
+  protected async encode(encodedSessionData: object): Promise<string> {
+    return Promise.resolve(JSON.stringify(encodedSessionData));
   }
 }

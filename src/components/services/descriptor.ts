@@ -5,6 +5,7 @@ import { BeforeResponseHandler } from "../../assistant-source";
 import { KillSessionService } from "./kill-session-service";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
+import { CryptedPlatformSessionFactory } from "./session-factories/crypted-platform-session-factory";
 import { PlatformSessionFactory } from "./session-factories/platform-session-factory";
 import { PlatformSessionMirror } from "./session-factories/platform-session-mirror";
 import { RedisSessionFactory } from "./session-factories/redis-session-factory";
@@ -32,6 +33,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindExtension<SessionFactory>(componentInterfaces.currentSessionFactory)
         .to(PlatformSessionFactory)
         .whenTargetNamed("platform");
+      bindService
+        .bindExtension<SessionFactory>(componentInterfaces.currentSessionFactory)
+        .to(CryptedPlatformSessionFactory)
+        .whenTargetNamed("cryptedPlatform");
 
       // Injection to get current session
       bindService.bindGlobalService<CurrentSessionFactory>("current-session-factory").toFactory<Session>(context => {
