@@ -15,12 +15,12 @@ export class EventBusHandler implements EventBus {
 
   public getObservable(eventName: string | symbol): Observable<AssistantJSEvent> {
     this.initializeSubject(eventName);
-    return this.subjects[eventName].asObservable();
+    return this.subjects[eventName as string].asObservable();
   }
 
   public publish(event: AssistantJSEvent): void {
     this.initializeSubject(event.name);
-    this.subjects[event.name].next(event);
+    this.subjects[event.name as string].next(event);
   }
 
   public subscribe(eventName: string | symbol, observer: Observer<AssistantJSEvent>): void {
@@ -29,8 +29,8 @@ export class EventBusHandler implements EventBus {
 
   /** Asks all extensions if they want to subscribe to this event = subject */
   private initializeSubject(eventName: string | symbol) {
-    if (!this.subjects[eventName]) {
-      this.subjects[eventName] = new Subject<AssistantJSEvent>();
+    if (!this.subjects[eventName as string]) {
+      this.subjects[eventName as string] = new Subject<AssistantJSEvent>();
 
       this.eventHandler.forEach(handler => {
         const subscriber = handler.getSubscriber(eventName);

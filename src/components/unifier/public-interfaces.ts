@@ -309,7 +309,13 @@ export namespace OptionalExtractions {
     requestTimestamp: string;
   }
 
-                                                               
+  export interface SessionData {
+    /**
+     * Blob of all session data or NULL, if current request doesn't contain any session data.
+     */
+    sessionData: string | null;
+  }
+
   /** Interface for additional domainspecific Paramters */
   export interface AdditionalParameters {
     /**
@@ -327,6 +333,7 @@ export namespace OptionalExtractions {
     TemporalAuthExtraction: ["temporalAuthToken"] /** Are information about the used device available? */,
     DeviceExtraction: ["device"],
     TimestampExtraction: ["requestTimestamp"],
+    SessionData: ["sessionData"],
   };
 }
 /** Minimum interface a response handler has to fulfill */
@@ -365,6 +372,14 @@ export namespace OptionalHandlerFeatures {
   export interface Reprompt {
     /** Reprompts for the current voice message */
     reprompts: string[] | null;
+  }
+
+  /** If implemented, the response handler's platform supports storing of session data */
+  export interface SessionData {
+    /**
+     * Blob of all session data to set or NULL if we don't want to set any session data.
+     */
+    sessionData: string | null;
   }
 
   export namespace GUI {
@@ -421,6 +436,9 @@ export namespace OptionalHandlerFeatures {
 
     /** Does this response handler support suggestion chips? */
     SuggestionChip: ["suggestionChips"],
+
+    /** Does this response handler support storing of session data? */
+    SessionData: ["sessionData"],
   };
 }
 

@@ -61,7 +61,7 @@ export class EntityDictionary implements EntityDictionaryInterface {
 
   public async readFromSession(session: Session, preferCurrentStore = true, storeKey = "__currentEntityStore") {
     const storedData = await session.get(storeKey);
-    const storedEntities = storedData === null ? {} : JSON.parse(storedData);
+    const storedEntities = typeof storedData === "undefined" ? {} : JSON.parse(storedData);
     this.store = preferCurrentStore ? { ...storedEntities, ...this.store } : { ...this.store, ...storedEntities };
   }
 }

@@ -22,7 +22,7 @@ export class MockExtractor implements RequestExtractor {
   /** Returns the whole body as extraction result */
   public extract(context: RequestContext): Promise<any> {
     return new Promise(resolve => {
-      resolve(context.body);
+      resolve({ sessionData: null, ...context.body });
     });
   }
 
