@@ -15,9 +15,7 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
   public endSessionWith(text: string | Promise<string>): void | Promise<void> {
     if (this.isPromise(text)) {
       return text.then(value => {
-        this.handler.endSession = true;
-        this.handler.voiceMessage = this.prepareText(value);
-        this.handler.sendResponse();
+        this.endSessionWith(value);
       });
     }
 
