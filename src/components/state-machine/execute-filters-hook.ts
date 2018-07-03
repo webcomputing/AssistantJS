@@ -38,11 +38,13 @@ export class ExecuteFiltersHook {
       if (fittingFilter) {
         const filterResult = await fittingFilter.execute();
 
-        if (typeof filterResult === "object" || filterResult === false) {
-          if (typeof filterResult === "object") {
-            await machine.transitionTo(filterResult.state);
-            await machine.handleIntent(filterResult.intent, filterResult.args);
-          }
+        if (typeof filterResult === "object") {
+          await machine.transitionTo(filterResult.state);
+          await machine.handleIntent(filterResult.intent, filterResult.args);
+          return false;
+        }
+
+        if (filterResult === false) {
           return false;
         }
       } else {
