@@ -8,10 +8,10 @@ import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { ResponseFactory } from "../unifier/response-factory";
 
-import { Filter, Hooks } from "../../assistant-source";
+import { Hooks } from "../joined-interfaces";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
-import { MAIN_STATE_NAME, State } from "./public-interfaces";
+import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
