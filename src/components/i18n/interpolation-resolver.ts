@@ -24,10 +24,13 @@ export class InterpolationResolver implements InterpolationResolverInterface {
    * @param translatedValue text containing missing interpolations
    */
   public async resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string> {
+    if (!translatedValue.includes("~")) {
+      return translatedValue;
+    }
+    const interpolations = translatedValue.split(/(?<=\*~~)(.*?)(?=\~~*)/g, undefined).filter(value => value.includes("~") === false);
     let text = translatedValue;
 
-    while (text.includes("*~~") && text.includes("~~*")) {
-      const interpolation = text.split("*~~")[1].split("~~*")[0];
+    for (const interpolation of interpolations) {
       const missingInterpolationExtensionsPromises = this.missingInterpolationExtensions.map(missingInterpolationExtension =>
         missingInterpolationExtension.execute(interpolation, translateHelper)
       );
@@ -35,8 +38,8 @@ export class InterpolationResolver implements InterpolationResolverInterface {
 
       for (const value of interpolationValues) {
         if (typeof value !== "undefined") {
-          text = text.replace("*~~" + interpolation + "~~*", value);
-          return text;
+          text = translatedValue.replace("*~~" + interpolation + "~~*", value);
+          return this.resolveMissingInterpolations(text, translateHelper);
         }
       }
       this.logger.warn(
@@ -45,8 +48,8 @@ export class InterpolationResolver implements InterpolationResolverInterface {
         } registered missingInterpolationExtensions provided a value. Now using "" instead.`
       );
 
-      text = text.replace("*~~" + interpolation + "~~*", "");
+      text = translatedValue.replace("*~~" + interpolation + "~~*", "");
     }
-    return text;
+    return this.resolveMissingInterpolations(text, translateHelper);
   }
 }
