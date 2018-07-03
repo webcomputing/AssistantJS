@@ -1,14 +1,13 @@
 import { inject, injectable, multiInject, optional } from "inversify";
-import "reflect-metadata";
-import { Filter, Hooks } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
 import { ComponentSpecificLoggerFactory, Logger } from "../root/public-interfaces";
+import { Hooks } from "./../joined-interfaces";
 import { filterMetadataKey } from "./filter-decorator";
 import { COMPONENT_NAME, componentInterfaces } from "./private-interfaces";
-import { State } from "./public-interfaces";
+import { Filter, State } from "./public-interfaces";
 
 @injectable()
-export class BeforeIntentHook {
+export class ExecuteFiltersHook {
   private state!: State.Required;
   private stateName!: string;
   private intent!: string;
@@ -46,6 +45,8 @@ export class BeforeIntentHook {
           }
           return false;
         }
+      } else {
+        this.logger.warn(`No matching filter class found for ${prioritizedFilter.name}`);
       }
     }
     return true;

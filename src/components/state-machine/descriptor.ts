@@ -9,7 +9,7 @@ import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { ResponseFactory } from "../unifier/response-factory";
 
 import { Filter, Hooks } from "../../assistant-source";
-import { BeforeIntentHook } from "./before-intent-hook";
+import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
 import { MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
@@ -111,12 +111,12 @@ export const descriptor: ComponentDescriptor = {
         };
       });
 
-      bindService.bindLocalServiceToSelf(BeforeIntentHook);
+      bindService.bindLocalServiceToSelf(ExecuteFiltersHook);
 
       // Returns before intent hook
       bindService
         .bindExtension<Hooks.BeforeIntentHook>(lookupService.lookup("core:state-machine").getInterface("beforeIntent"))
-        .toDynamicValue(context => context.container.get(BeforeIntentHook).execute);
+        .toDynamicValue(context => context.container.get(ExecuteFiltersHook).execute);
     },
   },
 };
