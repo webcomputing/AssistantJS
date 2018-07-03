@@ -24,11 +24,16 @@ export class InterpolationResolver implements InterpolationResolverInterface {
    * @param translatedValue text containing missing interpolations
    */
   public async resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string> {
+    let resolvedText = translatedValue;
+
+    // return if translatedValue does not contain any further interpolations
     if (!translatedValue.includes("~")) {
-      return translatedValue;
+      return resolvedText;
     }
+
+    // fill missing interpolations in parallel
     const interpolations = translatedValue.split(/(?<=\*~~)(.*?)(?=\~~*)/g, undefined).filter(value => value.includes("~") === false);
-    let text = translatedValue;
+    let replacement: string | undefined;
 
     for (const interpolation of interpolations) {
       const missingInterpolationExtensionsPromises = this.missingInterpolationExtensions.map(missingInterpolationExtension =>
@@ -38,18 +43,30 @@ export class InterpolationResolver implements InterpolationResolverInterface {
 
       for (const value of interpolationValues) {
         if (typeof value !== "undefined") {
-          text = translatedValue.replace("*~~" + interpolation + "~~*", value);
-          return this.resolveMissingInterpolations(text, translateHelper);
+          replacement = value;
+
+          // if interpolationValue contains futher interpolations, call this method recursively
+          if (replacement.includes("~")) {
+            replacement = await this.resolveMissingInterpolations(replacement, translateHelper);
+          }
+
+          break;
         }
       }
-      this.logger.warn(
-        `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the ${
-          this.missingInterpolationExtensions.length
-        } registered missingInterpolationExtensions provided a value. Now using "" instead.`
-      );
 
-      text = translatedValue.replace("*~~" + interpolation + "~~*", "");
+      if (typeof replacement === "undefined") {
+        this.logger.warn(
+          `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the ${
+            this.missingInterpolationExtensions.length
+          } registered missingInterpolationExtensions provided a value. Now using "" instead.`
+        );
+        replacement = "";
+      }
+
+      // resolve interpolations in given Text
+      resolvedText = translatedValue.replace("*~~" + interpolation + "~~*", replacement);
     }
-    return this.resolveMissingInterpolations(text, translateHelper);
+
+    return resolvedText;
   }
 }
