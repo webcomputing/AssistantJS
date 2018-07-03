@@ -116,7 +116,7 @@ export namespace Filter {
      * If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
      * @param args
      */
-    execute(...args: any[]): Promise<{ state: string; intent: string; args: any } | boolean>;
+    execute(...args: any[]): Promise<{ state: string; intent: string; args?: any[] } | boolean>;
   }
 
   /** Constructor of state objects */

@@ -39,8 +39,8 @@ export class ExecuteFiltersHook {
         const filterResult = await fittingFilter.execute();
 
         if (typeof filterResult === "object") {
-          await machine.transitionTo(filterResult.state);
-          await machine.handleIntent(filterResult.intent, filterResult.args);
+          const args = filterResult.args ? filterResult.args : [];
+          await machine.redirectTo(filterResult.state, filterResult.intent, ...args);
           return false;
         }
 
