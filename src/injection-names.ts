@@ -1,12 +1,12 @@
 /** Names of injectionable services, leads to fewer typing errors for most important injections */
 export const injectionNames = {
   i18nWrapper: "core:i18n:wrapper",
-  i18nTranslateValuesFor: "core:i18n:translate-values-for",
   stateFactory: "core:state-machine:state-factory",
   logger: "core:root:logger",
   eventBus: "core:root:event-bus",
   componentSpecificLoggerFactory: "core:root:component-specific-logger-factory",
   current: {
+    i18nTranslateValuesFor: "core:i18n:current-translate-values-for",
     translateHelper: "core:i18n:current-translate-helper",
     stateMachine: "core:state-machine:current-state-machine",
     stateNameProvider: "core:state-machine:current-state-name-provider",

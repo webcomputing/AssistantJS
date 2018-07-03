@@ -25,17 +25,9 @@ export class I18nextWrapper {
    */
   constructor(
     @inject("meta:component//core:i18n") componentMeta: Component<Configuration.Runtime>,
-    @optional()
-    @multiInject(componentInterfaces.missingInterpolation)
-    private missingInterpolationExtensions: MissingInterpolationExtension[],
     @inject(injectionNames.logger) logger: Logger,
     returnOnlySample = true
   ) {
-    if (typeof missingInterpolationExtensions === "undefined") {
-      // tslint:disable-next-line:no-parameter-reassignment
-      missingInterpolationExtensions = [];
-    }
-
     this.component = componentMeta;
     this.configuration = componentMeta.configuration;
     this.logger = logger;
@@ -84,19 +76,6 @@ export class I18nextWrapper {
    */
   private onInterpolationMissing(str: string, match: [string, string]) {
     this.logger.debug(`AssistantJS TranslateHelper's onInterpolationMissing callback was called. Missing interpolation = '${match[0]}'`);
-
-    let interpolationValue: string | undefined;
-
-    for (const missingInterpolationExtension of this.missingInterpolationExtensions) {
-      interpolationValue = missingInterpolationExtension.execute(match[1]);
-      if (typeof interpolationValue !== "undefined") {
-        return interpolationValue;
-      }
-    }
-
-    this.logger.warn(
-      `Missing translation interpolation for ${match[0]}. Neither you nor one of the
-      ${this.missingInterpolationExtensions.length} registered missingInterpolationExtensions provided a value. Now using "" instead.`
-    );
+    return match[0].replace("{{", "*~~").replace("}}", "~~*");
   }
 }

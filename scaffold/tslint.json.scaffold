@@ -1,0 +1,43 @@
+{
+  "extends": ["tslint:latest", "tslint-config-airbnb", "tslint-config-prettier"],
+  "rules": {
+    "no-floating-promises": true,
+    "no-unused-expression": true,
+    "interface-name":[true, "never-prefix"],
+    "only-arrow-functions": false,
+    "object-shorthand-properties-first": true,
+    "object-literal-sort-keys": false,
+    "no-namespace": false,
+    "no-increment-decrement": false,
+    "ter-prefer-arrow-callback": false,
+    "import-name": false,
+    "function-name": [ true, 
+      { 
+        "static-method-regex": "^[a-z][\\w\\d]+$",
+        "function-regex": "^([a-z][\\w\\d]+)|(([A-Z][\\w\\d]+)Mixin)$"
+      }
+    ],
+    "member-ordering": [ true,
+      { 
+        "order": [
+          "public-static-field",
+          "protected-static-field",
+          "private-static-field",
+          "public-instance-field",
+          "protected-instance-field",
+          "private-instance-field",
+          "public-constructor",
+          "protected-constructor",
+          "private-constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method",
+          "public-static-method",
+          "protected-static-method",
+          "private-static-method"
+        ]
+      }
+    ],
+    "prefer-array-literal": [ true, { "allow-type-parameters": true } ]
+  }
+}

@@ -7,7 +7,7 @@
   "tslint.autoFixOnSave": true,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
-  "gitlens.currentLine.enabled": false,
+  "gitlens.currentLine.enabled": true,
   "gitlens.codeLens.scopes": [
       "document"
   ],

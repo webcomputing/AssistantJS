@@ -68,7 +68,9 @@ export function cli(argv, resolvedIndex) {
     ];
 
     // Merge root files into array
-    copyInstructions = copyInstructions.concat([".gitignore", "index.ts", "tsconfig.json", "README.md", "package.json"].map(rootFile => [rootFile, rootFile]));
+    copyInstructions = copyInstructions.concat(
+      [".gitignore", "index.ts", "tsconfig.json", "tslint.json", "README.md", "package.json"].map(rootFile => [rootFile, rootFile])
+    );
 
     // Copy templates!
     copyInstructions.forEach(copyInstruction => {

@@ -7,7 +7,7 @@ import { MinimalRequestExtraction, OptionalExtractions } from "../unifier/public
 
 import { componentInterfaces } from "./component-interfaces";
 import { I18nContext } from "./context";
-import { TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
+import { InterpolationResolver, MissingInterpolationExtension, TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
@@ -15,22 +15,28 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:i18n:instance") public i18n: I18n,
     @inject("core:i18n:current-context") public context: I18nContext,
     @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
-    @inject("core:root:current-logger") public logger: Logger
+    @inject("core:root:current-logger") public logger: Logger,
+    @inject("core:i18n:interpolation-resolver") public interpolationResolver: InterpolationResolver
   ) {}
 
-  public t(key?: string, locals?: {});
-  public t(key: {});
-  public t(key?: string | {}, locals = {}) {
+  // tslint:disable-next-line:function-name
+  public async t(key?: string, locals?: {});
+  // tslint:disable-next-line:function-name
+  public async t(key: {});
+  // tslint:disable-next-line:function-name
+  public async t(key?: string | {}, locals = {}) {
     // To make it compatible with other signature
     if (typeof key === "object") {
+      // tslint:disable-next-line:no-parameter-reassignment
       locals = key === null ? {} : key;
+      // tslint:disable-next-line:no-parameter-reassignment
       key = undefined;
     }
 
     // Set language
     // Disable returning of objects so that lookup works properly with state keys.
     // Else, '.mainState' returns a valid result because of sub keys!
-    const options = { lng: this.extraction.language, returnObjectTrees: false, ...locals };
+    const options = { ...{ lng: this.extraction.language, returnObjectTrees: false }, ...locals };
     const extractorName = this.extraction.platform;
 
     // Catch up device name or set to undefined
@@ -42,6 +48,7 @@ export class TranslateHelper implements TranslateHelperInterface {
       : undefined;
 
     if (typeof key === "undefined") {
+      // tslint:disable-next-line:no-parameter-reassignment
       key = "";
     }
 
@@ -81,7 +88,9 @@ export class TranslateHelper implements TranslateHelperInterface {
     }
 
     this.logger.debug("I18N: using key resolvings %o", lookupKeys);
-    return this.translateOrFail(lookupKeys, options);
+    const translatedValue = this.translateOrFail(lookupKeys, options);
+
+    return this.interpolationResolver.resolveMissingInterpolations(translatedValue, this);
   }
 
   /**
@@ -89,25 +98,16 @@ export class TranslateHelper implements TranslateHelperInterface {
    * i18n.exists() won't work here: it returns true for keys returning an object, even if returnObjectTrees is false. t() then returns undefined.
    */
   private translateOrFail(lookups: string[], options = {}) {
-    let foundTranslation: string | undefined;
-
-    lookups.some(lookup => {
-      if (typeof foundTranslation === "undefined" && this.i18n.exists(lookup, options)) {
+    for (const lookup of lookups) {
+      if (this.i18n.exists(lookup, options)) {
         const translation = this.i18n.t(lookup, options);
         if (typeof translation === "string") {
           this.logger.debug("I18N: choosing key: " + lookup);
-          foundTranslation = translation;
-          return true;
+          return translation;
         }
       }
-
-      return false;
-    });
-
-    if (typeof foundTranslation === "undefined") {
-      throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
-    } else {
-      return foundTranslation;
     }
+
+    throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
   }
 }

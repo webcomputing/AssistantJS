@@ -43,19 +43,24 @@ export interface ResponseFactory {
   createCardResponse(): CardResponse;
 }
 
+export type ConditionalTypeEndSessionWith<T extends string | Promise<string>> = T extends string ? void : Promise<void>;
+export type ConditionalTypePrompt<T extends string | Promise<string>, X extends string | Promise<string>> = T extends Promise<string>
+  ? Promise<void>
+  : (X extends Promise<string> ? Promise<void> : void);
+
 export interface Voiceable {
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith(text: string): void;
+  endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeEndSessionWith<T>;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]): void;
+  prompt<T extends string | Promise<string>, X extends string | Promise<string>>(inputText: T, ...inputReprompts: X[]): ConditionalTypePrompt<T, X>;
 }
 
 // Currently, we are not allowed to use camelCase here! So try to just use a single word!

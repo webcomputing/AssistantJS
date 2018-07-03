@@ -6,8 +6,9 @@ import { Configuration } from "./private-interfaces";
 
 import { injectionNames, Logger } from "../../assistant-source";
 import { I18nContext } from "./context";
-import { MissingInterpolationExtension, TranslateHelper, TranslateValuesFor } from "./public-interfaces";
+import { MissingInterpolationExtension, TranslateHelper, TranslateValuesFor, InterpolationResolver } from "./public-interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
+import { InterpolationResolver as InterpolationResolverImpl } from "./interpolation-resolver";
 import { I18nextWrapper } from "./wrapper";
 
 const defaultConfiguration: Configuration.Defaults = {
@@ -35,21 +36,13 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .toDynamicValue(context => {
           return new I18nextWrapper(
             context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"),
-            context.container.isBound(componentInterfaces.missingInterpolation)
-              ? context.container.getAll<MissingInterpolationExtension>(componentInterfaces.missingInterpolation)
-              : [],
             context.container.get<Logger>(injectionNames.logger),
             false
           );
         })
         .inSingletonScope();
 
-      // Registers a spec helper function which returns all possible values instead of a sample one
-      bindService.bindGlobalService<TranslateValuesFor>("translate-values-for").toDynamicValue(context => {
-        return (key: string, options = {}) => {
-          return (context.container.get<I18nextWrapper>("core:i18n:spec-wrapper").instance.t(key, options) as string).split(arraySplitter);
-        };
-      });
+      bindService.bindGlobalService<InterpolationResolver>("interpolation-resolver").to(InterpolationResolverImpl);
 
       bindService.bindGlobalService<i18next.I18n>("instance").toDynamicValue(context => {
         return context.container.get<I18nextWrapper>("core:i18n:wrapper").instance;
@@ -57,6 +50,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
     },
     request: (bindService, lookupService) => {
       bindService.bindGlobalService<TranslateHelper>("current-translate-helper").to(TranslateHelperImpl);
+
       bindService
         .bindGlobalService<I18nContext>("current-context")
         .to(I18nContext)
@@ -70,6 +64,23 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           currentI18nContext.intent = intent;
           currentI18nContext.state = stateName.charAt(0).toLowerCase() + stateName.slice(1);
           return { success: true, result: currentI18nContext };
+        };
+      });
+
+      // Registers a spec helper function which returns all possible values instead of a sample one
+      bindService.bindGlobalService<TranslateValuesFor>("current-translate-values-for").toDynamicValue(context => {
+        return async (key: string, options = {}): Promise<string[]> => {
+          const translations: string[] = context.container
+            .get<I18nextWrapper>("core:i18n:spec-wrapper")
+            .instance.t(key, options)
+            .split(arraySplitter);
+          const translateHelper = context.container.get<TranslateHelper>("core:i18n:current-translate-helper");
+
+          return Promise.all(
+            translations.map(async translation =>
+              context.container.get<InterpolationResolver>("core:i18n:interpolation-resolver").resolveMissingInterpolations(translation, translateHelper)
+            )
+          );
         };
       });
     },
