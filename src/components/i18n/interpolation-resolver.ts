@@ -26,35 +26,33 @@ export class InterpolationResolver implements InterpolationResolverInterface {
   public async resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string> {
     let resolvedText = translatedValue;
 
-    // return if translatedValue does not contain any further interpolations
+    /** return if translatedValue does not contain any further interpolations */
     if (!translatedValue.includes("~")) {
       return resolvedText;
     }
 
-    // fill missing interpolations in parallel
+    /** fill missing interpolations in parallel */
     const interpolations = translatedValue.split(/(?<=\*~~)(.*?)(?=\~~*)/g, undefined).filter(value => value.includes("~") === false);
-    let replacement: string | undefined;
 
-    for (const interpolation of interpolations) {
+    /** returns a promise for a given interpolation which contains an object containing the interpolation plus the value it needs to be replaced with */
+    const perMissingInterpolation = async (interpolation: string): Promise<{ interpolation: string; replacement: string }> => {
       const missingInterpolationExtensionsPromises = this.missingInterpolationExtensions.map(missingInterpolationExtension =>
         missingInterpolationExtension.execute(interpolation, translateHelper)
       );
       const interpolationValues = await Promise.all(missingInterpolationExtensionsPromises);
 
-      for (const value of interpolationValues) {
-        if (typeof value !== "undefined") {
-          replacement = value;
+      /** filter for values of missingInterpolationExtensions */
+      const possibleValues = interpolationValues.filter(value => typeof value !== "undefined");
+      let replacement: string;
 
-          // if interpolationValue contains futher interpolations, call this method recursively
-          if (replacement.includes("~")) {
-            replacement = await this.resolveMissingInterpolations(replacement, translateHelper);
-          }
-
-          break;
+      if (possibleValues.length > 0) {
+        /** use first value to fill the missing interpolation */
+        replacement = possibleValues[0] as string;
+        /** if value contains futher interpolations call this method recursively */
+        if (replacement.includes("~")) {
+          replacement = await this.resolveMissingInterpolations(replacement, translateHelper);
         }
-      }
-
-      if (typeof replacement === "undefined") {
+      } else {
         this.logger.warn(
           `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the ${
             this.missingInterpolationExtensions.length
@@ -63,9 +61,16 @@ export class InterpolationResolver implements InterpolationResolverInterface {
         replacement = "";
       }
 
-      // resolve interpolations in given Text
-      resolvedText = translatedValue.replace("*~~" + interpolation + "~~*", replacement);
-    }
+      return { interpolation, replacement };
+    };
+
+    /** wait for all interpolations to be resolved */
+    const resultSets = await Promise.all(interpolations.map(perMissingInterpolation));
+
+    /** replace interpolations in given Text with replacements */
+    resultSets.forEach(set => {
+      resolvedText = translatedValue.replace("*~~" + set.interpolation + "~~*", set.replacement);
+    });
 
     return resolvedText;
   }
