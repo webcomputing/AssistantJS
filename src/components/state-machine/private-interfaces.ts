@@ -8,4 +8,4 @@ export const componentInterfaces = {
   afterIntent: Symbol("after-intent-hook"),
 };
 
-export const COMPONENT_NAME = "state-machine";
+export const COMPONENT_NAME = "core:state-machine";
