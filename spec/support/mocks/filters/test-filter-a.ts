@@ -7,7 +7,7 @@ export class TestFilterA implements Filter.Required {
     const redirect = {
       state: "FilterAState",
       intent: "filterTestBIntent",
-      args: undefined,
+      args: ["testArgs1", "testArgs2"],
     };
 
     return redirect;

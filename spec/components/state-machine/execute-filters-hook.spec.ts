@@ -12,7 +12,7 @@ interface CurrentThisContext {
   translateHelper: TranslateHelper;
 }
 
-describe("BeforeIntentHook", function() {
+describe("ExecuteFiltersHook", function() {
   beforeEach(async function(this: CurrentThisContext) {
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
@@ -49,6 +49,12 @@ describe("BeforeIntentHook", function() {
         await this.stateMachine.transitionTo("FilterCState");
         await this.stateMachine.handleIntent("filterTestAIntent");
         expect(this.responseHandler.voiceMessage).toBe(await this.translateHelper.t("filter.stateC.intentB"));
+      });
+
+      it("passes args from filter to redirectTo-method of state-machine", async function(this: CurrentThisContext) {
+        spyOn(this.stateMachine, "redirectTo").and.callThrough();
+        await this.stateMachine.handleIntent("filterTestAIntent");
+        expect(this.stateMachine.redirectTo).toHaveBeenCalledWith("FilterAState", "filterTestBIntent", "testArgs1", "testArgs2");
       });
     });
 
