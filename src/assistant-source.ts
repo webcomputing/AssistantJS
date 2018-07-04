@@ -1,12 +1,3 @@
-// [DEPRECATED] Export all interfaces - the old way using rootInterfaces, stateMachineInterfaces, ...
-import * as i18nInterfaces from "./components/i18n/public-interfaces";
-import * as rootInterfaces from "./components/root/public-interfaces";
-import * as servicesInterfaces from "./components/services/public-interfaces";
-import * as stateMachineInterfaces from "./components/state-machine/public-interfaces";
-import * as unifierInterfaces from "./components/unifier/public-interfaces";
-/** [DEPRECATED] All interfaces are now available in main scope */
-export { i18nInterfaces, rootInterfaces, servicesInterfaces, stateMachineInterfaces, unifierInterfaces };
-
 // Export all public interfaces
 export * from "./components/i18n/public-interfaces";
 export * from "./components/root/public-interfaces";

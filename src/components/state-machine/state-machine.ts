@@ -1,9 +1,10 @@
 import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
 import { Logger } from "../root/public-interfaces";
-import { Session } from "../services/public-interfaces";
+import { CurrentSessionFactory, Session } from "../services/public-interfaces";
 import { GenericIntent, intent } from "../unifier/public-interfaces";
 
+import { injectionNames } from "../../injection-names";
 import { componentInterfaces } from "./private-interfaces";
 import { State, Transitionable } from "./public-interfaces";
 
@@ -12,9 +13,9 @@ export class StateMachine implements Transitionable {
   public intentHistory: Array<{ stateName: string; intentMethodName: string }> = [];
 
   constructor(
-    @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{ instance: State.Required; name: string }>,
+    @inject(injectionNames.current.stateProvider) private getCurrentState: State.CurrentProvider,
     @inject("core:state-machine:state-names") private stateNames: string[],
-    @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
+    @inject(injectionNames.current.sessionFactory) private currentSessionFactory: CurrentSessionFactory,
     @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
     @inject("core:root:current-logger") private logger: Logger
   ) {}

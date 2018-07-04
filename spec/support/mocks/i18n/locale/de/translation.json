@@ -97,5 +97,6 @@
       "intentA": "FilterCState - filterTestAIntent",
       "intentB": "FilterCState - filterTestBIntent"
     }
-  }
+  },
+  "noInterpolation": "no interpolation"
 }

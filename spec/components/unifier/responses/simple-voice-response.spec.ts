@@ -1,8 +1,8 @@
-import { SimpleVoiceResponse } from "../../../../src/components/unifier/responses/simple-voice-response";
-import { createRequestScope } from "../../../support/util/setup";
-import { ResponseHandler } from "../../../support/mocks/unifier/handler";
-import { Logger, SpecSetup, OptionalHandlerFeatures } from "../../../../src/assistant-source";
 import { Container } from "inversify-components";
+import { Logger, OptionalHandlerFeatures, SpecSetup } from "../../../../src/assistant-source";
+import { SimpleVoiceResponse } from "../../../../src/components/unifier/responses/simple-voice-response";
+import { ResponseHandler } from "../../../support/mocks/unifier/handler";
+import { createRequestScope } from "../../../support/util/setup";
 
 interface CurrentThisContext {
   handler: ResponseHandler & OptionalHandlerFeatures.Reprompt;
@@ -24,6 +24,10 @@ describe("VoiceResponse", function() {
 
   describe("endSessionWith", function() {
     beforeEach(function(this: CurrentThisContext) {
+      spyOn(this.simpleVoiceResponse, "endSessionWith").and.callThrough();
+    });
+
+    beforeEach(async function(this: CurrentThisContext) {
       this.simpleVoiceResponse.endSessionWith("test string");
     });
 
@@ -37,6 +41,18 @@ describe("VoiceResponse", function() {
 
     it("sends response", function(this: CurrentThisContext) {
       expect(this.handler.sendResponse).toHaveBeenCalled();
+    });
+
+    describe("with string as parameter", function() {
+      it("does not return a Promise", async function(this: CurrentThisContext) {
+        expect((this.simpleVoiceResponse.endSessionWith("test string") as any) instanceof Promise).toBeFalsy();
+      });
+    });
+
+    describe("with Promise<string> as parameter", function() {
+      it("returns a promise", async function(this: CurrentThisContext) {
+        expect(this.simpleVoiceResponse.endSessionWith(Promise.resolve("test string")).then).toBeTruthy();
+      });
     });
   });
 

@@ -1,4 +1,3 @@
-import * as fakeRedis from "fakeredis";
 import { AssistantJSConfiguration } from "assistant-source";
 
 /*
@@ -28,16 +27,7 @@ const configuration: AssistantJSConfiguration = {
       debug: false
     }
   },
-
-  /** Configuration of AssistantJS's services component (interface = ServicesConfiguration) */
-  "core:services": {
-    /**
-    * Configures the redis instance to use. 
-    * Currently uses fakeredis, you want to change this to a real redis endpoint for production usage!
-    */
-    redisClient: fakeRedis.createClient({ fast: true })
-  }
-
+  
   // There are also other settings available. Just have a look at the "AssistantJSConfiguration" interface.
 };
 

@@ -1,3 +1,4 @@
+import { ExecutableExtension } from "inversify-components";
 import { TranslateHelper } from "../i18n/translate-helper";
 import { Logger, RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
@@ -88,6 +89,12 @@ export namespace State {
     readonly name: string;
     readonly intents: intent[];
   }
+
+  /** Returns name of current state name. If nothing is stored in session, uses MainState */
+  export type CurrentNameProvider = () => Promise<string>;
+
+  /** Returns name and instance of current state */
+  export type CurrentProvider = () => Promise<{ instance: State.Required; name: string }>;
 }
 
 /** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
@@ -115,3 +122,25 @@ export interface Filter {
    */
   execute(): Promise<{ state: string; intent: string; args?: any[] } | boolean> | { state: string; intent: string; args?: any[] } | boolean;
 }
+/**
+ * This interface represents extensions which are used after the context is set. e.g the StateMachine
+ */
+export interface AfterContextExtension extends ExecutableExtension {
+  execute(): any | Promise<any>;
+}
+
+/**
+ * Extensions of this type can are executed before the statemachine is executed
+ */
+export interface BeforeStateMachine {
+  /**
+   * Method which gets executed automatically, can be either sync with return tpye void or async with return type Promise<void>
+   */
+  execute(): void | Promise<void>;
+}
+
+/**
+ * Extensions of this type are executed after the statemachine is executed.
+ * has same type like interface BeforeStateMachine
+ */
+export type AfterStateMachine = BeforeStateMachine;
