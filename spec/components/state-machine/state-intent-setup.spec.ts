@@ -68,7 +68,7 @@ describe("StateMachineSetup", function() {
     });
   });
 
-  describe(".deriveStateIntents", function() {
+  describe("deriveStateIntents", function() {
     it("derives child intents corectly", function() {
       const expectation = implicitMainStateIntents.concat([GenericIntent.Help]) as string[];
       expect(StateMachineSetup.deriveStateIntents(SubState)).toEqual(expectation);
