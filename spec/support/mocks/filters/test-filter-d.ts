@@ -1,8 +1,8 @@
-import { inject, injectable } from "inversify";
-import { Filter, injectionNames } from "../../../../src/assistant-source";
+import { injectable } from "inversify";
+import { Filter } from "../../../../src/assistant-source";
 
 @injectable()
-export class TestFilterD implements Filter.Required {
+export class TestFilterD implements Filter {
   public async execute() {
     return true;
   }

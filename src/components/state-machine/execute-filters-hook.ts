@@ -37,7 +37,7 @@ export class ExecuteFiltersHook {
     for (const prioritizedFilter of prioritizedFilters) {
       const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilter);
       if (fittingFilter) {
-        const filterResult = await fittingFilter.execute();
+        const filterResult = await Promise.resolve(fittingFilter.execute());
 
         if (typeof filterResult === "object") {
           const args = filterResult.args ? filterResult.args : [];

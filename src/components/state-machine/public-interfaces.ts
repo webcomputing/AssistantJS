@@ -111,7 +111,7 @@ export interface Transitionable {
 export interface Filter {
   /**
    * Method of filter that is executed when a filter decorator is given.
-   * @returns a state/intent to be used instead of the intially called intent or a boolean. If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
+   * @returns an object containing a state/intent to be used instead of the intially called intent or a boolean (both as promises, if filter does some async operations). If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
    */
-  execute(): Promise<{ state: string; intent: string; args?: any[] } | boolean>;
+  execute(): Promise<{ state: string; intent: string; args?: any[] } | boolean> | { state: string; intent: string; args?: any[] } | boolean;
 }
