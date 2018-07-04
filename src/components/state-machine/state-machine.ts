@@ -40,7 +40,7 @@ export class StateMachine implements Transitionable {
 
       // Check if there is a "beforeIntent_" method available
       if (this.isStateWithBeforeIntent(currentState.instance)) {
-        const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
+        const callbackResult = await Promise.resolve(currentState.instance.beforeIntent_(intentMethod, this, ...args));
 
         if (typeof callbackResult !== "boolean") {
           throw new Error(
@@ -61,7 +61,7 @@ export class StateMachine implements Transitionable {
 
         // Call afterIntent_ method if present
         if (this.isStateWithAfterIntent(currentState.instance)) {
-          ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
+          currentState.instance.afterIntent_(intentMethod, this, ...args);
         }
 
         // Run afterIntent hooks
