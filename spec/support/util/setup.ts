@@ -1,17 +1,16 @@
-import { Container, ContainerImpl } from "inversify-components";
+import { ContainerImpl } from "inversify-components";
 
-import { GenericRequestHandler } from "../../../src/components/root/generic-request-handler";
 import { RequestContext } from "../../../src/components/root/public-interfaces";
-import { StateMachineSetup } from "../../../src/components/state-machine/setup";
 import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
 
 import { SpecSetup } from "../../../src/spec-setup";
 
 import { context } from "../mocks/root/request-context";
-import { ContextAState } from "../mocks/states/context-a";
-import { ContextBState } from "../mocks/states/context-b";
-import { ContextCState } from "../mocks/states/context-c";
+import { ContextAState } from "../mocks/states/context/context-a";
+import { ContextBState } from "../mocks/states/context/context-b";
+import { ContextCState } from "../mocks/states/context/context-c";
+import { ContextDState } from "../mocks/states/context/context-d";
 import { IntentCallbackState } from "../mocks/states/intent-callbacks";
 import { MainState } from "../mocks/states/main";
 import { PlainState } from "../mocks/states/plain";
@@ -20,7 +19,6 @@ import { UnhandledErrorState } from "../mocks/states/unhandled-error";
 import { UnhandledErrorWithFallbackState } from "../mocks/states/unhandled-error-with-fallback";
 import { extraction } from "../mocks/unifier/extraction";
 import { ResponseHandler } from "../mocks/unifier/handler";
-import { ContextDState } from "../mocks/states/context-d";
 
 /**
  * Creates a test assistant js setup
