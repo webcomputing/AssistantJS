@@ -5,46 +5,23 @@ import { State } from "./public-interfaces";
 
 import { AssistantJSSetup } from "../../setup";
 import { GenericIntent } from "../unifier/public-interfaces";
+import { ConventionalFileLoader } from "./conventional-file-loader";
 
-export class StateMachineSetup {
-  private assistantJS: AssistantJSSetup;
-  private stateClasses: { [name: string]: State.Constructor } = {};
-  private metaStates: State.Meta[] = [];
-
+export class StateMachineSetup extends ConventionalFileLoader {
   /** If set to true, states are registered in singleton scope. This may be pretty useful for testing. */
   public registerStatesInSingleton = false;
 
+  private stateClasses: { [name: string]: State.Constructor } = {};
+  private metaStates: State.Meta[] = [];
+
   constructor(assistantJS: AssistantJSSetup) {
-    this.assistantJS = assistantJS;
-  }
-
-  /**
-   * [Sync!] Adds all classes in a specific directory as states.
-   * @param addOnly If set to true, this method only calls "addState", but not "registerStates" finally
-   * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
-   * @param dictionary Dictionary which contains state classes, defaults to "states"
-   */
-  public registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/states") {
-    fs.readdirSync(baseDirectory + dictionary).forEach(file => {
-      const suffixParts = file.split(".");
-      const suffix = suffixParts[suffixParts.length - 1];
-
-      // Load if file is a JavaScript file
-      if (suffix !== "js") return;
-      const classModule = require(baseDirectory + dictionary + "/" + file);
-
-      Object.keys(classModule).forEach(exportName => {
-        this.addState(classModule[exportName]);
-      });
-    });
-
-    if (!addOnly) this.registerStates();
+    super(assistantJS);
   }
 
   /** Adds a state to setup */
-  public addState(stateClass: State.Constructor, name?: string, intents?: string[]) {
-    name = typeof name === "undefined" ? StateMachineSetup.deriveStateName(stateClass) : name;
-    intents = typeof intents === "undefined" ? StateMachineSetup.deriveStateIntents(stateClass) : intents;
+  public addClass(stateClass: State.Constructor, nameParam?: string, intentsParam?: string[]) {
+    const name = typeof nameParam === "undefined" ? StateMachineSetup.deriveClassName(stateClass) : nameParam;
+    const intents = typeof intentsParam === "undefined" ? StateMachineSetup.deriveStateIntents(stateClass) : intentsParam;
 
     // Create and add meta state
     const metaState = StateMachineSetup.createMetaState(name, intents);
@@ -52,11 +29,6 @@ export class StateMachineSetup {
 
     // Add state class
     this.stateClasses[name] = stateClass;
-  }
-
-  /** Registers all states in dependency injection container */
-  public registerStates() {
-    this.assistantJS.registerComponent(this.toComponentDescriptor());
   }
 
   /** Builds a component descriptor out of all added states (and meta states) */
@@ -91,11 +63,6 @@ export class StateMachineSetup {
     };
   }
 
-  /** Returns a states name based on its constructor */
-  public static deriveStateName(stateClass: State.Constructor): string {
-    return stateClass.name;
-  }
-
   /** Derives names of intents based on a state class */
   public static deriveStateIntents(stateClass: State.Constructor): string[] {
     const prototype = stateClass.prototype;
@@ -111,12 +78,11 @@ export class StateMachineSetup {
         .filter(method => method.endsWith("Intent") && method !== "unhandledGenericIntent" && method !== "unansweredGenericIntent")
         .map(method => {
           if (method.endsWith("GenericIntent")) {
-            const baseString = method.replace("GenericIntent", "");
-            return GenericIntent[baseString.charAt(0).toUpperCase() + baseString.slice(1)];
-          } else {
-            const baseString = method.replace("Intent", "");
-            return baseString.charAt(0).toLowerCase() + baseString.slice(1);
+            const baseStringGeneric = method.replace("GenericIntent", "");
+            return GenericIntent[baseStringGeneric.charAt(0).toUpperCase() + baseStringGeneric.slice(1)];
           }
+          const baseString = method.replace("Intent", "");
+          return baseString.charAt(0).toLowerCase() + baseString.slice(1);
         })
     );
   }

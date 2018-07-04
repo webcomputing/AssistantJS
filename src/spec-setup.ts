@@ -6,7 +6,7 @@ import { ServerApplication } from "./components/root/app-server";
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { Logger, RequestContext } from "./components/root/public-interfaces";
 import { Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
-import { StateMachineSetup } from "./components/state-machine/setup";
+import { StateMachineSetup } from "./components/state-machine/state-intent-setup";
 import { intent, MinimalRequestExtraction, MinimalResponseHandler } from "./components/unifier/public-interfaces";
 
 import { Constructor } from "./assistant-source";
@@ -106,15 +106,15 @@ export class SpecSetup {
   /** Registers states */
   public registerStates(states: State.Constructor[]) {
     const stateMachineSetup = new StateMachineSetup(this.setup);
-    states.forEach(state => stateMachineSetup.addState(state));
-    stateMachineSetup.registerStates();
+    states.forEach(state => stateMachineSetup.addClass(state));
+    stateMachineSetup.registerClasses();
   }
 
   /** Registers filters */
   public registerFilters(filters: Array<Constructor<Filter>>) {
     const filterSetup = new FilterSetup(this.setup);
-    filters.forEach(filter => filterSetup.addFilter(filter));
-    filterSetup.registerFilters();
+    filters.forEach(filter => filterSetup.addClass(filter));
+    filterSetup.registerClasses();
   }
 
   /**

@@ -14,7 +14,7 @@ export { ServerApplication } from "./components/root/app-server";
 export { GeneratorApplication } from "./components/root/app-generator";
 export { GenericRequestHandler } from "./components/root/generic-request-handler";
 export { defaultBunyan } from "./components/root/default-bunyan";
-export { StateMachineSetup } from "./components/state-machine/setup";
+export { StateMachineSetup } from "./components/state-machine/state-intent-setup";
 export { BaseState } from "./components/state-machine/base-state";
 export { FilterSetup } from "./components/state-machine/filter-setup";
 export { AbstractResponseHandler } from "./components/unifier/abstract-response-handler";

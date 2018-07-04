@@ -2,7 +2,7 @@ import { Container, ContainerImpl } from "inversify-components";
 
 import { GenericRequestHandler } from "../../../src/components/root/generic-request-handler";
 import { RequestContext } from "../../../src/components/root/public-interfaces";
-import { StateMachineSetup } from "../../../src/components/state-machine/setup";
+import { StateMachineSetup } from "../../../src/components/state-machine/state-intent-setup";
 import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
 

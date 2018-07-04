@@ -4,51 +4,22 @@ import { ComponentDescriptor } from "inversify-components";
 import { Filter } from "./public-interfaces";
 
 import { AssistantJSSetup } from "../../setup";
-import { GenericIntent } from "../unifier/public-interfaces";
 
 import { Constructor } from "../../assistant-source";
+import { ConventionalFileLoader } from "./conventional-file-loader";
 
-export class FilterSetup {
-  private assistantJS: AssistantJSSetup;
+export class FilterSetup extends ConventionalFileLoader {
   private filterClasses: { [name: string]: Constructor<Filter> } = {};
 
   constructor(assistantJS: AssistantJSSetup) {
-    this.assistantJS = assistantJS;
-  }
-
-  /**
-   * [Sync!] Adds all classes in a specific directory as filters.
-   * @param addOnly If set to true, this method only calls "addFilter", but not "registerFilters" finally
-   * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
-   * @param dictionary Dictionary which contains filter classes, defaults to "filters"
-   */
-  public registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/filters") {
-    fs.readdirSync(baseDirectory + dictionary).forEach(file => {
-      const suffixParts = file.split(".");
-      const suffix = suffixParts[suffixParts.length - 1];
-
-      // Load if file is a JavaScript file
-      if (suffix !== "js") return;
-      const classModule = require(baseDirectory + dictionary + "/" + file);
-
-      Object.keys(classModule).forEach(exportName => {
-        this.addFilter(classModule[exportName]);
-      });
-    });
-
-    if (!addOnly) this.registerFilters();
+    super(assistantJS);
   }
 
   /** Adds a filter to setup */
-  public addFilter(filterClass: Constructor<Filter>, name?: string) {
+  public addClass(filterClass: Constructor<Filter>, nameParam?: string) {
     // Add filter class
-    name = typeof name === "undefined" ? FilterSetup.deriveFilterName(filterClass) : name;
+    const name = typeof nameParam === "undefined" ? FilterSetup.deriveClassName(filterClass) : nameParam;
     this.filterClasses[name] = filterClass;
-  }
-
-  /** Registers all filters in dependency injection container */
-  public registerFilters() {
-    this.assistantJS.registerComponent(this.toComponentDescriptor());
   }
 
   /** Builds a component descriptor out of all added filters */
@@ -66,10 +37,5 @@ export class FilterSetup {
         },
       },
     };
-  }
-
-  /** Returns a filters name based on its constructor */
-  public static deriveFilterName(filterClass: Constructor<Filter>): string {
-    return filterClass.name;
   }
 }
