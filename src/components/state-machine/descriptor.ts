@@ -114,7 +114,7 @@ export const descriptor: ComponentDescriptor = {
       });
 
       // Provider for context states. Returns array of states or empty array if no state is present.
-      bindService.bindGlobalService("context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
+      bindService.bindGlobalService("current-context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
         return () => {
           const factory = context.container.get<Function>("core:state-machine:state-factory");
           return context.container

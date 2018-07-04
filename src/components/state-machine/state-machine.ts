@@ -15,7 +15,7 @@ export class StateMachine implements Transitionable {
   public intentHistory: Array<{ stateName: string; intentMethodName: string }> = [];
 
   constructor(
-    @inject("core:state-machine:context-states-provider") private getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>,
+    @inject(injectionNames.current.contextStatesProvider) private getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>,
     @inject(injectionNames.current.stateProvider) private getCurrentState: State.CurrentProvider,
     @inject("core:state-machine:state-names") private stateNames: string[],
     @inject(injectionNames.current.sessionFactory) private currentSessionFactory: CurrentSessionFactory,

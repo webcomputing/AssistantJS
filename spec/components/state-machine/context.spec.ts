@@ -1,7 +1,6 @@
 import { Container } from "inversify-components";
-import { GenericIntent, SpecSetup, State } from "../../../src/assistant-source";
+import { GenericIntent, injectionNames, SpecSetup, State } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
-import { injectionNames } from "../../../src/injection-names";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
@@ -25,7 +24,7 @@ describe("state context decorators", function() {
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
     this.getContextStates = this.container.inversifyInstance.get<() => Promise<Array<{ instance: State.Required; name: string }>>>(
-      "core:state-machine:context-states-provider"
+      injectionNames.current.contextStatesProvider
     );
   });
 
