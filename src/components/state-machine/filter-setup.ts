@@ -6,9 +6,11 @@ import { Filter } from "./public-interfaces";
 import { AssistantJSSetup } from "../../setup";
 import { GenericIntent } from "../unifier/public-interfaces";
 
+import { Constructor } from "../../assistant-source";
+
 export class FilterSetup {
   private assistantJS: AssistantJSSetup;
-  private filterClasses: { [name: string]: Filter.Constructor } = {};
+  private filterClasses: { [name: string]: Constructor<Filter> } = {};
 
   constructor(assistantJS: AssistantJSSetup) {
     this.assistantJS = assistantJS;
@@ -38,7 +40,7 @@ export class FilterSetup {
   }
 
   /** Adds a filter to setup */
-  public addFilter(filterClass: Filter.Constructor, name?: string) {
+  public addFilter(filterClass: Constructor<Filter>, name?: string) {
     // Add filter class
     name = typeof name === "undefined" ? FilterSetup.deriveFilterName(filterClass) : name;
     this.filterClasses[name] = filterClass;
@@ -59,7 +61,7 @@ export class FilterSetup {
           const filterInterface = lookupService.lookup("core:state-machine").getInterface("filter");
 
           Object.keys(this.filterClasses).forEach(filterName => {
-            const binding = bindService.bindExtension<Filter.Required>(filterInterface).to(this.filterClasses[filterName]);
+            const binding = bindService.bindExtension<Filter>(filterInterface).to(this.filterClasses[filterName]);
           });
         },
       },
@@ -67,7 +69,7 @@ export class FilterSetup {
   }
 
   /** Returns a filters name based on its constructor */
-  public static deriveFilterName(filterClass: Filter.Constructor): string {
+  public static deriveFilterName(filterClass: Constructor<Filter>): string {
     return filterClass.name;
   }
 }

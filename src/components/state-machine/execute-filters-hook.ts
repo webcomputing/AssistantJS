@@ -1,6 +1,7 @@
 import { inject, injectable, multiInject, optional } from "inversify";
 import { injectionNames } from "../../injection-names";
 import { ComponentSpecificLoggerFactory, Logger } from "../root/public-interfaces";
+import { Constructor } from "./../../assistant-source";
 import { Hooks } from "./../joined-interfaces";
 import { filterMetadataKey } from "./filter-decorator";
 import { COMPONENT_NAME, componentInterfaces } from "./private-interfaces";
@@ -12,13 +13,13 @@ export class ExecuteFiltersHook {
   private stateName!: string;
   private intent!: string;
   private logger: Logger;
-  private filters: Filter.Required[];
+  private filters: Filter[];
 
   constructor(
     @inject(injectionNames.componentSpecificLoggerFactory) loggerFactory: ComponentSpecificLoggerFactory,
     @optional()
     @multiInject(componentInterfaces.filter)
-    filters: Filter.Required[]
+    filters: Filter[]
   ) {
     this.logger = loggerFactory(COMPONENT_NAME);
     this.filters = typeof filters !== "undefined" ? filters : [];
@@ -54,12 +55,12 @@ export class ExecuteFiltersHook {
     return true;
   };
 
-  private retrieveStateFiltersFromMetadata(): Filter.Constructor[] {
+  private retrieveStateFiltersFromMetadata(): Array<Constructor<Filter>> {
     const metadata = Reflect.getMetadata(filterMetadataKey, this.state.constructor);
     return metadata ? metadata.filters : [];
   }
 
-  private retrieveIntentFiltersFromMetadata(): Filter.Constructor[] {
+  private retrieveIntentFiltersFromMetadata(): Array<Constructor<Filter>> {
     if (typeof this.intent !== "undefined" && typeof this.state[this.intent] !== "undefined") {
       const metadata = Reflect.getMetadata(filterMetadataKey, this.state[this.intent]);
       return metadata ? metadata.filters : [];

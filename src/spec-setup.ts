@@ -15,6 +15,8 @@ import { FilterSetup } from "./components/state-machine/filter-setup";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
+import { Constructor } from "./assistant-source";
+
 /** Used for managing multiple spec setups */
 let specSetupId = 0;
 
@@ -33,7 +35,7 @@ export class SpecSetup {
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
    */
-  public prepare(states: State.Constructor[] = [], filters: Filter.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
+  public prepare(states: State.Constructor[] = [], filters: Array<Constructor<Filter>> = [], autoBind = true, useChilds = false, autoSetup = true) {
     this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
@@ -116,7 +118,7 @@ export class SpecSetup {
   }
 
   /** Registers filters */
-  public registerFilters(filters: Filter.Constructor[]) {
+  public registerFilters(filters: Array<Constructor<Filter>>) {
     const filterSetup = new FilterSetup(this.setup);
     filters.forEach(filter => filterSetup.addFilter(filter));
     filterSetup.registerFilters();

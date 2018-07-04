@@ -108,19 +108,12 @@ export interface Transitionable {
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
 
-export namespace Filter {
-  export interface Required {
-    /**
-     * Method of filter that is executed when a filter decorator is given.
-     * It either returns a state/intent to be used instead of the original intent or a boolean.
-     * If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
-     * @param args
-     */
-    execute(...args: any[]): Promise<{ state: string; intent: string; args?: any[] } | boolean>;
-  }
-
-  /** Constructor of state objects */
-  export interface Constructor<F extends Required = Required> {
-    new (...args: any[]): F;
-  }
+export interface Filter {
+  /**
+   * Method of filter that is executed when a filter decorator is given.
+   * It either returns a state/intent to be used instead of the original intent or a boolean.
+   * If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
+   * @param args
+   */
+  execute(...args: any[]): Promise<{ state: string; intent: string; args?: any[] } | boolean>;
 }
