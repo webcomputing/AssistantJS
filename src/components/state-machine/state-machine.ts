@@ -1,9 +1,10 @@
 import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
 import { Logger } from "../root/public-interfaces";
-import { Session } from "../services/public-interfaces";
+import { CurrentSessionFactory } from "../services/public-interfaces";
 import { GenericIntent, intent } from "../unifier/public-interfaces";
 
+import { injectionNames } from "../../injection-names";
 import { clearContextMetadataKey } from "./clear-context-decorator";
 import { componentInterfaces } from "./private-interfaces";
 import { State, Transitionable } from "./public-interfaces";
@@ -14,10 +15,10 @@ export class StateMachine implements Transitionable {
   public intentHistory: Array<{ stateName: string; intentMethodName: string }> = [];
 
   constructor(
-    @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{ instance: State.Required; name: string }>,
     @inject("core:state-machine:context-states-provider") private getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>,
+    @inject(injectionNames.current.stateProvider) private getCurrentState: State.CurrentProvider,
     @inject("core:state-machine:state-names") private stateNames: string[],
-    @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
+    @inject(injectionNames.current.sessionFactory) private currentSessionFactory: CurrentSessionFactory,
     @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
     @inject("core:root:current-logger") private logger: Logger
   ) {}
@@ -47,8 +48,7 @@ export class StateMachine implements Transitionable {
       }
 
       // Check if there is a "beforeIntent_" method available
-      // tslint:disable-next-line:no-string-literal
-      if (typeof currentState.instance["beforeIntent_"] === "function") {
+      if ("beforeIntent_" in currentState.instance) {
         const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
 
         if (typeof callbackResult !== "boolean") {
@@ -69,8 +69,7 @@ export class StateMachine implements Transitionable {
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
         // Call afterIntent_ method if present
-        // tslint:disable-next-line:no-string-literal
-        if (typeof currentState.instance["afterIntent_"] === "function") {
+        if ("afterIntent_" in currentState.instance) {
           ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
         }
 
@@ -119,7 +118,7 @@ export class StateMachine implements Transitionable {
       )
     );
     // set remaining context states as new context
-    this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
+    await this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
 
     return this.currentSessionFactory().set("__current_state", state);
   }
@@ -137,10 +136,8 @@ export class StateMachine implements Transitionable {
 
   /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
-    // tslint:disable-next-line:no-string-literal
-    if (typeof state["errorFallback"] === "function") {
-      // tslint:disable-next-line:no-string-literal
-      await Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args));
+    if ("errorFallback" in state) {
+      await Promise.resolve((state as any).errorFallback(error, state, stateName, intentMethod, this, ...args));
     } else {
       throw error;
     }

@@ -1,5 +1,5 @@
 import { Logger } from "../../root/public-interfaces";
-import { MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../public-interfaces";
+import { ConditionalTypeEndSessionWith, ConditionalTypePrompt, MinimalResponseHandler, OptionalHandlerFeatures, Voiceable } from "../public-interfaces";
 import { BaseResponse } from "./base-response";
 
 export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
@@ -10,17 +10,35 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
     super(handler, failSilentlyOnUnsupportedFeatures, logger);
   }
 
-  public endSessionWith(text: string) {
+  public endSessionWith(text: Promise<string>): Promise<void>;
+  public endSessionWith(text: string): void;
+  public endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeEndSessionWith<T> {
+    if (this.isPromise(text)) {
+      return text.then(value => {
+        this.endSessionWith(value);
+      }) as ConditionalTypeEndSessionWith<T>;
+    }
+
     this.handler.endSession = true;
-    this.handler.voiceMessage = this.prepareText(text);
-    this.handler.sendResponse();
+    this.handler.voiceMessage = this.prepareText(text as string);
+    return this.handler.sendResponse() as ConditionalTypeEndSessionWith<T>;
   }
 
-  public prompt(text: string, ...reprompts: string[]) {
-    this.handler.endSession = false;
-    this.handler.voiceMessage = this.prepareText(text);
-    this.attachRepromptsIfAny(reprompts);
-    this.handler.sendResponse();
+  public prompt<T extends string | Promise<string>, S extends string | Promise<string>>(inputText: T, ...inputReprompts: S[]): ConditionalTypePrompt<T, S> {
+    const withResolvedPromises = (text: string, reprompts: string[]) => {
+      this.handler.endSession = false;
+      this.handler.voiceMessage = this.prepareText(text);
+      this.attachRepromptsIfAny(reprompts);
+      return this.handler.sendResponse();
+    };
+
+    if (typeof inputText !== "string" || inputReprompts.some(r => typeof r !== "string")) {
+      const allRepromptPromises = inputReprompts.map(r => Promise.resolve(r));
+      return Promise.all([Promise.resolve(inputText) as Promise<string>, Promise.all(allRepromptPromises)]).then(a =>
+        withResolvedPromises(a[0], a[1] as string[])
+      ) as ConditionalTypePrompt<T, S>;
+    }
+    return withResolvedPromises(inputText, inputReprompts as string[]) as ConditionalTypePrompt<T, S>;
   }
 
   /** Attaches reprompts to handler */
@@ -34,5 +52,10 @@ export class SimpleVoiceResponse extends BaseResponse implements Voiceable {
   /** Easy overwrite functionality for text preprocessing */
   protected prepareText(text: string) {
     return text;
+  }
+
+  /** typeguard to check if given value is string or Promise<string> */
+  private isPromise(text: string | Promise<string>): text is Promise<string> {
+    return typeof text !== "string";
   }
 }

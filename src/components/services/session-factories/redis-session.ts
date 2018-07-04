@@ -1,22 +1,26 @@
 import { RedisClient } from "redis";
-import { Session as SessionInterface } from "./public-interfaces";
+import { Session } from "../public-interfaces";
 
-export class Session implements SessionInterface {
-  public id: string;
-  public redisInstance: RedisClient;
-  public maxLifeTime: number;
+export class RedisSession implements Session {
+  /**
+   * Creates a redis-based session
+   * @param id ID of session
+   * @param redisInstance Instance of redis handler to use
+   * @param maxLifeTime Maximum lifetime of a session
+   */
+  constructor(public id: string, private redisInstance: RedisClient, private maxLifeTime: number) {}
 
-  constructor(id: string, redisInstance: RedisClient, maxLifeTime: number) {
-    this.id = id;
-    this.redisInstance = redisInstance;
-    this.maxLifeTime = maxLifeTime;
-  }
-
-  public async get(field: string): Promise<string> {
+  public async get(field: string): Promise<string | undefined> {
     return new Promise<string>((resolve, reject) => {
-      this.redisInstance.hget(this.documentID, field, (err, value) => {
+      this.redisInstance.hget(this.documentID, field, (err, value: any) => {
         if (!err) {
-          resolve(value);
+          if (value === null || typeof value === "undefined") {
+            resolve(undefined);
+          } else if (typeof value === "number") {
+            resolve(value.toString());
+          } else {
+            resolve(value);
+          }
         } else {
           reject(err);
         }
@@ -56,6 +60,18 @@ export class Session implements SessionInterface {
       this.redisInstance.del(this.documentID, (err, response) => {
         if (!err) {
           resolve();
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  public exists(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.redisInstance.hlen(this.documentID, (err, response) => {
+        if (!err) {
+          resolve(response > 0);
         } else {
           reject(err);
         }

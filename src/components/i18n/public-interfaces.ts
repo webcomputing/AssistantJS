@@ -7,7 +7,7 @@ export interface TranslateHelper {
    * First try is `currentState.currentIntent.platform.device`.
    * @param locals If given: variables to use in response
    */
-  t(locals?: { [name: string]: string | number | object }): string;
+  t(locals?: { [name: string]: string | number | object }): Promise<string>;
 
   /**
    * Translates the given key using your json translations.
@@ -16,18 +16,21 @@ export interface TranslateHelper {
    * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
    * @param locals Variables to use in reponse
    */
-  t(key?: string, locals?: { [name: string]: string | number | object }): string;
+  t(key?: string, locals?: { [name: string]: string | number | object }): Promise<string>;
 }
 
-/**
- * Returns all translations for a given key, especially useful for specs
- * @param {string} key Key of the translation
- * @param {any} options Options to pass to i18next / translate helper
- * @return {string[]} All fitting translations
- */
-export type TranslateValuesFor = (key: string, options?: any) => string[];
+export interface InterpolationResolver {
+  /**
+   * resolves all missing interpolations in the given translation iteratively by executing missingInterpolation extensions
+   * @param translatedValue text containing missing interpolations
+   */
+  resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string>;
+}
+
+export type TranslateValuesFor = (key: string, options?: any) => Promise<string[]>;
 
 /** Configuration object for AssistantJS user for i18n component */
+// tslint:disable-next-line:interface-name
 export interface I18nConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
 
 /**
@@ -39,5 +42,5 @@ export interface MissingInterpolationExtension {
    * If a string is returned, it will be used to fill the missing interpolation value
    * @param missingInterpolationName name of the interpolation that is missing
    */
-  execute(missingInterpolationName: string): string | undefined;
+  execute(missingInterpolationName: string, translateHelper: TranslateHelper): string | undefined | Promise<string | undefined>;
 }

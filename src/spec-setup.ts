@@ -1,6 +1,5 @@
 import { createLogger } from "bunyan";
 import * as express from "express";
-import * as fakeRedis from "fakeredis";
 import { ContainerImpl } from "inversify-components";
 
 import { ServerApplication } from "./components/root/app-server";
@@ -13,9 +12,6 @@ import { intent, MinimalRequestExtraction, MinimalResponseHandler } from "./comp
 
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
-
-/** Used for managing multiple spec setups */
-let specSetupId = 0;
 
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecSetup {
@@ -31,9 +27,8 @@ export class SpecSetup {
    * @param autobind If true, calls setup.autobind()
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
-   * */
+   */
   public prepare(states: State.Constructor[] = [], autoBind = true, useChilds = false, autoSetup = true) {
-    this.initializeDefaultConfiguration();
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
 
@@ -101,9 +96,9 @@ export class SpecSetup {
       }
 
       return machine.handleIntent(typeof intent === "undefined" ? extraction.intent : intent);
-    } else {
-      throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
     }
+
+    throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
   }
 
   /** Registers states */
@@ -152,21 +147,13 @@ export class SpecSetup {
       );
     });
   }
-
-  /** Initialize default configuration -> changes redis to mock version */
-  public initializeDefaultConfiguration() {
-    // Set redis instance to fake redis instance
-    const serviceConfiguration: Configuration.Required = {
-      redisClient: fakeRedis.createClient(6379, `redis-spec-setup-${++specSetupId}`, { fast: true }),
-    };
-    this.setup.addConfiguration({ "core:services": serviceConfiguration });
-  }
 }
 
 /**
  * This is an implementation of GenericRequestHandle which DOES NOT spawn a child container,
  * but uses the parent container instead. Nice for testing.
  */
+// tslint:disable-next-line:max-classes-per-file
 export class ChildlessGenericRequestHandler extends GenericRequestHandler {
   public createChildContainer(container) {
     return container.inversifyInstance;

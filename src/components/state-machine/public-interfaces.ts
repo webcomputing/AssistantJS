@@ -1,3 +1,4 @@
+import { ExecutableExtension } from "inversify-components";
 import { TranslateHelper } from "../i18n/translate-helper";
 import { Logger, RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
@@ -16,7 +17,11 @@ export namespace State {
      * @param machine Current transitionable interface
      * @param originalIntentMethod Name of intent the state machine tried to call
      */
-    unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any;
+    unhandledGenericIntent(
+      machine: Transitionable,
+      originalIntentMethod: string,
+      ...args: any[]
+    ): Promise<any>;
 
     /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
@@ -88,6 +93,12 @@ export namespace State {
     readonly name: string;
     readonly intents: intent[];
   }
+
+  /** Returns name of current state name. If nothing is stored in session, uses MainState */
+  export type CurrentNameProvider = () => Promise<string>;
+
+  /** Returns name and instance of current state */
+  export type CurrentProvider = () => Promise<{ instance: State.Required; name: string }>;
 }
 
 /** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
@@ -107,3 +118,26 @@ export interface Transitionable {
   /** Jumps to given intent in current state */
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
+
+/**
+ * This interface represents extensions which are used after the context is set. e.g the StateMachine
+ */
+export interface AfterContextExtension extends ExecutableExtension {
+  execute(): any | Promise<any>;
+}
+
+/**
+ * Extensions of this type can are executed before the statemachine is executed
+ */
+export interface BeforeStateMachine {
+  /**
+   * Method which gets executed automatically, can be either sync with return tpye void or async with return type Promise<void>
+   */
+  execute(): void | Promise<void>;
+}
+
+/**
+ * Extensions of this type are executed after the statemachine is executed.
+ * has same type like interface BeforeStateMachine
+ */
+export type AfterStateMachine = BeforeStateMachine;

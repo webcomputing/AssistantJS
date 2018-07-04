@@ -4,9 +4,12 @@ import { componentInterfaces } from "../../../src/components/unifier/private-int
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { expressAppWithTimeout, RequestProxy, withServer } from "../../support/util/requester";
 
+import { MinimalRequestExtraction } from "../../../src/assistant-source";
 import { createContext } from "../../support/mocks/root/request-context";
 import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
+import { MockRequestExtractionModifier } from "../../support/mocks/unifier/mock-request-modifier";
+import { MockRequestExtractionSessionModifier } from "../../support/mocks/unifier/mock-request-session-modifier";
 import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
 
 describe("ContextDeriver", function() {
@@ -25,7 +28,7 @@ describe("ContextDeriver", function() {
     describe("with a valid extractor registered", function() {
       beforeEach(function() {
         (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-        (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+        (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
       });
 
       describe("when an invalid request was sent", function() {
@@ -43,7 +46,7 @@ describe("ContextDeriver", function() {
       });
 
       describe("when a valid request was sent", function() {
-        const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform };
+        const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
         beforeEach(async function(done) {
           [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
@@ -63,11 +66,11 @@ describe("ContextDeriver", function() {
         beforeEach(function() {
           (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
           (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(SpokenTextExtractor);
-          (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+          (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
         });
 
         describe("when a valid request was sent", function() {
-          const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform };
+          const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
           beforeEach(async function(done) {
             [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
@@ -75,7 +78,7 @@ describe("ContextDeriver", function() {
             done();
           });
 
-          it("uses feature richer extractor", function() {
+          it("uses extractor with more implemented features", function() {
             const extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
             expect(extraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
           });
@@ -87,17 +90,17 @@ describe("ContextDeriver", function() {
   describe("with a valid extractor configured", function() {
     beforeEach(function() {
       (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({});
+      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
+
+      // Craete mock extraction and a fitting request context for it
+      this.mockExtraction = createExtraction("myTest", { testEntity: "value1", testEntity2: "value2" });
+      this.mockRequestContext = createContext("POST", "/fitting_path", this.mockExtraction);
     });
 
-    describe("derive", function() {
+    describe("#derive", function() {
       beforeEach(function() {
         // Grab deriver
         this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
-
-        // Craete mock extraction and a fitting request context for it
-        this.mockExtraction = createExtraction("myTest", { testEntity: "value1", testEntity2: "value2" });
-        this.mockRequestContext = createContext("POST", "/fitting_path", this.mockExtraction);
       });
 
       describe("logging", function() {
@@ -126,6 +129,7 @@ describe("ContextDeriver", function() {
               intent: "myTest",
               language: "**filtered**",
               platform: "**filtered**",
+              sessionData: "**filtered**",
             });
             done();
           });
@@ -144,6 +148,7 @@ describe("ContextDeriver", function() {
               intent: "**filtered**",
               language: "**filtered**",
               platform: "**filtered**",
+              sessionData: "**filtered**",
             });
             done();
           });
@@ -152,9 +157,51 @@ describe("ContextDeriver", function() {
         describe("with default whitelist", function() {
           it("filters everything except intent, language and platform", async function(done) {
             await this.deriver.derive(this.mockRequestContext);
-            this.expectLoggingWithExtraction({...this.mockExtraction,  sessionID: "**filtered**", entities: "**filtered**"});
+            this.expectLoggingWithExtraction({ ...this.mockExtraction, sessionID: "**filtered**", entities: "**filtered**", sessionData: "**filtered**" });
             done();
           });
+        });
+      });
+    });
+
+    describe("with RequestExtractionModifier registerd", function() {
+      describe("without RequestExtractionModifier", function() {
+        beforeEach(async function() {
+          this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
+        });
+
+        it("does not change RequestExtraction, expect for sessionid", async function() {
+          const result = await this.deriver.derive(this.mockRequestContext);
+          expect(result[0] as MinimalRequestExtraction).toEqual({
+            ...this.mockExtraction,
+            sessionID: `${this.mockExtraction.platform}-${this.mockExtraction.sessionID}`,
+          });
+        });
+      });
+
+      describe("with one RequestExtractionModifier", function() {
+        beforeEach(async function() {
+          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestModifier).to(MockRequestExtractionSessionModifier);
+          this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
+        });
+
+        it("returns changed RequestExtraction", async function() {
+          const result = await this.deriver.derive(this.mockRequestContext);
+          expect((result[0] as MinimalRequestExtraction).sessionID).toBe("my-new-session-id");
+        });
+      });
+
+      describe("with multiple RequestExtractionModifier", function() {
+        beforeEach(async function() {
+          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestModifier).to(MockRequestExtractionSessionModifier);
+          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestModifier).to(MockRequestExtractionModifier);
+          this.deriver = this.container.inversifyInstance.get(rootComponentInterfaces.contextDeriver);
+        });
+
+        it("changes to last RequestModifier", async function() {
+          const result = await this.deriver.derive(this.mockRequestContext);
+          expect((result[0] as MinimalRequestExtraction).sessionID).toBe("my-second-session-id");
+          expect((result[0] as MinimalRequestExtraction).intent).toBe("my-new-intent");
         });
       });
     });

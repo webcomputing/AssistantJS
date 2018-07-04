@@ -60,7 +60,7 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
  */
 export function createRequestScope(
   specSetup: SpecSetup,
-  minimalExtraction: MinimalRequestExtraction | null = extraction,
+  minimalExtraction: MinimalRequestExtraction | null = JSON.parse(JSON.stringify(extraction)),
   requestContext: RequestContext = context,
   responseHandler: { new (...args: any[]): MinimalResponseHandler } = ResponseHandler
 ) {

@@ -43,19 +43,24 @@ export interface ResponseFactory {
   createCardResponse(): CardResponse;
 }
 
+export type ConditionalTypeEndSessionWith<T extends string | Promise<string>> = T extends string ? void : Promise<void>;
+export type ConditionalTypePrompt<T extends string | Promise<string>, X extends string | Promise<string>> = T extends Promise<string>
+  ? Promise<void>
+  : (X extends Promise<string> ? Promise<void> : void);
+
 export interface Voiceable {
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith(text: string): void;
+  endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeEndSessionWith<T>;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]): void;
+  prompt<T extends string | Promise<string>, X extends string | Promise<string>>(inputText: T, ...inputReprompts: X[]): ConditionalTypePrompt<T, X>;
 }
 
 // Currently, we are not allowed to use camelCase here! So try to just use a single word!
@@ -236,19 +241,30 @@ export interface RequestExtractor<ComponentConfiguration = {}> {
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
 
+/**
+ * Extension interface to modify extractions after the Extractor has made them
+ */
+export interface RequestExtractionModifier {
+  /**
+   * Modifies the RequestExtraction
+   * @param extraction the original or previous extraction
+   */
+  modify(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction>;
+}
+
 /** Common fields between PlatformRequestExtraction and MinimalRequestExtraction */
 export interface CommonRequestExtraction {
   /** Set of entities */
   entities?: { [name: string]: any };
 
   /** Intent to call */
-  readonly intent: intent;
+  intent: intent;
 
   /** Given session id */
-  readonly sessionID: string;
+  sessionID: string;
 
   /** Language of this request */
-  readonly language: string;
+  language: string;
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
@@ -259,7 +275,7 @@ export interface PlatformRequestExtraction<ComponentConfiguration = {}> extends 
 /** The minimum set of information a RequestExtractor has to extract from a request */
 export interface MinimalRequestExtraction extends CommonRequestExtraction {
   /** Name of platform responsible for this extraction (equals to component.name) */
-  readonly platform: string;
+  platform: string;
 }
 
 /** Optional, additional informations which extractors may extract from a request */
@@ -285,25 +301,44 @@ export namespace OptionalExtractions {
   export interface Device {
     /**
      * Name of platform-specific device, name is given and filled by platform.
-     * NULLL values are not allowed here: If a platform supports devices, it has to return the used one.
+     * NULL values are not allowed here: If a platform supports devices, it has to return the used one.
      */
     device: string;
+  }
+
+  export interface Timestamp {
+    /**
+     * Timestamp of the platform-specific request.
+     * NULL values are not allowed here: If a platform supports Timestamp, it has to return this.
+     */
+    requestTimestamp: string;
+  }
+
+  export interface SessionData {
+    /**
+     * Blob of all session data or NULL, if current request doesn't contain any session data.
+     */
+    sessionData: string | null;
+  }
+
+  /** Interface for additional domainspecific Paramters */
+  export interface AdditionalParameters {
+    /**
+     * Key-Value Store for any additional paramters
+     */
+    additionalParameters: { [paramter: string]: any };
   }
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
     /** Are OAuth tokens available? */
-    OAuthExtraction: ["oAuthToken"],
-
-    /** Is the spoken text available? */
-    SpokenTextExtraction: ["spokenText"],
-
-    /** Is a platform-specific temporal auth token available? */
-    TemporalAuthExtraction: ["temporalAuthToken"],
-
-    /** Are information about the used device available? */
+    OAuthExtraction: ["oAuthToken"] /** Is the spoken text available? */,
+    SpokenTextExtraction: ["spokenText"] /** Is a platform-specific temporal auth token available? */,
+    TemporalAuthExtraction: ["temporalAuthToken"] /** Are information about the used device available? */,
     DeviceExtraction: ["device"],
+    TimestampExtraction: ["requestTimestamp"],
+    SessionData: ["sessionData"],
   };
 }
 /** Minimum interface a response handler has to fulfill */
@@ -342,6 +377,14 @@ export namespace OptionalHandlerFeatures {
   export interface Reprompt {
     /** Reprompts for the current voice message */
     reprompts: string[] | null;
+  }
+
+  /** If implemented, the response handler's platform supports storing of session data */
+  export interface SessionData {
+    /**
+     * Blob of all session data to set or NULL if we don't want to set any session data.
+     */
+    sessionData: string | null;
   }
 
   export namespace GUI {
@@ -398,6 +441,9 @@ export namespace OptionalHandlerFeatures {
 
     /** Does this response handler support suggestion chips? */
     SuggestionChip: ["suggestionChips"],
+
+    /** Does this response handler support storing of session data? */
+    SessionData: ["sessionData"],
   };
 }
 

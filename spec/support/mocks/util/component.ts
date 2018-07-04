@@ -3,6 +3,7 @@ import { Component as ComponentI, InterfaceDescriptor } from "inversify-componen
 export class Component implements ComponentI {
   public readonly name: string;
   public readonly interfaces: InterfaceDescriptor;
+  // tslint:disable-next-line:variable-name
   private _configuration: {};
 
   get configuration() {
@@ -24,6 +25,6 @@ export class Component implements ComponentI {
   }
 
   public addConfiguration(c: {}) {
-    this._configuration = {...this._configuration, ...c};
+    this._configuration = { ...this._configuration, ...c };
   }
 }
