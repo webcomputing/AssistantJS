@@ -10,10 +10,17 @@ interface CurrentThisContext {
   stateMachine: StateMachine;
   container: Container;
   getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>;
+  doStateTransitions: (states: string[]) => Promise<void>;
 }
 
 describe("state context decorators", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.doStateTransitions = async (states: string[]) => {
+      for (const state of states) {
+        await this.stateMachine.transitionTo(state);
+      }
+    };
+
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
@@ -29,19 +36,20 @@ describe("state context decorators", function() {
 
     describe("with transitioning from state A to B", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState"]);
+        await this.doStateTransitions(["ContextAState", "ContextBState"]);
       });
 
       it("uses exampleAIntent of ContextAState", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("exampleAIntent");
         expect(this.stateMachine.handleIntent).toHaveBeenCalledTimes(2);
+        expect(this.stateMachine.handleIntent).toHaveBeenCalledWith("exampleAIntent");
         expect(this.stateMachine.handleIntent).not.toHaveBeenCalledWith(GenericIntent.Unhandled, "exampleAIntent");
       });
     });
 
     describe("with transitioning from A to B to A", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextAState"]);
+        await this.doStateTransitions(["ContextAState", "ContextBState", "ContextAState"]);
       });
 
       it("does not add states which stayInContext decorator callback returns false to context", async function(this: CurrentThisContext) {
@@ -62,7 +70,7 @@ describe("state context decorators", function() {
 
     describe("with transitioning from A to B to A to B", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextBState", "ContextAState", "ContextBState"]);
+        await this.doStateTransitions(["ContextAState", "ContextBState", "ContextAState", "ContextBState"]);
       });
 
       it("just adds a certain class of state to context once", async function(this: CurrentThisContext) {
@@ -77,7 +85,7 @@ describe("state context decorators", function() {
   describe("clearContext decorator", function() {
     describe("with transitioning from A to C", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextCState"]);
+        await this.doStateTransitions(["ContextAState", "ContextCState"]);
       });
 
       it("removes ContextAState from context", async function(this: CurrentThisContext) {
@@ -89,7 +97,7 @@ describe("state context decorators", function() {
 
     describe("with transitioning from A to D", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        await doStateTransitions(this.stateMachine, ["ContextAState", "ContextDState"]);
+        await this.doStateTransitions(["ContextAState", "ContextDState"]);
       });
 
       it("keeps ContextAState in context", async function(this: CurrentThisContext) {
@@ -101,9 +109,3 @@ describe("state context decorators", function() {
     });
   });
 });
-
-async function doStateTransitions(stateMachine: StateMachine, states: string[]) {
-  for (const state of states) {
-    await stateMachine.transitionTo(state);
-  }
-}
