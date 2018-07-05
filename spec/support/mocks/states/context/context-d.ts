@@ -8,7 +8,7 @@ import { stayInContext } from "../../../../../src/components/state-machine/stay-
 import { ResponseFactory } from "../../../../../src/components/unifier/public-interfaces";
 
 @stayInContext()
-@clearContext((current, context, history) => false)
+@clearContext(() => false)
 @injectable()
 export class ContextDState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;

@@ -79,6 +79,19 @@ describe("state context decorators", function() {
         expect(contextStatesNames.indexOf("ContextAState")).toBe(contextStatesNames.lastIndexOf("ContextAState"));
       });
     });
+
+    describe("callback", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.doStateTransitions(["ContextAState", "ContextBState"]);
+      });
+
+      it("gets called with the correct parameters", async function(this: CurrentThisContext) {
+        expect(current).toEqual("ContextAState");
+        expect(next).toEqual("ContextBState");
+        expect(context).toEqual(["ContextAState"]);
+        expect(history).toEqual([]);
+      });
+    });
   });
 
   describe("clearContext decorator", function() {
@@ -106,5 +119,31 @@ describe("state context decorators", function() {
         expect(contextStates.map(state => state.name)).toContain("ContextAState");
       });
     });
+
+    describe("callback", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.doStateTransitions(["ContextCState"]);
+        await this.stateMachine.handleIntent("exampleCIntent");
+      });
+
+      it("gets called with the correct parameters", async function(this: CurrentThisContext) {
+        expect(current).toEqual("ContextCState");
+        expect(context).toEqual([]);
+        expect(history).toEqual([{ stateName: "ContextCState", intentMethodName: "exampleCIntent" }]);
+      });
+    });
   });
 });
+
+let current;
+let next;
+let context;
+let history;
+
+export function testCallback(currentParam, contextParam, historyParam, nextParam) {
+  current = currentParam;
+  next = nextParam;
+  context = contextParam;
+  history = historyParam;
+  return true;
+}

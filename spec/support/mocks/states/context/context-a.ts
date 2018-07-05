@@ -5,8 +5,9 @@ import { BaseState } from "../../../../../src/components/state-machine/base-stat
 import { State, Transitionable } from "../../../../../src/components/state-machine/public-interfaces";
 import { stayInContext } from "../../../../../src/components/state-machine/stay-in-context-decorator";
 import { ResponseFactory } from "../../../../../src/components/unifier/public-interfaces";
+import { testCallback } from "../../../../components/state-machine/context.spec";
 
-@stayInContext()
+@stayInContext(testCallback)
 @injectable()
 export class ContextAState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;
