@@ -81,6 +81,19 @@ describe("state context decorators", function() {
       });
     });
 
+    describe("with transitioning from A to D to A to D", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.doStateTransitions(["ContextAState", "ContextDState", "ContextAState", "ContextDState"]);
+      });
+
+      it("keeps context states chronologically", async function(this: CurrentThisContext) {
+        const contextStates = await this.getContextStates();
+        const contextStatesNames = contextStates.map(state => state.name);
+        expect(contextStatesNames[0]).toBe("ContextDState");
+        expect(contextStatesNames[1]).toBe("ContextAState");
+      });
+    });
+
     describe("callback", function() {
       beforeEach(async function(this: CurrentThisContext) {
         await this.doStateTransitions(["ContextAState", "ContextBState"]);
