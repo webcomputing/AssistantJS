@@ -8,6 +8,7 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
 
+import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "./interpolation-resolver";
 import { arraySplitter, processor } from "./plugins/array-returns-sample.plugin";
 import { processor as templateParser } from "./plugins/parse-template-language.plugin";
 import { MissingInterpolationExtension } from "./public-interfaces";
@@ -76,6 +77,6 @@ export class I18nextWrapper {
    */
   private onInterpolationMissing(str: string, match: [string, string]) {
     this.logger.debug(`AssistantJS TranslateHelper's onInterpolationMissing callback was called. Missing interpolation = '${match[0]}'`);
-    return match[0].replace("{{", "*~~").replace("}}", "~~*");
+    return match[0].replace("{{", TEMPORARY_INTERPOLATION_START).replace("}}", TEMPORARY_INTERPOLATION_END);
   }
 }
