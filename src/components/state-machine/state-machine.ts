@@ -20,10 +20,10 @@ export class StateMachine implements Transitionable {
     @inject("core:root:current-logger") private logger: Logger
   ) {}
 
-  public async handleIntent(intent: intent, ...args: any[]) {
+  public async handleIntent(requestedIntent: intent, ...args: any[]) {
     const currentState = await this.getCurrentState();
 
-    const intentMethod = this.deriveIntentMethod(intent);
+    const intentMethod = this.deriveIntentMethod(requestedIntent);
     this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
     this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
@@ -40,8 +40,8 @@ export class StateMachine implements Transitionable {
       }
 
       // Check if there is a "beforeIntent_" method available
-      if ("beforeIntent_" in currentState.instance) {
-        const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
+      if (this.isStateWithBeforeIntent(currentState.instance)) {
+        const callbackResult = await Promise.resolve(currentState.instance.beforeIntent_(intentMethod, this, ...args));
 
         if (typeof callbackResult !== "boolean") {
           throw new Error(
@@ -61,8 +61,8 @@ export class StateMachine implements Transitionable {
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
         // Call afterIntent_ method if present
-        if ("afterIntent_" in currentState.instance) {
-          ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
+        if (this.isStateWithAfterIntent(currentState.instance)) {
+          currentState.instance.afterIntent_(intentMethod, this, ...args);
         }
 
         // Run afterIntent hooks
@@ -85,9 +85,9 @@ export class StateMachine implements Transitionable {
     return this.currentSessionFactory().set("__current_state", state);
   }
 
-  public async redirectTo(state: string, intent: intent, ...args: any[]) {
+  public async redirectTo(state: string, requestedIntent: intent, ...args: any[]) {
     await this.transitionTo(state);
-    return this.handleIntent(intent, ...args);
+    return this.handleIntent(requestedIntent, ...args);
   }
 
   public stateExists(state: string) {
@@ -98,18 +98,18 @@ export class StateMachine implements Transitionable {
 
   /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
-    if ("errorFallback" in state) {
-      await Promise.resolve((state as any).errorFallback(error, state, stateName, intentMethod, this, ...args));
+    if (this.isStateWithErrorFallback(state)) {
+      await Promise.resolve(state.errorFallback(error, state, stateName, intentMethod, this, ...args));
     } else {
       throw error;
     }
   }
 
   /** If you change this: Have a look at registering of states / automatic intent recognition, too! */
-  private deriveIntentMethod(intent: intent): string {
-    if (typeof intent === "string" && intent.endsWith("Intent")) return intent;
+  private deriveIntentMethod(requestedIntent: intent): string {
+    if (typeof requestedIntent === "string" && requestedIntent.endsWith("Intent")) return requestedIntent;
 
-    const baseString = (typeof intent === "string" ? intent : GenericIntent[intent].toLowerCase() + "Generic") + "Intent";
+    const baseString = (typeof requestedIntent === "string" ? requestedIntent : GenericIntent[requestedIntent].toLowerCase() + "Generic") + "Intent";
     return baseString.charAt(0).toLowerCase() + baseString.slice(1);
   }
 
@@ -119,5 +119,18 @@ export class StateMachine implements Transitionable {
 
   private getAfterIntentCallbacks() {
     return this.pipeFactory(componentInterfaces.afterIntent);
+  }
+
+  /** Type Guards */
+  private isStateWithBeforeIntent(state: State.Required | State.Required & State.BeforeIntent): state is State.Required & State.BeforeIntent {
+    return "beforeIntent_" in state;
+  }
+
+  private isStateWithAfterIntent(state: State.Required | State.Required & State.AfterIntent): state is State.Required & State.AfterIntent {
+    return "afterIntent_" in state;
+  }
+
+  private isStateWithErrorFallback(state: State.Required | State.Required & State.ErrorHandler): state is State.Required & State.ErrorHandler {
+    return "errorFallback" in state;
   }
 }

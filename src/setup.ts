@@ -1,4 +1,3 @@
-import { inject, injectable, multiInject } from "inversify";
 import { ComponentDescriptor, Container, ContainerImpl, MainApplication } from "inversify-components";
 
 import * as internalComponents from "./components/index";

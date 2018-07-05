@@ -82,5 +82,21 @@
     "9",
     "10"
   ],
+  "filter": {
+    "stateA": {
+      "intentA": "FilterAState - filterTestAIntent",
+      "intentB": "FilterAState - filterTestBIntent",
+      "intentC": "FilterAState - filterTestCIntent",
+      "intentD": "FilterAState - filterTestDIntent"
+    },
+    "stateB": {
+      "intentA": "FilterBState - filterTestAIntent",
+      "intentB": "FilterBState - filterTestBIntent"
+    },
+    "stateC": {
+      "intentA": "FilterCState - filterTestAIntent",
+      "intentB": "FilterCState - filterTestBIntent"
+    }
+  },
   "noInterpolation": "no interpolation"
 }

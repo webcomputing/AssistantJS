@@ -8,8 +8,10 @@ import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { ResponseFactory } from "../unifier/response-factory";
 
+import { Hooks } from "../joined-interfaces";
+import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
-import { MAIN_STATE_NAME, State } from "./public-interfaces";
+import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
@@ -71,7 +73,7 @@ export const descriptor: ComponentDescriptor = {
       });
     },
 
-    request: bindService => {
+    request: (bindService, lookupService) => {
       // Returns set of dependencies fitting for BaseState
       bindService.bindGlobalService<State.SetupSet>("current-state-setup-set").toDynamicValue(context => {
         return {
@@ -112,6 +114,13 @@ export const descriptor: ComponentDescriptor = {
             });
         };
       });
+
+      bindService.bindLocalServiceToSelf(ExecuteFiltersHook);
+
+      // Returns before intent hook
+      bindService
+        .bindExtension<Hooks.BeforeIntentHook>(lookupService.lookup("core:state-machine").getInterface("beforeIntent"))
+        .toDynamicValue(context => context.container.get(ExecuteFiltersHook).execute);
     },
   },
 };

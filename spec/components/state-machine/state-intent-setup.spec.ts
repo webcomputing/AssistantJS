@@ -1,6 +1,6 @@
 import { GenericIntent } from "../../../src/components/unifier/public-interfaces";
 
-import { StateMachineSetup } from "../../../src/components/state-machine/setup";
+import { StateMachineSetup } from "../../../src/components/state-machine/state-intent-setup";
 import { createRequestScope, createSpecHelper } from "../../support/util/setup";
 
 import { MainState } from "../../support/mocks/states/main";
@@ -23,8 +23,8 @@ describe("StateMachineSetup", function() {
 
   describe("addState", function() {
     beforeEach(function() {
-      this.setup.addState(MainState);
-      this.setup.addState(SecondState, explicitName, explicitIntents);
+      this.setup.addClass(MainState);
+      this.setup.addClass(SecondState, explicitName, explicitIntents);
     });
 
     it("adds state to internal stateClasses", function() {
@@ -68,7 +68,7 @@ describe("StateMachineSetup", function() {
     });
   });
 
-  describe(".deriveStateIntents", function() {
+  describe("deriveStateIntents", function() {
     it("derives child intents corectly", function() {
       const expectation = implicitMainStateIntents.concat([GenericIntent.Help]) as string[];
       expect(StateMachineSetup.deriveStateIntents(SubState)).toEqual(expectation);
