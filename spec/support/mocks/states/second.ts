@@ -3,12 +3,12 @@ import { State } from "../../../../src/components/state-machine/public-interface
 
 @injectable()
 export class SecondState implements State.Required {
-  public spy?: Function;
+  public spy?: (...args: any[]) => void;
 
   constructor(
     @optional()
     @inject("mocks:states:call-spy")
-    spy: Function
+    spy: (...args: any[]) => void
   ) {
     this.spy = spy;
   }
