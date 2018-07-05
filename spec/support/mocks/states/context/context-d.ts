@@ -7,7 +7,7 @@ import { State, Transitionable } from "../../../../../src/components/state-machi
 import { stayInContext } from "../../../../../src/components/state-machine/stay-in-context-decorator";
 import { ResponseFactory } from "../../../../../src/components/unifier/public-interfaces";
 
-@stayInContext((current, next, context, history) => true)
+@stayInContext()
 @clearContext((current, context, history) => false)
 @injectable()
 export class ContextDState extends BaseState implements State.Required {
