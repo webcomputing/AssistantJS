@@ -24,14 +24,14 @@ export class StateMachine implements Transitionable {
   ) {}
 
   public async handleIntent(requestedIntent: intent, ...args: any[]) {
-    const currentState = await this.getCurrentState();
+    const [currentState, contextStates] = await Promise.all([this.getCurrentState(), this.getContextStates()]);
     const intentMethod = this.deriveIntentMethod(requestedIntent);
     this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
     this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
     // execute clearContext callback if decorator is present
     const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
-    if (clearContextCallbackFn && clearContextCallbackFn(currentState.name, (await this.getContextStates()).map(cState => cState.name), this.intentHistory)) {
+    if (clearContextCallbackFn && clearContextCallbackFn(currentState.name, contextStates.map(cState => cState.name), this.intentHistory)) {
       this.currentSessionFactory().set("__context_states", JSON.stringify([]));
     }
 
@@ -78,7 +78,6 @@ export class StateMachine implements Transitionable {
           .withArguments(currentState.instance, currentState.name, intentMethod, this, ...args)
           .runWithResultset();
       } else {
-        const contextStates = await this.getContextStates();
         const fittingState = contextStates.find(state => typeof state.instance[intentMethod] === "function");
 
         if (fittingState) {
