@@ -18,24 +18,15 @@ describe("FilterSetup", function() {
 
   describe("addFilter", function() {
     beforeEach(function() {
-      this.setup.addClass(TestFilterA);
-      this.setup.addClass(TestFilterB, explicitName);
+      this.setup.addFilter(TestFilterA);
     });
 
     it("adds filter to internal filterClasses", function() {
-      expect(Object.keys(this.setup.filterClasses).length).toBe(2);
+      expect(Object.keys(this.setup.classes).length).toBe(1);
     });
 
-    describe("without explicit name", function() {
-      it("adds filter to filterClasses by name of constructor", function() {
-        expect(this.setup.filterClasses.TestFilterA).toEqual(TestFilterA);
-      });
-    });
-
-    describe("with explicit name given", function() {
-      it("adds filter to filterClasses by given name", function() {
-        expect(this.setup.filterClasses[explicitName]).toEqual(TestFilterB);
-      });
+    it("adds filter to filterClasses by name of constructor", function() {
+      expect(this.setup.classes.TestFilterA).toEqual(TestFilterA);
     });
   });
 });

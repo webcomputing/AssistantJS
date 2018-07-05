@@ -3,21 +3,13 @@ import { ComponentDescriptor } from "inversify-components";
 import { Constructor } from "../../assistant-source";
 import { AssistantJSSetup } from "../../setup";
 
-export abstract class ConventionalFileLoader {
-  private assistantJS: AssistantJSSetup;
+export abstract class ConventionalFileLoader<ClassType> {
+  public classes: { [name: string]: Constructor<ClassType> } = {};
+  protected assistantJS: AssistantJSSetup;
 
   constructor(assistantJS: AssistantJSSetup) {
     this.assistantJS = assistantJS;
   }
-
-  /**
-   * Adds a class to setup
-   * @param classToAdd class to add
-   * @param name name to use for class
-   * @param args further params
-   */
-
-  public abstract addClass(classToAdd: Constructor<any>, name?: string, ...args: any[]);
 
   /**
    * Builds a component descriptor out of all added classes
@@ -25,10 +17,10 @@ export abstract class ConventionalFileLoader {
   public abstract toComponentDescriptor(): ComponentDescriptor;
 
   /**
-   * [Sync!] Adds all classes in a specific directory as filters.
-   * @param addOnly If set to true, this method only calls "addFilter", but not "registerFilters" finally
+   * [Sync!] Adds all classes in a specific directory to this.classes.
+   * @param addOnly If set to true, this method only calls "addClass", but not "registerClasses" finally, so does not register the component descriptor
    * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
-   * @param dictionary Dictionary which contains filter classes, defaults to "filters"
+   * @param dictionary Dictionary which contains the classes to add
    */
   public registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary) {
     fs.readdirSync(baseDirectory + dictionary).forEach(file => {
@@ -47,13 +39,26 @@ export abstract class ConventionalFileLoader {
     if (!addOnly) this.registerClasses();
   }
 
-  /** Registers all states in dependency injection container */
-  public registerClasses() {
+  /** Registers all classes in dependency injection container */
+  protected registerClasses() {
     this.assistantJS.registerComponent(this.toComponentDescriptor());
   }
 
-  /** Returns a states name based on its constructor */
-  public static deriveClassName<T>(classToDerive: Constructor<T>): string {
+  /**
+   * Adds a class to setup
+   * @param classToAdd class to add
+   * @param name name to use for class
+   * @param args further params
+   * @return Name of class which was added
+   */
+  protected addClass(classToAdd: Constructor<ClassType>, name?: string, ...args: any[]): string {
+    const className = typeof name === "undefined" ? ConventionalFileLoader.deriveClassName<ClassType>(classToAdd) : name;
+    this.classes[className] = classToAdd;
+    return className;
+  }
+
+  /** Returns a class name based on its constructor */
+  public static deriveClassName<ClassType>(classToDerive: Constructor<ClassType>): string {
     return classToDerive.name;
   }
 }

@@ -23,12 +23,12 @@ describe("StateMachineSetup", function() {
 
   describe("addState", function() {
     beforeEach(function() {
-      this.setup.addClass(MainState);
-      this.setup.addClass(SecondState, explicitName, explicitIntents);
+      this.setup.addState(MainState);
+      this.setup.addState(SecondState, explicitName, explicitIntents);
     });
 
     it("adds state to internal stateClasses", function() {
-      expect(Object.keys(this.setup.stateClasses).length).toBe(2);
+      expect(Object.keys(this.setup.classes).length).toBe(2);
     });
 
     it("adds state to internal metaStates", function() {
@@ -37,7 +37,7 @@ describe("StateMachineSetup", function() {
 
     describe("without explicit name", function() {
       it("adds state to stateClases by name of constructor", function() {
-        expect(this.setup.stateClasses.MainState).toEqual(MainState);
+        expect(this.setup.classes.MainState).toEqual(MainState);
       });
 
       it("adds state to metaStates with constructor name", function() {
@@ -47,7 +47,7 @@ describe("StateMachineSetup", function() {
 
     describe("with explicit name given", function() {
       it("adds state to stateClasses by given name", function() {
-        expect(this.setup.stateClasses[explicitName]).toEqual(SecondState);
+        expect(this.setup.classes[explicitName]).toEqual(SecondState);
       });
 
       it("adds state to metaStates with given name", function() {

@@ -106,15 +106,15 @@ export class SpecSetup {
   /** Registers states */
   public registerStates(states: State.Constructor[]) {
     const stateMachineSetup = new StateMachineSetup(this.setup);
-    states.forEach(state => stateMachineSetup.addClass(state));
-    stateMachineSetup.registerClasses();
+    states.forEach(state => stateMachineSetup.addState(state));
+    stateMachineSetup.registerStates();
   }
 
   /** Registers filters */
   public registerFilters(filters: Array<Constructor<Filter>>) {
     const filterSetup = new FilterSetup(this.setup);
-    filters.forEach(filter => filterSetup.addClass(filter));
-    filterSetup.registerClasses();
+    filters.forEach(filter => filterSetup.addFilter(filter));
+    filterSetup.registerFilters();
   }
 
   /**
