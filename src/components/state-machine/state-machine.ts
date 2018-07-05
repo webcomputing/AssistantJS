@@ -80,8 +80,8 @@ export class StateMachine implements Transitionable {
       } else {
         const fittingState = contextStates.find(state => typeof state.instance[intentMethod] === "function");
 
-        if (fittingState) {
-          await this.transitionTo((fittingState as { instance: State.Required; name: string }).name);
+        if (typeof fittingState !== "undefined") {
+          await this.transitionTo(fittingState.name);
           await this.handleIntent(intentMethod, ...args);
         } else {
           // -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead
@@ -96,10 +96,11 @@ export class StateMachine implements Transitionable {
 
   public async transitionTo(state: string) {
     if (this.stateNames.indexOf(state) === -1) throw Error("Cannot transition to " + state + ": State does not exist!");
-    let contextStates = await this.getContextStates();
+    const resolvedPromise = await Promise.all([this.getContextStates(), this.getCurrentState()]);
+    let contextStates = resolvedPromise[0];
+    const currentState = resolvedPromise[1];
 
     // add current state to context if context meta data is present
-    const currentState = await this.getCurrentState();
     const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
 
     // add to context if not present already
