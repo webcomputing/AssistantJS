@@ -2,8 +2,8 @@ import { inject, injectable, optional } from "inversify";
 import { TranslateHelper } from "../../../../../src/components/i18n/public-interfaces";
 import { Logger } from "../../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../../src/components/state-machine/base-state";
+import { stayInContext } from "../../../../../src/components/state-machine/decorators/stay-in-context-decorator";
 import { State, Transitionable } from "../../../../../src/components/state-machine/public-interfaces";
-import { stayInContext } from "../../../../../src/components/state-machine/stay-in-context-decorator";
 import { ResponseFactory } from "../../../../../src/components/unifier/public-interfaces";
 
 @stayInContext(() => false)

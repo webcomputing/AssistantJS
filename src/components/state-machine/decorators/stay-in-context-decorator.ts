@@ -1,5 +1,3 @@
-import { State } from "../state-machine/public-interfaces";
-
 export const stayInContextMetadataKey = Symbol("metadata-key: stayInContext");
 
 export function stayInContext(addToContext?: (...args: any[]) => boolean) {

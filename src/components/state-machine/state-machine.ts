@@ -5,10 +5,10 @@ import { CurrentSessionFactory } from "../services/public-interfaces";
 import { GenericIntent, intent } from "../unifier/public-interfaces";
 
 import { injectionNames } from "../../injection-names";
-import { clearContextMetadataKey } from "./clear-context-decorator";
+import { clearContextMetadataKey } from "./decorators/clear-context-decorator";
+import { stayInContextMetadataKey } from "./decorators/stay-in-context-decorator";
 import { componentInterfaces } from "./private-interfaces";
 import { State, Transitionable } from "./public-interfaces";
-import { stayInContextMetadataKey } from "./stay-in-context-decorator";
 
 @injectable()
 export class StateMachine implements Transitionable {

@@ -1,5 +1,3 @@
-import { State } from "../state-machine/public-interfaces";
-
 export const clearContextMetadataKey = Symbol("metadata-key: clearContext");
 
 export function clearContext(needsClear?: (...args: any[]) => boolean) {
