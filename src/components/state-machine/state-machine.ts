@@ -29,25 +29,25 @@ export class StateMachine implements Transitionable {
     this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
     this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
-    // execute clearContext callback if decorator is present
+    /* execute clearContext callback if decorator is present */
     const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
     if (clearContextCallbackFn && clearContextCallbackFn(currentState.name, contextStates.map(cState => cState.name), this.intentHistory)) {
       this.currentSessionFactory().set("__context_states", JSON.stringify([]));
     }
 
     try {
-      // Run beforeIntent-hooks as filter
+      /* Run beforeIntent-hooks as filter */
       const hookResults = await this.getBeforeIntentCallbacks()
         .withArguments(currentState.instance, currentState.name, intentMethod, this, ...args)
         .runAsFilter();
 
-      // Abort if not all hooks returned a "success" result
+      /* Abort if not all hooks returned a "success" result */
       if (!hookResults.success) {
         this.logger.info("One of your hooks did not return a successful result. Aborting planned state machine execution.");
         return;
       }
 
-      // Check if there is a "beforeIntent_" method available
+      /* Check if there is a "beforeIntent_" method available */
       if ("beforeIntent_" in currentState.instance) {
         const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
 
@@ -63,17 +63,17 @@ export class StateMachine implements Transitionable {
         }
       }
 
-      // Check if intentMethod is available in currentState
+      /* Check if intentMethod is available in currentState */
       if (typeof currentState.instance[intentMethod] === "function") {
-        // Call given intent
+        /* Call given intent */
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
-        // Call afterIntent_ method if present
+        /* Call afterIntent_ method if present */
         if ("afterIntent_" in currentState.instance) {
           ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
         }
 
-        // Run afterIntent hooks
+        /* Run afterIntent hooks */
         await this.getAfterIntentCallbacks()
           .withArguments(currentState.instance, currentState.name, intentMethod, this, ...args)
           .runWithResultset();
@@ -84,12 +84,12 @@ export class StateMachine implements Transitionable {
           await this.transitionTo(fittingState.name);
           await this.handleIntent(intentMethod, ...args);
         } else {
-          // -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead
+          /* -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead */
           await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);
         }
       }
     } catch (e) {
-      // Handle exception by error handler
+      /* Handle exception by error handler */
       await this.handleOrReject(e, currentState.instance, currentState.name, intentMethod, ...args);
     }
   }
@@ -100,15 +100,15 @@ export class StateMachine implements Transitionable {
     let contextStates = resolvedPromise[0];
     const currentState = resolvedPromise[1];
 
-    // add current state to context if context meta data is present
     const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
 
-    // add to context if not present already
-    if (stayInContextCallbackFn && contextStates.map(cState => cState.name).indexOf(currentState.name) === -1) {
+    /* add current state to context if context meta data is present and remove previous context entry of current state */
+    if (stayInContextCallbackFn) {
+      contextStates = contextStates.filter(contextState => contextState.name !== currentState.name);
       contextStates.push(currentState);
     }
 
-    // execute callbacks of context states and filter by result
+    /* execute callbacks of context states and filter by result */
     contextStates = contextStates.filter(contextState =>
       (this.retrieveStayInContextCallbackFromMetadata(contextState.instance.constructor as State.Constructor) as ((...args: any[]) => boolean))(
         currentState.name,
@@ -117,7 +117,7 @@ export class StateMachine implements Transitionable {
         state
       )
     );
-    // set remaining context states as new context
+    /* set remaining context states as new context */
     await this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
 
     return this.currentSessionFactory().set("__current_state", state);
