@@ -38,10 +38,11 @@ describe("state context decorators", function() {
         await this.doStateTransitions(["ContextAState", "ContextBState"]);
       });
 
-      it("uses exampleAIntent of ContextAState", async function(this: CurrentThisContext) {
-        await this.stateMachine.handleIntent("exampleAIntent");
+      it("uses exampleAIntent of ContextAState passing all args", async function(this: CurrentThisContext) {
+        await this.stateMachine.handleIntent("exampleAIntent", "testArgs");
         expect(this.stateMachine.handleIntent).toHaveBeenCalledTimes(2);
-        expect(this.stateMachine.handleIntent).toHaveBeenCalledWith("exampleAIntent");
+        expect(this.stateMachine.handleIntent).not.toHaveBeenCalledWith("exampleAIntent");
+        expect(this.stateMachine.handleIntent).toHaveBeenCalledWith("exampleAIntent", "testArgs");
         expect(this.stateMachine.handleIntent).not.toHaveBeenCalledWith(GenericIntent.Unhandled, "exampleAIntent");
       });
     });
