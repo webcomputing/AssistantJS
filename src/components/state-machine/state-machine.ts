@@ -30,7 +30,7 @@ export class StateMachine implements Transitionable {
     this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
 
     // execute clearContext callback if decorator is present
-    const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata((currentState.instance as any).constructor);
+    const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
     if (clearContextCallbackFn && clearContextCallbackFn(currentState.name, (await this.getContextStates()).map(cState => cState.name), this.intentHistory)) {
       this.currentSessionFactory().set("__context_states", JSON.stringify([]));
     }
@@ -101,7 +101,7 @@ export class StateMachine implements Transitionable {
 
     // add current state to context if context meta data is present
     const currentState = await this.getCurrentState();
-    const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata((currentState.instance as any).constructor);
+    const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
 
     // add to context if not present already
     if (stayInContextCallbackFn && contextStates.map(cState => cState.name).indexOf(currentState.name) === -1) {
@@ -110,7 +110,7 @@ export class StateMachine implements Transitionable {
 
     // execute callbacks of context states and filter by result
     contextStates = contextStates.filter(contextState =>
-      (this.retrieveStayInContextCallbackFromMetadata((contextState.instance as any).constructor) as ((...args: any[]) => boolean))(
+      (this.retrieveStayInContextCallbackFromMetadata(contextState.instance.constructor as State.Constructor) as ((...args: any[]) => boolean))(
         currentState.name,
         contextStates.map(cState => cState.name),
         this.intentHistory,
