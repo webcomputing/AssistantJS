@@ -27,12 +27,13 @@ export class InterpolationResolver implements InterpolationResolverInterface {
     let resolvedText = translatedValue;
 
     /** return if translatedValue does not contain any further interpolations */
-    if (!translatedValue.includes("~")) {
+    if (!translatedValue.includes("*~~")) {
       return resolvedText;
     }
 
     /** fill missing interpolations in parallel */
-    const interpolations = translatedValue.split(/(?<=\*~~)(.*?)(?=\~~*)/g, undefined).filter(value => value.includes("~") === false);
+    const matches = translatedValue.match(/\*~~(.*?)~~\*/g);
+    const interpolations = matches !== null ? matches.map(match => match.replace("*~~", "").replace("~~*", "")) : [];
 
     /** returns a promise for a given interpolation which contains an object containing the interpolation plus the value it needs to be replaced with */
     const perMissingInterpolation = async (interpolation: string): Promise<{ interpolation: string; replacement: string }> => {
@@ -49,7 +50,7 @@ export class InterpolationResolver implements InterpolationResolverInterface {
         /** use first value to fill the missing interpolation */
         replacement = possibleValues[0] as string;
         /** if value contains futher interpolations call this method recursively */
-        if (replacement.includes("~")) {
+        if (replacement.includes("*~~")) {
           replacement = await this.resolveMissingInterpolations(replacement, translateHelper);
         }
       } else {
