@@ -1,14 +1,21 @@
-import { injectable } from "inversify";
+import { inject, injectable, optional } from "inversify";
 import { Filter } from "../../../../src/assistant-source";
 
 @injectable()
 export class TestFilterB implements Filter {
-  public execute() {
+  constructor(
+    @optional()
+    @inject("mocks:filters:call-spy")
+    private spy?: (...args: any[]) => void
+  ) {}
+
+  public execute(...args: any[]) {
     const redirect = {
       state: "FilterBState",
       intent: "filterTestBIntent",
-      args: undefined,
     };
+
+    if (this.spy) this.spy("TestFilterB", ...args);
 
     return redirect;
   }

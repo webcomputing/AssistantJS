@@ -9,7 +9,7 @@ import { ResponseFactory } from "../../../../src/components/unifier/public-inter
 export class MainState extends BaseState implements State.Required {
   public responseFactory: ResponseFactory;
   public extraction: any;
-  public spy?: Function;
+  public spy?: (...args: any[]) => void;
 
   constructor(
     @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
@@ -18,7 +18,7 @@ export class MainState extends BaseState implements State.Required {
     @inject("core:root:current-logger") logger: Logger,
     @optional()
     @inject("mocks:states:call-spy")
-    spy: Function
+    spy: (...args: any[]) => void
   ) {
     super(responseFactory, translateHelper, extraction, logger);
     this.extraction = extraction;

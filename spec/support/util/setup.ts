@@ -11,6 +11,7 @@ import { SpecSetup } from "../../../src/spec-setup";
 import { TestFilterA } from "../mocks/filters/test-filter-a";
 import { TestFilterB } from "../mocks/filters/test-filter-b";
 import { TestFilterC } from "../mocks/filters/test-filter-c";
+import { TestFilterD } from "../mocks/filters/test-filter-d";
 import { context } from "../mocks/root/request-context";
 import { FilterAState } from "../mocks/states/filter-a";
 import { FilterBState } from "../mocks/states/filter-b";
@@ -35,7 +36,7 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
   const assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
   assistantJs.prepare(
     [MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState, FilterAState, FilterBState, FilterCState],
-    [TestFilterA, TestFilterB, TestFilterC],
+    [TestFilterA, TestFilterB, TestFilterC, TestFilterD],
     autoBind,
     useChilds,
     autoSetup

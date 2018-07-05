@@ -5,6 +5,7 @@ import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { filter } from "../../../../src/components/state-machine/filter-decorator";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { TestFilterB } from "../filters/test-filter-b";
 import { TestFilterC } from "../filters/test-filter-c";
 
 @injectable()
@@ -30,5 +31,10 @@ export class FilterCState extends BaseState implements State.Required {
 
   public filterTestBIntent() {
     this.endSessionWith(this.t("filter.stateC.intentB"));
+  }
+
+  @filter(TestFilterB)
+  public filterTestArgumentsPassingIntent() {
+    // never called
   }
 }

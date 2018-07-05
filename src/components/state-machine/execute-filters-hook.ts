@@ -9,9 +9,6 @@ import { Filter, State } from "./public-interfaces";
 
 @injectable()
 export class ExecuteFiltersHook {
-  private state!: State.Required;
-  private stateName!: string;
-  private intent!: string;
   private logger: Logger;
   private filters: Filter[];
 
@@ -26,22 +23,19 @@ export class ExecuteFiltersHook {
   }
 
   /** Hook method, the only method which will be called */
-  public execute: Hooks.BeforeIntentHook = async (mode, state, stateName, intent, machine) => {
+  public execute: Hooks.BeforeIntentHook = async (mode, state, stateName, intent, machine, ...args) => {
     this.logger.debug({ intent, state: stateName }, "Executing filter hook");
-    this.state = state;
-    this.stateName = stateName;
-    this.intent = intent;
 
-    const prioritizedFilters = [...this.retrieveStateFiltersFromMetadata(), ...this.retrieveIntentFiltersFromMetadata()];
+    const prioritizedFilters = [...this.retrieveStateFiltersFromMetadata(state), ...this.retrieveIntentFiltersFromMetadata(state, intent)];
 
     for (const prioritizedFilter of prioritizedFilters) {
       const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilter);
       if (fittingFilter) {
-        const filterResult = await Promise.resolve(fittingFilter.execute());
+        const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, ...args));
 
         if (typeof filterResult === "object") {
-          const args = filterResult.args ? filterResult.args : [];
-          await machine.redirectTo(filterResult.state, filterResult.intent, ...args);
+          const filterArgs = filterResult.args ? filterResult.args : args;
+          await machine.redirectTo(filterResult.state, filterResult.intent, ...filterArgs);
           return false;
         }
 
@@ -55,16 +49,17 @@ export class ExecuteFiltersHook {
     return true;
   };
 
-  private retrieveStateFiltersFromMetadata(): Array<Constructor<Filter>> {
-    const metadata = Reflect.getMetadata(filterMetadataKey, this.state.constructor);
+  private retrieveStateFiltersFromMetadata(state: State.Required): Array<Constructor<Filter>> {
+    const metadata = Reflect.getMetadata(filterMetadataKey, state.constructor);
     return metadata ? metadata.filters : [];
   }
 
-  private retrieveIntentFiltersFromMetadata(): Array<Constructor<Filter>> {
-    if (typeof this.intent !== "undefined" && typeof this.state[this.intent] !== "undefined") {
-      const metadata = Reflect.getMetadata(filterMetadataKey, this.state[this.intent]);
+  private retrieveIntentFiltersFromMetadata(state: State.Required, intent: string): Array<Constructor<Filter>> {
+    if (typeof state[intent] !== "undefined") {
+      const metadata = Reflect.getMetadata(filterMetadataKey, state[intent]);
       return metadata ? metadata.filters : [];
     }
+
     return [];
   }
 }
