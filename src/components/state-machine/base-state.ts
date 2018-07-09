@@ -77,12 +77,12 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   }
 
   /** Prompts with current unhandled message */
-  public async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any> {
+  public async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]) {
     this.responseFactory.createVoiceResponse().prompt(await this.translateHelper.t());
   }
 
   /** Sends empty response */
-  public unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
+  public async unansweredGenericIntent(machine: Transitionable, ...args: any[]) {
     this.responseFactory.createAndSendEmptyResponse();
   }
 
