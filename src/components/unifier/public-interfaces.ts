@@ -357,95 +357,9 @@ export interface VoiceMessage {
 }
 
 /**
- * In addition to the basic features every response handler has to support (see MinimalResponseHandler),
- * every response handler may also support a subset of these features
+ * Export everything from the response handle specific types and classes
  */
-export namespace OptionalHandlerFeatures {
-  /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
-  export interface Authentication {
-    /** If set to true, the assistant will be informed about a missing oauth token */
-    forceAuthenticated: boolean;
-  }
-
-  /** If implemented, a response handler is able to parse SSML voice message */
-  export interface SSML {
-    /** If set to true, this voice message is in SSML format */
-    isSSML: boolean;
-  }
-
-  /** If implemented, the response handler's platform supports reprompts */
-  export interface Reprompt {
-    /** Reprompts for the current voice message */
-    reprompts: string[] | null;
-  }
-
-  /** If implemented, the response handler's platform supports storing of session data */
-  export interface SessionData {
-    /**
-     * Blob of all session data to set or NULL if we don't want to set any session data.
-     */
-    sessionData: string | null;
-  }
-
-  export namespace GUI {
-    export namespace Card {
-      /** Minimal Interface to represent a simple Card */
-      export interface Simple {
-        /** The card's title */
-        cardTitle: string | null;
-
-        /** The card's body */
-        cardBody: string | null;
-      }
-
-      /* Interface to represent a Card with Image */
-      export interface Image {
-        /** The image to display in the card */
-        cardImage: string | null;
-      }
-    }
-
-    /** Minimal Interface to represent SuggestionChips */
-    export interface SuggestionChips {
-      /** The suggestion chips to show */
-      suggestionChips: string[] | null;
-    }
-
-    /** Minimal Interface to represent ChatBubbles */
-    export interface ChatBubbles {
-      /** An array containing all chat messages / chat bubbles to display */
-      chatBubbles: string[] | null;
-    }
-  }
-
-  /** For internal feature checking since TypeScript does not emit interfaces */
-  // tslint:disable-next-line:variable-name
-  export const FeatureChecker = {
-    /** Can we force the existance of OAuth tokens? */
-    AuthenticationHandler: ["forceAuthenticated"],
-
-    /** Are chat messages / chat bubbles available? */
-    ChatBubble: ["chatBubbles"],
-
-    /** Does this response handler support reprompts? */
-    Reprompt: ["reprompts"],
-
-    /** Does this response handler support SSML? */
-    SSMLHandler: ["isSSML"],
-
-    /** Does this response handler support cards containing a textual title and body? */
-    SimpleCard: ["cardBody", "cardTitle"],
-
-    /** Are cards containing a textual title, body and an image available? */
-    ImageCard: ["cardBody", "cardTitle", "cardImage"],
-
-    /** Does this response handler support suggestion chips? */
-    SuggestionChip: ["suggestionChips"],
-
-    /** Does this response handler support storing of session data? */
-    SessionData: ["sessionData"],
-  };
-}
+export * from "./response-handler";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper {
