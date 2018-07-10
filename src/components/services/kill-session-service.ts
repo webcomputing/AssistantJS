@@ -2,8 +2,8 @@ import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
 import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
-import { Session } from "../services/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
+import { Session } from "./public-interfaces";
 
 /** Destroys (redis-) session after session ended */
 @injectable()

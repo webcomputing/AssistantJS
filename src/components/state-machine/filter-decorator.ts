@@ -1,4 +1,4 @@
-import { Constructor } from "./../../assistant-source";
+import { Constructor } from "../../assistant-source";
 import { Filter } from "./public-interfaces";
 
 export const filterMetadataKey = Symbol("metadata-key: filter");
