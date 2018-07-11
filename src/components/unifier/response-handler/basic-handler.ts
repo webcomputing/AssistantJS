@@ -77,7 +77,7 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
   /**
    * Sends all messages as answer. After sending it is not possible anymore to set or change the answer.
    */
-  send(): void | Promise<void>;
+  send(): Promise<void>;
 
   /**
    * Returns true when @see {send()} has been called, otherwise false
@@ -86,7 +86,7 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
 }
 
 export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
-  private promises: {
+  protected promises: {
     [key in keyof B]?: {
       resolver: Promise<any> | Promise<B[key]> | B[key];
       thenMap?: (value: any) => B[key]; // todo conditional type when it is possible to reference the type of the property "resolver"
@@ -97,12 +97,12 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
 
   private isSent: boolean = false;
 
-  public send(): void {
+  public async send(): Promise<void> {
     this.isSent = true;
 
     // todo
 
-    this.sendResults();
+    this.sendResults({} as any); // todo
     throw new Error("Method not implemented.");
   }
 
@@ -147,14 +147,16 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   }
 
   public setChatBubbles(chatBubbles: B["chatBubbles"]): this {
-    throw new Error("Method not implemented.");
+    this.promises.chatBubbles = { resolver: chatBubbles };
+    return this;
   }
 
   public setCard(card: B["card"]): this {
-    throw new Error("Method not implemented.");
+    this.promises.card = { resolver: card };
+    return this;
   }
 
-  protected abstract sendResults();
+  protected abstract sendResults(results: B): void;
 
   private isSSML(text: string) {
     return text.includes("</") || text.includes("/>");

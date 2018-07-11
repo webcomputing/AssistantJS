@@ -1,4 +1,4 @@
-import { BasicHandable, BasicHandler, BasicAnswerTypes } from "./basic-handler";
+import { BasicAnswerTypes, BasicHandable, BasicHandler } from "./basic-handler";
 
 export interface AlexaSpecificTypes extends BasicAnswerTypes {
   card: {
@@ -12,21 +12,19 @@ export interface AlexaSpecificTypes extends BasicAnswerTypes {
   };
 }
 
-export interface AlexaSpecificHandable extends BasicHandable<AlexaSpecificTypes> {
-  addCard(myCard: AlexaSpecificTypes["card"]): this;
-  addSuggestionChips(chips: AlexaSpecificTypes["suggestionChips"]): this;
+export interface AlexaSpecificHandable {
   addAlexaList(list: AlexaSpecificTypes["list"]): this;
 }
 
 export class AlexaSpecificHandler<T extends AlexaSpecificTypes> extends BasicHandler<AlexaSpecificTypes> implements AlexaSpecificHandable {
-  private list: T["list"] | null = null;
-
   public addAlexaList(list: T["list"]): this {
-    this.list = list;
+    this.promises.list = {
+      resolver: list,
+    };
     return this;
   }
 
-  public getAlexaList(): T["list"] | null {
-    return this.list;
+  protected sendResults(results: AlexaSpecificTypes): void {
+    throw new Error("Method not implemented.");
   }
 }

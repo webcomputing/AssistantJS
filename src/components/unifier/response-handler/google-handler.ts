@@ -1,4 +1,4 @@
-import { BasicHandable, BasicHandler, BasicAnswerTypes } from "./basic-handler";
+import { BasicAnswerTypes, BasicHandable, BasicHandler } from "./basic-handler";
 
 export interface GoogleSpecificTypes extends BasicAnswerTypes {
   card: {
@@ -13,21 +13,17 @@ export interface GoogleSpecificTypes extends BasicAnswerTypes {
   };
 }
 
-export interface GoogleSpecificHandable extends BasicHandable<GoogleSpecificTypes> {
-  addCard(myCard: GoogleSpecificTypes["card"]): this;
-  addSuggestionChips(chips: GoogleSpecificTypes["suggestionChips"]): this;
+export interface GoogleSpecificHandable {
   addGoogleTable(table: GoogleSpecificTypes["table"]): this;
 }
 
 export class GoogleSpecificHandler<T extends GoogleSpecificTypes> extends BasicHandler<GoogleSpecificTypes> implements GoogleSpecificHandable {
-  private table: T["table"] | null = null;
-
   public addGoogleTable(table: T["table"]): this {
-    this.table = table;
+    this.promises.table = { resolver: table };
     return this;
   }
 
-  public getGoogleTable(): T["table"] | null {
-    return this.table;
+  protected sendResults(results: GoogleSpecificTypes): void {
+    throw new Error("Method not implemented.");
   }
 }
