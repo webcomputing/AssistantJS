@@ -19,7 +19,7 @@ interface CurrentThisContext {
 
 describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.handlerInstance = new MockHandlerA() as MixedHandler; // todo change to container instanciation
+    this.handlerInstance = new MockHandlerA() as MixedHandler; // todo change to container instantiation
     spyOn(this.handlerInstance, "addMockHandlerATable").and.callThrough();
 
     this.proxiedHandler = HandlerProxyFactory.createHandlerProxy(this.handlerInstance);

@@ -1,4 +1,5 @@
-import { BasicAnswerTypes, BasicHandable, BasicHandler } from "./basic-handler";
+import { BasicAnswerTypes, BasicHandler } from "./basic-handler";
+import { BasicHandable } from "./basic-handable";
 
 export interface AlexaSpecificTypes extends BasicAnswerTypes {
   card: {
