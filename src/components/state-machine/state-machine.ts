@@ -137,7 +137,7 @@ export class StateMachine implements Transitionable {
   /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
     if (this.isStateWithErrorFallback(state)) {
-      await Promise.resolve(state.errorFallback(error, state, stateName, intentMethod, this, ...args));
+      return Promise.resolve(state.errorFallback(error, state, stateName, intentMethod, this, ...args));
     } else {
       throw error;
     }
@@ -159,7 +159,6 @@ export class StateMachine implements Transitionable {
     return this.pipeFactory(componentInterfaces.afterIntent);
   }
 
-
   private retrieveStayInContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
     const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
     return metadata ? metadata.stayInContext : undefined;
@@ -168,6 +167,7 @@ export class StateMachine implements Transitionable {
   private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
     const metadata = Reflect.getMetadata(clearContextMetadataKey, currentStateClass);
     return metadata ? metadata.clearContext : undefined;
+  }                                                                                                                        
 
   /** Type Guards */
   private isStateWithBeforeIntent(state: State.Required | State.Required & State.BeforeIntent): state is State.Required & State.BeforeIntent {
