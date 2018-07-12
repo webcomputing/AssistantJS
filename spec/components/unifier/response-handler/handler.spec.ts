@@ -12,9 +12,9 @@ interface CurrentThisContext {
 
   mockCard: MockHandlerASpecificTypes["card"];
   mockChatBubbles: MockHandlerASpecificTypes["chatBubbles"];
-  mockPrompt: MockHandlerASpecificTypes["prompt"]["text"];
-  mockSSMLPrompt: MockHandlerASpecificTypes["prompt"]["text"];
-  mockReprompts: Array<MockHandlerASpecificTypes["prompt"]["text"]>;
+  mockVoiceMessage: MockHandlerASpecificTypes["voiceMessage"]["text"];
+  mockSSMLPrompt: MockHandlerASpecificTypes["voiceMessage"]["text"];
+  mockReprompts: Array<MockHandlerASpecificTypes["voiceMessage"]["text"]>;
   mockSuggestionChips: MockHandlerASpecificTypes["suggestionChips"];
   mockSessionData: MockHandlerASpecificTypes["sessionData"];
   mockShouldAuthenticate: MockHandlerASpecificTypes["shouldAuthenticate"];
@@ -35,7 +35,7 @@ describe("BaseHandler", function() {
     this.mockTable = { header: ["A", "B"], elements: [["A1", "A2"], ["B1", "B2"]] };
     this.mockCard = { description: "desc", title: "title" };
     this.mockChatBubbles = ["Bubble A", "Bubble B"];
-    this.mockPrompt = "Prompt";
+    this.mockVoiceMessage = "Prompt";
     this.mockSSMLPrompt = "<ssml>Prompt</ssml>";
     this.mockReprompts = ["Reprompt A", "Reprompt B"];
     this.mockSuggestionChips = [{ displayText: "Suggestion A", spokenText: "Suggestion A" }, { displayText: "Suggestion B", spokenText: "Suggestion A" }];
@@ -97,17 +97,17 @@ describe("BaseHandler", function() {
 
         this.fillExpectedResultsWithDefaults();
         this.fillExpectedReprompts();
-        this.expectedResult.prompt = mapPrompt(this.mockPrompt);
+        this.expectedResult.voiceMessage = mapPrompt(this.mockVoiceMessage);
 
         await this.handlerInstance
-          .prompt(Promise.resolve(this.mockPrompt))
+          .prompt(Promise.resolve(this.mockVoiceMessage))
           .setReprompts(promisfiedMockedReprompts)
           .setCard(Promise.resolve(this.mockCard))
           .setChatBubbles(Promise.resolve(this.mockChatBubbles))
           .setSuggestionChips(Promise.resolve(this.mockSuggestionChips))
           .setMockHandlerATable(Promise.resolve(this.mockTable))
           .setUnauthenticated()
-          .endSession()
+          .setEndSession()
           .send();
       });
 
@@ -118,17 +118,17 @@ describe("BaseHandler", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.fillExpectedResultsWithDefaults();
         this.fillExpectedReprompts();
-        this.expectedResult.prompt = mapPrompt(this.mockPrompt);
+        this.expectedResult.voiceMessage = mapPrompt(this.mockVoiceMessage);
 
         await this.handlerInstance
-          .prompt(this.mockPrompt)
+          .prompt(this.mockVoiceMessage)
           .setReprompts(this.mockReprompts)
           .setCard(this.mockCard)
           .setChatBubbles(this.mockChatBubbles)
           .setSuggestionChips(this.mockSuggestionChips)
           .setMockHandlerATable(this.mockTable)
           .setUnauthenticated()
-          .endSession()
+          .setEndSession()
           .send();
       });
 
@@ -140,9 +140,9 @@ describe("BaseHandler", function() {
     describe("with prompt()", function() {
       describe("with prompt as Promise", function() {
         beforeEach(async function(this: CurrentThisContext) {
-          this.expectedResult.prompt = mapPrompt(this.mockPrompt);
+          this.expectedResult.voiceMessage = mapPrompt(this.mockVoiceMessage);
 
-          await this.handlerInstance.prompt(Promise.resolve(this.mockPrompt)).send();
+          await this.handlerInstance.prompt(Promise.resolve(this.mockVoiceMessage)).send();
         });
 
         expectResult();
@@ -150,7 +150,7 @@ describe("BaseHandler", function() {
 
       describe("with SSML in prompt", function() {
         beforeEach(async function(this: CurrentThisContext) {
-          this.expectedResult.prompt = mapPrompt(this.mockSSMLPrompt, true);
+          this.expectedResult.voiceMessage = mapPrompt(this.mockSSMLPrompt, true);
 
           await this.handlerInstance.prompt(this.mockSSMLPrompt).send();
         });
@@ -161,9 +161,9 @@ describe("BaseHandler", function() {
       describe("with prompt and reprompt in one call", function() {
         beforeEach(async function(this: CurrentThisContext) {
           this.fillExpectedReprompts();
-          this.expectedResult.prompt = mapPrompt(this.mockPrompt);
+          this.expectedResult.voiceMessage = mapPrompt(this.mockVoiceMessage);
 
-          await this.handlerInstance.prompt(this.mockPrompt, ...this.mockReprompts).send();
+          await this.handlerInstance.prompt(this.mockVoiceMessage, ...this.mockReprompts).send();
         });
 
         expectResult();
@@ -213,11 +213,22 @@ describe("BaseHandler", function() {
       expectResult();
     });
 
-    describe("with endSession()", function() {
+    describe("with setEndSession()", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.expectedResult.shouldSessionEnd = true;
 
-        await this.handlerInstance.endSession().send();
+        await this.handlerInstance.setEndSession().send();
+      });
+
+      expectResult();
+    });
+
+    describe("with endSessionWith()", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.expectedResult.shouldSessionEnd = true;
+        this.expectedResult.voiceMessage = mapPrompt(this.mockVoiceMessage);
+
+        await this.handlerInstance.endSessionWith(this.mockVoiceMessage).send();
       });
 
       expectResult();

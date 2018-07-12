@@ -358,9 +358,9 @@ export interface VoiceMessage {
 }
 
 /**
- * Export everything from the response handle specific types and classes
+ * Export all interfaces from the response handle specific types
  */
-export * from "./response-handler";
+export { BasicAnswerTypes, BasicHandable } from "./response-handler/handler-types";
 
 export namespace OptionalHandlerFeatures {
   /** If implemented, a response handler is able to inform the assistant about a missing oauth token */

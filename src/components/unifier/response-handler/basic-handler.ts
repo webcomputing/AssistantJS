@@ -15,7 +15,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   /**
    * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
    */
-  public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "endSession", "send", "wasSent"];
+  public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "setEndSession", "endSessionWith", "send", "wasSent"];
 
   /**
    * This set of Methods can be used from the specific Handler, all Methods which starts with 'set<HandlerName>' are added to the list of valid methods automatically
@@ -55,7 +55,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
       /**
        * function to build the final object from an intermediate object
        */
-      thenMap?: (value: any) => B[key]; // todo conditional type when it is possible to reference the type of the property "resolver"
+      thenMap?: (value: any) => B[key] | Promise<B[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
     }
   } = {} as any;
 
@@ -106,7 +106,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
 
         // remap the intermediate Results, when an thenMap function is present
         if (resolver.thenMap) {
-          const finalResult = resolver.thenMap.bind(this)(currentValue);
+          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
           this.results[currentKey] = finalResult;
         } else {
           // here are only final results
@@ -134,14 +134,24 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     return this;
   }
 
-  public endSession(): this {
+  public setEndSession(): this {
     this.promises.shouldSessionEnd = { resolver: true };
     return this;
   }
 
-  public prompt(inputText: B["prompt"]["text"] | Promise<B["prompt"]["text"]>, ...reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>>): this {
+  public endSessionWith(text: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>): this {
+    this.promises.shouldSessionEnd = { resolver: true };
+    this.prompt(text);
+
+    return this;
+  }
+
+  public prompt(
+    inputText: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>,
+    ...reprompts: Array<B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>>
+  ): this {
     // add a thenMap function to build the correct object from the simple strings
-    this.promises.prompt = {
+    this.promises.voiceMessage = {
       resolver: Promise.resolve(inputText),
       thenMap: this.createPromptAnswer,
     };
@@ -154,7 +164,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     return this;
   }
 
-  public setReprompts(reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>> | Promise<Array<B["prompt"]["text"]>>): this {
+  public setReprompts(reprompts: Array<B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>> | Promise<Array<B["voiceMessage"]["text"]>>): this {
     // check wether it is an Arry or an Promise
     if (Array.isArray(reprompts)) {
       // add reprompts as Array with remapper function
@@ -191,7 +201,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    * Creates from a String the correct prompt object
    * @param text text with or without SSML
    */
-  private createPromptAnswer(text: string): BasicAnswerTypes["prompt"] {
+  private createPromptAnswer(text: string): BasicAnswerTypes["voiceMessage"] {
     return {
       text,
       isSSML: BasicHandler.isSSML(text),
@@ -203,10 +213,10 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    * @param reprompts
    */
   private getRepromptArrayRemapper(
-    reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>>
+    reprompts: Array<B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>>
   ): {
-    resolver: Promise<Array<B["prompt"]["text"]>>;
-    thenMap: (finaleReprompts: Array<B["prompt"]["text"]>) => B["reprompts"];
+    resolver: Promise<Array<B["voiceMessage"]["text"]>>;
+    thenMap: (finaleReprompts: Array<B["voiceMessage"]["text"]>) => B["reprompts"];
   } {
     return {
       resolver: Promise.all(reprompts),

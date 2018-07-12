@@ -1,5 +1,6 @@
 import { Container } from "inversify";
-import { BasicHandler, HandlerProxyFactory } from "../../../../src/assistant-source";
+import { BasicHandler } from "../../../../src/assistant-source";
+import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
 import { MockHandlerA, MockHandlerASpecificTypes } from "./mocks/mock-handler-a";
 import { MockHandlerB, MockHandlerBSpecificTypes } from "./mocks/mock-handler-b";
 
