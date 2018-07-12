@@ -23,6 +23,7 @@ interface CurrentThisContext {
 
   expectedResult: Partial<MockHandlerASpecificTypes>;
   fillExpectedReprompts: () => void;
+  fillExpectedResultsWithDefaults: () => void;
 }
 
 describe("BaseHandler", function() {
@@ -42,13 +43,17 @@ describe("BaseHandler", function() {
     this.mockShouldAuthenticate = true;
     this.mockShouldSessionEnd = true;
 
-    this.expectedResult = {
-      table: this.mockTable,
-      card: this.mockCard,
-      chatBubbles: this.mockChatBubbles,
-      suggestionChips: this.mockSuggestionChips,
-      shouldAuthenticate: this.mockShouldAuthenticate,
-      shouldSessionEnd: this.mockShouldSessionEnd,
+    this.expectedResult = {};
+
+    this.fillExpectedResultsWithDefaults = () => {
+      this.expectedResult = {
+        table: this.mockTable,
+        card: this.mockCard,
+        chatBubbles: this.mockChatBubbles,
+        suggestionChips: this.mockSuggestionChips,
+        shouldAuthenticate: this.mockShouldAuthenticate,
+        shouldSessionEnd: this.mockShouldSessionEnd,
+      };
     };
 
     this.fillExpectedReprompts = () => {
@@ -71,23 +76,26 @@ describe("BaseHandler", function() {
     };
   }
 
+  function promisefyElements(value: string) {
+    return Promise.resolve(value);
+  }
+
   describe("without answers set", function() {
     beforeEach(async function(this: CurrentThisContext) {
       await this.handlerInstance.send();
     });
 
     it("calls sendResponse with empty object", async function(this: CurrentThisContext) {
-      expect(this.handlerInstance.sendResults).toHaveBeenCalledWith({});
+      expect(this.handlerInstance.sendResults).toHaveBeenCalledWith(this.expectedResult);
     });
   });
 
   describe("with answers set", function() {
     describe("with promises in Answers", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        const promisfiedMockedReprompts = this.mockReprompts.map((value: string) => {
-          return Promise.resolve(value);
-        });
+        const promisfiedMockedReprompts = this.mockReprompts.map(promisefyElements);
 
+        this.fillExpectedResultsWithDefaults();
         this.fillExpectedReprompts();
         this.expectedResult.prompt = mapPrompt(this.mockPrompt);
 
@@ -108,6 +116,7 @@ describe("BaseHandler", function() {
 
     describe("without promises in Answer", function() {
       beforeEach(async function(this: CurrentThisContext) {
+        this.fillExpectedResultsWithDefaults();
         this.fillExpectedReprompts();
         this.expectedResult.prompt = mapPrompt(this.mockPrompt);
 
@@ -127,27 +136,158 @@ describe("BaseHandler", function() {
     });
   });
 
-  describe("with special types", function() {
-    describe("with SSML prompt", function() {
-      beforeEach(async function(this: CurrentThisContext) {
-        this.fillExpectedReprompts();
-        this.expectedResult.prompt = mapPrompt(this.mockSSMLPrompt, true);
+  describe("with single methods", function() {
+    describe("with prompt()", function() {
+      describe("with prompt as Promise", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.prompt = mapPrompt(this.mockPrompt);
 
-        await this.handlerInstance.prompt(this.mockSSMLPrompt).send();
+          await this.handlerInstance.prompt(Promise.resolve(this.mockPrompt)).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with SSML prompt", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.fillExpectedReprompts();
+          this.expectedResult.prompt = mapPrompt(this.mockSSMLPrompt, true);
+
+          await this.handlerInstance.prompt(this.mockSSMLPrompt).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with prompt and reprompt in one call", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.fillExpectedReprompts();
+          this.expectedResult.prompt = mapPrompt(this.mockPrompt);
+
+          await this.handlerInstance.prompt(this.mockPrompt, ...this.mockReprompts).send();
+        });
+
+        expectResult();
+      });
+    });
+
+    describe("with setReprompts()", function() {
+      describe("with Array of strings", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.fillExpectedReprompts();
+
+          await this.handlerInstance.setReprompts(this.mockReprompts).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with Array of Promises", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.fillExpectedReprompts();
+
+          const promisfiedMockedReprompts = this.mockReprompts.map(promisefyElements);
+          await this.handlerInstance.setReprompts(Promise.all(promisfiedMockedReprompts)).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with Promise, which returns Array of Strings", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.fillExpectedReprompts();
+
+          await this.handlerInstance.setReprompts(Promise.resolve(this.mockReprompts)).send();
+        });
+
+        expectResult();
+      });
+    });
+
+    describe("with setUnauthenticated()", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.expectedResult.shouldAuthenticate = true;
+
+        await this.handlerInstance.setUnauthenticated().send();
       });
 
       expectResult();
     });
 
-    describe("with prompt and reprompt in one call", function() {
+    describe("with endSession()", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.fillExpectedReprompts();
-        this.expectedResult.prompt = mapPrompt(this.mockPrompt);
+        this.expectedResult.shouldSessionEnd = true;
 
-        await this.handlerInstance.prompt(this.mockPrompt, ...this.mockReprompts).send();
+        await this.handlerInstance.endSession().send();
       });
 
       expectResult();
+    });
+
+    describe("with setSuggestionChips()", function() {
+      describe("with simple Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.suggestionChips = this.mockSuggestionChips;
+
+          await this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with Promise, which returns Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.suggestionChips = this.mockSuggestionChips;
+
+          await this.handlerInstance.setSuggestionChips(Promise.resolve(this.mockSuggestionChips)).send();
+        });
+
+        expectResult();
+      });
+    });
+
+    describe("with setChatBubbles()", function() {
+      describe("with simple Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.chatBubbles = this.mockChatBubbles;
+
+          await this.handlerInstance.setChatBubbles(this.mockChatBubbles).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with Promise, which returns Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.chatBubbles = this.mockChatBubbles;
+
+          await this.handlerInstance.setChatBubbles(Promise.resolve(this.mockChatBubbles)).send();
+        });
+
+        expectResult();
+      });
+    });
+
+    describe("with setCard()", function() {
+      describe("with simple Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.card = this.mockCard;
+
+          await this.handlerInstance.setCard(this.mockCard).send();
+        });
+
+        expectResult();
+      });
+
+      describe("with Promise, which returns Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.expectedResult.card = this.mockCard;
+
+          await this.handlerInstance.setCard(Promise.resolve(this.mockCard)).send();
+        });
+
+        expectResult();
+      });
     });
   });
 

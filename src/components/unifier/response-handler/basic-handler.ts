@@ -70,7 +70,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     return this;
   }
 
-  public setReprompts(reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>>): this {
+  public setReprompts(reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>> | Promise<Array<B["prompt"]["text"]>>): this {
     throw new Error("Method not implemented.");
   }
 
