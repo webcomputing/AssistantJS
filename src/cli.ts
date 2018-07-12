@@ -51,12 +51,22 @@ export function cli(argv, resolvedIndex) {
     console.log("Creating project directory..");
     fs.mkdirSync(projectPath.substr(0, projectPath.length - 1));
 
-    ["app", "app/states", "app/states/mixins", "builds", "config", "config/locales", "config/locales/en", "spec", "spec/helpers", "spec/support"].forEach(
-      directory => {
-        console.log("Creating " + directory + "..");
-        fs.mkdirSync(projectPath + directory);
-      }
-    );
+    [
+      "app",
+      "app/filters",
+      "app/states",
+      "app/states/mixins",
+      "builds",
+      "config",
+      "config/locales",
+      "config/locales/en",
+      "spec",
+      "spec/helpers",
+      "spec/support",
+    ].forEach(directory => {
+      console.log("Creating " + directory + "..");
+      fs.mkdirSync(projectPath + directory);
+    });
 
     // Create copyInstructions: [0] => source directory, [1] => target directory
     let copyInstructions = [
@@ -65,6 +75,7 @@ export function cli(argv, resolvedIndex) {
       ["setup.js", "spec/helpers/setup.js"],
       ["application.ts", "app/states/application.ts"],
       ["main.ts", "app/states/main.ts"],
+      ["example-filter.ts", "app/filters/example-filter.ts"],
     ];
 
     // Merge root files into array

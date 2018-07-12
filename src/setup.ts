@@ -35,7 +35,7 @@ export class AssistantJSSetup {
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
   }
 
-  public addConfiguration<ComponentConfiguration = {}>(configuration: { [componentName: string]: ComponentConfiguration }) {
+  public addConfiguration(configuration: { [componentName: string]: any }) {
     this.configuration = { ...this.configuration, ...configuration };
   }
 

@@ -16,7 +16,9 @@ export class FilterSetup extends ConventionalFileLoader<Filter> {
    * @param dictionary Dictionary which contains the filters to add, defaults to "/filters"
    */
   public registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary = "/filters") {
-    return super.registerByConvention(addOnly, baseDirectory, dictionary);
+    if (fs.existsSync(baseDirectory + dictionary)) {
+      return super.registerByConvention(addOnly, baseDirectory, dictionary);
+    }
   }
 
   /** Builds a component descriptor out of all added filters */

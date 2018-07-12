@@ -82,7 +82,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   }
 
   /** Sends empty response */
-  public unansweredGenericIntent(machine: Transitionable, ...args: any[]): any {
+  public async unansweredGenericIntent(machine: Transitionable, ...args: any[]): Promise<any> {
     this.responseFactory.createAndSendEmptyResponse();
   }
 

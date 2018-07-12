@@ -1,4 +1,4 @@
-import { AssistantJSSetup, StateMachineSetup } from "assistant-source";
+import { AssistantJSSetup, FilterSetup, StateMachineSetup } from "assistant-source";
 import componentConfiguration from "./config/components";
 
 /** 
@@ -27,7 +27,7 @@ export function initializeSetups (localAssistantJs: AssistantJSSetup, localState
   localStateMachineSetup.registerByConvention(addOnly);
 
   // Register all filters
-  filterSetup.registerByConvention(addOnly);
+  localFilterSetup.registerByConvention(addOnly);
 }
 
 // Initialize the exported production setups
