@@ -1,8 +1,8 @@
 import { inject, injectable, multiInject, optional } from "inversify";
+import { Constructor } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
+import { Hooks } from "../joined-interfaces";
 import { ComponentSpecificLoggerFactory, Logger } from "../root/public-interfaces";
-import { Constructor } from "./../../assistant-source";
-import { Hooks } from "./../joined-interfaces";
 import { filterMetadataKey } from "./filter-decorator";
 import { COMPONENT_NAME, componentInterfaces } from "./private-interfaces";
 import { Filter, State } from "./public-interfaces";

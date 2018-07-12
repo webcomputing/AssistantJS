@@ -341,6 +341,7 @@ export namespace OptionalExtractions {
     SessionData: ["sessionData"],
   };
 }
+
 /** Minimum interface a response handler has to fulfill */
 export interface MinimalResponseHandler extends VoiceMessage {
   /** If set to false, the session should go on after sending the response */
@@ -357,9 +358,10 @@ export interface VoiceMessage {
 }
 
 /**
- * In addition to the basic features every response handler has to support (see MinimalResponseHandler),
- * every response handler may also support a subset of these features
+ * Export all interfaces from the response handle specific types
  */
+export { BasicAnswerTypes, BasicHandable } from "./response-handler/handler-types";
+
 export namespace OptionalHandlerFeatures {
   /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
   export interface Authentication {
