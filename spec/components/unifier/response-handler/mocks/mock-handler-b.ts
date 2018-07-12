@@ -1,4 +1,5 @@
-import { BasicAnswerTypes, BasicHandler } from "../../../../../src/components/unifier/response-handler";
+import { BasicHandler } from "../../../../../src/components/unifier/response-handler";
+import { BasicAnswerTypes } from "../../../../../src/components/unifier/response-handler/handler-types";
 
 export interface MockHandlerBSpecificTypes extends BasicAnswerTypes {
   card: {

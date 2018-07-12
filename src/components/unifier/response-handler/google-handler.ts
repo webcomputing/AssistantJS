@@ -1,5 +1,5 @@
-import { BasicAnswerTypes, BasicHandler } from "./basic-handler";
-import { BasicHandable } from "./basic-handable";
+import { BasicHandler } from "./basic-handler";
+import { BasicAnswerTypes } from "./handler-types";
 
 export interface GoogleSpecificTypes extends BasicAnswerTypes {
   card: {

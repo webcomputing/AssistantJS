@@ -1,4 +1,23 @@
-import { BasicAnswerTypes } from "./basic-handler";
+import { HandlerFeatureTypes } from "./feature-types";
+
+/**
+ * This interface defines the types which can be used on all Handlers
+ * Handler should extend this interface to define own specific types.
+ * Then multiple interfaces of diffrent Handler can be merged together.
+ */
+export interface BasicAnswerTypes {
+  card: HandlerFeatureTypes.GUI.Card.Simple & Partial<HandlerFeatureTypes.GUI.Card.Image>;
+  suggestionChips: HandlerFeatureTypes.GUI.SuggestionChips;
+  chatBubbles: HandlerFeatureTypes.GUI.ChatBubbles;
+  prompt: {
+    text: string;
+    isSSML: HandlerFeatureTypes.SSML;
+  };
+  reprompts: Array<BasicAnswerTypes["prompt"]>;
+  sessionData: HandlerFeatureTypes.SessionData;
+  shouldAuthenticate: boolean;
+  shouldSessionEnd: boolean;
+}
 
 /**
  * This interface defines which methods every handler should have.

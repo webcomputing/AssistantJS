@@ -1,38 +1,81 @@
-import { BasicHandable } from "./basic-handable";
-import { HandlerFeatureTypes } from "./feature-types";
+import { BasicAnswerTypes, BasicHandable } from "./handler-types";
 
 /**
- * This interface defines the types which are used on all Handlers
- * Handler should extend this interface to define own specific types.
- * Then multiple interfaces of diffrent Handler can be merged together.
+ * This Class represents the basic features a ResponseHandler should have. It implements all Basic functions,
+ * so a specific Handler has to implement only the own methods and functions.
+ *
+ * All public methods are specified in the interface @see {@link BasicHandable} and most of the methods supports Method-Chaining
+ * All methods allows to add a Promise, so that all promises are awaited concurrently when the method send is called
+ *
+ * To uses the Generic 'B' the specific handler should use its own interface, which extends the @see {@link BasicAnswerTypes}
+ *
+ * For the docs of the Methods see also the implemented interfaces
  */
-export interface BasicAnswerTypes {
-  card: HandlerFeatureTypes.GUI.Card.Simple & Partial<HandlerFeatureTypes.GUI.Card.Image>;
-  suggestionChips: HandlerFeatureTypes.GUI.SuggestionChips;
-  chatBubbles: HandlerFeatureTypes.GUI.ChatBubbles;
-  prompt: {
-    text: string;
-    isSSML: HandlerFeatureTypes.SSML;
-  };
-  reprompts: Array<BasicAnswerTypes["prompt"]>;
-  sessionData: HandlerFeatureTypes.SessionData;
-  shouldAuthenticate: boolean;
-  shouldSessionEnd: boolean;
-}
-
 export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
+  /**
+   * As every call can add a Promise, this property is used to save all Promises
+   *
+   * A final object with only a prompt could look like this:
+   * <pre><code>
+   * {
+   *    prompt: {
+   *       resolver: "<ssml>Hallo</ssml>",
+   *       thenMap: (value: string) => {...}
+   *     }
+   * }
+   * </code></pre>
+   *
+   * In case of that the resolver is either a Promise which returns the correct object,
+   * or the correct object no Method 'thenMap()' is necessary
+   *
+   * In case that a Promise which does not return the correct type or an object of the wrong type is provided
+   * the Method thenMap MUST be provided. This method is called automatically with the result of the Promise or the wrong object
+   * and can build and provide the correct object.
+   */
   protected promises: {
     [key in keyof B]?: {
-      resolver: Promise<any> | Promise<B[key]> | B[key];
+      /**
+       * 1.) Promise of a final object
+       * 2.) final object itself
+       * 3.) Promise of intermediate Object which is given to the thenMap-function
+       * 4.) intermediate Object which is given to the thenMap-function
+       */
+      resolver: Promise<B[key]> | B[key] | Promise<any> | any;
+
+      /**
+       * function to build the final object from an intermediate object
+       */
       thenMap?: (value: any) => B[key]; // todo conditional type when it is possible to reference the type of the property "resolver"
     }
   } = {} as any;
 
+  /**
+   * Property to save the final results
+   *
+   * The result should look identical to the type 'B extends BasicAnswerTypes.
+   *
+   * A final object with only a prompt could look like this:
+   * <pre><code>
+   * {
+   *    prompt: {
+   *       text: "<ssml>Hallo</ssml>",
+   *       isSSML: true
+   *     }
+   * }
+   * </code></pre>
+   */
   private results: { [key in keyof B]?: B[key] } = {} as any;
 
+  /**
+   * property to save if the answers were sent
+   */
   private isSent: boolean = false;
 
+  /**
+   * Method to give the final resolved results to the specific Hanlder Implementation of the Method @see {@link sendResults()}
+   */
   public async send(): Promise<void> {
+    // first get all keys, these are the properties which are filled
     const promiseKeys: string[] = [];
     for (const key in this.promises) {
       if (this.promises.hasOwnProperty(key)) {
@@ -40,24 +83,35 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
       }
     }
 
+    // resolve all intermediate and final results from the Promises and build an Array of new Promises
+    // and fill the results array
     const concurrentProcesses = promiseKeys.map(async (key: string) => {
-      const currentKey = key as keyof BasicAnswerTypes;
+      const currentKey = key as keyof BasicAnswerTypes; // we have to set the type here to 'BasicAnswerTypes', as if we set the type to 'B' the type of the const resolver is wrong
+
+      // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
       const resolver = this.promises[currentKey];
       if (resolver) {
+        // resolve the final or intermediate result
         const currentValue = await Promise.resolve(resolver.resolver);
 
+        // remap the intermediate Results, when an thenMap function is present
         if (resolver.thenMap) {
           const finalResult = resolver.thenMap.bind(this)(currentValue);
           this.results[currentKey] = finalResult;
         } else {
+          // here are only final results
           this.results[currentKey] = currentValue;
         }
       }
     });
 
+    // wait for all Prmises at once, after this
     await Promise.all(concurrentProcesses);
 
+    // give results to the specific handler
     this.sendResults(this.results);
+
+    // everything was sent successfully
     this.isSent = true;
   }
 
@@ -76,11 +130,13 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   }
 
   public prompt(inputText: B["prompt"]["text"] | Promise<B["prompt"]["text"]>, ...reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>>): this {
+    // add a thenMap function to build the correct object from the simple strings
     this.promises.prompt = {
       resolver: Promise.resolve(inputText),
       thenMap: this.createPromptAnswer,
     };
 
+    // add reprompts with remapper function
     if (reprompts && reprompts.length > 0) {
       this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
     }
@@ -89,11 +145,14 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   }
 
   public setReprompts(reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>> | Promise<Array<B["prompt"]["text"]>>): this {
+    // check wether it is an Arry or an Promise
     if (Array.isArray(reprompts)) {
+      // add reprompts as Array with remapper function
       this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
     } else {
+      // Add Promise and thenMap function
       this.promises.reprompts = {
-        resolver: Promise.resolve(reprompts),
+        resolver: reprompts,
         thenMap: this.createRepromptAnswerArray,
       };
     }
@@ -118,6 +177,10 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
 
   protected abstract sendResults(results: Partial<B>): void;
 
+  /**
+   * Creates from a String the correct prompt object
+   * @param text text with or without SSML
+   */
   private createPromptAnswer(text: string): BasicAnswerTypes["prompt"] {
     return {
       text,
@@ -125,6 +188,10 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     };
   }
 
+  /**
+   * Builds the Remapper for Reprompts in an Array of promises and strings
+   * @param reprompts
+   */
   private getRepromptArrayRemapper(
     reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>>
   ): {
@@ -137,11 +204,20 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     };
   }
 
-  private createRepromptAnswerArray(finalReprompts: string[]) {
-    return finalReprompts.map(this.createPromptAnswer);
+  /**
+   * Builds ther Remappee from an string Array
+   * @param reprompts
+   */
+  private createRepromptAnswerArray(reprompts: string[]) {
+    return reprompts.map(this.createPromptAnswer);
   }
 
-  private static isSSML(text: string) {
+  /**
+   * checks wether the text contains SSML
+   * @param text with or without SSML
+   * @returns true when the text conatins SSML, otherwise false
+   */
+  private static isSSML(text: string): boolean {
     return text.includes("</") || text.includes("/>");
   }
 }

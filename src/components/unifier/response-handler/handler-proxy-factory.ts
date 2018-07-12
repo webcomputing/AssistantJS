@@ -1,4 +1,5 @@
-import { BasicHandler, BasicAnswerTypes } from "./basic-handler";
+import { BasicHandler } from "./basic-handler";
+import { BasicAnswerTypes } from "./handler-types";
 
 export class HandlerProxyFactory {
   /**
