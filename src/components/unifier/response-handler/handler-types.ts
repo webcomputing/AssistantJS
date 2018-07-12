@@ -28,6 +28,8 @@ export interface BasicAnswerTypes {
  * that all missing feature-methods get traped and return also the correct this-context. This Proxy is return by the @see {@link HandlerProxyFactory}.
  */
 export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
+  readonly whitelist: string[];
+
   /**
    * Sends voice message
    * @param text Text to say to user

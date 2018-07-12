@@ -12,6 +12,9 @@ import { BasicAnswerTypes, BasicHandable } from "./handler-types";
  * For the docs of the Methods see also the implemented interfaces
  */
 export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
+  public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "endSession", "send", "wasSent"];
+
+  public abstract readonly specificWhitelist: string[];
   /**
    * As every call can add a Promise, this property is used to save all Promises
    *

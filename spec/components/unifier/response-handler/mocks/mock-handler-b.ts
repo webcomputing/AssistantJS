@@ -16,6 +16,8 @@ export interface MockHandlerBSpecificHandable {
 }
 
 export class MockHandlerB<T extends MockHandlerBSpecificTypes> extends BasicHandler<MockHandlerBSpecificTypes> implements MockHandlerBSpecificHandable {
+  public readonly specificWhitelist: Array<keyof MockHandlerB<T>> = ["setCard", "setChatBubbles", "setReprompts", "setSuggestionChips", "setUnauthenticated"];
+
   public addMockHandlerBList(list: T["list"]): this {
     this.promises.list = {
       resolver: list,

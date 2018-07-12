@@ -18,6 +18,8 @@ export interface MockHandlerASpecificHandable {
 }
 
 export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<MockHandlerASpecificTypes> implements MockHandlerASpecificHandable {
+  public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = ["addMockHandlerATable", "setCard", "setChatBubbles"];
+
   public addMockHandlerATable(table: T["table"] | Promise<T["table"]>): this {
     this.promises.table = { resolver: table };
     return this;
