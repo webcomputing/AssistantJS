@@ -1,6 +1,7 @@
 import { injectable } from "inversify";
 import { Container } from "inversify-components";
 import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
+import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "../../../src/components/i18n/interpolation-resolver";
 import { arraySplitter } from "../../../src/components/i18n/plugins/array-returns-sample.plugin";
 import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
@@ -28,10 +29,10 @@ describe("I18nWrapper", function() {
     });
 
     describe("missingInterpolationHandler", function() {
-      beforeEach(function () {
+      beforeEach(function() {
         spyOn(this.wrapper.instance.options, "missingInterpolationHandler").and.callThrough();
       });
-      
+
       it("calls callback if interpolation is missing", function(this: CurrentThisContext) {
         this.wrapper.instance.t("templateSyntaxSmall");
         expect(this.wrapper.instance.options.missingInterpolationHandler).toHaveBeenCalled();
@@ -39,7 +40,7 @@ describe("I18nWrapper", function() {
 
       it("replaces interpolation with modified interpolation", function(this: CurrentThisContext) {
         const translation = this.wrapper.instance.t("templateSyntaxSmall");
-        expect(translation).toContain("*~~name~~*");
+        expect(translation).toContain(`${TEMPORARY_INTERPOLATION_START}name${TEMPORARY_INTERPOLATION_END}`);
       });
     });
   });

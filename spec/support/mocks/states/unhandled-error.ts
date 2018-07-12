@@ -6,14 +6,14 @@ import { ResponseFactory } from "../../../../src/components/unifier/public-inter
 export class UnhandledErrorState implements State.Required {
   public responseFactory: ResponseFactory;
   public extraction: any;
-  public spy?: Function;
+  public spy?: (...args: any[]) => void;
 
   constructor(
     @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
     @inject("core:unifier:current-extraction") extraction: any,
     @optional()
     @inject("mocks:states:call-spy")
-    spy: Function
+    spy: (...args: any[]) => void
   ) {
     this.extraction = extraction;
     this.spy = spy;

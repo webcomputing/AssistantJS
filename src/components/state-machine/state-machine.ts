@@ -47,9 +47,9 @@ export class StateMachine implements Transitionable {
         return;
       }
 
-      /* Check if there is a "beforeIntent_" method available */
-      if ("beforeIntent_" in currentState.instance) {
-        const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
+      // Check if there is a "beforeIntent_" method available
+      if (this.isStateWithBeforeIntent(currentState.instance)) {
+        const callbackResult = await Promise.resolve(currentState.instance.beforeIntent_(intentMethod, this, ...args));
 
         if (typeof callbackResult !== "boolean") {
           throw new Error(
@@ -68,9 +68,9 @@ export class StateMachine implements Transitionable {
         /* Call given intent */
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
-        /* Call afterIntent_ method if present */
-        if ("afterIntent_" in currentState.instance) {
-          ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
+        // Call afterIntent_ method if present
+        if (this.isStateWithAfterIntent(currentState.instance)) {
+          currentState.instance.afterIntent_(intentMethod, this, ...args);
         }
 
         /* Run afterIntent hooks */
@@ -136,8 +136,8 @@ export class StateMachine implements Transitionable {
 
   /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
-    if ("errorFallback" in state) {
-      await Promise.resolve((state as any).errorFallback(error, state, stateName, intentMethod, this, ...args));
+    if (this.isStateWithErrorFallback(state)) {
+      await Promise.resolve(state.errorFallback(error, state, stateName, intentMethod, this, ...args));
     } else {
       throw error;
     }
@@ -159,6 +159,7 @@ export class StateMachine implements Transitionable {
     return this.pipeFactory(componentInterfaces.afterIntent);
   }
 
+
   private retrieveStayInContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
     const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
     return metadata ? metadata.stayInContext : undefined;
@@ -167,5 +168,17 @@ export class StateMachine implements Transitionable {
   private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
     const metadata = Reflect.getMetadata(clearContextMetadataKey, currentStateClass);
     return metadata ? metadata.clearContext : undefined;
+
+  /** Type Guards */
+  private isStateWithBeforeIntent(state: State.Required | State.Required & State.BeforeIntent): state is State.Required & State.BeforeIntent {
+    return "beforeIntent_" in state;
+  }
+
+  private isStateWithAfterIntent(state: State.Required | State.Required & State.AfterIntent): state is State.Required & State.AfterIntent {
+    return "afterIntent_" in state;
+  }
+
+  private isStateWithErrorFallback(state: State.Required | State.Required & State.ErrorHandler): state is State.Required & State.ErrorHandler {
+    return "errorFallback" in state;
   }
 }

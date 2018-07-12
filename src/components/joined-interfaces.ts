@@ -14,7 +14,7 @@ export interface AssistantJSConfiguration {
   "core:unifier"?: UnifierConfiguration;
 
   /** Configuration options of "services" component */
-  "core:services": ServicesConfiguration;
+  "core:services"?: ServicesConfiguration;
 
   /** Configuration options of "i18n" component */
   "core:i18n"?: I18nConfiguration;

@@ -11,7 +11,7 @@ export class IntentCallbackState extends BaseState implements State.AfterIntent,
     @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet,
     @optional()
     @inject("mocks:states:call-spy")
-    private spy: Function
+    private spy: (...args: any[]) => void
   ) {
     super(stateSetupSet);
   }

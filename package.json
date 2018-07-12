@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "TypeScript framework to build cross-platform voice applications (alexa, google home, ...). Write once, run anywhere!",
   "keywords": [
     "alexa",
@@ -51,6 +51,7 @@
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.8",
+    "@types/reflect-metadata": "0.0.5",
     "@types/request-promise": "^4.1.40",
     "connect-timeout": "^1.9.0",
     "fakeredis": "^2.0.0",

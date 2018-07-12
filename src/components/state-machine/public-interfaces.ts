@@ -17,17 +17,13 @@ export namespace State {
      * @param machine Current transitionable interface
      * @param originalIntentMethod Name of intent the state machine tried to call
      */
-    unhandledGenericIntent(
-      machine: Transitionable,
-      originalIntentMethod: string,
-      ...args: any[]
-    ): Promise<any>;
+    unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any | Promise<any>;
 
     /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
      * @param machine Current transitionable interface
      */
-    unansweredGenericIntent(machine: Transitionable, ...args: any[]): any;
+    unansweredGenericIntent(machine: Transitionable, ...args: any[]): any | Promise<any>;
   }
 
   /** Implement this interface in your state if you need an error handler */
@@ -119,6 +115,22 @@ export interface Transitionable {
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
 
+export interface Filter {
+  /**
+   * Method of filter that is executed when a filter decorator is given.
+   * @param {State.Required} state Instance of state which occured the execution of this filter
+   * @param {string} stateName Name of state which occured the execution of this filter
+   * @param {string} intentMethod Name of intent method which state machine wanted to call originally
+   * @param args all additional arguments passed to the intent method
+   * @returns an object containing a state/intent to be used instead of the intially called intent or a boolean (both as promises, if filter does some async operations). If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
+   */
+  execute(
+    state: State.Required,
+    stateName: string,
+    intentMethod: string,
+    ...args: any[]
+  ): Promise<{ state: string; intent: string; args?: any[] } | boolean> | { state: string; intent: string; args?: any[] } | boolean;
+}
 /**
  * This interface represents extensions which are used after the context is set. e.g the StateMachine
  */

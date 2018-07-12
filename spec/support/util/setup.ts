@@ -1,16 +1,24 @@
 import { ContainerImpl } from "inversify-components";
 
 import { RequestContext } from "../../../src/components/root/public-interfaces";
+import { StateMachineSetup } from "../../../src/components/state-machine/state-intent-setup";
 import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
 
 import { SpecSetup } from "../../../src/spec-setup";
 
+import { TestFilterA } from "../mocks/filters/test-filter-a";
+import { TestFilterB } from "../mocks/filters/test-filter-b";
+import { TestFilterC } from "../mocks/filters/test-filter-c";
+import { TestFilterD } from "../mocks/filters/test-filter-d";
 import { context } from "../mocks/root/request-context";
 import { ContextAState } from "../mocks/states/context/context-a";
 import { ContextBState } from "../mocks/states/context/context-b";
 import { ContextCState } from "../mocks/states/context/context-c";
 import { ContextDState } from "../mocks/states/context/context-d";
+import { FilterAState } from "../mocks/states/filter-a";
+import { FilterBState } from "../mocks/states/filter-b";
+import { FilterCState } from "../mocks/states/filter-c";
 import { IntentCallbackState } from "../mocks/states/intent-callbacks";
 import { MainState } from "../mocks/states/main";
 import { PlainState } from "../mocks/states/plain";
@@ -37,11 +45,15 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
       UnhandledErrorWithFallbackState,
       PlainState,
       IntentCallbackState,
+      FilterAState, 
+      FilterBState, 
+      FilterCState,
       ContextAState,
       ContextBState,
       ContextCState,
       ContextDState,
     ],
+    [TestFilterA, TestFilterB, TestFilterC, TestFilterD],
     autoBind,
     useChilds,
     autoSetup

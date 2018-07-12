@@ -1,4 +1,3 @@
-import { inject, injectable, multiInject } from "inversify";
 import { ComponentDescriptor, Container, ContainerImpl, MainApplication } from "inversify-components";
 
 import * as internalComponents from "./components/index";
@@ -37,7 +36,7 @@ export class AssistantJSSetup {
     components.forEach(component => this.container.componentRegistry.addFromDescriptor(component));
   }
 
-  public addConfiguration<ComponentConfiguration = {}>(configuration: { [componentName: string]: ComponentConfiguration }) {
+  public addConfiguration(configuration: { [componentName: string]: any }) {
     this.configuration = { ...this.configuration, ...configuration };
   }
 

@@ -5,6 +5,9 @@ import { componentInterfaces } from "./component-interfaces";
 import { InterpolationResolver as InterpolationResolverInterface, MissingInterpolationExtension } from "./public-interfaces";
 import { TranslateHelper } from "./translate-helper";
 
+export const TEMPORARY_INTERPOLATION_START = "§§§§§§§€§~~~~~~";
+export const TEMPORARY_INTERPOLATION_END = "~~~~~~§§§§§§§€§";
+
 @injectable()
 export class InterpolationResolver implements InterpolationResolverInterface {
   constructor(
@@ -27,12 +30,14 @@ export class InterpolationResolver implements InterpolationResolverInterface {
     let resolvedText = translatedValue;
 
     /** return if translatedValue does not contain any further interpolations */
-    if (!translatedValue.includes("~")) {
+    if (!translatedValue.includes(TEMPORARY_INTERPOLATION_START)) {
       return resolvedText;
     }
 
     /** fill missing interpolations in parallel */
-    const interpolations = translatedValue.split(/(?<=\*~~)(.*?)(?=\~~*)/g, undefined).filter(value => value.includes("~") === false);
+    const matches = translatedValue.match(new RegExp(`${TEMPORARY_INTERPOLATION_START}(.*?)${TEMPORARY_INTERPOLATION_END}`, "g"));
+    const interpolations =
+      matches !== null ? matches.map(match => match.replace(TEMPORARY_INTERPOLATION_START, "").replace(TEMPORARY_INTERPOLATION_END, "")) : [];
 
     /** returns a promise for a given interpolation which contains an object containing the interpolation plus the value it needs to be replaced with */
     const perMissingInterpolation = async (interpolation: string): Promise<{ interpolation: string; replacement: string }> => {
@@ -49,7 +54,7 @@ export class InterpolationResolver implements InterpolationResolverInterface {
         /** use first value to fill the missing interpolation */
         replacement = possibleValues[0] as string;
         /** if value contains futher interpolations call this method recursively */
-        if (replacement.includes("~")) {
+        if (replacement.includes(TEMPORARY_INTERPOLATION_START)) {
           replacement = await this.resolveMissingInterpolations(replacement, translateHelper);
         }
       } else {
@@ -69,7 +74,7 @@ export class InterpolationResolver implements InterpolationResolverInterface {
 
     /** replace interpolations in given Text with replacements */
     resultSets.forEach(set => {
-      resolvedText = translatedValue.replace("*~~" + set.interpolation + "~~*", set.replacement);
+      resolvedText = translatedValue.replace(TEMPORARY_INTERPOLATION_START + set.interpolation + TEMPORARY_INTERPOLATION_END, set.replacement);
     });
 
     return resolvedText;

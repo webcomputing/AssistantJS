@@ -14,7 +14,7 @@ export class SubState extends MainState {
     @inject("core:root:current-logger") logger: Logger,
     @optional()
     @inject("mocks:states:call-spy")
-    spy: Function
+    spy: (...args: any[]) => void
   ) {
     super(responseFactory, extraction, tHelper, logger, spy);
   }
