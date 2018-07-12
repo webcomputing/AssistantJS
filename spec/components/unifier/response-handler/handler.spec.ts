@@ -148,9 +148,8 @@ describe("BaseHandler", function() {
         expectResult();
       });
 
-      describe("with SSML prompt", function() {
+      describe("with SSML in prompt", function() {
         beforeEach(async function(this: CurrentThisContext) {
-          this.fillExpectedReprompts();
           this.expectedResult.prompt = mapPrompt(this.mockSSMLPrompt, true);
 
           await this.handlerInstance.prompt(this.mockSSMLPrompt).send();
@@ -287,6 +286,34 @@ describe("BaseHandler", function() {
         });
 
         expectResult();
+      });
+    });
+
+    describe("without any AnswerType", function() {
+      describe("with simple Array", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          await this.handlerInstance.send();
+        });
+
+        expectResult();
+      });
+    });
+  });
+
+  describe("wasSent()", function() {
+    describe("with sending", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.handlerInstance.send();
+      });
+
+      it("returns true", async function(this: CurrentThisContext) {
+        expect(this.handlerInstance.wasSent()).toBe(true);
+      });
+    });
+
+    describe("without sending", function() {
+      it("returns false", async function(this: CurrentThisContext) {
+        expect(this.handlerInstance.wasSent()).toBe(false);
       });
     });
   });

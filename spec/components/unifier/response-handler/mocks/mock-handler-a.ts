@@ -22,7 +22,7 @@ export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHand
     return this;
   }
 
-  protected sendResults(results: MockHandlerASpecificTypes): void {
-    throw new Error("Method not implemented.");
+  protected sendResults(results: Partial<MockHandlerASpecificTypes>): void {
+    // do nothing here
   }
 }

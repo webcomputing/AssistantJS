@@ -33,12 +33,32 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   private isSent: boolean = false;
 
   public async send(): Promise<void> {
+    const promiseKeys: string[] = [];
+    for (const key in this.promises) {
+      if (this.promises.hasOwnProperty(key)) {
+        promiseKeys.push(key);
+      }
+    }
+
+    const concurrentProcesses = promiseKeys.map(async (key: string) => {
+      const currentKey = key as keyof BasicAnswerTypes;
+      const resolver = this.promises[currentKey];
+      if (resolver) {
+        const currentValue = await Promise.resolve(resolver.resolver);
+
+        if (resolver.thenMap) {
+          const finalResult = resolver.thenMap.bind(this)(currentValue);
+          this.results[currentKey] = finalResult;
+        } else {
+          this.results[currentKey] = currentValue;
+        }
+      }
+    });
+
+    await Promise.all(concurrentProcesses);
+
+    this.sendResults(this.results);
     this.isSent = true;
-
-    // todo
-
-    this.sendResults({} as any); // todo
-    throw new Error("Method not implemented.");
   }
 
   public wasSent(): boolean {
@@ -61,21 +81,29 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
       thenMap: this.createPromptAnswer,
     };
 
-    this.promises.reprompts = {
-      resolver: Promise.all(reprompts),
-      thenMap: (finalReprompts: string[]) => {
-        return finalReprompts.map(this.createPromptAnswer);
-      },
-    };
+    if (reprompts && reprompts.length > 0) {
+      this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
+    }
+
     return this;
   }
 
   public setReprompts(reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>> | Promise<Array<B["prompt"]["text"]>>): this {
-    throw new Error("Method not implemented.");
+    if (Array.isArray(reprompts)) {
+      this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
+    } else {
+      this.promises.reprompts = {
+        resolver: Promise.resolve(reprompts),
+        thenMap: this.createRepromptAnswerArray,
+      };
+    }
+
+    return this;
   }
 
   public setSuggestionChips(suggestionChips: B["suggestionChips"] | Promise<B["suggestionChips"]>): this {
-    throw new Error("Method not implemented.");
+    this.promises.suggestionChips = { resolver: suggestionChips };
+    return this;
   }
 
   public setChatBubbles(chatBubbles: B["chatBubbles"] | Promise<B["chatBubbles"]>): this {
@@ -90,14 +118,30 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
 
   protected abstract sendResults(results: Partial<B>): void;
 
-  private isSSML(text: string) {
-    return text.includes("</") || text.includes("/>");
-  }
-
   private createPromptAnswer(text: string): BasicAnswerTypes["prompt"] {
     return {
       text,
-      isSSML: this.isSSML(text),
+      isSSML: BasicHandler.isSSML(text),
     };
+  }
+
+  private getRepromptArrayRemapper(
+    reprompts: Array<B["prompt"]["text"] | Promise<B["prompt"]["text"]>>
+  ): {
+    resolver: Promise<Array<B["prompt"]["text"]>>;
+    thenMap: (finaleReprompts: Array<B["prompt"]["text"]>) => B["reprompts"];
+  } {
+    return {
+      resolver: Promise.all(reprompts),
+      thenMap: this.createRepromptAnswerArray,
+    };
+  }
+
+  private createRepromptAnswerArray(finalReprompts: string[]) {
+    return finalReprompts.map(this.createPromptAnswer);
+  }
+
+  private static isSSML(text: string) {
+    return text.includes("</") || text.includes("/>");
   }
 }
