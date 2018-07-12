@@ -14,13 +14,13 @@ export interface MockHandlerASpecificTypes extends BasicAnswerTypes {
 }
 
 export interface MockHandlerASpecificHandable {
-  addMockHandlerATable(table: MockHandlerASpecificTypes["table"] | Promise<MockHandlerASpecificTypes["table"]>): this;
+  setMockHandlerATable(table: MockHandlerASpecificTypes["table"] | Promise<MockHandlerASpecificTypes["table"]>): this;
 }
 
 export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<MockHandlerASpecificTypes> implements MockHandlerASpecificHandable {
-  public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = ["addMockHandlerATable", "setCard", "setChatBubbles"];
+  public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = ["setMockHandlerATable", "setCard", "setChatBubbles"];
 
-  public addMockHandlerATable(table: T["table"] | Promise<T["table"]>): this {
+  public setMockHandlerATable(table: T["table"] | Promise<T["table"]>): this {
     this.promises.table = { resolver: table };
     return this;
   }

@@ -20,7 +20,7 @@ interface CurrentThisContext {
 describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
     this.handlerInstance = new MockHandlerA() as MixedHandler; // todo change to container instantiation
-    spyOn(this.handlerInstance, "addMockHandlerATable").and.callThrough();
+    spyOn(this.handlerInstance, "setMockHandlerATable").and.callThrough();
 
     this.proxiedHandler = HandlerProxyFactory.createHandlerProxy(this.handlerInstance);
 
@@ -31,21 +31,21 @@ describe("HandlerProxyFactory", function() {
   describe("createHandlerProxy()", function() {
     describe("with present function", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.proxiedHandler.addMockHandlerATable(this.mockTable);
+        this.proxiedHandler.setMockHandlerATable(this.mockTable);
       });
 
       it("calls present function", async function(this: CurrentThisContext) {
-        expect(this.handlerInstance.addMockHandlerATable).toHaveBeenCalledWith(this.mockTable);
+        expect(this.handlerInstance.setMockHandlerATable).toHaveBeenCalledWith(this.mockTable);
       });
     });
 
     describe("without function", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.result = this.proxiedHandler.addMockHandlerBList(this.mockList);
+        this.result = this.proxiedHandler.setMockHandlerBList(this.mockList);
       });
 
       it("returns proxy function", async function(this: CurrentThisContext) {
-        expect(typeof this.proxiedHandler.addMockHandlerBList).toBe("function");
+        expect(typeof this.proxiedHandler.setMockHandlerBList).toBe("function");
         expect(this.result).toBe(this.proxiedHandler);
       });
 
@@ -73,7 +73,7 @@ describe("HandlerProxyFactory", function() {
       describe("with one of two function present", function() {
         describe("where first function is present", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            this.result = this.proxiedHandler.setCard({ title: "TestTitle", description: "Description" }).addMockHandlerBList(this.mockList);
+            this.result = this.proxiedHandler.setCard({ title: "TestTitle", description: "Description" }).setMockHandlerBList(this.mockList);
           });
 
           checkProxiedInstance();
@@ -81,7 +81,7 @@ describe("HandlerProxyFactory", function() {
 
         describe("where second function is present", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            this.result = this.proxiedHandler.addMockHandlerBList(this.mockList).setCard({ title: "TestTitle", description: "Description" });
+            this.result = this.proxiedHandler.setMockHandlerBList(this.mockList).setCard({ title: "TestTitle", description: "Description" });
           });
 
           checkProxiedInstance();

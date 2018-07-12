@@ -38,7 +38,7 @@ export class HandlerProxyFactory {
             propKey
               .toString()
               .toLowerCase()
-              .startsWith("add" + handlerName.toLowerCase())
+              .startsWith("set" + handlerName.toLowerCase())
           )
         ) {
           console.log("Method " + propKey.toString() + "() is not supported on " + handlerName); // todo: exchange with correct logger and add Error here, when required

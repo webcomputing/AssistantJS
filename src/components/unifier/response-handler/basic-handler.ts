@@ -12,8 +12,15 @@ import { BasicAnswerTypes, BasicHandable } from "./handler-types";
  * For the docs of the Methods see also the implemented interfaces
  */
 export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
+  /**
+   * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
+   */
   public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "endSession", "send", "wasSent"];
 
+  /**
+   * This set of Methods can be used from the specific Handler, all Methods which starts with 'set<HandlerName>' are added to the list of valid methods automatically
+   * private and protected methods MUST be added here too, because all Method-calls, also internal method-calls are proxied and are filtered with this whitelist
+   */
   public abstract readonly specificWhitelist: string[];
   /**
    * As every call can add a Promise, this property is used to save all Promises

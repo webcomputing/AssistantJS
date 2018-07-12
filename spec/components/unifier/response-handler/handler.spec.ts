@@ -105,7 +105,7 @@ describe("BaseHandler", function() {
           .setCard(Promise.resolve(this.mockCard))
           .setChatBubbles(Promise.resolve(this.mockChatBubbles))
           .setSuggestionChips(Promise.resolve(this.mockSuggestionChips))
-          .addMockHandlerATable(Promise.resolve(this.mockTable))
+          .setMockHandlerATable(Promise.resolve(this.mockTable))
           .setUnauthenticated()
           .endSession()
           .send();
@@ -126,7 +126,7 @@ describe("BaseHandler", function() {
           .setCard(this.mockCard)
           .setChatBubbles(this.mockChatBubbles)
           .setSuggestionChips(this.mockSuggestionChips)
-          .addMockHandlerATable(this.mockTable)
+          .setMockHandlerATable(this.mockTable)
           .setUnauthenticated()
           .endSession()
           .send();
@@ -322,7 +322,7 @@ describe("BaseHandler", function() {
     beforeEach(async function(this: CurrentThisContext) {
       this.expectedResult = {};
 
-      this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).addMockHandlerATable(this.mockTable);
+      this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).setMockHandlerATable(this.mockTable);
     });
 
     it("calls send in AfterStateMachine", async function(this: CurrentThisContext) {
