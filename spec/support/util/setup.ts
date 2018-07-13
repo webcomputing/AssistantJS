@@ -1,13 +1,12 @@
-import { Container, ContainerImpl } from "inversify-components";
+import { ContainerImpl } from "inversify-components";
 
-import { GenericRequestHandler } from "../../../src/components/root/generic-request-handler";
 import { RequestContext } from "../../../src/components/root/public-interfaces";
-import { StateMachineSetup } from "../../../src/components/state-machine/state-intent-setup";
-import { MinimalRequestExtraction, MinimalResponseHandler } from "../../../src/components/unifier/public-interfaces";
+import { MinimalRequestExtraction } from "../../../src/components/unifier/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
 
 import { SpecSetup } from "../../../src/spec-setup";
 
+import { BasicHandler } from "../../../src/assistant-source";
 import { TestFilterA } from "../mocks/filters/test-filter-a";
 import { TestFilterB } from "../mocks/filters/test-filter-b";
 import { TestFilterC } from "../mocks/filters/test-filter-c";
@@ -23,7 +22,7 @@ import { SecondState } from "../mocks/states/second";
 import { UnhandledErrorState } from "../mocks/states/unhandled-error";
 import { UnhandledErrorWithFallbackState } from "../mocks/states/unhandled-error-with-fallback";
 import { extraction } from "../mocks/unifier/extraction";
-import { ResponseHandler } from "../mocks/unifier/handler";
+import { MockHandlerA as ResponseHandler } from "../mocks/unifier/response-handler/mock-handler-a";
 
 /**
  * Creates a test assistant js setup
@@ -55,7 +54,7 @@ export function createRequestScope(
   specSetup: SpecSetup,
   minimalExtraction: MinimalRequestExtraction | null = JSON.parse(JSON.stringify(extraction)),
   requestContext: RequestContext = context,
-  responseHandler: { new (...args: any[]): MinimalResponseHandler } = ResponseHandler
+  responseHandler: { new (...args: any[]): BasicHandler<any> } = ResponseHandler
 ) {
   specSetup.createRequestScope(minimalExtraction, requestContext, responseHandler);
 }

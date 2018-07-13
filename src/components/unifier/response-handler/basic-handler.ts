@@ -1,4 +1,8 @@
-import { BasicAnswerTypes, BasicHandable } from "./handler-types";
+import { inject, injectable } from "inversify";
+import * as util from "util";
+import { injectionNames } from "../../../injection-names";
+import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
+import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./handler-types";
 
 /**
  * This Class represents the basic features a ResponseHandler should have. It implements all Basic functions,
@@ -11,6 +15,7 @@ import { BasicAnswerTypes, BasicHandable } from "./handler-types";
  *
  * For the docs of the Methods see also the implemented interfaces
  */
+@injectable()
 export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
   /**
    * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
@@ -81,10 +86,33 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    */
   private isSent: boolean = false;
 
+  private responseCallback: ResponseCallback;
+  private killSession: () => Promise<void>;
+
+  constructor(
+    @inject(injectionNames.current.requestContext) extraction: RequestContext,
+    @inject(injectionNames.current.killSessionService) killSession: () => Promise<void>,
+    @inject(injectionNames.current.responseHandlerExtensions) private responseHandlerExtensions: ResponseHandlerExtensions<B, BasicHandler<B>>
+  ) {
+    this.responseCallback = extraction.responseCallback;
+    this.killSession = killSession;
+  }
+
   /**
    * Method to give the final resolved results to the specific Hanlder Implementation of the Method @see {@link sendResults()}
    */
   public async send(): Promise<void> {
+    this.failIfInactive();
+
+    // first check if BeforeResponseHandlers are set,
+    // because specific ResponseHandlers inherits from this BasicHandler and calls super().
+    // This prevents DI and this.beforeSendResponseHandler are undefined
+    if (this.responseHandlerExtensions) {
+      this.responseHandlerExtensions.beforeExtensions.forEach(beforeResponseHandler => {
+        beforeResponseHandler.execute(this);
+      });
+    }
+
     // first get all keys, these are the properties which are filled
     const promiseKeys: string[] = [];
     for (const key in this.promises) {
@@ -119,10 +147,24 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     await Promise.all(concurrentProcesses);
 
     // give results to the specific handler
-    this.sendResults(this.results);
+    this.getBody(this.results);
 
     // everything was sent successfully
     this.isSent = true;
+
+    this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders());
+    if (this.results.shouldSessionEnd) {
+      this.killSession();
+    }
+
+    // first check if AfterResponseHandlers are set,
+    // because normal ResponseHandlers inherits from this AbstractResponseHandler and calls super().
+    // This prevents DI and this.afterSendResponseHandler are undefined
+    if (this.responseHandlerExtensions) {
+      this.responseHandlerExtensions.afterExtensions.forEach(afterResponseHandler => {
+        afterResponseHandler.execute(this.results);
+      });
+    }
   }
 
   public wasSent(): boolean {
@@ -132,6 +174,31 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   public setUnauthenticated(): this {
     this.promises.shouldAuthenticate = { resolver: true };
     return this;
+  }
+
+  /**
+   * Adds Data to session
+   *
+   * Most of the time it is better to use the @see {@link Session}-Implementation, as the Session-Implemention will set it automatically to the handler
+   * or use another SessionStorage like Redis. And it has some more features.
+   */
+  public setSessionData(sessionData: B["sessionData"] | Promise<B["sessionData"]>): this {
+    if (!(this.whitelist.indexOf("setSessionData") > 0 || this.specificWhitelist.indexOf("setSessionData") > 0)) {
+      throw new Error(
+        "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
+      );
+    }
+
+    this.promises.sessionData = { resolver: sessionData };
+
+    return this;
+  }
+
+  /**
+   * gets the current SessionData
+   */
+  public getSessionData(): Promise<B["sessionData"]> | undefined {
+    return this.promises.sessionData ? Promise.resolve(this.promises.sessionData.resolver) : undefined;
   }
 
   public setEndSession(): this {
@@ -195,7 +262,29 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     return this;
   }
 
-  protected abstract sendResults(results: Partial<B>): void;
+  /**
+   * generates the concrete data for a specific Handler
+   * has to be implemented by the specific handler
+   * @param results one file which contains all answers/prompts
+   * @returns e.g. the Object to send as result to the calling service
+   */
+  protected abstract getBody(results: Partial<B>): any;
+
+  /**
+   *  Headers of response, default is Contet-Type "application/json" only
+   */
+  protected getHeaders() {
+    return { "Content-Type": "application/json" };
+  }
+
+  private failIfInactive() {
+    if (this.isSent) {
+      throw Error(
+        "This handle is already inactive, an response was already sent. You cannot send text to a platform multiple times in one request. Current response handler: " +
+          util.inspect(this)
+      );
+    }
+  }
 
   /**
    * Creates from a String the correct prompt object

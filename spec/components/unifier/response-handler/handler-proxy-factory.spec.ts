@@ -1,11 +1,11 @@
 import { Container } from "inversify";
-import { BasicHandler } from "../../../../src/assistant-source";
+import { BasicHandable, BasicHandler } from "../../../../src/assistant-source";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
-import { MockHandlerA, MockHandlerASpecificTypes } from "./mocks/mock-handler-a";
-import { MockHandlerB, MockHandlerBSpecificTypes } from "./mocks/mock-handler-b";
+import { MockHandlerA, MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { MockHandlerB, MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 
 type MixedTypes = MockHandlerASpecificTypes & MockHandlerBSpecificTypes;
-type MixedHandler = BasicHandler<MixedTypes> & MockHandlerA<MixedTypes> & MockHandlerB<MixedTypes>;
+type MixedHandler = BasicHandable<MixedTypes> & MockHandlerASpecificHandable & MockHandlerBSpecificHandable;
 
 interface CurrentThisContext {
   specHelper;
@@ -20,10 +20,12 @@ interface CurrentThisContext {
 
 describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.handlerInstance = new MockHandlerA() as MixedHandler; // todo change to container instantiation
+    this.handlerInstance = this.container.get(MockHandlerA) as any;
     spyOn(this.handlerInstance, "setMockHandlerATable").and.callThrough();
 
-    this.proxiedHandler = HandlerProxyFactory.createHandlerProxy(this.handlerInstance);
+    const handlerProxyFactory = this.container.get(HandlerProxyFactory);
+
+    this.proxiedHandler = handlerProxyFactory.createHandlerProxy(this.handlerInstance);
 
     this.mockList = { elements: [{ title: "ListElement1" }] };
     this.mockTable = { header: ["A"], elements: [["A1"]] };

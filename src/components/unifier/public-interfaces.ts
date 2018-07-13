@@ -3,64 +3,24 @@ import { SpecSetup } from "../../spec-setup";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { Configuration } from "./private-interfaces";
-import { CardResponse } from "./responses/card-response";
-import { ChatResponse } from "./responses/chat-response";
-import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
+import { BasicAnswerTypes, BasicHandler } from "./response-handler";
 
 /** Intent type - intents are either strings or type of GenericIntent */
 export declare type intent = string | GenericIntent;
-
-/** Main AssistantJS class to send responses to the user. */
-export interface ResponseFactory {
-  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
-  failSilentlyOnUnsupportedFeatures: boolean;
-
-  /** Creates a Voiceable response object which decides wheter or wheter not to use SSML based on input and platform features */
-  createVoiceResponse(): Voiceable;
-
-  /** Creates a Voiceable response object without SSML availability */
-  createSimpleVoiceResponse(): Voiceable;
-
-  /** Creates a Voiceable response object with SSML enabled. Throws an exception of SSML is not possible on platform. */
-  createSSMLResponse(): Voiceable;
-
-  /** Creates a response object for adding suggestion chips to the current response */
-  createSuggestionChipsResponse(): SuggestionChipsResponse;
-
-  /** Creates a response object for adding text/chat messsages (for displaying) to the current response */
-  createChatResponse(): ChatResponse;
-
-  /** Creates and sends an empty response */
-  createAndSendEmptyResponse(): {};
-
-  /**
-   * Sends a authentication prompt if available on current platform (else throws exception), possibly allows to add a message to it
-   * @param text String to add say in authentication prompt
-   */
-  createAndSendUnauthenticatedResponse(text?: string): {};
-
-  /** Creates a card response for adding simple graphical elements to your response */
-  createCardResponse(): CardResponse;
-}
-
-export type ConditionalTypeEndSessionWith<T extends string | Promise<string>> = T extends string ? void : Promise<void>;
-export type ConditionalTypePrompt<T extends string | Promise<string>, X extends string | Promise<string>> = T extends Promise<string>
-  ? Promise<void>
-  : (X extends Promise<string> ? Promise<void> : void);
 
 export interface Voiceable {
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeEndSessionWith<T>;
+  endSessionWith(text: string | Promise<string>): void;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt<T extends string | Promise<string>, X extends string | Promise<string>>(inputText: T, ...inputReprompts: X[]): ConditionalTypePrompt<T, X>;
+  prompt(inputText: string | Promise<string>, ...inputReprompts: Array<string | Promise<string>>): void;
 }
 
 // Currently, we are not allowed to use camelCase here! So try to just use a single word!
@@ -342,112 +302,10 @@ export namespace OptionalExtractions {
   };
 }
 
-/** Minimum interface a response handler has to fulfill */
-export interface MinimalResponseHandler extends VoiceMessage {
-  /** If set to false, the session should go on after sending the response */
-  endSession: boolean;
-
-  /** Called automatically if the response should be sent */
-  sendResponse(): void;
-}
-
-/** Minimum interface for an VoiceMessage */
-export interface VoiceMessage {
-  /** Voice message to speak to the user */
-  voiceMessage: string | null;
-}
-
 /**
  * Export all interfaces from the response handle specific types
  */
-export { BasicAnswerTypes, BasicHandable } from "./response-handler/handler-types";
-
-export namespace OptionalHandlerFeatures {
-  /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
-  export interface Authentication {
-    /** If set to true, the assistant will be informed about a missing oauth token */
-    forceAuthenticated: boolean;
-  }
-
-  /** If implemented, a response handler is able to parse SSML voice message */
-  export interface SSML {
-    /** If set to true, this voice message is in SSML format */
-    isSSML: boolean;
-  }
-
-  /** If implemented, the response handler's platform supports reprompts */
-  export interface Reprompt {
-    /** Reprompts for the current voice message */
-    reprompts: string[] | null;
-  }
-
-  /** If implemented, the response handler's platform supports storing of session data */
-  export interface SessionData {
-    /**
-     * Blob of all session data to set or NULL if we don't want to set any session data.
-     */
-    sessionData: string | null;
-  }
-
-  export namespace GUI {
-    export namespace Card {
-      /** Minimal Interface to represent a simple Card */
-      export interface Simple {
-        /** The card's title */
-        cardTitle: string | null;
-
-        /** The card's body */
-        cardBody: string | null;
-      }
-
-      /* Interface to represent a Card with Image */
-      export interface Image {
-        /** The image to display in the card */
-        cardImage: string | null;
-      }
-    }
-
-    /** Minimal Interface to represent SuggestionChips */
-    export interface SuggestionChips {
-      /** The suggestion chips to show */
-      suggestionChips: string[] | null;
-    }
-
-    /** Minimal Interface to represent ChatBubbles */
-    export interface ChatBubbles {
-      /** An array containing all chat messages / chat bubbles to display */
-      chatBubbles: string[] | null;
-    }
-  }
-
-  /** For internal feature checking since TypeScript does not emit interfaces */
-  // tslint:disable-next-line:variable-name
-  export const FeatureChecker = {
-    /** Can we force the existance of OAuth tokens? */
-    AuthenticationHandler: ["forceAuthenticated"],
-
-    /** Are chat messages / chat bubbles available? */
-    ChatBubble: ["chatBubbles"],
-
-    /** Does this response handler support reprompts? */
-    Reprompt: ["reprompts"],
-
-    /** Does this response handler support SSML? */
-    SSMLHandler: ["isSSML"],
-
-    /** Does this response handler support cards containing a textual title and body? */
-    SimpleCard: ["cardBody", "cardTitle"],
-
-    /** Are cards containing a textual title, body and an image available? */
-    ImageCard: ["cardBody", "cardTitle", "cardImage"],
-
-    /** Does this response handler support suggestion chips? */
-    SuggestionChip: ["suggestionChips"],
-
-    /** Does this response handler support storing of session data? */
-    SessionData: ["sessionData"],
-  };
-}
+export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHandler, ResponseHandlerExtensions } from "./response-handler/handler-types";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper {
@@ -461,24 +319,13 @@ export interface PlatformSpecHelper {
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
+  pretendIntentCalled<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandler<AnswerTypes>>(
+    intent: intent,
+    autoStart?: boolean,
+    additionalExtractions?: any,
+    additionalContext?: any
+  ): Promise<CustomHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
-
-/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
-export interface BeforeResponseHandler {
-  execute(responseHandler: MinimalResponseHandler);
-}
-
-/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
-export interface AfterResponseHandler {
-  execute(responseHandler: MinimalResponseHandler);
-}
-
-/** Interface to get all Before- and AfterResponseHandler */
-export interface ResponseHandlerExtensions {
-  beforeExtensions: BeforeResponseHandler[];
-  afterExtensions: AfterResponseHandler[];
-}

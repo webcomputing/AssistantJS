@@ -17,11 +17,8 @@ export { defaultBunyan } from "./components/root/default-bunyan";
 export { StateMachineSetup } from "./components/state-machine/state-intent-setup";
 export { BaseState } from "./components/state-machine/base-state";
 export { FilterSetup } from "./components/state-machine/filter-setup";
-export { AbstractResponseHandler } from "./components/unifier/abstract-response-handler";
 export { BasicHandler } from "./components/unifier/response-handler/basic-handler";
 export { featureIsAvailable } from "./components/unifier/feature-checker";
-export { BaseResponse } from "./components/unifier/responses/base-response";
-export { ResponseFactory as ResponseFactoryClass } from "./components/unifier/response-factory";
 export { cli } from "./cli";
 
 // Export SpecHelper

@@ -1,12 +1,30 @@
+import { inject, injectable } from "inversify";
+import { Component } from "inversify-components";
+import { injectionNames } from "../../../injection-names";
+import { Logger } from "../../root/public-interfaces";
+import { Configuration } from "../private-interfaces";
 import { BasicHandler } from "./basic-handler";
-import { BasicAnswerTypes } from "./handler-types";
+import { BasicAnswerTypes, BasicHandable } from "./handler-types";
 
+@injectable()
 export class HandlerProxyFactory {
+  /**
+   * If set to false, this the handler will throw an exception if an unsupported feature if used
+   */
+  private failSilentlyOnUnsupportedFeatures: boolean = true;
+
+  constructor(@inject(injectionNames.logger) private logger: Logger, @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>) {
+    this.failSilentlyOnUnsupportedFeatures = componentMeta.configuration.failSilentlyOnUnsupportedFeatures;
+  }
+
   /**
    * All empty properties in the Handler MUST have the value 'null', as undefined is used to proxy for unknown functions
    * @param handler
    */
-  public static createHandlerProxy<K extends BasicAnswerTypes, T extends BasicHandler<K>>(handler: T): T {
+  public createHandlerProxy<K extends BasicAnswerTypes, T extends BasicHandable<K>>(handler: T): T {
+    const failSilentlyOnUnsupportedFeatures = this.failSilentlyOnUnsupportedFeatures;
+    const logger = this.logger;
+
     const proxiedHandler = new Proxy(handler, {
       get(target, propKey, receiver) {
         const propValue = target[propKey];
@@ -14,13 +32,13 @@ export class HandlerProxyFactory {
         const handlerName = handler.constructor.name;
 
         const fakeFunction = function() {
-          // "this" points to the proxy, is like using the "receiver" that the proxy has captured
+          // "this" points to the proxy, is necessary to work with method-chaining
           return this;
         };
 
         // return proxy in case there is no function with the specific name, optional properties MUST have the value null to get here ignored.
         if (typeof propValue === "undefined") {
-          console.log("Method " + propKey.toString() + "() is not implemented on " + handlerName); // todo: exchange with correct logger
+          logger.warn("Method " + propKey.toString() + "() is not implemented on " + handlerName);
 
           // return a fake function, which is automatically called
           return fakeFunction;
@@ -33,22 +51,25 @@ export class HandlerProxyFactory {
 
         if (
           !(
-            handler.whitelist.indexOf(propKey.toString() as any) > 0 ||
-            handler.specificWhitelist.indexOf(propKey.toString() as any) > 0 ||
-            propKey
+            handler.whitelist.indexOf(propKey.toString() as any) > 0 || // in general whitelist
+            handler.specificWhitelist.indexOf(propKey.toString() as any) > 0 || // in handler specific whitelist
+            propKey // or by convention with name
               .toString()
               .toLowerCase()
               .startsWith("set" + handlerName.toLowerCase())
           )
         ) {
-          console.log("Method " + propKey.toString() + "() is not supported on " + handlerName); // todo: exchange with correct logger and add Error here, when required
+          const message = "Method " + propKey.toString() + "() is not supported on " + handlerName;
+          logger.warn(message);
+          if (!failSilentlyOnUnsupportedFeatures) {
+            throw new Error(message);
+          }
 
-          // return a fake function, which is automatically called
           return fakeFunction;
         }
 
         return function() {
-          // "this" points to the proxy, is like using the "receiver" that the proxy has captured
+          // "this" points to the proxy, is necessary to work with method-chaining
           return propValue.apply(this, arguments);
         };
       },

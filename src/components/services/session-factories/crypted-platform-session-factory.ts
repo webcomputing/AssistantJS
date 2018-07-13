@@ -1,8 +1,8 @@
 import { inject, injectable } from "inversify";
-import { Component } from "inversify-components";
 import { injectionNames } from "../../../injection-names";
-import { MinimalRequestExtraction, MinimalResponseHandler, OptionalExtractions, OptionalHandlerFeatures } from "../../unifier/public-interfaces";
-import { Configuration, SessionConfiguration } from "../private-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions } from "../../unifier/public-interfaces";
+import { BasicHandler } from "../../unifier/response-handler";
+import { SessionConfiguration } from "../private-interfaces";
 import { Session } from "../public-interfaces";
 import { CryptedPlatformSession } from "./crypted-platform-session";
 import { PlatformSessionFactory } from "./platform-session-factory";
@@ -13,14 +13,14 @@ import { PlatformSessionFactory } from "./platform-session-factory";
 export class CryptedPlatformSessionFactory extends PlatformSessionFactory {
   constructor(
     @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,
-    @inject(injectionNames.current.responseHandler) handler: MinimalResponseHandler
+    @inject(injectionNames.current.responseHandler) handler: BasicHandler<any>
   ) {
     super(extraction, handler);
   }
 
   protected createSession(
     extraction: OptionalExtractions.SessionData,
-    handler: OptionalHandlerFeatures.SessionData,
+    handler: BasicHandler<any>,
     configuration?: SessionConfiguration.CryptedPlatform
   ): Session {
     return new CryptedPlatformSession(extraction, handler, configuration ? configuration.encryptionKey : undefined);

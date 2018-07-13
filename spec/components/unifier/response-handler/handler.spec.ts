@@ -1,6 +1,6 @@
 import { Container } from "inversify";
-import { MockHandlerA, MockHandlerASpecificTypes } from "./mocks/mock-handler-a";
-import { MockHandlerBSpecificTypes } from "./mocks/mock-handler-b";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 
 type CurrentHandler = MockHandlerA<MockHandlerASpecificTypes>;
 
@@ -8,7 +8,7 @@ interface CurrentThisContext {
   specHelper;
   assistantJs;
   container: Container;
-  handlerInstance: CurrentHandler & { sendResults: () => void };
+  handlerInstance: CurrentHandler & { getBody: () => void };
 
   mockCard: MockHandlerASpecificTypes["card"];
   mockChatBubbles: MockHandlerASpecificTypes["chatBubbles"];
@@ -29,8 +29,8 @@ interface CurrentThisContext {
 describe("BaseHandler", function() {
   beforeEach(async function(this: CurrentThisContext) {
     // has to set type to any to spy on protected method sendResults()
-    this.handlerInstance = new MockHandlerA() as any; // todo change to container instantiation
-    spyOn(this.handlerInstance, "sendResults");
+    this.handlerInstance = this.container.get(MockHandlerA) as any;
+    spyOn(this.handlerInstance, "getBody");
 
     this.mockTable = { header: ["A", "B"], elements: [["A1", "A2"], ["B1", "B2"]] };
     this.mockCard = { description: "desc", title: "title" };
@@ -65,7 +65,7 @@ describe("BaseHandler", function() {
 
   function expectResult() {
     it("calls sendResponse with corresponding object", async function(this: CurrentThisContext) {
-      expect(this.handlerInstance.sendResults).toHaveBeenCalledWith(this.expectedResult);
+      expect(this.handlerInstance.getBody).toHaveBeenCalledWith(this.expectedResult);
     });
   }
 
@@ -86,7 +86,7 @@ describe("BaseHandler", function() {
     });
 
     it("calls sendResponse with empty object", async function(this: CurrentThisContext) {
-      expect(this.handlerInstance.sendResults).toHaveBeenCalledWith(this.expectedResult);
+      expect(this.handlerInstance.getBody).toHaveBeenCalledWith(this.expectedResult);
     });
   });
 

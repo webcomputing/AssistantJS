@@ -1,19 +1,14 @@
+import { BasicHandler } from "../../../../src/assistant-source";
 import { PlatformSessionMirror } from "../../../../src/components/services/session-factories/platform-session-mirror";
 import { componentInterfaces } from "../../../../src/components/unifier/private-interfaces";
-import {
-  BeforeResponseHandler,
-  MinimalRequestExtraction,
-  MinimalResponseHandler,
-  OptionalExtractions,
-  OptionalHandlerFeatures,
-} from "../../../../src/components/unifier/public-interfaces";
+import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
 import { injectionNames } from "../../../../src/injection-names";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
-  handler: MinimalResponseHandler & OptionalHandlerFeatures.SessionData;
+  handler: BasicHandler<any>;
   mirror: PlatformSessionMirror;
   buildMirror(): PlatformSessionMirror;
 }
@@ -34,7 +29,7 @@ describe("PlatformSessionMirror", function() {
   it("is bound to responseHandler's beforeSendResponse extension", async function(this: CurrentThisContext) {
     expect(
       this.container.inversifyInstance
-        .getAll<BeforeResponseHandler>(componentInterfaces.beforeSendResponse)
+        .getAll<BeforeResponseHandler<any, any>>(componentInterfaces.beforeSendResponse)
         .filter(object => object.constructor.name === PlatformSessionMirror.name).length
     ).toEqual(1);
   });
@@ -42,7 +37,7 @@ describe("PlatformSessionMirror", function() {
   describe("#execute", function() {
     describe("with no compatible responseHandler", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        delete this.handler.sessionData;
+        this.handler.setSessionData(undefined);
       });
 
       describe("with no session data stored in extraction", function() {
@@ -52,7 +47,7 @@ describe("PlatformSessionMirror", function() {
 
         it("does nothing", async function(this: CurrentThisContext) {
           this.mirror.execute(this.handler);
-          expect(this.handler.sessionData).toBeUndefined();
+          expect(await this.handler.getSessionData()).toBeUndefined();
         });
       });
 
@@ -75,20 +70,20 @@ describe("PlatformSessionMirror", function() {
 
         it("does nothing", async function(this: CurrentThisContext) {
           this.mirror.execute(this.handler);
-          expect(this.handler.sessionData).toBeUndefined();
+          expect(await this.handler.getSessionData()).toBeUndefined();
         });
       });
     });
 
     describe("with compatible responseHandler", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.handler.sessionData = null;
+        this.handler.setSessionData(null);
       });
 
       describe("with no extractionData", function() {
         it("does nothing", async function(this: CurrentThisContext) {
           this.buildMirror().execute(this.handler);
-          expect(this.handler.sessionData).toBeNull();
+          expect(await this.handler.getSessionData()).toBeUndefined();
         });
       });
 
@@ -99,17 +94,17 @@ describe("PlatformSessionMirror", function() {
 
         it("mirrors extraction's sessionData to handler's sessionData", async function(this: CurrentThisContext) {
           this.buildMirror().execute(this.handler);
-          expect(this.handler.sessionData).toEqual("a");
+          expect(await this.handler.getSessionData()).toEqual("a");
         });
 
         describe("with responseHandler having sth stored in sessionData", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            this.handler.sessionData = "b";
+            this.handler.setSessionData("b");
           });
 
           it("does nothing", async function(this: CurrentThisContext) {
             this.buildMirror().execute(this.handler);
-            expect(this.handler.sessionData).toEqual("b");
+            expect(await this.handler.getSessionData()).toEqual("b");
           });
         });
       });

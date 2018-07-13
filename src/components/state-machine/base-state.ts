@@ -2,14 +2,8 @@ import { injectable, unmanaged } from "inversify";
 import { TranslateHelper } from "../i18n/public-interfaces";
 import { Logger, RequestContext } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
-import {
-  ConditionalTypeEndSessionWith,
-  ConditionalTypePrompt,
-  MinimalRequestExtraction,
-  OptionalExtractions,
-  ResponseFactory,
-  Voiceable,
-} from "../unifier/public-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions, Voiceable } from "../unifier/public-interfaces";
+import { BasicHandler } from "../unifier/response-handler";
 import { State, Transitionable } from "./public-interfaces";
 
 /**
@@ -21,7 +15,7 @@ import { State, Transitionable } from "./public-interfaces";
 @injectable()
 export abstract class BaseState implements State.Required, Voiceable, TranslateHelper {
   /** Current response factory */
-  public responseFactory: ResponseFactory;
+  public responseHandler: BasicHandler<any>;
 
   /** Current translate helper */
   public translateHelper: TranslateHelper;
@@ -39,7 +33,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {MinimalRequestExtraction} extraction Extraction of current request
    * @param {Logger} logger Logger, prepared to log information about the current request
    */
-  constructor(responseFactory: ResponseFactory, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
+  constructor(responseHandler: BasicHandler<any>, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
 
   /**
    * As an alternative to passing all objects on it's own, you can also pass a set of them
@@ -48,18 +42,18 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   constructor(stateSetupSet: State.SetupSet);
 
   constructor(
-    @unmanaged() responseFactoryOrSet: ResponseFactory | State.SetupSet,
+    @unmanaged() responseFactoryOrSet: BasicHandler<any> | State.SetupSet,
     @unmanaged() translateHelper?: TranslateHelper,
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
   ) {
-    if (typeof (responseFactoryOrSet as State.SetupSet).responseFactory === "undefined") {
+    if (typeof (responseFactoryOrSet as State.SetupSet).responseHandler === "undefined") {
       // Did not pass StateSetupSet
       if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined") {
         throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
       }
 
-      this.responseFactory = responseFactoryOrSet as ResponseFactory;
+      this.responseHandler = responseFactoryOrSet as BasicHandler<any>;
       this.translateHelper = translateHelper;
       this.extraction = extraction;
       this.logger = logger;
@@ -69,7 +63,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
         throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
       }
 
-      this.responseFactory = (responseFactoryOrSet as State.SetupSet).responseFactory;
+      this.responseHandler = (responseFactoryOrSet as State.SetupSet).responseHandler;
       this.translateHelper = (responseFactoryOrSet as State.SetupSet).translateHelper;
       this.extraction = (responseFactoryOrSet as State.SetupSet).extraction;
       this.logger = (responseFactoryOrSet as State.SetupSet).logger;
@@ -78,12 +72,12 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
 
   /** Prompts with current unhandled message */
   public async unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): Promise<any> {
-    this.responseFactory.createVoiceResponse().prompt(await this.translateHelper.t());
+    this.responseHandler.prompt(this.translateHelper.t());
   }
 
   /** Sends empty response */
   public async unansweredGenericIntent(machine: Transitionable, ...args: any[]): Promise<any> {
-    this.responseFactory.createAndSendEmptyResponse();
+    await this.responseHandler.send();
   }
 
   /**
@@ -114,16 +108,16 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  public prompt<T extends string | Promise<string>, S extends string | Promise<string>>(text: T, ...reprompts: S[]): ConditionalTypePrompt<T, S> {
-    return this.responseFactory.createVoiceResponse().prompt(text, ...reprompts);
+  public prompt<T extends string | Promise<string>, S extends string | Promise<string>>(text: T, ...reprompts: S[]): void {
+    this.responseHandler.prompt(text, ...reprompts);
   }
 
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeEndSessionWith<T> {
-    return this.responseFactory.createVoiceResponse().endSessionWith(text);
+  public endSessionWith<T extends string | Promise<string>>(text: T): void {
+    this.responseHandler.endSessionWith(text);
   }
 
   /** Returns name of current platform */

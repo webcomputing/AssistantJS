@@ -4,24 +4,23 @@ import { Logger } from "../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { filter } from "../../../../src/components/state-machine/filter-decorator";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { BasicHandler } from "../../../../src/components/unifier/response-handler/basic-handler";
+import { injectionNames } from "../../../../src/injection-names";
 import { TestFilterB } from "../filters/test-filter-b";
 import { TestFilterC } from "../filters/test-filter-c";
 
 @injectable()
 export class FilterCState extends BaseState implements State.Required {
-  public responseFactory: ResponseFactory;
   public extraction: any;
 
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
+    @inject(injectionNames.current.responseHandler) responseHandler: BasicHandler<any>,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
     @inject("core:root:current-logger") logger: Logger
   ) {
-    super(responseFactory, translateHelper, extraction, logger);
+    super(responseHandler, translateHelper, extraction, logger);
     this.extraction = extraction;
-    this.responseFactory = responseFactory;
   }
 
   @filter(TestFilterC)

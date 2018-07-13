@@ -47,6 +47,30 @@ export interface BasicAnswerTypes {
 }
 
 /**
+ * Interface to Implement if you want to use beforeSendResponse extensionpoint
+ * The BeforeResponseHandler gets the Handler to add or change values
+ */
+export interface BeforeResponseHandler<AnswerType extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerType>> {
+  execute(handler: CustomHandler): Promise<void>;
+}
+
+/**
+ * Interface to Implement if you want to use beforeSendResponse extensionpoint
+ * The after ResponseHandler does only get the results, as the answers cannot be changed anymore
+ */
+export interface AfterResponseHandler<AnswerType extends BasicAnswerTypes> {
+  execute(results: { [key in keyof AnswerType]?: AnswerType[key] });
+}
+
+/**
+ * Interface to get all Before- and AfterResponseHandler
+ */
+export interface ResponseHandlerExtensions<AnswerType extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerType>> {
+  beforeExtensions: Array<BeforeResponseHandler<AnswerType, CustomHandler>>;
+  afterExtensions: Array<AfterResponseHandler<AnswerType>>;
+}
+
+/**
  * This interface defines which methods every handler should have.
  * Types are referenced to the merged handler-specific types, like 'AlexaSpecificTypes & GoogleSpecificType'
  *
@@ -56,6 +80,7 @@ export interface BasicAnswerTypes {
  */
 export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
   readonly whitelist: string[];
+  readonly specificWhitelist: string[];
 
   /**
    * Sends voice message

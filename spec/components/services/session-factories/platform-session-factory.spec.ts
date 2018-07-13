@@ -1,10 +1,4 @@
-import {
-  injectionNames,
-  MinimalRequestExtraction,
-  MinimalResponseHandler,
-  OptionalExtractions,
-  OptionalHandlerFeatures,
-} from "../../../../src/assistant-source";
+import { BasicHandler, injectionNames, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/assistant-source";
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
 import { PlatformSessionFactory } from "../../../../src/components/services/session-factories/platform-session-factory";
 import { createRequestScope } from "../../../support/util/setup";
@@ -12,7 +6,7 @@ import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
-  handler: MinimalResponseHandler & OptionalHandlerFeatures.SessionData;
+  handler: BasicHandler<any>;
   sessionFactory: PlatformSessionFactory;
 }
 
@@ -29,7 +23,7 @@ describe("PlatformSessionFactory", function() {
   describe("#getCurrentSession", function() {
     describe("with responseHandler not having support for sessionData", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        delete this.handler.sessionData;
+        this.handler.setSessionData(undefined);
       });
 
       describe("with extraction having support for sessionData", function() {
@@ -45,7 +39,7 @@ describe("PlatformSessionFactory", function() {
 
     describe("with responseHandler having support for sessionData", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.handler.sessionData = null;
+        this.handler.setSessionData(null);
       });
 
       describe("with extraction not having support for sessionData", function() {

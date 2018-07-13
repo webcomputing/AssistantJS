@@ -6,9 +6,9 @@ import { TranslateHelper } from "../i18n/translate-helper";
 import { Logger } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
-import { ResponseFactory } from "../unifier/response-factory";
 
 import { Hooks } from "../joined-interfaces";
+import { BasicHandler } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
 import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
@@ -77,7 +77,7 @@ export const descriptor: ComponentDescriptor = {
       // Returns set of dependencies fitting for BaseState
       bindService.bindGlobalService<State.SetupSet>("current-state-setup-set").toDynamicValue(context => {
         return {
-          responseFactory: context.container.get<ResponseFactory>(injectionNames.current.responseFactory),
+          responseHandler: context.container.get<BasicHandler<any>>(injectionNames.current.responseHandler),
           translateHelper: context.container.get<TranslateHelper>(injectionNames.current.translateHelper),
           extraction: context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction),
           logger: context.container.get<Logger>(injectionNames.current.logger),

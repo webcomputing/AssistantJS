@@ -14,7 +14,6 @@ export const injectionNames = {
     stateSetupSet: "core:state-machine:current-state-setup-set",
     sessionFactory: "core:services:current-session-factory",
     extraction: "core:unifier:current-extraction",
-    responseFactory: "core:unifier:current-response-factory",
     entityDictionary: "core:unifier:current-entity-dictionary",
     responseHandler: "core:unifier:current-response-handler",
     logger: "core:root:current-logger",

@@ -5,10 +5,8 @@ import { RequestProxy, withServer } from "../../support/util/requester";
 import { createSpecHelper } from "../../support/util/setup";
 
 import { extraction } from "../../support/mocks/unifier/extraction";
-import { RealResponseHandler } from "../../support/mocks/unifier/handler";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
-
-import { RequestPromise } from "request-promise";
+import { MockHandlerA as RealResponseHandler } from "../../support/mocks/unifier/response-handler/mock-handler-a";
 
 describe("with child containers enabled", function() {
   beforeEach(function() {

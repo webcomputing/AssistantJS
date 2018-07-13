@@ -1,14 +1,14 @@
 import { inject, injectable, optional } from "inversify";
 import { Logger } from "../../../../src/components/root/public-interfaces";
-import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
 
+import { BasicHandler } from "../../../../src/assistant-source";
+import { injectionNames } from "../../../../src/injection-names";
 import { MainState } from "./main";
 
 @injectable()
 export class SubState extends MainState {
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
+    @inject(injectionNames.current.responseHandler) responseHandler: BasicHandler<any>,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") tHelper: any,
     @inject("core:root:current-logger") logger: Logger,
@@ -16,7 +16,7 @@ export class SubState extends MainState {
     @inject("mocks:states:call-spy")
     spy: (...args: any[]) => void
   ) {
-    super(responseFactory, extraction, tHelper, logger, spy);
+    super(responseHandler, extraction, tHelper, logger, spy);
   }
 
   public helpGenericIntent(...args: any[]) {

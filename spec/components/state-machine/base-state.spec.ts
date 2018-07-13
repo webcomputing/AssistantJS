@@ -9,7 +9,6 @@ import { createRequestScope } from "../../support/util/setup";
 interface CurrentThisContext {
   state: BaseState;
   specHelper: SpecSetup;
-  voiceResponseMock: Voiceable;
 }
 
 describe("BaseState", function() {
@@ -20,32 +19,29 @@ describe("BaseState", function() {
     this.state = this.specHelper.setup.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<BaseState>("PlainState");
   });
 
-  describe("responseFactory synonyms", function() {
+  describe("responseHandler synonyms", function() {
     beforeEach(function(this: CurrentThisContext) {
       // Singleton voice response
-      this.voiceResponseMock = this.state.responseFactory.createVoiceResponse();
-
-      spyOn(this.state.responseFactory, "createVoiceResponse").and.returnValue(this.voiceResponseMock);
+      spyOn(this.state.responseHandler, "prompt").and.callThrough();
     });
 
     describe("prompt", function() {
       it("calls responseFactory.prompt", function(this: CurrentThisContext) {
         const message = "Voice message";
         const reprompts = ["First reprompt", "Second reprompt", "Third reprompt", "Fourth reprompt"];
-        spyOn(this.voiceResponseMock, "prompt");
 
         this.state.prompt(message, ...reprompts);
-        expect(this.voiceResponseMock.prompt).toHaveBeenCalledWith(message, ...reprompts);
+        expect(this.state.responseHandler.prompt).toHaveBeenCalledWith(message, ...reprompts);
       });
     });
 
     describe("endSessionWith", function() {
       it("calls responseFactory.endSessionWith", function(this: CurrentThisContext) {
         const message = "Voice message";
-        spyOn(this.voiceResponseMock, "endSessionWith");
+        spyOn(this.state.responseHandler, "endSessionWith");
 
         this.state.endSessionWith(message);
-        expect(this.voiceResponseMock.endSessionWith).toHaveBeenCalledWith(message);
+        expect(this.state.responseHandler.endSessionWith).toHaveBeenCalledWith(message);
       });
     });
   });

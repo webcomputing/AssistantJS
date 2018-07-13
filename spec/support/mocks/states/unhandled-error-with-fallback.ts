@@ -1,6 +1,4 @@
-import { inject, injectable, optional } from "inversify";
-import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { injectable } from "inversify";
 
 import { UnhandledErrorState } from "./unhandled-error";
 

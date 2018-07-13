@@ -1,15 +1,15 @@
 import { inject, injectable, optional } from "inversify";
+import { BasicHandler } from "../../../../src/assistant-source";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { injectionNames } from "../../../../src/injection-names";
 
 @injectable()
 export class UnhandledErrorState implements State.Required {
-  public responseFactory: ResponseFactory;
   public extraction: any;
   public spy?: (...args: any[]) => void;
 
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
+    @inject(injectionNames.current.responseHandler) responsehandler: BasicHandler<any>,
     @inject("core:unifier:current-extraction") extraction: any,
     @optional()
     @inject("mocks:states:call-spy")
@@ -17,7 +17,6 @@ export class UnhandledErrorState implements State.Required {
   ) {
     this.extraction = extraction;
     this.spy = spy;
-    this.responseFactory = responseFactory;
   }
 
   public async unhandledGenericIntent(...args: any[]) {

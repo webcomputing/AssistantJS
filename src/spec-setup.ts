@@ -7,10 +7,11 @@ import { GenericRequestHandler } from "./components/root/generic-request-handler
 import { Logger, RequestContext } from "./components/root/public-interfaces";
 import { Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
 import { StateMachineSetup } from "./components/state-machine/state-intent-setup";
-import { intent, MinimalRequestExtraction, MinimalResponseHandler } from "./components/unifier/public-interfaces";
+import { intent, MinimalRequestExtraction } from "./components/unifier/public-interfaces";
 
 import { Constructor } from "./assistant-source";
 import { FilterSetup } from "./components/state-machine/filter-setup";
+import { BasicHandler } from "./components/unifier/response-handler";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
@@ -53,7 +54,7 @@ export class SpecSetup {
   public createRequestScope(
     minimalExtraction: MinimalRequestExtraction | null,
     requestContext: RequestContext,
-    responseHandler?: { new (...args: any[]): MinimalResponseHandler }
+    responseHandler?: { new (...args: any[]): BasicHandler<any> }
   ) {
     // Get request handle instance and create child container of it
     const requestHandle = this.setup.container.inversifyInstance.get(GenericRequestHandler);
@@ -70,7 +71,7 @@ export class SpecSetup {
     // Add minimal response handler
     if (typeof responseHandler !== "undefined") {
       if (minimalExtraction !== null) {
-        childContainer.bind<MinimalResponseHandler>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
+        childContainer.bind<BasicHandler<any>>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
       } else {
         throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");
       }
