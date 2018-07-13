@@ -12,6 +12,10 @@ import { TestFilterB } from "../mocks/filters/test-filter-b";
 import { TestFilterC } from "../mocks/filters/test-filter-c";
 import { TestFilterD } from "../mocks/filters/test-filter-d";
 import { context } from "../mocks/root/request-context";
+import { ContextAState } from "../mocks/states/context/context-a";
+import { ContextBState } from "../mocks/states/context/context-b";
+import { ContextCState } from "../mocks/states/context/context-c";
+import { ContextDState } from "../mocks/states/context/context-d";
 import { FilterAState } from "../mocks/states/filter-a";
 import { FilterBState } from "../mocks/states/filter-b";
 import { FilterCState } from "../mocks/states/filter-c";
@@ -34,7 +38,21 @@ import { MockHandlerA as ResponseHandler } from "../mocks/unifier/response-handl
 export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecSetup {
   const assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
   assistantJs.prepare(
-    [MainState, SecondState, UnhandledErrorState, UnhandledErrorWithFallbackState, PlainState, IntentCallbackState, FilterAState, FilterBState, FilterCState],
+    [
+      MainState,
+      SecondState,
+      UnhandledErrorState,
+      UnhandledErrorWithFallbackState,
+      PlainState,
+      IntentCallbackState,
+      FilterAState, 
+      FilterBState, 
+      FilterCState,
+      ContextAState,
+      ContextBState,
+      ContextCState,
+      ContextDState,
+    ],
     [TestFilterA, TestFilterB, TestFilterC, TestFilterD],
     autoBind,
     useChilds,

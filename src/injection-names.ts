@@ -11,6 +11,7 @@ export const injectionNames = {
     stateMachine: "core:state-machine:current-state-machine",
     stateNameProvider: "core:state-machine:current-state-name-provider",
     stateProvider: "core:state-machine:current-state-provider",
+    contextStatesProvider: "core:state-machine:current-context-states-provider",
     stateSetupSet: "core:state-machine:current-state-setup-set",
     sessionFactory: "core:services:current-session-factory",
     extraction: "core:unifier:current-extraction",
