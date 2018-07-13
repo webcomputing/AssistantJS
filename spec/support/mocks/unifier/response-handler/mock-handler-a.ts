@@ -22,7 +22,25 @@ export interface MockHandlerASpecificHandable {
 
 @injectable()
 export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<MockHandlerASpecificTypes> implements MockHandlerASpecificHandable {
-  public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = ["setMockHandlerATable", "setCard", "setChatBubbles"];
+  // "prompt",
+  // "setEndSession",
+  // "endSessionWith",
+  // "send",
+  // "wasSent",
+  // "getSessionData",
+  // "setSessionData",
+  // "setEndSession",
+
+  public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = [
+    "setMockHandlerATable",
+    "setCard",
+    "setChatBubbles",
+    "setSessionData",
+    "setChatBubbles",
+    "setReprompts",
+    "setSuggestionChips",
+    "setUnauthenticated",
+  ];
 
   constructor(
     @inject(injectionNames.current.requestContext) extraction: RequestContext,

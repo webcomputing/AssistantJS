@@ -1,3 +1,3 @@
 beforeEach(function() {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 300;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
 });

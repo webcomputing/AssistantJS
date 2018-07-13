@@ -25,11 +25,11 @@ export class FilterCState extends BaseState implements State.Required {
 
   @filter(TestFilterC)
   public filterTestAIntent(...args: any[]) {
-    this.endSessionWith(this.t("filter.stateC.intentA"));
+    this.responseHandler.endSessionWith(this.t("filter.stateC.intentA")).send();
   }
 
   public filterTestBIntent() {
-    this.endSessionWith(this.t("filter.stateC.intentB"));
+    this.responseHandler.endSessionWith(this.t("filter.stateC.intentB")).send();
   }
 
   @filter(TestFilterB)

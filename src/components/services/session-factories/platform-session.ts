@@ -38,9 +38,7 @@ export class PlatformSession implements Session {
    * We have to priorize the handler's data to get eventually changed data
    */
   protected async getLatestSessionData(): Promise<{ [key: string]: string }> {
-    const currentSessionDataPromise = this.handler.getSessionData();
-
-    const currentSessionData = currentSessionDataPromise ? await Promise.resolve(currentSessionDataPromise) : undefined;
+    const currentSessionData = await this.handler.getSessionData();
 
     if (!currentSessionData) {
       // Current handler does not have any session data yet. So this is the first call. Let's get session data from extraction

@@ -20,7 +20,16 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   /**
    * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
    */
-  public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "setEndSession", "endSessionWith", "send", "wasSent", "getSessionData"];
+  public readonly whitelist: Array<keyof BasicHandler<B>> = [
+    "prompt",
+    "setEndSession",
+    "endSessionWith",
+    "send",
+    "wasSent",
+    "getSessionData",
+    "setSessionData",
+    "setEndSession",
+  ];
 
   /**
    * This set of Methods can be used from the specific Handler, all Methods which starts with 'set<HandlerName>' are added to the list of valid methods automatically
@@ -134,7 +143,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
 
         // remap the intermediate Results, when an thenMap function is present
         if (resolver.thenMap) {
-          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
+          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue)); // todo debugging here
           this.results[currentKey] = finalResult;
         } else {
           // here are only final results
@@ -183,7 +192,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    * or use another SessionStorage like Redis. And it has some more features.
    */
   public setSessionData(sessionData: B["sessionData"] | Promise<B["sessionData"]>): this {
-    if (!(this.whitelist.indexOf("setSessionData") > 0 || this.specificWhitelist.indexOf("setSessionData") > 0)) {
+    if (!(this.specificWhitelist.indexOf("setSessionData") > 0)) {
       throw new Error(
         "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
       );

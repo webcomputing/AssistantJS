@@ -28,17 +28,18 @@ describe("ExecuteFiltersHook", function() {
 
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
+
     this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
     this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
     this.responseHandler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
 
     this.resultHolder = this.responseHandler as any;
 
-    this.container.inversifyInstance.unbind(injectionNames.current.responseHandler);
-    this.container.inversifyInstance
-      .bind(injectionNames.current.responseHandler)
-      .toDynamicValue(() => this.responseHandler)
-      .inSingletonScope();
+    // this.container.inversifyInstance.unbind(injectionNames.current.responseHandler);
+    // this.container.inversifyInstance
+    //   .bind(injectionNames.current.responseHandler)
+    //   .toDynamicValue(() => this.responseHandler)
+    //   .inSingletonScope();
     await this.stateMachine.transitionTo("FilterAState");
   });
 
@@ -47,7 +48,7 @@ describe("ExecuteFiltersHook", function() {
       await this.stateMachine.transitionTo("FilterAState");
     });
 
-    it("uses no filter", async function(this: CurrentThisContext) {
+    fit("uses no filter", async function(this: CurrentThisContext) {
       await this.stateMachine.handleIntent("filterTestBIntent");
       expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
     });

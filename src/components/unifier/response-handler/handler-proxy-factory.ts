@@ -51,8 +51,8 @@ export class HandlerProxyFactory {
 
         if (
           !(
-            handler.whitelist.indexOf(propKey.toString() as any) > 0 || // in general whitelist
-            handler.specificWhitelist.indexOf(propKey.toString() as any) > 0 || // in handler specific whitelist
+            handler.whitelist.indexOf(propKey.toString() as any) > -1 || // in general whitelist
+            handler.specificWhitelist.indexOf(propKey.toString() as any) > -1 || // in handler specific whitelist
             propKey // or by convention with name
               .toString()
               .toLowerCase()

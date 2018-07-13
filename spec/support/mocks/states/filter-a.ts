@@ -25,21 +25,21 @@ export class FilterAState extends BaseState implements State.Required {
   }
 
   @filter(TestFilterA)
-  public filterTestAIntent(...args: any[]) {
-    this.endSessionWith(this.t("filter.stateA.intentA"));
+  public async filterTestAIntent(...args: any[]) {
+    await this.responseHandler.endSessionWith(this.t("filter.stateA.intentA")).send();
   }
 
-  public filterTestBIntent() {
-    this.endSessionWith(this.t("filter.stateA.intentB"));
+  public async filterTestBIntent() {
+    await this.responseHandler.endSessionWith(this.t("filter.stateA.intentB")).send();
   }
 
   @filter(TestFilterD, TestFilterA)
-  public filterTestCIntent() {
-    this.endSessionWith(this.t("filter.stateA.intentC"));
+  public async filterTestCIntent() {
+    await this.responseHandler.endSessionWith(this.t("filter.stateA.intentC")).send();
   }
 
   @filter(TestFilterA, TestFilterB)
-  public filterTestDIntent() {
-    this.endSessionWith(this.t("filter.stateA.intentD"));
+  public async filterTestDIntent() {
+    await this.responseHandler.endSessionWith(this.t("filter.stateA.intentD")).send();
   }
 }
