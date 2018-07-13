@@ -42,18 +42,18 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   constructor(stateSetupSet: State.SetupSet);
 
   constructor(
-    @unmanaged() responseFactoryOrSet: BasicHandler<any> | State.SetupSet,
+    @unmanaged() responseHandlerOrSet: BasicHandler<any> | State.SetupSet,
     @unmanaged() translateHelper?: TranslateHelper,
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
   ) {
-    if (typeof (responseFactoryOrSet as State.SetupSet).responseHandler === "undefined") {
+    if (responseHandlerOrSet instanceof BasicHandler) {
       // Did not pass StateSetupSet
       if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined") {
         throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
       }
 
-      this.responseHandler = responseFactoryOrSet as BasicHandler<any>;
+      this.responseHandler = responseHandlerOrSet as BasicHandler<any>;
       this.translateHelper = translateHelper;
       this.extraction = extraction;
       this.logger = logger;
@@ -63,10 +63,10 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
         throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
       }
 
-      this.responseHandler = (responseFactoryOrSet as State.SetupSet).responseHandler;
-      this.translateHelper = (responseFactoryOrSet as State.SetupSet).translateHelper;
-      this.extraction = (responseFactoryOrSet as State.SetupSet).extraction;
-      this.logger = (responseFactoryOrSet as State.SetupSet).logger;
+      this.responseHandler = (responseHandlerOrSet as State.SetupSet).responseHandler;
+      this.translateHelper = (responseHandlerOrSet as State.SetupSet).translateHelper;
+      this.extraction = (responseHandlerOrSet as State.SetupSet).extraction;
+      this.logger = (responseHandlerOrSet as State.SetupSet).logger;
     }
   }
 

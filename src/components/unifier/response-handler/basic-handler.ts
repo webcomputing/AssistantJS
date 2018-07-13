@@ -20,7 +20,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   /**
    * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
    */
-  public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "setEndSession", "endSessionWith", "send", "wasSent"];
+  public readonly whitelist: Array<keyof BasicHandler<B>> = ["prompt", "setEndSession", "endSessionWith", "send", "wasSent", "getSessionData"];
 
   /**
    * This set of Methods can be used from the specific Handler, all Methods which starts with 'set<HandlerName>' are added to the list of valid methods automatically

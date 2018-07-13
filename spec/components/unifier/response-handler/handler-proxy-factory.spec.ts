@@ -1,16 +1,15 @@
 import { Container } from "inversify";
-import { BasicHandable, BasicHandler } from "../../../../src/assistant-source";
+import { BasicHandable, BasicHandler, injectionNames } from "../../../../src/assistant-source";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
 import { MockHandlerA, MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { MockHandlerB, MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
+import { createRequestScope } from "../../../support/util/setup";
+import { ThisContext } from "../../../this-context";
 
 type MixedTypes = MockHandlerASpecificTypes & MockHandlerBSpecificTypes;
 type MixedHandler = BasicHandable<MixedTypes> & MockHandlerASpecificHandable & MockHandlerBSpecificHandable;
 
-interface CurrentThisContext {
-  specHelper;
-  assistantJs;
-  container: Container;
+interface CurrentThisContext extends ThisContext {
   handlerInstance: MixedHandler;
   proxiedHandler: MixedHandler;
   mockTable: MockHandlerASpecificTypes["table"];
@@ -20,10 +19,14 @@ interface CurrentThisContext {
 
 describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.handlerInstance = this.container.get(MockHandlerA) as any;
+    createRequestScope(this.specHelper);
+
+    // has to set type to any to spy on protected method sendResults()
+    this.handlerInstance = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+
     spyOn(this.handlerInstance, "setMockHandlerATable").and.callThrough();
 
-    const handlerProxyFactory = this.container.get(HandlerProxyFactory);
+    const handlerProxyFactory = this.container.inversifyInstance.get(HandlerProxyFactory);
 
     this.proxiedHandler = handlerProxyFactory.createHandlerProxy(this.handlerInstance);
 

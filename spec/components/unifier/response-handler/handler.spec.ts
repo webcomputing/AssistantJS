@@ -1,13 +1,12 @@
 import { Container } from "inversify";
+import { injectionNames } from "../../../../src/injection-names";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
-import { MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
+import { createRequestScope } from "../../../support/util/setup";
+import { ThisContext } from "../../../this-context";
 
 type CurrentHandler = MockHandlerA<MockHandlerASpecificTypes>;
 
-interface CurrentThisContext {
-  specHelper;
-  assistantJs;
-  container: Container;
+interface CurrentThisContext extends ThisContext {
   handlerInstance: CurrentHandler & { getBody: () => void };
 
   mockCard: MockHandlerASpecificTypes["card"];
@@ -28,8 +27,11 @@ interface CurrentThisContext {
 
 describe("BaseHandler", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    createRequestScope(this.specHelper);
+
     // has to set type to any to spy on protected method sendResults()
-    this.handlerInstance = this.container.get(MockHandlerA) as any;
+    this.handlerInstance = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+
     spyOn(this.handlerInstance, "getBody");
 
     this.mockTable = { header: ["A", "B"], elements: [["A1", "A2"], ["B1", "B2"]] };

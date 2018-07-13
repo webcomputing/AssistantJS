@@ -167,7 +167,7 @@ export class StateMachine implements Transitionable {
   private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ((...args: any[]) => boolean) | undefined {
     const metadata = Reflect.getMetadata(clearContextMetadataKey, currentStateClass);
     return metadata ? metadata.clearContext : undefined;
-  }                                                                                                                        
+  }
 
   /** Type Guards */
   private isStateWithBeforeIntent(state: State.Required | State.Required & State.BeforeIntent): state is State.Required & State.BeforeIntent {

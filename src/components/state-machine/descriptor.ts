@@ -114,7 +114,7 @@ export const descriptor: ComponentDescriptor = {
             });
         };
       });
-      
+
       // Provider for context states. Returns array of states or empty array if no state is present.
       bindService.bindGlobalService("current-context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
         return () => {
@@ -131,7 +131,7 @@ export const descriptor: ComponentDescriptor = {
             });
         };
       });
-      
+
       bindService.bindLocalServiceToSelf(ExecuteFiltersHook);
 
       // Returns before intent hook
