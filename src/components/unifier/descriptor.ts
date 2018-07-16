@@ -17,6 +17,7 @@ import {
   ResponseHandlerExtensions,
 } from "./public-interfaces";
 import { BasicHandler, HandlerProxyFactory } from "./response-handler";
+import { AfterStateResponseSender } from "./response-handler/after-state-handler";
 import { swapHash } from "./swap-hash";
 
 const configuration: Configuration.Defaults = {
@@ -88,6 +89,9 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           : undefined;
         return createUnifierLoggerMiddleware(currentExtraction);
       });
+
+      // send all unsent messages
+      bindService.bindExtension(lookupService.lookup("core:state-machine").getInterface("afterStateMachine")).to(AfterStateResponseSender);
     },
   },
 };

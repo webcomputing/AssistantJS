@@ -1,4 +1,4 @@
-import { inject, injectable } from "inversify";
+import { inject, injectable, targetName } from "inversify";
 import { Component } from "inversify-components";
 import { injectionNames } from "../../../injection-names";
 import { Logger } from "../../root/public-interfaces";
@@ -72,6 +72,15 @@ export class HandlerProxyFactory {
           // "this" points to the proxy, is necessary to work with method-chaining
           return propValue.apply(this, arguments);
         };
+      },
+
+      set(target, propertyKey, value, receiver): boolean {
+        if (typeof target[propertyKey] !== "function") {
+          target[propertyKey] = value;
+          return true;
+        }
+
+        return false;
       },
     });
 

@@ -49,6 +49,7 @@ export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHand
   }
 
   protected getBody(results: Partial<MockHandlerASpecificTypes>): any {
-    // do nothing here
+    // return only textMessage here for a specific spec
+    return (results.voiceMessage && results.voiceMessage.text) || {};
   }
 }

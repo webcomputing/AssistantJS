@@ -34,6 +34,8 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     "getRepromptArrayRemapper",
     "createRepromptAnswerArray",
     "checkSessionFeature",
+    "responseCallback",
+    "killSession",
   ];
 
   /**
@@ -160,12 +162,10 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     // wait for all Prmises at once, after this
     await Promise.all(concurrentProcesses);
 
-    // give results to the specific handler
-    this.getBody(this.results);
-
     // everything was sent successfully
     this.isSent = true;
 
+    // give results to the specific handler
     this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders());
     if (this.results.shouldSessionEnd) {
       this.killSession();

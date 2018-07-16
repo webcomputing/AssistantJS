@@ -11,7 +11,6 @@ import { Logger, RequestContext, ResponseCallback } from "./public-interfaces";
 export class ServerApplication implements MainApplication {
   private port: number;
   private app: express.Express;
-  private listeningCallback = (app: ServerApplication) => {};
   private expressRunningInstance;
   private logger: undefined | Logger;
 
@@ -104,4 +103,6 @@ export class ServerApplication implements MainApplication {
       this.logger.info(typeof requestId === "undefined" ? {} : { requestId }, message);
     }
   }
+
+  private listeningCallback = (app: ServerApplication) => {};
 }

@@ -36,7 +36,7 @@ describe("with child containers enabled", function() {
       done();
     });
 
-    fit("handles all of them correctly", async function(done) {
+    it("handles all of them correctly", async function(done) {
       const requests: Array<Promise<any>> = [];
       const extractions: any[] = [];
 
@@ -44,14 +44,7 @@ describe("with child containers enabled", function() {
         extractions[i] = { ...extractionData, message: "My message " + i };
         requests.push(
           new Promise<any>((resolve, reject) => {
-            request
-              .post(MockExtractor.fittingPath(), extractions[i])
-              .then(value => {
-                resolve(value);
-              })
-              .catch(e => {
-                console.log("Error", e);
-              });
+            request.post(MockExtractor.fittingPath(), extractions[i]).then(value => resolve(value));
           })
         );
       }

@@ -15,6 +15,9 @@ export function featureIsAvailable<FeatureInterface>(
 }
 
 export function handlerFeatureIsAvailable(handler: BasicHandable<any>, featureOrFunctionName: string[]) {
+  if (typeof handler.whitelist === "function") {
+    console.log("dsadsa");
+  }
   const objectKeys = [...handler.whitelist, ...handler.specificWhitelist];
   return featureOrFunctionName.filter(f => objectKeys.indexOf(f) === -1).length === 0;
 }
