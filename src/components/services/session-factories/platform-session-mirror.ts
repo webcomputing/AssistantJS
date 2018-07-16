@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
-import { featureIsAvailable } from "../../unifier/feature-checker";
+import { featureIsAvailable, handlerFeatureIsAvailable } from "../../unifier/feature-checker";
 import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../unifier/public-interfaces";
 import { BasicHandler } from "../../unifier/response-handler";
 
@@ -23,10 +23,16 @@ export class PlatformSessionMirror implements BeforeResponseHandler<any, any> {
       featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData) &&
       typeof this.extraction.sessionData === "string"
     ) {
-      const currentSessionData = await responseHandler.getSessionData();
+      if (handlerFeatureIsAvailable(responseHandler, ["getSessionData", "setSessionData"])) {
+        const currentSessionData = await responseHandler.getSessionData();
 
-      if (!currentSessionData) {
-        responseHandler.setSessionData(this.extraction.sessionData);
+        if (!currentSessionData) {
+          responseHandler.setSessionData(this.extraction.sessionData);
+        }
+      } else {
+        throw new Error(
+          "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
+        );
       }
     }
   }

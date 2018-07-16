@@ -38,6 +38,9 @@ describe("PlatformSessionMirror", function() {
     describe("with no compatible responseHandler", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.handler.setSessionData(undefined);
+
+        // remove session capability
+        (this.handler as any).specificWhitelist = this.handler.specificWhitelist.filter(value => value !== "setSessionData");
       });
 
       describe("with no session data stored in extraction", function() {
@@ -58,7 +61,12 @@ describe("PlatformSessionMirror", function() {
         });
 
         it("throws exception", async function(this: CurrentThisContext) {
-          expect(() => this.mirror.execute(this.handler)).toThrowError();
+          try {
+            await this.mirror.execute(this.handler);
+            fail("Expected to throw Error");
+          } catch (e) {
+            expect(true).toBe(true);
+          }
         });
       });
 
@@ -77,12 +85,12 @@ describe("PlatformSessionMirror", function() {
 
     describe("with compatible responseHandler", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.handler.setSessionData(null);
+        (this.handler as any).promises.sessionData = undefined;
       });
 
       describe("with no extractionData", function() {
         it("does nothing", async function(this: CurrentThisContext) {
-          this.buildMirror().execute(this.handler);
+          await this.buildMirror().execute(this.handler);
           expect(await this.handler.getSessionData()).toBeUndefined();
         });
       });
@@ -93,7 +101,7 @@ describe("PlatformSessionMirror", function() {
         });
 
         it("mirrors extraction's sessionData to handler's sessionData", async function(this: CurrentThisContext) {
-          this.buildMirror().execute(this.handler);
+          await this.buildMirror().execute(this.handler);
           expect(await this.handler.getSessionData()).toEqual("a");
         });
 

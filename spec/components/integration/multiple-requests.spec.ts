@@ -20,7 +20,7 @@ describe("with child containers enabled", function() {
   });
 
   describe("when multiple requests fired", function() {
-    const FIRE_AMOUNT = 50;
+    const FIRE_AMOUNT = 1;
 
     const extractionData = { intent: "answer", message: "My message", platform: extraction.platform };
     let request: RequestProxy;
@@ -36,22 +36,29 @@ describe("with child containers enabled", function() {
       done();
     });
 
-    it("handles all of them correctly", async function(done) {
+    fit("handles all of them correctly", async function(done) {
       const requests: Array<Promise<any>> = [];
-      let extractions: any[];
+      const extractions: any[] = [];
 
       for (let i = 0; i < FIRE_AMOUNT; i++) {
-        extraction[i] = { ...extractionData, message: "My message " + i };
+        extractions[i] = { ...extractionData, message: "My message " + i };
         requests.push(
           new Promise<any>((resolve, reject) => {
-            request.post(MockExtractor.fittingPath(), extraction[i]).then(value => resolve(value));
+            request
+              .post(MockExtractor.fittingPath(), extractions[i])
+              .then(value => {
+                resolve(value);
+              })
+              .catch(e => {
+                console.log("Error", e);
+              });
           })
         );
       }
 
       const fulfilledPromises = await Promise.all(requests);
       for (const i in fulfilledPromises) {
-        expect(fulfilledPromises[i].body).toEqual(extraction[i].message);
+        expect(fulfilledPromises[i].body).toEqual(extractions[i].message);
       }
 
       done();

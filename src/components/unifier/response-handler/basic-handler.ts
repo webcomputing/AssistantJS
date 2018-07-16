@@ -26,8 +26,6 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     "endSessionWith",
     "send",
     "wasSent",
-    "getSessionData",
-    "setSessionData",
     "setEndSession",
     "getBody",
     "getHeaders",
@@ -35,6 +33,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     "createPromptAnswer",
     "getRepromptArrayRemapper",
     "createRepromptAnswerArray",
+    "checkSessionFeature",
   ];
 
   /**
@@ -198,11 +197,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    * or use another SessionStorage like Redis. And it has some more features.
    */
   public setSessionData(sessionData: B["sessionData"] | Promise<B["sessionData"]>): this {
-    if (!(this.specificWhitelist.indexOf("setSessionData") > 0)) {
-      throw new Error(
-        "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
-      );
-    }
+    this.checkSessionFeature();
 
     this.promises.sessionData = { resolver: sessionData };
 
@@ -334,6 +329,17 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    */
   private createRepromptAnswerArray(reprompts: string[]) {
     return reprompts.map(this.createPromptAnswer);
+  }
+
+  /**
+   * Checks if session is available, otherwise it throws an error
+   */
+  private checkSessionFeature() {
+    if (!(this.specificWhitelist.indexOf("setSessionData") > 0 && this.specificWhitelist.indexOf("getSessionData"))) {
+      throw new Error(
+        "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
+      );
+    }
   }
 
   /**
