@@ -20,7 +20,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   /**
    * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
    */
-  public readonly whitelist: Array<keyof BasicHandler<B>> = [
+  public readonly whitelist: string[] = [
     "prompt",
     "setEndSession",
     "endSessionWith",
@@ -29,6 +29,12 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     "getSessionData",
     "setSessionData",
     "setEndSession",
+    "getBody",
+    "getHeaders",
+    "failIfInactive",
+    "createPromptAnswer",
+    "getRepromptArrayRemapper",
+    "createRepromptAnswerArray",
   ];
 
   /**
@@ -143,7 +149,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
 
         // remap the intermediate Results, when an thenMap function is present
         if (resolver.thenMap) {
-          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue)); // todo debugging here
+          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue)); // todo debugin here
           this.results[currentKey] = finalResult;
         } else {
           // here are only final results

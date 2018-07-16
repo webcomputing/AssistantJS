@@ -35,11 +35,6 @@ describe("ExecuteFiltersHook", function() {
 
     this.resultHolder = this.responseHandler as any;
 
-    // this.container.inversifyInstance.unbind(injectionNames.current.responseHandler);
-    // this.container.inversifyInstance
-    //   .bind(injectionNames.current.responseHandler)
-    //   .toDynamicValue(() => this.responseHandler)
-    //   .inSingletonScope();
     await this.stateMachine.transitionTo("FilterAState");
   });
 
@@ -48,7 +43,7 @@ describe("ExecuteFiltersHook", function() {
       await this.stateMachine.transitionTo("FilterAState");
     });
 
-    fit("uses no filter", async function(this: CurrentThisContext) {
+    it("uses no filter", async function(this: CurrentThisContext) {
       await this.stateMachine.handleIntent("filterTestBIntent");
       expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
     });

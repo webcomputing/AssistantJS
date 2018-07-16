@@ -1,8 +1,7 @@
-import * as crypto from "crypto";
-import { BasicHandler } from "../../../../src/assistant-source";
+import { BasicHandler, injectionNames } from "../../../../src/assistant-source";
 import { CryptedPlatformSession } from "../../../../src/components/services/session-factories/crypted-platform-session";
-import { BasicAnswerTypes, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
-import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
+import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
@@ -17,7 +16,8 @@ interface CurrentThisContext extends ThisContext {
 
 describe("CryptedPlatformSession", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.handler = this.container.inversifyInstance.get(MockHandlerA);
+    createRequestScope(this.specHelper); // bind handler without proxy to make spy possible
+
     this.extractionData = { sessionData: null };
     this.createSession = () => new CryptedPlatformSession(this.extractionData, this.handler);
 

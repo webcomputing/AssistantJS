@@ -1,5 +1,6 @@
 import { Container } from "inversify";
 import { injectionNames } from "../../../../src/injection-names";
+import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
@@ -29,8 +30,7 @@ describe("BaseHandler", function() {
   beforeEach(async function(this: CurrentThisContext) {
     createRequestScope(this.specHelper);
 
-    // has to set type to any to spy on protected method sendResults()
-    this.handlerInstance = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+    this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
 
     spyOn(this.handlerInstance, "getBody");
 

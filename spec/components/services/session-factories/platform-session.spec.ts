@@ -1,6 +1,7 @@
-import { BasicHandler, OptionalExtractions } from "../../../../src/assistant-source";
+import { BasicHandler, injectionNames, OptionalExtractions } from "../../../../src/assistant-source";
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
 import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
@@ -18,7 +19,9 @@ interface CurrentThisContext extends ThisContext {
 
 describe("PlatformSession", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.handler = this.container.inversifyInstance.get(MockHandlerA);
+    createRequestScope(this.specHelper);
+
+    this.handler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
     this.extractionData = { sessionData: null };
 
     this.createSession = () => {

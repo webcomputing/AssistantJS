@@ -1,6 +1,7 @@
 import { Container } from "inversify";
 import { BasicHandable, BasicHandler, injectionNames } from "../../../../src/assistant-source";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
+import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { MockHandlerB, MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 import { createRequestScope } from "../../../support/util/setup";
@@ -21,8 +22,7 @@ describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
     createRequestScope(this.specHelper);
 
-    // has to set type to any to spy on protected method sendResults()
-    this.handlerInstance = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+    this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
 
     spyOn(this.handlerInstance, "setMockHandlerATable").and.callThrough();
 

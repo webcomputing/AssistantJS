@@ -1,14 +1,18 @@
+import { BasicHandler } from "../../../src/assistant-source";
 import { BaseState } from "../../../src/components/state-machine/base-state";
 import { State } from "../../../src/components/state-machine/public-interfaces";
 import { Voiceable } from "../../../src/components/unifier/public-interfaces";
 import { injectionNames } from "../../../src/injection-names";
 import { SpecSetup } from "../../../src/spec-setup";
+import { PLATFORM } from "../../support/mocks/unifier/extraction";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
 
-interface CurrentThisContext {
+interface CurrentThisContext extends ThisContext {
   state: BaseState;
   specHelper: SpecSetup;
+  handler: BasicHandler<any>;
 }
 
 describe("BaseState", function() {
@@ -16,32 +20,33 @@ describe("BaseState", function() {
     configureI18nLocale((this as any).container, false);
     createRequestScope(this.specHelper);
 
+    this.handler = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
+    // Singleton voice response
+    spyOn(this.handler, "prompt").and.callThrough();
+    spyOn(this.handler, "endSessionWith").and.callThrough();
+    this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
+    this.container.inversifyInstance.bind(PLATFORM + ":current-response-handler").toDynamicValue(context => this.handler);
+
     this.state = this.specHelper.setup.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<BaseState>("PlainState");
   });
 
   describe("responseHandler synonyms", function() {
-    beforeEach(function(this: CurrentThisContext) {
-      // Singleton voice response
-      spyOn(this.state.responseHandler, "prompt").and.callThrough();
-    });
-
     describe("prompt", function() {
       it("calls responseFactory.prompt", function(this: CurrentThisContext) {
         const message = "Voice message";
         const reprompts = ["First reprompt", "Second reprompt", "Third reprompt", "Fourth reprompt"];
 
         this.state.prompt(message, ...reprompts);
-        expect(this.state.responseHandler.prompt).toHaveBeenCalledWith(message, ...reprompts);
+        expect(this.handler.prompt).toHaveBeenCalledWith(message, ...reprompts);
       });
     });
 
     describe("endSessionWith", function() {
       it("calls responseFactory.endSessionWith", function(this: CurrentThisContext) {
         const message = "Voice message";
-        spyOn(this.state.responseHandler, "endSessionWith");
 
         this.state.endSessionWith(message);
-        expect(this.state.responseHandler.endSessionWith).toHaveBeenCalledWith(message);
+        expect(this.handler.endSessionWith).toHaveBeenCalledWith(message);
       });
     });
   });
