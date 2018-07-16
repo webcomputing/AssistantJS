@@ -16,7 +16,7 @@ export class PlatformSession implements Session {
   public async set(field: string, value: string): Promise<void> {
     const existing = await this.getLatestSessionData();
     existing[field] = value;
-    return this.storeSessionData(existing);
+    await this.storeSessionData(existing);
   }
 
   public async delete(field: string): Promise<void> {

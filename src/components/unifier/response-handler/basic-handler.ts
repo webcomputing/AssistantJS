@@ -210,7 +210,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   }
 
   /**
-   * gets the current SessionData
+   * gets the current SessionData as Promise or undefined if no session is set
    */
   public getSessionData(): Promise<B["sessionData"]> | undefined {
     return this.promises.sessionData ? Promise.resolve(this.promises.sessionData.resolver) : undefined;

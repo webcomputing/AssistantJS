@@ -18,6 +18,8 @@ describe("CryptedPlatformSession", function() {
   beforeEach(async function(this: CurrentThisContext) {
     createRequestScope(this.specHelper); // bind handler without proxy to make spy possible
 
+    this.handler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+
     this.extractionData = { sessionData: null };
     this.createSession = () => new CryptedPlatformSession(this.extractionData, this.handler);
 

@@ -1,5 +1,4 @@
 import { MinimalRequestExtraction } from "./public-interfaces";
-import { BasicHandler } from "./response-handler";
 
 /**
  * Checks whether a given feature exists in an extraction result.
@@ -11,7 +10,7 @@ export function featureIsAvailable<FeatureInterface>(
   feature: string[]
 ): container is FeatureInterface & MinimalRequestExtraction;
 
-export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction | BasicHandler<any>, feature: string[]) {
+export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction, feature: string[]) {
   const objectKeys = Object.keys(container);
   return feature.filter(f => objectKeys.indexOf(f) === -1).length === 0;
 }
