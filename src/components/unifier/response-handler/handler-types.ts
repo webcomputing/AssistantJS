@@ -71,6 +71,24 @@ export interface ResponseHandlerExtensions<AnswerType extends BasicAnswerTypes, 
 }
 
 /**
+ * This interface defines which methodes are necessary for ResponseHandler to handle Sessions
+ */
+export interface SessionHandable<CurrentType extends BasicAnswerTypes> {
+  /**
+   * Adds Data to session
+   *
+   * Most of the time it is better to use the @see {@link Session}-Implementation, as the Session-Implemention will set it automatically to the handler
+   * or use another SessionStorage like Redis. And it has some more features.
+   */
+  setSessionData(sessionData: CurrentType["sessionData"] | Promise<CurrentType["sessionData"]>): this;
+
+  /**
+   * gets the current SessionData as Promise or undefined if no session is set
+   */
+  getSessionData(): Promise<CurrentType["sessionData"]> | undefined;
+}
+
+/**
  * This interface defines which methods every handler should have.
  * Types are referenced to the merged handler-specific types, like 'AlexaSpecificTypes & GoogleSpecificType'
  *
@@ -143,3 +161,8 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    */
   wasSent(): boolean;
 }
+
+/**
+ * Combination of BasicHandable and SessionHandable
+ */
+export type BasicSessionHandable<B extends BasicAnswerTypes> = BasicHandable<B> & SessionHandable<B>;

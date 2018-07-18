@@ -3,7 +3,6 @@ import { Component } from "inversify-components";
 import { injectionNames } from "../../../injection-names";
 import { Logger } from "../../root/public-interfaces";
 import { Configuration } from "../private-interfaces";
-import { BasicHandler } from "./basic-handler";
 import { BasicAnswerTypes, BasicHandable } from "./handler-types";
 
 @injectable()

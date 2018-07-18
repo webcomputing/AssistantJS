@@ -1,5 +1,5 @@
 import { OptionalExtractions } from "../../../assistant-source";
-import { BasicHandler } from "../../unifier/response-handler";
+import { BasicSessionHandable } from "../../unifier/response-handler";
 import { Session } from "../public-interfaces";
 
 /**
@@ -7,7 +7,7 @@ import { Session } from "../public-interfaces";
  */
 
 export class PlatformSession implements Session {
-  constructor(private extraction: OptionalExtractions.SessionData, private handler: BasicHandler<any>) {}
+  constructor(private extraction: OptionalExtractions.SessionData, private handler: BasicSessionHandable<any>) {}
 
   public async get(field: string): Promise<string | undefined> {
     return (await this.getLatestSessionData())[field];

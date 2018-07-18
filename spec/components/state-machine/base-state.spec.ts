@@ -1,7 +1,6 @@
-import { BasicHandler } from "../../../src/assistant-source";
 import { BaseState } from "../../../src/components/state-machine/base-state";
 import { State } from "../../../src/components/state-machine/public-interfaces";
-import { Voiceable } from "../../../src/components/unifier/public-interfaces";
+import { BasicHandable } from "../../../src/components/unifier/public-interfaces";
 import { injectionNames } from "../../../src/injection-names";
 import { SpecSetup } from "../../../src/spec-setup";
 import { PLATFORM } from "../../support/mocks/unifier/extraction";
@@ -12,7 +11,7 @@ import { ThisContext } from "../../this-context";
 interface CurrentThisContext extends ThisContext {
   state: BaseState;
   specHelper: SpecSetup;
-  handler: BasicHandler<any>;
+  handler: BasicHandable<any>;
 }
 
 describe("BaseState", function() {

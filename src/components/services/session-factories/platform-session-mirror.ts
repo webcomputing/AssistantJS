@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
 import { featureIsAvailable, handlerFeatureIsAvailable } from "../../unifier/feature-checker";
 import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../unifier/public-interfaces";
-import { BasicHandler } from "../../unifier/response-handler";
+import { BasicSessionHandable } from "../../unifier/response-handler";
 
 /**
  * Bind's itself to BeforeResponseHandler componentInterface and mirrors the sessionData from
@@ -18,7 +18,7 @@ export class PlatformSessionMirror implements BeforeResponseHandler<any, any> {
    * Mirrors the sessionData from extraction to handler, if nothing was changed.
    * This way, the session remains intact, even if we don't change any data.
    */
-  public async execute(responseHandler: BasicHandler<any>) {
+  public async execute(responseHandler: BasicSessionHandable<any>) {
     if (
       featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData) &&
       typeof this.extraction.sessionData === "string"

@@ -6,9 +6,6 @@
       "request": "launch",
       "name": "Specs",
       "program": "${workspaceRoot}/node_modules/jasmine-ts/lib/index.js",
-      "env": {
-        "DEBUG": "*"
-      },
       "args": [
         "**/*.spec.ts"
       ],

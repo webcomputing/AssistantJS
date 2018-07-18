@@ -1,8 +1,7 @@
 import { ExecutableExtension } from "inversify-components";
 import { TranslateHelper } from "../i18n/translate-helper";
 import { Logger } from "../root/public-interfaces";
-import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
-import { BasicHandler } from "../unifier/response-handler/basic-handler";
+import { BasicHandable, intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 
 /** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
@@ -77,7 +76,7 @@ export namespace State {
 
   /** Set containing all objects needed to setup a BaseState. */
   export interface SetupSet {
-    responseHandler: BasicHandler<any>;
+    responseHandler: BasicHandable<any>;
     translateHelper: TranslateHelper;
     extraction: MinimalRequestExtraction;
     logger: Logger;

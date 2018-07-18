@@ -20,7 +20,7 @@ describe("with child containers enabled", function() {
   });
 
   describe("when multiple requests fired", function() {
-    const FIRE_AMOUNT = 1;
+    const FIRE_AMOUNT = 50;
 
     const extractionData = { intent: "answer", message: "My message", platform: extraction.platform };
     let request: RequestProxy;

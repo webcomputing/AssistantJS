@@ -3,7 +3,7 @@ import { SpecSetup } from "../../spec-setup";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { Configuration } from "./private-interfaces";
-import { BasicAnswerTypes, BasicHandler } from "./response-handler";
+import { BasicAnswerTypes, BasicHandable } from "./response-handler";
 
 /** Intent type - intents are either strings or type of GenericIntent */
 export declare type intent = string | GenericIntent;
@@ -319,7 +319,7 @@ export interface PlatformSpecHelper {
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandler<AnswerTypes>>(
+  pretendIntentCalled<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerTypes>>(
     intent: intent,
     autoStart?: boolean,
     additionalExtractions?: any,

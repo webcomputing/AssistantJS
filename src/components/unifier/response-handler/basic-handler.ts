@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import * as util from "util";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
-import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./handler-types";
+import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, SessionHandable } from "./handler-types";
 
 /**
  * This Class represents the basic features a ResponseHandler should have. It implements all Basic functions,
@@ -16,7 +16,7 @@ import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./ha
  * For the docs of the Methods see also the implemented interfaces
  */
 @injectable()
-export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
+export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B>, SessionHandable<B> {
   /**
    * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
    */
@@ -108,7 +108,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   constructor(
     @inject(injectionNames.current.requestContext) extraction: RequestContext,
     @inject(injectionNames.current.killSessionService) killSession: () => Promise<void>,
-    @inject(injectionNames.current.responseHandlerExtensions) private responseHandlerExtensions: ResponseHandlerExtensions<B, BasicHandler<B>>
+    @inject(injectionNames.current.responseHandlerExtensions) private responseHandlerExtensions: ResponseHandlerExtensions<B, BasicHandable<B>>
   ) {
     this.responseCallback = extraction.responseCallback;
     this.killSession = killSession;

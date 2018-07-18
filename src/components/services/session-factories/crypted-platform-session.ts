@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { OptionalExtractions } from "../../unifier/public-interfaces";
-import { BasicHandler } from "../../unifier/response-handler";
+import { BasicSessionHandable } from "../../unifier/response-handler";
 import { PlatformSession } from "./platform-session";
 
 /**
@@ -20,7 +20,7 @@ export class CryptedPlatformSession extends PlatformSession {
    * @param handler See PlatformSession
    * @param configuredEncryptionKey Encryption key to use. If left out, a auto-generated one will be taken, which will live as long as the app runs
    */
-  constructor(extraction: OptionalExtractions.SessionData, handler: BasicHandler<any>, configuredEncryptionKey?: string) {
+  constructor(extraction: OptionalExtractions.SessionData, handler: BasicSessionHandable<any>, configuredEncryptionKey?: string) {
     super(extraction, handler);
 
     if (typeof configuredEncryptionKey === "string") {

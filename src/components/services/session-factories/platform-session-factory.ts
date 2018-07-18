@@ -1,10 +1,9 @@
 import { inject, injectable } from "inversify";
-import { Constructor } from "../../../assistant-source";
 import { injectionNames } from "../../../injection-names";
 import { featureIsAvailable, handlerFeatureIsAvailable } from "../../unifier/feature-checker";
 import { BasicHandable, MinimalRequestExtraction, OptionalExtractions } from "../../unifier/public-interfaces";
-import { BasicHandler } from "../../unifier/response-handler";
-import { CurrentSessionFactory, Session, SessionFactory } from "../public-interfaces";
+import { BasicSessionHandable } from "../../unifier/response-handler";
+import { Session, SessionFactory } from "../public-interfaces";
 import { PlatformSession } from "./platform-session";
 
 /** Gets current platform-based session by current request handler & extraction. Needs SessionData feature support by request handler. */
@@ -13,7 +12,7 @@ import { PlatformSession } from "./platform-session";
 export class PlatformSessionFactory implements SessionFactory {
   constructor(
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
-    @inject(injectionNames.current.responseHandler) private handler: BasicHandler<any>
+    @inject(injectionNames.current.responseHandler) private handler: BasicSessionHandable<any>
   ) {}
 
   /** Gets current platform-based session by current request handler & extraction. Needs SessionData feature support by request handler. */
@@ -36,7 +35,7 @@ export class PlatformSessionFactory implements SessionFactory {
   }
 
   /** Creates the object */
-  protected createSession(extraction: OptionalExtractions.SessionData, handler: BasicHandler<any>, configurationAttributes?: any): Session {
+  protected createSession(extraction: OptionalExtractions.SessionData, handler: BasicSessionHandable<any>, configurationAttributes?: any): Session {
     return new PlatformSession(extraction, handler);
   }
 }

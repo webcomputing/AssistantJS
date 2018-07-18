@@ -1,9 +1,9 @@
 import { injectable, unmanaged } from "inversify";
 import { TranslateHelper } from "../i18n/public-interfaces";
-import { Logger, RequestContext } from "../root/public-interfaces";
+import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
 import { MinimalRequestExtraction, OptionalExtractions, Voiceable } from "../unifier/public-interfaces";
-import { BasicHandler } from "../unifier/response-handler";
+import { BasicHandable, BasicHandler } from "../unifier/response-handler";
 import { State, Transitionable } from "./public-interfaces";
 
 /**
@@ -15,7 +15,7 @@ import { State, Transitionable } from "./public-interfaces";
 @injectable()
 export abstract class BaseState implements State.Required, Voiceable, TranslateHelper {
   /** Current response factory */
-  public responseHandler: BasicHandler<any>;
+  public responseHandler: BasicHandable<any>;
 
   /** Current translate helper */
   public translateHelper: TranslateHelper;
@@ -33,7 +33,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {MinimalRequestExtraction} extraction Extraction of current request
    * @param {Logger} logger Logger, prepared to log information about the current request
    */
-  constructor(responseHandler: BasicHandler<any>, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
+  constructor(responseHandler: BasicHandable<any>, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
 
   /**
    * As an alternative to passing all objects on it's own, you can also pass a set of them
@@ -42,7 +42,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   constructor(stateSetupSet: State.SetupSet);
 
   constructor(
-    @unmanaged() responseHandlerOrSet: BasicHandler<any> | State.SetupSet,
+    @unmanaged() responseHandlerOrSet: BasicHandable<any> | State.SetupSet,
     @unmanaged() translateHelper?: TranslateHelper,
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
@@ -53,7 +53,7 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
         throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
       }
 
-      this.responseHandler = responseHandlerOrSet as BasicHandler<any>;
+      this.responseHandler = responseHandlerOrSet;
       this.translateHelper = translateHelper;
       this.extraction = extraction;
       this.logger = logger;

@@ -8,7 +8,7 @@ import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 
 import { Hooks } from "../joined-interfaces";
-import { BasicHandler } from "../unifier/response-handler";
+import { BasicHandable } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
 import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
@@ -77,7 +77,7 @@ export const descriptor: ComponentDescriptor = {
       // Returns set of dependencies fitting for BaseState
       bindService.bindGlobalService<State.SetupSet>("current-state-setup-set").toDynamicValue(context => {
         return {
-          responseHandler: context.container.get<BasicHandler<any>>(injectionNames.current.responseHandler),
+          responseHandler: context.container.get<BasicHandable<any>>(injectionNames.current.responseHandler),
           translateHelper: context.container.get<TranslateHelper>(injectionNames.current.translateHelper),
           extraction: context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction),
           logger: context.container.get<Logger>(injectionNames.current.logger),

@@ -1,14 +1,13 @@
 import { inject, injectable, optional } from "inversify";
 import { Logger } from "../../../../src/components/root/public-interfaces";
-
-import { BasicHandler } from "../../../../src/assistant-source";
+import { BasicHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
 import { MainState } from "./main";
 
 @injectable()
 export class SubState extends MainState {
   constructor(
-    @inject(injectionNames.current.responseHandler) responseHandler: BasicHandler<any>,
+    @inject(injectionNames.current.responseHandler) responseHandler: BasicHandable<any>,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") tHelper: any,
     @inject("core:root:current-logger") logger: Logger,

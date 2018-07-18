@@ -1,11 +1,11 @@
 import { Container } from "inversify-components";
-import { BasicAnswerTypes, BasicHandler, injectionNames, SpecSetup, TranslateHelper } from "../../../src/assistant-source";
+import { BasicAnswerTypes, BasicHandable, injectionNames, SpecSetup, TranslateHelper } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {
-  responseHandler: BasicHandler<any>;
+  responseHandler: BasicHandable<any>;
   resultHolder: HandlerHasResults;
   specHelper: SpecSetup;
   stateMachine: StateMachine;

@@ -1,12 +1,11 @@
 import { ContainerImpl } from "inversify-components";
 
 import { RequestContext } from "../../../src/components/root/public-interfaces";
-import { MinimalRequestExtraction } from "../../../src/components/unifier/public-interfaces";
+import { BasicHandable, MinimalRequestExtraction } from "../../../src/components/unifier/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
 
 import { SpecSetup } from "../../../src/spec-setup";
 
-import { BasicHandler } from "../../../src/assistant-source";
 import { TestFilterA } from "../mocks/filters/test-filter-a";
 import { TestFilterB } from "../mocks/filters/test-filter-b";
 import { TestFilterC } from "../mocks/filters/test-filter-c";
@@ -45,8 +44,8 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
       UnhandledErrorWithFallbackState,
       PlainState,
       IntentCallbackState,
-      FilterAState, 
-      FilterBState, 
+      FilterAState,
+      FilterBState,
       FilterCState,
       ContextAState,
       ContextBState,
@@ -72,7 +71,7 @@ export function createRequestScope(
   specSetup: SpecSetup,
   minimalExtraction: MinimalRequestExtraction | null = JSON.parse(JSON.stringify(extraction)),
   requestContext: RequestContext = context,
-  responseHandler: { new (...args: any[]): BasicHandler<any> } = ResponseHandler
+  responseHandler: { new (...args: any[]): BasicHandable<any> } = ResponseHandler
 ) {
   specSetup.createRequestScope(minimalExtraction, requestContext, responseHandler);
 }

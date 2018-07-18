@@ -1,14 +1,14 @@
-import { BasicHandler } from "../../../../src/assistant-source";
 import { SessionConfiguration } from "../../../../src/components/services/private-interfaces";
 import { CryptedPlatformSessionFactory } from "../../../../src/components/services/session-factories/crypted-platform-session-factory";
 import { MinimalRequestExtraction, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
+import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
-  handler: BasicHandler<any>;
+  handler: BasicSessionHandable<any>;
   sessionFactory: CryptedPlatformSessionFactory;
 }
 
