@@ -28,8 +28,11 @@ export function expressAppWithTimeout(length = "5s") {
   const app = express();
   app.use(timeout(length));
   app.use(function(req, res, next) {
-    next();
-    if (!(req as any).timedout) res.send("");
+    if (!(req as any).timedout) {
+      next();
+    } else {
+      next(new Error("request timed out"));
+    }
   });
   return app;
 }
