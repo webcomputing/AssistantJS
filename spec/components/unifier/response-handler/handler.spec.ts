@@ -1,4 +1,5 @@
 import { Container } from "inversify";
+import { AfterStateMachine } from "../../../../src/assistant-source";
 import { injectionNames } from "../../../../src/injection-names";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
@@ -31,8 +32,11 @@ describe("BaseHandler", function() {
     createRequestScope(this.specHelper);
 
     this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
+    this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
 
     spyOn(this.handlerInstance, "getBody");
+
+    this.container.inversifyInstance.bind(PLATFORM + ":current-response-handler").toConstantValue(this.handlerInstance);
 
     this.mockTable = { header: ["A", "B"], elements: [["A1", "A2"], ["B1", "B2"]] };
     this.mockCard = { description: "desc", title: "title" };
@@ -333,13 +337,12 @@ describe("BaseHandler", function() {
 
   describe("without sending activly", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.expectedResult = {};
-
       this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).setMockHandlerATable(this.mockTable);
+      await this.specHelper.runMachine();
     });
 
-    it("calls send in AfterStateMachine", async function(this: CurrentThisContext) {
-      pending("not implemented");
+    it("calls getBody() in AfterStateMachine", async function(this: CurrentThisContext) {
+      expect(this.handlerInstance.getBody).toHaveBeenCalledWith({ suggestionChips: this.mockSuggestionChips, table: this.mockTable });
     });
   });
 });
