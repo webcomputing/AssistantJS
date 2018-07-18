@@ -59,7 +59,7 @@ export interface BeforeResponseHandler<AnswerType extends BasicAnswerTypes, Cust
  * The after ResponseHandler does only get the results, as the answers cannot be changed anymore
  */
 export interface AfterResponseHandler<AnswerType extends BasicAnswerTypes> {
-  execute(results: { [key in keyof AnswerType]?: AnswerType[key] });
+  execute(results: Partial<AnswerType>);
 }
 
 /**

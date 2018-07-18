@@ -1,11 +1,11 @@
-import { BasicHandler, injectionNames, OptionalExtractions } from "../../../../src/assistant-source";
+import { injectionNames, OptionalExtractions } from "../../../../src/assistant-source";
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
-import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
-  handler: BasicHandler<any>;
+  handler: BasicSessionHandable<any>;
   extractionData: OptionalExtractions.SessionData;
   session: PlatformSession;
   params: any;

@@ -1,14 +1,14 @@
-import { BasicHandler } from "../../../../src/assistant-source";
 import { PlatformSessionMirror } from "../../../../src/components/services/session-factories/platform-session-mirror";
 import { componentInterfaces } from "../../../../src/components/unifier/private-interfaces";
 import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
+import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
-  handler: BasicHandler<any>;
+  handler: BasicSessionHandable<any>;
   mirror: PlatformSessionMirror;
   buildMirror(): PlatformSessionMirror;
 }

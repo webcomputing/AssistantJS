@@ -10,9 +10,9 @@ import { BasicHandable } from "../public-interfaces";
 export class AfterStateResponseSender implements AfterStateMachine {
   constructor(@inject(injectionNames.current.responseHandler) private handler: BasicHandable<any>) {}
 
-  public execute(): void | Promise<void> {
+  public async execute(): Promise<void> {
     if (!this.handler.wasSent()) {
-      this.handler.send();
+      await this.handler.send();
     }
   }
 }
