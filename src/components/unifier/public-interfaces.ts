@@ -1,5 +1,5 @@
 import { Component, ExecutableExtension } from "inversify-components";
-import { SpecSetup } from "../../spec-setup";
+import { SpecHelper } from "../../spec-helper";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { Configuration } from "./private-interfaces";
@@ -310,7 +310,7 @@ export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHa
 /** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper {
   /** Link to assistantJS SpecSetup */
-  specSetup: SpecSetup;
+  specSetup: SpecHelper;
 
   /**
    * Pretends call of given intent (and entities, ...)

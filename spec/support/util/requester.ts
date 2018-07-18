@@ -5,7 +5,7 @@ import * as express from "express";
 import { Container } from "inversify-components";
 
 import { AssistantJSSetup } from "../../../src/setup";
-import { SpecSetup } from "../../../src/spec-setup";
+import { SpecHelper } from "../../../src/spec-helper";
 
 /** Proxy for request-promise to use in combination with running server */
 export class RequestProxy {
@@ -19,7 +19,7 @@ export class RequestProxy {
 }
 
 export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
-  const specSetup = new SpecSetup(assistantJs);
+  const specSetup = new SpecHelper(assistantJs);
   const stopFunction = await specSetup.withServer(expressApp);
   return [new RequestProxy(), stopFunction];
 }

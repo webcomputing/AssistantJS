@@ -15,7 +15,7 @@ import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
 /** Helper for specs, which is also useful in other npm modules */
-export class SpecSetup {
+export class SpecHelper {
   public setup: AssistantJSSetup;
 
   constructor(originalSetup: AssistantJSSetup = new AssistantJSSetup(new ContainerImpl())) {

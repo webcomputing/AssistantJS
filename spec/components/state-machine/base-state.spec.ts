@@ -2,7 +2,7 @@ import { BaseState } from "../../../src/components/state-machine/base-state";
 import { State } from "../../../src/components/state-machine/public-interfaces";
 import { BasicHandable } from "../../../src/components/unifier/public-interfaces";
 import { injectionNames } from "../../../src/injection-names";
-import { SpecSetup } from "../../../src/spec-setup";
+import { SpecHelper } from "../../../src/spec-helper";
 import { PLATFORM } from "../../support/mocks/unifier/extraction";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
@@ -10,7 +10,7 @@ import { ThisContext } from "../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   state: BaseState;
-  specHelper: SpecSetup;
+  specHelper: SpecHelper;
   handler: BasicHandable<any>;
 }
 

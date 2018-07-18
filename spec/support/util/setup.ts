@@ -4,7 +4,7 @@ import { RequestContext } from "../../../src/components/root/public-interfaces";
 import { BasicHandable, MinimalRequestExtraction } from "../../../src/components/unifier/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
 
-import { SpecSetup } from "../../../src/spec-setup";
+import { SpecHelper } from "../../../src/spec-helper";
 
 import { TestFilterA } from "../mocks/filters/test-filter-a";
 import { TestFilterB } from "../mocks/filters/test-filter-b";
@@ -34,8 +34,8 @@ import { MockHandlerA as ResponseHandler } from "../mocks/unifier/response-handl
  * @param autoBind If set to true, assistantJs.autobind() will be called for you
  * @param autoSetup If set to true, assistantJs.registerInternalComponents() will be called for you
  */
-export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecSetup {
-  const assistantJs = new SpecSetup(new AssistantJSSetup(new ContainerImpl()));
+export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecHelper {
+  const assistantJs = new SpecHelper(new AssistantJSSetup(new ContainerImpl()));
   assistantJs.prepare(
     [
       MainState,
@@ -68,7 +68,7 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
  * @param requestContext Request context to add to di container for scope opening. If you don't pass one, mocks/root/request-context will be used
  */
 export function createRequestScope(
-  specSetup: SpecSetup,
+  specSetup: SpecHelper,
   minimalExtraction: MinimalRequestExtraction | null = JSON.parse(JSON.stringify(extraction)),
   requestContext: RequestContext = context,
   responseHandler: { new (...args: any[]): BasicHandable<any> } = ResponseHandler
