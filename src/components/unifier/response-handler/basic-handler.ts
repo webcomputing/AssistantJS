@@ -95,7 +95,7 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    * }
    * </code></pre>
    */
-  private results: { [key in keyof B]?: B[key] } = {} as any;
+  private results: Partial<B> = {} as any;
 
   /**
    * property to save if the answers were sent

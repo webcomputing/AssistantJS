@@ -2,7 +2,7 @@ import { Container } from "inversify-components";
 import { componentInterfaces as rootComponentInterfaces } from "../../../src/components/root/private-interfaces";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { expressAppWithTimeout, RequestProxy, withServer } from "../../support/util/requester";
+import { RequestProxy, withServer } from "../../support/util/requester";
 
 import { AfterContextExtension, AssistantJSSetup, MinimalRequestExtraction, OptionalExtractions, RequestContext } from "../../../src/assistant-source";
 import { createContext } from "../../support/mocks/root/request-context";
@@ -55,7 +55,7 @@ describe("ContextDeriver", function() {
         const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
         beforeEach(async function(done) {
-          [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
+          [request, stopServer] = await withServer(this.assistantJs);
           await request.post(MockExtractor.fittingPath(), extractionData);
           done();
         });
@@ -79,7 +79,7 @@ describe("ContextDeriver", function() {
           const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
           beforeEach(async function(this: CurrentThisContext, done) {
-            [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
+            [request, stopServer] = await withServer(this.assistantJs);
             await request.post(MockExtractor.fittingPath(), extractionData);
             done();
           });

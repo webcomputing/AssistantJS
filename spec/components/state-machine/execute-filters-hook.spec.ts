@@ -1,21 +1,15 @@
 import { Container } from "inversify-components";
-import { BasicAnswerTypes, BasicHandable, injectionNames, SpecHelper, TranslateHelper } from "../../../src/assistant-source";
+import { injectionNames, SpecHelper, TranslateHelper } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {
-  responseHandler: BasicHandable<any>;
-  resultHolder: HandlerHasResults;
   specHelper: SpecHelper;
   stateMachine: StateMachine;
   container: Container;
   translateHelper: TranslateHelper;
   callSpyResults: any[][];
-}
-
-interface HandlerHasResults {
-  results: BasicAnswerTypes;
 }
 
 describe("ExecuteFiltersHook", function() {
@@ -31,9 +25,6 @@ describe("ExecuteFiltersHook", function() {
 
     this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
     this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
-    this.responseHandler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
-
-    this.resultHolder = this.responseHandler as any;
 
     await this.stateMachine.transitionTo("FilterAState");
   });
@@ -45,7 +36,7 @@ describe("ExecuteFiltersHook", function() {
 
     it("uses no filter", async function(this: CurrentThisContext) {
       await this.stateMachine.handleIntent("filterTestBIntent");
-      expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+      expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
     });
   });
 
@@ -53,13 +44,13 @@ describe("ExecuteFiltersHook", function() {
     describe("without a state filter decorator", function() {
       it("uses intent filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestAIntent");
-        expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
 
       it("uses handling of filter class instead of the original intent", async function(this: CurrentThisContext) {
         await this.stateMachine.transitionTo("FilterCState");
         await this.stateMachine.handleIntent("filterTestAIntent");
-        expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateC.intentB"));
+        expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateC.intentB"));
       });
 
       it("passes arguments from handleIntent to execute method of filter", async function(this: CurrentThisContext) {
@@ -98,7 +89,7 @@ describe("ExecuteFiltersHook", function() {
 
       it("uses state filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestAIntent");
-        expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
     });
   });
@@ -111,7 +102,7 @@ describe("ExecuteFiltersHook", function() {
 
       it("uses state filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestBIntent");
-        expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
     });
   });
@@ -123,7 +114,7 @@ describe("ExecuteFiltersHook", function() {
       });
 
       it("properly redirects", async function(this: CurrentThisContext) {
-        expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
 
       it("does not call the second one", async function(this: CurrentThisContext) {
@@ -138,7 +129,7 @@ describe("ExecuteFiltersHook", function() {
       });
 
       it("properly redirects", async function(this: CurrentThisContext) {
-        expect(this.resultHolder.results.voiceMessage.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+        expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
       });
 
       it("has already called the first one", async function(this: CurrentThisContext) {

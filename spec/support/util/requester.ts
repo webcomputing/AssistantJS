@@ -23,16 +23,3 @@ export async function withServer(assistantJs: AssistantJSSetup, expressApp: expr
   const stopFunction = await specSetup.withServer(expressApp);
   return [new RequestProxy(), stopFunction];
 }
-
-export function expressAppWithTimeout(length = "5s") {
-  const app = express();
-  app.use(timeout(length));
-  app.use(function(req, res, next) {
-    if (!(req as any).timedout) {
-      next();
-    } else {
-      next(new Error("request timed out"));
-    }
-  });
-  return app;
-}

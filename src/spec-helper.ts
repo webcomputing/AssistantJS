@@ -5,12 +5,13 @@ import { ContainerImpl } from "inversify-components";
 import { ServerApplication } from "./components/root/app-server";
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { Logger, RequestContext } from "./components/root/public-interfaces";
-import { Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
+import { AfterContextExtension, Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
 import { StateMachineSetup } from "./components/state-machine/state-intent-setup";
 import { BasicHandable, intent, MinimalRequestExtraction } from "./components/unifier/public-interfaces";
 
 import { Constructor } from "./assistant-source";
 import { FilterSetup } from "./components/state-machine/filter-setup";
+import { BasicAnswerTypes, BasicHandler } from "./components/unifier/response-handler";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
@@ -90,14 +91,30 @@ export class SpecHelper {
       this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") &&
       this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")
     ) {
-      const machine = this.setup.container.inversifyInstance.get<Transitionable>("core:state-machine:current-state-machine");
+      // get current Extraction, set intent and bind it back to
       const extraction = this.setup.container.inversifyInstance.get<MinimalRequestExtraction>("core:unifier:current-extraction");
+      if (intent) {
+        extraction.intent = intent;
+      }
+      this.setup.container.inversifyInstance.unbind("core:unifier:current-extraction");
+      this.setup.container.inversifyInstance.bind<MinimalRequestExtraction>("core:unifier:current-extraction").toConstantValue(extraction);
+
+      const machine = this.setup.container.inversifyInstance.get<Transitionable>("core:state-machine:current-state-machine");
 
       if (typeof stateName !== "undefined") {
         await machine.transitionTo(stateName);
       }
 
-      return machine.handleIntent(typeof intent === "undefined" ? extraction.intent : intent);
+      /**
+       * Here, we need the state machine runner instead of machine.handleIntent()
+       * because we won't execute after state machine extensions otherwise
+       */
+      const afterContextExtensions = this.setup.container.inversifyInstance.getAll<AfterContextExtension>(
+        this.setup.container.componentRegistry.lookup("core:root").getInterface("afterContextExtension")
+      );
+      const runner = afterContextExtensions.filter(extensionClass => extensionClass.constructor.name === "Runner")[0];
+
+      return runner.execute();
     }
 
     throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
@@ -155,6 +172,24 @@ export class SpecHelper {
         )
       );
     });
+  }
+
+  /**
+   * This Method returns the resolved Results from the current ResponseHandler
+   */
+  public getResponseResults<CurrentTypes extends BasicAnswerTypes = BasicAnswerTypes>(): Partial<CurrentTypes> {
+    const requestHandler: BasicHandable<CurrentTypes> = this.setup.container.inversifyInstance.get(injectionNames.current.responseHandler);
+
+    const results = (requestHandler as any).results as Partial<CurrentTypes>;
+    const promises = (requestHandler as any).promises as { [key in keyof CurrentTypes]?: any };
+
+    for (const key in promises) {
+      if (promises.hasOwnProperty(key) && (!results.hasOwnProperty(key) || !results[key])) {
+        throw new Error("Not all Promises has been resolved. Did you await send() on the ResponseHandler?");
+      }
+    }
+
+    return results;
   }
 }
 
