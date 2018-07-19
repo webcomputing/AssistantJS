@@ -55,8 +55,8 @@ export interface BeforeResponseHandler<AnswerType extends BasicAnswerTypes, Cust
 }
 
 /**
- * Interface to Implement if you want to use beforeSendResponse extensionpoint
- * The after ResponseHandler does only get the results, as the answers cannot be changed anymore
+ * Interface to Implement if you want to use afterSendResponse extensionpoint
+ * The AfterResponseHandler does only get the results, as the answers cannot be changed anymore
  */
 export interface AfterResponseHandler<AnswerType extends BasicAnswerTypes> {
   execute(results: Partial<AnswerType>);

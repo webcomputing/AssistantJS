@@ -5,6 +5,13 @@ import { Logger } from "../../root/public-interfaces";
 import { Configuration } from "../private-interfaces";
 import { BasicAnswerTypes, BasicHandable } from "./handler-types";
 
+/**
+ * This Factory adds a proxy arround the current handler to allow method-chaining with every specific handler,
+ * even when the specific handler does not have an impleementation for the specific method.
+ *
+ *
+ * This factory is bound to the root-scope as singleton, so DO NOT add any injections with request-scope here
+ */
 @injectable()
 export class HandlerProxyFactory {
   /**
@@ -12,12 +19,19 @@ export class HandlerProxyFactory {
    */
   private failSilentlyOnUnsupportedFeatures: boolean = true;
 
+  /**
+   * This factory is bound to the root-scope as singleton, so DO NOT add any injections with request-scope here
+   * @param logger for logging warnings or errors
+   * @param componentMeta with configuration
+   */
   constructor(@inject(injectionNames.logger) private logger: Logger, @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>) {
     this.failSilentlyOnUnsupportedFeatures = componentMeta.configuration.failSilentlyOnUnsupportedFeatures;
   }
 
   /**
    * All empty properties in the Handler MUST have the value 'null', as undefined is used to proxy for unknown functions
+   *
+   * This factory is bound to the root-scope as singleton, so DO NOT add any injections with request-scope here
    * @param handler
    */
   public createHandlerProxy<K extends BasicAnswerTypes, T extends BasicHandable<K>>(handler: T): T {

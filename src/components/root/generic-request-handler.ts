@@ -26,7 +26,7 @@ export class GenericRequestHandler {
     // Request handlers have the ability to add something to current di scope.
     const extensions = scopedRequestContainer.getAll<ContextDeriver>(componentInterfaces.contextDeriver);
     const results = await Promise.all(extensions.map(extension => extension.derive(context)));
-    const canBeHandled = results
+    const needsRequestScope = results
       // returning true, when a result has been returned by the ContextDeriver, otherwise false
       .map(result => {
         if (typeof result !== "undefined") {
@@ -41,7 +41,7 @@ export class GenericRequestHandler {
       }, false);
 
     // open the request scope only when the request can be handled
-    if (canBeHandled) {
+    if (needsRequestScope) {
       // Register this child container as request-scope and make context available in all descriptors
       container.componentRegistry.autobind(scopedRequestContainer, [], "request", context);
 

@@ -1,4 +1,5 @@
 import { inject, injectable } from "inversify";
+import { MinimalRequestExtraction } from "../../../../../src/assistant-source";
 import { RequestContext } from "../../../../../src/components/root/public-interfaces";
 import { BasicHandler } from "../../../../../src/components/unifier/response-handler";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "../../../../../src/components/unifier/response-handler/handler-types";
@@ -36,11 +37,12 @@ export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHand
   ];
 
   constructor(
-    @inject(injectionNames.current.requestContext) extraction: RequestContext,
+    @inject(injectionNames.current.requestContext) requestContext: RequestContext,
+    @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,
     @inject(injectionNames.current.killSessionService) killSession: () => Promise<void>,
     @inject(injectionNames.current.responseHandlerExtensions) responseHandlerExtensions: ResponseHandlerExtensions<T, MockHandlerA<T>>
   ) {
-    super(extraction, killSession, responseHandlerExtensions);
+    super(requestContext, extraction, killSession, responseHandlerExtensions);
   }
 
   public setMockHandlerATable(table: T["table"] | Promise<T["table"]>): this {

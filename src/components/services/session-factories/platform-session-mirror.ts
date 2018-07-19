@@ -31,7 +31,9 @@ export class PlatformSessionMirror implements BeforeResponseHandler<any, any> {
         }
       } else {
         throw new Error(
-          "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
+          `You are trying to use the platform's (${
+            this.extraction.platform
+          }) session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage.`
         );
       }
     }

@@ -96,15 +96,9 @@ export class StateMachine implements Transitionable {
 
   public async transitionTo(state: string) {
     if (this.stateNames.indexOf(state) === -1) throw Error("Cannot transition to " + state + ": State does not exist!");
-
-    const getContextStates = await this.getContextStates();
-    const getCurrentState = await this.getCurrentState();
-
-    const resolvedPromise = [getContextStates, getCurrentState];
-
-    // const resolvedPromise = await Promise.all([this.getContextStates(), this.getCurrentState()]);
-    let contextStates = getContextStates;
-    const currentState = getCurrentState;
+    const resolvedPromise = await Promise.all([this.getContextStates(), this.getCurrentState()]);
+    let contextStates = resolvedPromise[0];
+    const currentState = resolvedPromise[1];
 
     const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
 

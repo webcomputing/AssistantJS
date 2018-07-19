@@ -2,6 +2,7 @@ import { inject, injectable } from "inversify";
 import * as util from "util";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
+import { MinimalRequestExtraction } from "../public-interfaces";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, SessionHandable } from "./handler-types";
 
 /**
@@ -103,15 +104,14 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   private isSent: boolean = false;
 
   private responseCallback: ResponseCallback;
-  private killSession: () => Promise<void>;
 
   constructor(
-    @inject(injectionNames.current.requestContext) extraction: RequestContext,
-    @inject(injectionNames.current.killSessionService) killSession: () => Promise<void>,
+    @inject(injectionNames.current.requestContext) private requestContext: RequestContext,
+    @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
+    @inject(injectionNames.current.killSessionService) private killSession: () => Promise<void>,
     @inject(injectionNames.current.responseHandlerExtensions) private responseHandlerExtensions: ResponseHandlerExtensions<B, BasicHandable<B>>
   ) {
-    this.responseCallback = extraction.responseCallback;
-    this.killSession = killSession;
+    this.responseCallback = requestContext.responseCallback;
   }
 
   /**
@@ -337,7 +337,9 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
   private checkSessionFeature() {
     if (!(this.specificWhitelist.indexOf("setSessionData") > 0 && this.specificWhitelist.indexOf("getSessionData"))) {
       throw new Error(
-        "You are trying to use the platform's session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage."
+        `You are trying to use the platform's (${
+          this.extraction.platform
+        }) session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage.`
       );
     }
   }

@@ -302,6 +302,11 @@ export namespace OptionalExtractions {
   };
 }
 
+export namespace OptionalHandlerFeatures {
+  // tslint:disable-next-line:variable-name
+  export const SessionData = ["getSessionData", "setSessionData"];
+}
+
 /**
  * Export all interfaces from the response handle specific types
  */
