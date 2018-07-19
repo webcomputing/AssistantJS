@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { RequestContext } from "../../../../../src/components/root/public-interfaces";
 import { BasicHandler } from "../../../../../src/components/unifier/response-handler";
-import { BasicAnswerTypes, ResponseHandlerExtensions } from "../../../../../src/components/unifier/response-handler/handler-types";
+import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "../../../../../src/components/unifier/response-handler/handler-types";
 import { injectionNames } from "../../../../../src/injection-names";
 
 export interface MockHandlerASpecificTypes extends BasicAnswerTypes {
@@ -16,12 +16,12 @@ export interface MockHandlerASpecificTypes extends BasicAnswerTypes {
   };
 }
 
-export interface MockHandlerASpecificHandable {
-  setMockHandlerATable(table: MockHandlerASpecificTypes["table"] | Promise<MockHandlerASpecificTypes["table"]>): this;
+export interface MockHandlerASpecificHandable<CustomTypes extends MockHandlerASpecificTypes> extends BasicHandable<CustomTypes> {
+  setMockHandlerATable(table: CustomTypes["table"] | Promise<CustomTypes["table"]>): this;
 }
 
 @injectable()
-export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<MockHandlerASpecificTypes> implements MockHandlerASpecificHandable {
+export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<T> implements MockHandlerASpecificHandable<T> {
   public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = [
     "setMockHandlerATable",
     "setCard",

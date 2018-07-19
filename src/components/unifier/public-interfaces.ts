@@ -308,7 +308,7 @@ export namespace OptionalExtractions {
 export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHandler, ResponseHandlerExtensions } from "./response-handler/handler-types";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
-export interface PlatformSpecHelper {
+export interface PlatformSpecHelper<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerTypes>> {
   /** Link to assistantJS SpecSetup */
   specSetup: SpecHelper;
 
@@ -319,12 +319,7 @@ export interface PlatformSpecHelper {
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerTypes>>(
-    intent: intent,
-    autoStart?: boolean,
-    additionalExtractions?: any,
-    additionalContext?: any
-  ): Promise<CustomHandler>;
+  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<CustomHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */
