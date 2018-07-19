@@ -11,7 +11,7 @@ import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 type MixedTypes = MockHandlerASpecificTypes & MockHandlerBSpecificTypes;
-type MixedHandler = BasicHandable<MixedTypes> & MockHandlerASpecificHandable & MockHandlerBSpecificHandable;
+type MixedHandler = BasicHandable<MixedTypes> & MockHandlerASpecificHandable<MixedTypes> & MockHandlerBSpecificHandable<MixedTypes>;
 
 interface CurrentThisContext extends ThisContext {
   handlerInstance: MixedHandler;
