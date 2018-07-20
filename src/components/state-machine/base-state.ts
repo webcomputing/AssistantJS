@@ -106,10 +106,9 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
-   * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  public prompt<T extends string | Promise<string>, S extends string | Promise<string>>(text: T, ...reprompts: S[]): void {
-    this.responseHandler.prompt(text, ...reprompts);
+  public prompt<T extends string | Promise<string>>(text: T): void {
+    this.responseHandler.prompt(text);
   }
 
   /**

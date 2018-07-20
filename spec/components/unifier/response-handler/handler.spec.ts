@@ -1,6 +1,3 @@
-import { Container } from "inversify";
-import { AfterStateMachine } from "../../../../src/assistant-source";
-import { injectionNames } from "../../../../src/injection-names";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { createRequestScope } from "../../../support/util/setup";

@@ -176,52 +176,13 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     return this;
   }
 
-  public prompt(
-    inputText: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>,
-    ...reprompts: Array<B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>>
-  ): this {
+  public prompt(inputText: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>): this {
     // add a thenMap function to build the correct object from the simple strings
     this.promises.voiceMessage = {
       resolver: Promise.resolve(inputText),
       thenMap: this.createPromptAnswer,
     };
 
-    // add reprompts with remapper function
-    if (reprompts && reprompts.length > 0) {
-      this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
-    }
-
-    return this;
-  }
-
-  public setReprompts(reprompts: Array<B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>> | Promise<Array<B["voiceMessage"]["text"]>>): this {
-    // check wether it is an Arry or an Promise
-    if (Array.isArray(reprompts)) {
-      // add reprompts as Array with remapper function
-      this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
-    } else {
-      // Add Promise and thenMap function
-      this.promises.reprompts = {
-        resolver: reprompts,
-        thenMap: this.createRepromptAnswerArray,
-      };
-    }
-
-    return this;
-  }
-
-  public setSuggestionChips(suggestionChips: B["suggestionChips"] | Promise<B["suggestionChips"]>): this {
-    this.promises.suggestionChips = { resolver: suggestionChips };
-    return this;
-  }
-
-  public setChatBubbles(chatBubbles: B["chatBubbles"] | Promise<B["chatBubbles"]>): this {
-    this.promises.chatBubbles = { resolver: chatBubbles };
-    return this;
-  }
-
-  public setCard(card: B["card"] | Promise<B["card"]>): this {
-    this.promises.card = { resolver: card };
     return this;
   }
 
@@ -242,6 +203,17 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     return { "Content-Type": "application/json" };
   }
 
+  /**
+   * Creates from a String the correct prompt object
+   * @param text text with or without SSML
+   */
+  protected createPromptAnswer(text: string): BasicAnswerTypes["voiceMessage"] {
+    return {
+      text,
+      isSSML: BasicHandler.isSSML(text),
+    };
+  }
+
   private failIfInactive() {
     if (this.isSent) {
       throw Error(
@@ -249,41 +221,6 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
           util.inspect(this)
       );
     }
-  }
-
-  /**
-   * Creates from a String the correct prompt object
-   * @param text text with or without SSML
-   */
-  private createPromptAnswer(text: string): BasicAnswerTypes["voiceMessage"] {
-    return {
-      text,
-      isSSML: BasicHandler.isSSML(text),
-    };
-  }
-
-  /**
-   * Builds the Remapper for Reprompts in an Array of promises and strings
-   * @param reprompts
-   */
-  private getRepromptArrayRemapper(
-    reprompts: Array<B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>>
-  ): {
-    resolver: Promise<Array<B["voiceMessage"]["text"]>>;
-    thenMap: (finaleReprompts: Array<B["voiceMessage"]["text"]>) => B["reprompts"];
-  } {
-    return {
-      resolver: Promise.all(reprompts),
-      thenMap: this.createRepromptAnswerArray,
-    };
-  }
-
-  /**
-   * Builds ther Remappee from an string Array
-   * @param reprompts
-   */
-  private createRepromptAnswerArray(reprompts: string[]) {
-    return reprompts.map(this.createPromptAnswer);
   }
 
   /**

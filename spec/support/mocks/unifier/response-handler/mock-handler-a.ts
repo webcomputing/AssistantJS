@@ -1,7 +1,15 @@
 import { inject, injectable } from "inversify";
-import { Constructor, MinimalRequestExtraction } from "../../../../../src/assistant-source";
+import { MinimalRequestExtraction } from "../../../../../src/assistant-source";
 import { RequestContext } from "../../../../../src/components/root/public-interfaces";
-import { BasicHandler, SessionDataMixin } from "../../../../../src/components/unifier/response-handler";
+import {
+  AuthenticationMixin,
+  BasicHandler,
+  CardMixin,
+  ChatBubblesMixin,
+  RepromptsMixin,
+  SessionDataMixin,
+  SuggestionChipsMixin,
+} from "../../../../../src/components/unifier/response-handler";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "../../../../../src/components/unifier/response-handler/handler-types";
 import { injectionNames } from "../../../../../src/injection-names";
 
@@ -22,7 +30,9 @@ export interface MockHandlerASpecificHandable<CustomTypes extends MockHandlerASp
 }
 
 @injectable()
-export class MockHandlerA<T extends MockHandlerASpecificTypes> extends SessionDataMixin(BasicHandler)<T> implements MockHandlerASpecificHandable<T> {
+export class MockHandlerA<T extends MockHandlerASpecificTypes>
+  extends AuthenticationMixin(CardMixin(ChatBubblesMixin(RepromptsMixin(SessionDataMixin(SuggestionChipsMixin(BasicHandler))))))<T>
+  implements MockHandlerASpecificHandable<T> {
   constructor(
     @inject(injectionNames.current.requestContext) requestContext: RequestContext,
     @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,

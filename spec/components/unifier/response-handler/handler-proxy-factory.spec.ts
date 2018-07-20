@@ -5,16 +5,13 @@ import { BasicAnswerTypes, BasicHandable, SessionHandable } from "../../../../sr
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
 import { injectionNames } from "../../../../src/injection-names";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
-import { MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { MockHandlerA, MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { MockHandlerB, MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 type MixedTypes = MockHandlerASpecificTypes & MockHandlerBSpecificTypes;
-type MixedHandler = BasicHandable<MixedTypes> &
-  SessionHandable<MixedTypes> &
-  MockHandlerASpecificHandable<MixedTypes> &
-  MockHandlerBSpecificHandable<MixedTypes>;
+type MixedHandler = MockHandlerA<MixedTypes> & MockHandlerB<MixedTypes>;
 
 interface CurrentThisContext extends ThisContext {
   handlerInstance: MixedHandler;

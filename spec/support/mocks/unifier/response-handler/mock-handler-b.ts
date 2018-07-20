@@ -4,7 +4,6 @@ import { RequestContext } from "../../../../../src/components/root/public-interf
 import { BasicHandler } from "../../../../../src/components/unifier/response-handler";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "../../../../../src/components/unifier/response-handler/handler-types";
 import { injectionNames } from "../../../../../src/injection-names";
-import { MockHandlerASpecificHandable } from "./mock-handler-a";
 
 export interface MockHandlerBSpecificTypes extends BasicAnswerTypes {
   card: {
@@ -22,8 +21,6 @@ export interface MockHandlerBSpecificHandable<CustomTypes extends MockHandlerBSp
 
 @injectable()
 export class MockHandlerB<T extends MockHandlerBSpecificTypes> extends BasicHandler<T> implements MockHandlerBSpecificHandable<T> {
-  public readonly specificWhitelist: Array<keyof MockHandlerB<T>> = ["setCard", "setChatBubbles", "setReprompts", "setSuggestionChips", "setUnauthenticated"];
-
   constructor(
     @inject(injectionNames.current.requestContext) requestContext: RequestContext,
     @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,

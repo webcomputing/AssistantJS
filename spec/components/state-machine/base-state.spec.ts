@@ -33,10 +33,9 @@ describe("BaseState", function() {
     describe("prompt", function() {
       it("calls responseFactory.prompt", function(this: CurrentThisContext) {
         const message = "Voice message";
-        const reprompts = ["First reprompt", "Second reprompt", "Third reprompt", "Fourth reprompt"];
 
-        this.state.prompt(message, ...reprompts);
-        expect(this.handler.prompt).toHaveBeenCalledWith(message, ...reprompts);
+        this.state.prompt(message);
+        expect(this.handler.prompt).toHaveBeenCalledWith(message);
       });
     });
 
