@@ -183,7 +183,7 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
 
   /**
    * generates the concrete data for a specific Handler
-   * has to be implemented by the specific handler
+   * has to be implemented by the specific handler, cannot be abstract for the mixins
    * @param results one file which contains all answers/prompts
    * @returns e.g. the Object to send as result to the calling service
    */

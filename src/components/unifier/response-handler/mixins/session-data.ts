@@ -3,6 +3,9 @@ import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
 import { BasicAnswerTypes } from "../handler-types";
 
+/**
+ * Mixin to add SessionData-Feature
+ */
 export function SessionDataMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
 ): Mixin<OptionalHandlerFeatures.SessionData<CustomTypes>> & CustomHandlerConstructor {

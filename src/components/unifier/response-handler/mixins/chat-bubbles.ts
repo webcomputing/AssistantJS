@@ -3,6 +3,9 @@ import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
 import { BasicAnswerTypes } from "../handler-types";
 
+/**
+ * Mixin to add ChatBubbles-Feature
+ */
 export function ChatBubblesMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
 ): Mixin<OptionalHandlerFeatures.ChatBubbles<CustomTypes>> & CustomHandlerConstructor {

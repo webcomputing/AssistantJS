@@ -115,7 +115,7 @@ export class HandlerProxyFactory {
       },
 
       /**
-       * This is necessary so that Object.keys is traped
+       * This is necessary so that Object.keys is traped by ownKeys()
        * @param target the current handler
        */
       getOwnPropertyDescriptor(target) {
