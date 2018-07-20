@@ -1,11 +1,12 @@
-import { Constructor, MinimalRequestExtraction, Mixin, RequestContext } from "../../../../assistant-source";
+import { Constructor, Mixin } from "../../../../assistant-source";
+import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
-import { BasicAnswerTypes, BasicHandable, ChatBubblesHandable, ResponseHandlerExtensions, SessionHandable } from "../handler-types";
+import { BasicAnswerTypes } from "../handler-types";
 
 export function ChatBubblesMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
-): Mixin<ChatBubblesHandable<CustomTypes>> & CustomHandlerConstructor {
-  abstract class ChatBubblesHandler extends superHandler implements ChatBubblesHandable<CustomTypes> {
+): Mixin<OptionalHandlerFeatures.ChatBubbles<CustomTypes>> & CustomHandlerConstructor {
+  abstract class ChatBubblesHandler extends superHandler implements OptionalHandlerFeatures.ChatBubbles<CustomTypes> {
     constructor(...args: any[]) {
       super(...args);
     }

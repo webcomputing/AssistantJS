@@ -159,11 +159,6 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     return this.isSent;
   }
 
-  public setUnauthenticated(): this {
-    this.promises.shouldAuthenticate = { resolver: true };
-    return this;
-  }
-
   public setEndSession(): this {
     this.promises.shouldSessionEnd = { resolver: true };
     return this;

@@ -1,11 +1,12 @@
-import { Constructor, MinimalRequestExtraction, Mixin, RequestContext } from "../../../../assistant-source";
+import { Constructor, Mixin } from "../../../../assistant-source";
+import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
-import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, SessionHandable } from "../handler-types";
+import { BasicAnswerTypes } from "../handler-types";
 
 export function SessionDataMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
-): Mixin<SessionHandable<CustomTypes>> & CustomHandlerConstructor {
-  abstract class SessionData extends superHandler implements SessionHandable<CustomTypes> {
+): Mixin<OptionalHandlerFeatures.SessionData<CustomTypes>> & CustomHandlerConstructor {
+  abstract class SessionData extends superHandler implements OptionalHandlerFeatures.SessionData<CustomTypes> {
     constructor(...args: any[]) {
       super(...args);
     }

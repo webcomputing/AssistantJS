@@ -23,7 +23,7 @@ export class PlatformSessionMirror implements BeforeResponseHandler<any, any> {
       featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData) &&
       typeof this.extraction.sessionData === "string"
     ) {
-      if (featureIsAvailable(responseHandler, OptionalHandlerFeatures.SessionData)) {
+      if (featureIsAvailable(responseHandler, OptionalHandlerFeatures.FeatureChecker.SessionData)) {
         const currentSessionData = await responseHandler.getSessionData();
 
         if (!currentSessionData) {

@@ -1,11 +1,12 @@
-import { Constructor, MinimalRequestExtraction, Mixin, RequestContext } from "../../../../assistant-source";
+import { Constructor, Mixin } from "../../../../assistant-source";
+import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
-import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, SessionHandable, SuggestionChipsHandable } from "../handler-types";
+import { BasicAnswerTypes } from "../handler-types";
 
 export function SuggestionChipsMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
-): Mixin<SuggestionChipsHandable<CustomTypes>> & CustomHandlerConstructor {
-  abstract class SuggestionChipsHandler extends superHandler implements SuggestionChipsHandable<CustomTypes> {
+): Mixin<OptionalHandlerFeatures.SuggestionChips<CustomTypes>> & CustomHandlerConstructor {
+  abstract class SuggestionChipsHandler extends superHandler implements OptionalHandlerFeatures.SuggestionChips<CustomTypes> {
     constructor(...args: any[]) {
       super(...args);
     }

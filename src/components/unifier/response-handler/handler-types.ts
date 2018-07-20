@@ -1,3 +1,5 @@
+import { OptionalHandlerFeatures } from "../public-interfaces";
+
 /**
  * This interface defines the types which can be used on all Handlers
  * Handler should extend this interface to define own specific types.
@@ -71,78 +73,6 @@ export interface ResponseHandlerExtensions<AnswerType extends BasicAnswerTypes, 
 }
 
 /**
- * This interface defines which methodes are necessary for ResponseHandler to handle Sessions
- */
-export interface SessionHandable<CurrentType extends BasicAnswerTypes> {
-  /**
-   * Adds Data to session
-   *
-   * Most of the time it is better to use the @see {@link Session}-Implementation, as the Session-Implemention will set it automatically to the handler
-   * or use another SessionStorage like Redis. And it has some more features.
-   */
-  setSessionData(sessionData: CurrentType["sessionData"] | Promise<CurrentType["sessionData"]>): this;
-
-  /**
-   * gets the current SessionData as Promise or undefined if no session is set
-   */
-  getSessionData(): Promise<CurrentType["sessionData"]> | undefined;
-}
-
-/**
- * Adds SuggestionChips to Handler
- */
-export interface SuggestionChipsHandable<CurrentType extends BasicAnswerTypes> {
-  /**
-   * Add some sugestions for Devices with a Display after the response is shown and/or read to the user
-   * @param suggestionChips Texts to show (mostly) under the previous responses (prompts)
-   */
-  setSuggestionChips(suggestionChips: CurrentType["suggestionChips"] | Promise<CurrentType["suggestionChips"]>): this;
-}
-
-export interface RepromptsHandable<CurrentType extends BasicAnswerTypes> {
-  /**
-   * Sends voice message
-   * @param text Text to say to user
-   * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
-   */
-  prompt(
-    inputText: CurrentType["voiceMessage"]["text"] | Promise<CurrentType["voiceMessage"]["text"]>,
-    ...reprompts: Array<CurrentType["voiceMessage"]["text"] | Promise<CurrentType["voiceMessage"]["text"]>>
-  ): this; // cannot set type via B["reprompts"] as typescript thinks this type is not an array
-
-  /**
-   * Adds voice messages when the User does not answer in a given time
-   * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
-   */
-  setReprompts(
-    reprompts: Array<CurrentType["voiceMessage"]["text"] | Promise<CurrentType["voiceMessage"]["text"]>> | Promise<Array<CurrentType["voiceMessage"]["text"]>>
-  ): this;
-}
-
-export interface CardHandable<CurrentType extends BasicAnswerTypes> {
-  /**
-   * Adds a common Card to all Handlers
-   * @param card Card which should be shown
-   */
-  setCard(card: CurrentType["card"] | Promise<CurrentType["card"]>): this;
-}
-
-export interface ChatBubblesHandable<CurrentType extends BasicAnswerTypes> {
-  /**
-   * Add multiple texts as seperate text-bubbles
-   * @param chatBubbles Array of texts to shown as Bubbles
-   */
-  setChatBubbles(chatBubbles: CurrentType["chatBubbles"] | Promise<CurrentType["chatBubbles"]>): this;
-}
-
-export interface AuthenticationHandable {
-  /**
-   * Sets the current Session as Unauthenticated.
-   */
-  setUnauthenticated(): this;
-}
-
-/**
  * This interface defines which methods every handler should have.
  * Types are referenced to the merged handler-specific types, like 'AlexaSpecificTypes & GoogleSpecificType'
  *
@@ -183,4 +113,4 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
 /**
  * Combination of BasicHandable and SessionHandable
  */
-export type BasicSessionHandable<B extends BasicAnswerTypes> = BasicHandable<B> & SessionHandable<B>;
+export type BasicSessionHandable<B extends BasicAnswerTypes> = BasicHandable<B> & OptionalHandlerFeatures.SessionData<B>;

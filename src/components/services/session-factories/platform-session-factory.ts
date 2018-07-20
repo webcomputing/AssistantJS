@@ -18,7 +18,7 @@ export class PlatformSessionFactory implements SessionFactory {
   /** Gets current platform-based session by current request handler & extraction. Needs SessionData feature support by request handler. */
   public getCurrentSession(configurationAttributes?: any): Session {
     if (featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData)) {
-      if (featureIsAvailable(this.handler, OptionalHandlerFeatures.SessionData)) {
+      if (featureIsAvailable(this.handler, OptionalHandlerFeatures.FeatureChecker.SessionData)) {
         return this.createSession(this.extraction, this.handler, configurationAttributes);
       }
 

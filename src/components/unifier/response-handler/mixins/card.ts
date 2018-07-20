@@ -1,11 +1,12 @@
-import { Constructor, MinimalRequestExtraction, Mixin, RequestContext } from "../../../../assistant-source";
+import { Constructor, Mixin } from "../../../../assistant-source";
+import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
-import { BasicAnswerTypes, BasicHandable, CardHandable, ResponseHandlerExtensions, SessionHandable } from "../handler-types";
+import { BasicAnswerTypes } from "../handler-types";
 
 export function CardMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
-): Mixin<CardHandable<CustomTypes>> & CustomHandlerConstructor {
-  abstract class CardHandler extends superHandler implements CardHandable<CustomTypes> {
+): Mixin<OptionalHandlerFeatures.Card<CustomTypes>> & CustomHandlerConstructor {
+  abstract class CardHandler extends superHandler implements OptionalHandlerFeatures.Card<CustomTypes> {
     constructor(...args: any[]) {
       super(...args);
     }

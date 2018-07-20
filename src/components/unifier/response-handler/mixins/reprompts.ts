@@ -1,11 +1,12 @@
-import { Constructor, MinimalRequestExtraction, Mixin, RequestContext } from "../../../../assistant-source";
+import { Constructor, Mixin } from "../../../../assistant-source";
+import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
-import { BasicAnswerTypes, BasicHandable, RepromptsHandable, ResponseHandlerExtensions, SessionHandable } from "../handler-types";
+import { BasicAnswerTypes } from "../handler-types";
 
 export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
   superHandler: CustomHandlerConstructor
-): Mixin<RepromptsHandable<CustomTypes>> & CustomHandlerConstructor {
-  abstract class RepromptsHandler extends superHandler implements RepromptsHandable<CustomTypes> {
+): Mixin<OptionalHandlerFeatures.Reprompts<CustomTypes>> & CustomHandlerConstructor {
+  abstract class RepromptsHandler extends superHandler implements OptionalHandlerFeatures.Reprompts<CustomTypes> {
     constructor(...args: any[]) {
       super(...args);
     }
