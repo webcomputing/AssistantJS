@@ -4,12 +4,13 @@ import { BasicHandable } from "../../../src/components/unifier/public-interfaces
 import { injectionNames } from "../../../src/injection-names";
 import { SpecHelper } from "../../../src/spec-helper";
 import { PLATFORM } from "../../support/mocks/unifier/extraction";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../../support/mocks/unifier/response-handler/mock-handler-a";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 import { ThisContext } from "../../this-context";
 
 interface CurrentThisContext extends ThisContext {
-  state: BaseState;
+  state: BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>;
   specHelper: SpecHelper;
   handler: BasicHandable<any>;
 }
@@ -26,16 +27,19 @@ describe("BaseState", function() {
     this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
     this.container.inversifyInstance.bind(PLATFORM + ":current-response-handler").toDynamicValue(context => this.handler);
 
-    this.state = this.specHelper.setup.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<BaseState>("PlainState");
+    this.state = this.specHelper.setup.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<
+      BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>
+    >("PlainState");
   });
 
   describe("responseHandler synonyms", function() {
     describe("prompt", function() {
       it("calls responseFactory.prompt", function(this: CurrentThisContext) {
         const message = "Voice message";
+        const reprompts = ["First reprompt", "Second reprompt", "Third reprompt", "Fourth reprompt"];
 
-        this.state.prompt(message);
-        expect(this.handler.prompt).toHaveBeenCalledWith(message);
+        this.state.prompt(message, ...reprompts);
+        expect(this.handler.prompt).toHaveBeenCalledWith(message, ...reprompts);
       });
     });
 

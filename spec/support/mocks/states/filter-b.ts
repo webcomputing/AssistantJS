@@ -8,14 +8,15 @@ import { BasicHandable } from "../../../../src/components/unifier/response-handl
 import { injectionNames } from "../../../../src/injection-names";
 import { TestFilterA } from "../filters/test-filter-a";
 import { TestFilterB } from "../filters/test-filter-b";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../unifier/response-handler/mock-handler-a";
 
 @injectable()
 @filter(TestFilterA)
-export class FilterBState extends BaseState implements State.Required {
+export class FilterBState extends BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>> implements State.Required {
   public extraction: any;
 
   constructor(
-    @inject(injectionNames.current.responseHandler) responseHandler: BasicHandable<any>,
+    @inject(injectionNames.current.responseHandler) responseHandler: MockHandlerA<MockHandlerASpecificTypes>,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
     @inject("core:root:current-logger") logger: Logger

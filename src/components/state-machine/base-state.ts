@@ -3,7 +3,7 @@ import { TranslateHelper } from "../i18n/public-interfaces";
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
 import { MinimalRequestExtraction, OptionalExtractions, Voiceable } from "../unifier/public-interfaces";
-import { BasicHandable, BasicHandler } from "../unifier/response-handler";
+import { BasicAnswerTypes, BasicHandable, BasicHandler } from "../unifier/response-handler";
 import { State, Transitionable } from "./public-interfaces";
 
 /**
@@ -13,9 +13,10 @@ import { State, Transitionable } from "./public-interfaces";
  */
 
 @injectable()
-export abstract class BaseState implements State.Required, Voiceable, TranslateHelper {
+export abstract class BaseState<CurrentTypes extends BasicAnswerTypes, CurrentHandler extends BasicHandable<CurrentTypes>>
+  implements State.Required, Voiceable, TranslateHelper {
   /** Current response factory */
-  public responseHandler: BasicHandable<any>;
+  public responseHandler: CurrentHandler;
 
   /** Current translate helper */
   public translateHelper: TranslateHelper;
@@ -33,24 +34,24 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * @param {MinimalRequestExtraction} extraction Extraction of current request
    * @param {Logger} logger Logger, prepared to log information about the current request
    */
-  constructor(responseHandler: BasicHandable<any>, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
+  constructor(responseHandler: CurrentHandler, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
 
   /**
    * As an alternative to passing all objects on it's own, you can also pass a set of them
    * @param {StateSetupSet} stateSetupSet A set containing response factory, translate helper and extraction.
    */
-  constructor(stateSetupSet: State.SetupSet);
+  constructor(stateSetupSet: State.SetupSet<CurrentTypes, CurrentHandler>);
 
   constructor(
-    @unmanaged() responseHandlerOrSet: BasicHandable<any> | State.SetupSet,
+    @unmanaged() responseHandlerOrSet: CurrentHandler | State.SetupSet<CurrentTypes, CurrentHandler>,
     @unmanaged() translateHelper?: TranslateHelper,
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
   ) {
-    if (responseHandlerOrSet instanceof BasicHandler) {
+    if (this.isResponseHandler(responseHandlerOrSet)) {
       // Did not pass StateSetupSet
       if (typeof translateHelper === "undefined" || typeof extraction === "undefined" || typeof logger === "undefined") {
-        throw new Error("If you pass a ResponseFactory as first parameter, you also have to pass translateHelper, extraction and logger.");
+        throw new Error("If you pass a ResponseHandler as first parameter, you also have to pass translateHelper, extraction and logger.");
       }
 
       this.responseHandler = responseHandlerOrSet;
@@ -63,10 +64,10 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
         throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
       }
 
-      this.responseHandler = (responseHandlerOrSet as State.SetupSet).responseHandler;
-      this.translateHelper = (responseHandlerOrSet as State.SetupSet).translateHelper;
-      this.extraction = (responseHandlerOrSet as State.SetupSet).extraction;
-      this.logger = (responseHandlerOrSet as State.SetupSet).logger;
+      this.responseHandler = (responseHandlerOrSet as State.SetupSet<CurrentTypes, CurrentHandler>).responseHandler;
+      this.translateHelper = (responseHandlerOrSet as State.SetupSet<CurrentTypes, CurrentHandler>).translateHelper;
+      this.extraction = (responseHandlerOrSet as State.SetupSet<CurrentTypes, CurrentHandler>).extraction;
+      this.logger = (responseHandlerOrSet as State.SetupSet<CurrentTypes, CurrentHandler>).logger;
     }
   }
 
@@ -107,17 +108,17 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    */
-  public prompt<T extends string | Promise<string>>(text: T): void {
-    this.responseHandler.prompt(text);
-  }
+  public prompt: CurrentHandler["prompt"] = (text: CurrentTypes["voiceMessage"]["text"], ...args: any[]) => {
+    return (this.responseHandler as any).prompt(text, ...args);
+  };
 
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public endSessionWith<T extends string | Promise<string>>(text: T): void {
-    this.responseHandler.endSessionWith(text);
-  }
+  public endSessionWith: CurrentHandler["endSessionWith"] = (text: CurrentTypes["voiceMessage"]["text"]) => {
+    return this.responseHandler.endSessionWith(text);
+  };
 
   /** Returns name of current platform */
   public getPlatform(): string {
@@ -130,5 +131,9 @@ export abstract class BaseState implements State.Required, Voiceable, TranslateH
       return this.extraction.device;
     }
     return this.getPlatform();
+  }
+
+  private isResponseHandler(container: CurrentHandler | State.SetupSet<CurrentTypes, CurrentHandler>): container is CurrentHandler {
+    return container instanceof BasicHandler;
   }
 }

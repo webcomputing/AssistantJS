@@ -75,7 +75,7 @@ export const descriptor: ComponentDescriptor = {
 
     request: (bindService, lookupService) => {
       // Returns set of dependencies fitting for BaseState
-      bindService.bindGlobalService<State.SetupSet>("current-state-setup-set").toDynamicValue(context => {
+      bindService.bindGlobalService<State.SetupSet<any, any>>("current-state-setup-set").toDynamicValue(context => {
         return {
           responseHandler: context.container.get<BasicHandable<any>>(injectionNames.current.responseHandler),
           translateHelper: context.container.get<TranslateHelper>(injectionNames.current.translateHelper),
