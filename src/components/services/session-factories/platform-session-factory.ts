@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
-import { featureIsAvailable, handlerFeatureIsAvailable } from "../../unifier/feature-checker";
-import { BasicHandable, MinimalRequestExtraction, OptionalExtractions, OptionalHandlerFeatures } from "../../unifier/public-interfaces";
+import { featureIsAvailable } from "../../unifier/feature-checker";
+import { MinimalRequestExtraction, OptionalExtractions, OptionalHandlerFeatures } from "../../unifier/public-interfaces";
 import { BasicSessionHandable } from "../../unifier/response-handler";
 import { Session, SessionFactory } from "../public-interfaces";
 import { PlatformSession } from "./platform-session";
@@ -18,7 +18,7 @@ export class PlatformSessionFactory implements SessionFactory {
   /** Gets current platform-based session by current request handler & extraction. Needs SessionData feature support by request handler. */
   public getCurrentSession(configurationAttributes?: any): Session {
     if (featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData)) {
-      if (handlerFeatureIsAvailable(this.handler, OptionalHandlerFeatures.SessionData)) {
+      if (featureIsAvailable(this.handler, OptionalHandlerFeatures.SessionData)) {
         return this.createSession(this.extraction, this.handler, configurationAttributes);
       }
 

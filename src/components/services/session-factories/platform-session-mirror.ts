@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
-import { featureIsAvailable, handlerFeatureIsAvailable } from "../../unifier/feature-checker";
-import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../unifier/public-interfaces";
+import { featureIsAvailable } from "../../unifier/feature-checker";
+import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions, OptionalHandlerFeatures } from "../../unifier/public-interfaces";
 import { BasicSessionHandable } from "../../unifier/response-handler";
 
 /**
@@ -23,7 +23,7 @@ export class PlatformSessionMirror implements BeforeResponseHandler<any, any> {
       featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData) &&
       typeof this.extraction.sessionData === "string"
     ) {
-      if (handlerFeatureIsAvailable(responseHandler, ["getSessionData", "setSessionData"])) {
+      if (featureIsAvailable(responseHandler, OptionalHandlerFeatures.SessionData)) {
         const currentSessionData = await responseHandler.getSessionData();
 
         if (!currentSessionData) {

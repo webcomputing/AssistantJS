@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
-import { MinimalRequestExtraction } from "../../../../../src/assistant-source";
+import { Constructor, MinimalRequestExtraction } from "../../../../../src/assistant-source";
 import { RequestContext } from "../../../../../src/components/root/public-interfaces";
-import { BasicHandler } from "../../../../../src/components/unifier/response-handler";
+import { BasicHandler, SessionDataMixin } from "../../../../../src/components/unifier/response-handler";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "../../../../../src/components/unifier/response-handler/handler-types";
 import { injectionNames } from "../../../../../src/injection-names";
 
@@ -22,20 +22,7 @@ export interface MockHandlerASpecificHandable<CustomTypes extends MockHandlerASp
 }
 
 @injectable()
-export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<T> implements MockHandlerASpecificHandable<T> {
-  public readonly specificWhitelist: Array<keyof MockHandlerA<T>> = [
-    "setMockHandlerATable",
-    "setCard",
-    "setChatBubbles",
-    "setSessionData",
-    "setChatBubbles",
-    "setReprompts",
-    "setSuggestionChips",
-    "setUnauthenticated",
-    "setSessionData",
-    "getSessionData",
-  ];
-
+export class MockHandlerA<T extends MockHandlerASpecificTypes> extends SessionDataMixin(BasicHandler)<T> implements MockHandlerASpecificHandable<T> {
   constructor(
     @inject(injectionNames.current.requestContext) requestContext: RequestContext,
     @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,

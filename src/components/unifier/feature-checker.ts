@@ -9,12 +9,16 @@ import { BasicHandable } from "./response-handler";
 export function featureIsAvailable<FeatureInterface>(
   container: MinimalRequestExtraction,
   feature: string[]
-): container is FeatureInterface & MinimalRequestExtraction {
+): container is FeatureInterface & MinimalRequestExtraction;
+
+/**
+ * Checks whether a given feature is supported by a response handler.
+ * @param {BasicHandable} container The response handler which might support the feature
+ * @param {string[]} feature The feature to check. Just pass a value of the FeatureChecker object from OptionalFeatures
+ */
+export function featureIsAvailable<FeatureInterface>(container: BasicHandable<any>, feature: string[]): container is FeatureInterface & BasicHandable<any>;
+
+export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction | BasicHandable<any>, feature: string[]) {
   const objectKeys = Object.keys(container);
   return feature.filter(f => objectKeys.indexOf(f) === -1).length === 0;
-}
-
-export function handlerFeatureIsAvailable(handler: BasicHandable<any>, featureOrFunctionName: string[]) {
-  const objectKeys = [...handler.whitelist, ...handler.specificWhitelist];
-  return featureOrFunctionName.filter(f => objectKeys.indexOf(f) === -1).length === 0;
 }

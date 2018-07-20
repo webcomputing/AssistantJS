@@ -3,7 +3,7 @@ import * as util from "util";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
 import { MinimalRequestExtraction } from "../public-interfaces";
-import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, SessionHandable } from "./handler-types";
+import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./handler-types";
 
 /**
  * This Class represents the basic features a ResponseHandler should have. It implements all Basic functions,
@@ -17,33 +17,7 @@ import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, SessionHand
  * For the docs of the Methods see also the implemented interfaces
  */
 @injectable()
-export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B>, SessionHandable<B> {
-  /**
-   * this is the minmal set of methods which a specific handler should support, it is used by the proxy from the @see {@link HandlerProxyFactory} to identify the supported Methods.
-   */
-  public readonly whitelist: string[] = [
-    "prompt",
-    "setEndSession",
-    "endSessionWith",
-    "send",
-    "wasSent",
-    "setEndSession",
-    "getBody",
-    "getHeaders",
-    "failIfInactive",
-    "createPromptAnswer",
-    "getRepromptArrayRemapper",
-    "createRepromptAnswerArray",
-    "checkSessionFeature",
-    "responseCallback",
-    "killSession",
-  ];
-
-  /**
-   * This set of Methods can be used from the specific Handler, all Methods which starts with 'set<HandlerName>' are added to the list of valid methods automatically
-   * private and protected methods MUST be added here too, because all Method-calls, also internal method-calls are proxied and are filtered with this whitelist
-   */
-  public abstract readonly specificWhitelist: string[];
+export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
   /**
    * As every call can add a Promise, this property is used to save all Promises
    *
@@ -190,27 +164,6 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
     return this;
   }
 
-  /**
-   * Adds Data to session
-   *
-   * Most of the time it is better to use the @see {@link Session}-Implementation, as the Session-Implemention will set it automatically to the handler
-   * or use another SessionStorage like Redis. And it has some more features.
-   */
-  public setSessionData(sessionData: B["sessionData"] | Promise<B["sessionData"]>): this {
-    this.checkSessionFeature();
-
-    this.promises.sessionData = { resolver: sessionData };
-
-    return this;
-  }
-
-  /**
-   * gets the current SessionData as Promise or undefined if no session is set
-   */
-  public getSessionData(): Promise<B["sessionData"]> | undefined {
-    return this.promises.sessionData ? Promise.resolve(this.promises.sessionData.resolver) : undefined;
-  }
-
   public setEndSession(): this {
     this.promises.shouldSessionEnd = { resolver: true };
     return this;
@@ -278,7 +231,9 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    * @param results one file which contains all answers/prompts
    * @returns e.g. the Object to send as result to the calling service
    */
-  protected abstract getBody(results: Partial<B>): any;
+  protected getBody(results: Partial<B>): any {
+    throw new Error("Not implemented");
+  }
 
   /**
    *  Headers of response, default is Contet-Type "application/json" only
@@ -329,19 +284,6 @@ export abstract class BasicHandler<B extends BasicAnswerTypes> implements BasicH
    */
   private createRepromptAnswerArray(reprompts: string[]) {
     return reprompts.map(this.createPromptAnswer);
-  }
-
-  /**
-   * Checks if session is available, otherwise it throws an error
-   */
-  private checkSessionFeature() {
-    if (!(this.specificWhitelist.indexOf("setSessionData") > 0 && this.specificWhitelist.indexOf("getSessionData"))) {
-      throw new Error(
-        `You are trying to use the platform's (${
-          this.extraction.platform
-        }) session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage.`
-      );
-    }
   }
 
   /**

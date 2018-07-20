@@ -1,17 +1,20 @@
 import { Component } from "inversify-components";
 import { Logger } from "../../../../src/components/root/public-interfaces";
 import { Configuration } from "../../../../src/components/unifier/private-interfaces";
-import { BasicHandable } from "../../../../src/components/unifier/response-handler";
+import { BasicAnswerTypes, BasicHandable, SessionHandable } from "../../../../src/components/unifier/response-handler";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
 import { injectionNames } from "../../../../src/injection-names";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
-import { MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
+import { MockHandlerB, MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 type MixedTypes = MockHandlerASpecificTypes & MockHandlerBSpecificTypes;
-type MixedHandler = BasicHandable<MixedTypes> & MockHandlerASpecificHandable<MixedTypes> & MockHandlerBSpecificHandable<MixedTypes>;
+type MixedHandler = BasicHandable<MixedTypes> &
+  SessionHandable<MixedTypes> &
+  MockHandlerASpecificHandable<MixedTypes> &
+  MockHandlerBSpecificHandable<MixedTypes>;
 
 interface CurrentThisContext extends ThisContext {
   handlerInstance: MixedHandler;
@@ -108,19 +111,27 @@ describe("HandlerProxyFactory", function() {
     });
 
     describe("without supporting the function", function() {
-      describe("setSuggestionChips()", function() {
+      describe("setSessionData()", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
+          this.container.inversifyInstance
+            .bind(PLATFORM + ":current-response-handler")
+            .to(MockHandlerB)
+            .inSingletonScope();
+
+          this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
+        });
+
         describe("with logging only", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            this.buildProxiedHandler();
-
-            (this.proxiedHandler as any).specificWhitelist = this.proxiedHandler.specificWhitelist.filter(value => value !== "setSuggestionChips");
-
             this.logger = this.container.inversifyInstance.get(injectionNames.logger);
             spyOn(this.logger, "warn").and.callThrough();
             this.container.inversifyInstance.unbind(injectionNames.logger);
             this.container.inversifyInstance.bind(injectionNames.logger).toConstantValue(this.logger);
 
-            this.result = this.proxiedHandler.setSuggestionChips([{ displayText: "hallo", spokenText: "hallo" }]);
+            this.buildProxiedHandler();
+
+            this.result = this.proxiedHandler.setSessionData("current session data to set");
           });
 
           checkProxiedInstance();
@@ -138,13 +149,11 @@ describe("HandlerProxyFactory", function() {
             this.container.inversifyInstance.bind<Component<Configuration.Runtime>>("meta:component//core:unifier").toConstantValue(metaData);
 
             this.buildProxiedHandler();
-
-            (this.proxiedHandler as any).specificWhitelist = this.proxiedHandler.specificWhitelist.filter(value => value !== "setSuggestionChips");
           });
 
           it("throws error", async function(this: CurrentThisContext) {
             expect(() => {
-              this.proxiedHandler.setSuggestionChips([{ displayText: "hallo", spokenText: "hallo" }]);
+              this.proxiedHandler.setSessionData("my new session data");
             }).toThrow();
           });
         });

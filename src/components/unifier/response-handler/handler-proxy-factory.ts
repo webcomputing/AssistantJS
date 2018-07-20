@@ -38,7 +38,23 @@ export class HandlerProxyFactory {
     const failSilentlyOnUnsupportedFeatures = this.failSilentlyOnUnsupportedFeatures;
     const logger = this.logger;
 
+    const getAllPropertyNames = obj => {
+      let current = obj;
+      const props = new Set();
+      do {
+        Object.getOwnPropertyNames(current).forEach(p => props.add(p));
+        current = Object.getPrototypeOf(current);
+      } while (current && current !== Object.getPrototypeOf({}));
+      return Array.from(props);
+    };
+
     const proxiedHandler = new Proxy(handler, {
+      /**
+       * Trap for all get call.
+       * @param target current handler
+       * @param propKey to get
+       * @param receiver
+       */
       get(target, propKey, receiver) {
         const propValue = target[propKey];
 
@@ -51,7 +67,11 @@ export class HandlerProxyFactory {
 
         // return proxy in case there is no function with the specific name, optional properties MUST have the value null to get here ignored.
         if (typeof propValue === "undefined") {
-          logger.warn("Method " + propKey.toString() + "() is not implemented on " + handlerName);
+          const message = "Method " + propKey.toString() + "() is not implemented or supported on " + handlerName;
+          logger.warn(message);
+          if (!failSilentlyOnUnsupportedFeatures) {
+            throw new Error(message);
+          }
 
           // return a fake function, which is automatically called
           return fakeFunction;
@@ -62,31 +82,19 @@ export class HandlerProxyFactory {
           return propValue;
         }
 
-        if (
-          !(
-            handler.whitelist.indexOf(propKey.toString() as any) > -1 || // in general whitelist
-            handler.specificWhitelist.indexOf(propKey.toString() as any) > -1 || // in handler specific whitelist
-            propKey // or by convention with name
-              .toString()
-              .toLowerCase()
-              .startsWith("set" + handlerName.toLowerCase())
-          )
-        ) {
-          const message = "Method " + propKey.toString() + "() is not supported on " + handlerName;
-          logger.warn(message);
-          if (!failSilentlyOnUnsupportedFeatures) {
-            throw new Error(message);
-          }
-
-          return fakeFunction;
-        }
-
         return function() {
           // "this" points to the proxy, is necessary to work with method-chaining
           return propValue.apply(this, arguments);
         };
       },
 
+      /**
+       * trap for setting values, alows iny to set properties, does not allow to overrwrite functions
+       * @param target the current handler
+       * @param propertyKey the key whoch should get set
+       * @param value to set
+       * @param receiver
+       */
       set(target, propertyKey, value, receiver): boolean {
         if (typeof target[propertyKey] !== "function") {
           target[propertyKey] = value;
@@ -94,6 +102,27 @@ export class HandlerProxyFactory {
         }
 
         return false;
+      },
+
+      /**
+       * This traps Object.keys() or Object.getPropertyNames()
+       * @param target the current handler
+       */
+      ownKeys(target) {
+        const props = getAllPropertyNames(target);
+
+        return props;
+      },
+
+      /**
+       * This is necessary so that Object.keys is traped
+       * @param target the current handler
+       */
+      getOwnPropertyDescriptor(target) {
+        return {
+          enumerable: true,
+          configurable: true,
+        };
       },
     });
 
