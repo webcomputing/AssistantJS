@@ -1,9 +1,10 @@
 import { BaseState, State } from "assistant-source";
 import { injectable, unmanaged } from "inversify";
+import { CurrentAnswerTypes, CurrentHandler } from "../../config/handler";
 
 @injectable()
-export class ApplicationState extends BaseState {
-  constructor(@unmanaged() setupSet: State.SetupSet) {
+export class ApplicationState extends BaseState<CurrentAnswerTypes, CurrentHandler> {
+  constructor(@unmanaged() setupSet: State.SetupSet<CurrentAnswerTypes, CurrentHandler>) {
     super(setupSet);
   }
 }

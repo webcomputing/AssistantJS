@@ -76,6 +76,7 @@ export function cli(argv, resolvedIndex) {
       ["application.ts", "app/states/application.ts"],
       ["main.ts", "app/states/main.ts"],
       ["example-filter.ts", "app/filters/example-filter.ts"],
+      ["handler-config.ts", "config/handler.ts"],
     ];
 
     // Merge root files into array
