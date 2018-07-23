@@ -33,7 +33,7 @@ export function SessionDataMixin<CustomTypes extends BasicAnswerTypes, CustomHan
       return this.promises.sessionData ? Promise.resolve(this.promises.sessionData.resolver) : undefined;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>);
+    protected abstract getBody(results: Partial<CustomTypes>): any;
   }
 
   return SessionData;

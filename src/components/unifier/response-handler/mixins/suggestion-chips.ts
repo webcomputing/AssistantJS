@@ -19,7 +19,7 @@ export function SuggestionChipsMixin<CustomTypes extends BasicAnswerTypes, Custo
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>);
+    protected abstract getBody(results: Partial<CustomTypes>): any;
   }
 
   return SuggestionChipsHandler;

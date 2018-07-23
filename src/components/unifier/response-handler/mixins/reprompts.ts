@@ -44,7 +44,7 @@ export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandl
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>);
+    protected abstract getBody(results: Partial<CustomTypes>): any;
 
     /**
      * Builds the Remapper for Reprompts in an Array of promises and strings

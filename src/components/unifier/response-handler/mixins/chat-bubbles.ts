@@ -19,7 +19,7 @@ export function ChatBubblesMixin<CustomTypes extends BasicAnswerTypes, CustomHan
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>);
+    protected abstract getBody(results: Partial<CustomTypes>): any;
   }
 
   return ChatBubblesHandler;

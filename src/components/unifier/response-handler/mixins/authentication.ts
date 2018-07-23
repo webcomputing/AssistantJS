@@ -19,7 +19,7 @@ export function AuthenticationMixin<CustomTypes extends BasicAnswerTypes, Custom
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>);
+    protected abstract getBody(results: Partial<CustomTypes>): any;
   }
 
   return AuthenticationHandler;

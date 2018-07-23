@@ -19,7 +19,7 @@ export function CardMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerCon
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>);
+    protected abstract getBody(results: Partial<CustomTypes>): any;
   }
 
   return CardHandler;
