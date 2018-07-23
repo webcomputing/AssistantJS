@@ -394,6 +394,11 @@ export namespace OptionalHandlerFeatures {
  */
 export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHandler, ResponseHandlerExtensions } from "./response-handler/handler-types";
 
+/**
+ * Export mixins
+ */
+export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, SessionDataMixin, SuggestionChipsMixin } from "./response-handler/mixins";
+
 /** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerTypes>> {
   /** Link to assistantJS SpecSetup */
