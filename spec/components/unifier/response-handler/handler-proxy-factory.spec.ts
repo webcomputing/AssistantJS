@@ -1,12 +1,11 @@
 import { Component } from "inversify-components";
 import { Logger } from "../../../../src/components/root/public-interfaces";
 import { Configuration } from "../../../../src/components/unifier/private-interfaces";
-import { BasicAnswerTypes, BasicHandable, SessionHandable } from "../../../../src/components/unifier/response-handler";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
 import { injectionNames } from "../../../../src/injection-names";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
-import { MockHandlerA, MockHandlerASpecificHandable, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
-import { MockHandlerB, MockHandlerBSpecificHandable, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { MockHandlerB, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
