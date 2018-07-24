@@ -61,7 +61,7 @@ export interface BeforeResponseHandler<AnswerType extends BasicAnswerTypes, Cust
  * The AfterResponseHandler does only get the results, as the answers cannot be changed anymore
  */
 export interface AfterResponseHandler<AnswerType extends BasicAnswerTypes> {
-  execute(results: Partial<AnswerType>);
+  execute(results: Partial<AnswerType>): Promise<void>;
 }
 
 /**

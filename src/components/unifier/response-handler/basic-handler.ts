@@ -98,9 +98,11 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     // because specific ResponseHandlers inherits from this BasicHandler and calls super().
     // This prevents DI and this.beforeSendResponseHandler are undefined
     if (this.responseHandlerExtensions) {
-      this.responseHandlerExtensions.beforeExtensions.forEach(beforeResponseHandler => {
-        beforeResponseHandler.execute(this);
+      const beforeResponseHandlerPromises = this.responseHandlerExtensions.beforeExtensions.map(beforeResponseHandler => {
+        return beforeResponseHandler.execute(this);
       });
+
+      await Promise.all(beforeResponseHandlerPromises);
     }
 
     // first get all keys, these are the properties which are filled
@@ -149,9 +151,11 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     // because normal ResponseHandlers inherits from this AbstractResponseHandler and calls super().
     // This prevents DI and this.afterSendResponseHandler are undefined
     if (this.responseHandlerExtensions) {
-      this.responseHandlerExtensions.afterExtensions.forEach(afterResponseHandler => {
+      const afterResponseHandlerPromises = this.responseHandlerExtensions.afterExtensions.map(afterResponseHandler => {
         afterResponseHandler.execute(this.results);
       });
+
+      await Promise.all(afterResponseHandlerPromises);
     }
   }
 
