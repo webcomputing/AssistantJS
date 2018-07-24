@@ -53,7 +53,7 @@ export class HandlerProxyFactory {
        * Trap for all get call.
        * @param target current handler
        * @param propKey to get
-       * @param receiver
+       * @param receiver, the current proxy object
        */
       get(target, propKey, receiver) {
         const propValue = target[propKey];
@@ -61,8 +61,8 @@ export class HandlerProxyFactory {
         const handlerName = handler.constructor.name;
 
         const fakeFunction = function() {
-          // "this" points to the proxy, is necessary to work with method-chaining
-          return this;
+          // "receiver" points to the proxy, is necessary to work with method-chaining
+          return receiver;
         };
 
         // return proxy in case there is no function with the specific name, optional properties MUST have the value null to get here ignored.
@@ -83,8 +83,8 @@ export class HandlerProxyFactory {
         }
 
         return function() {
-          // "this" points to the proxy, is necessary to work with method-chaining
-          return propValue.apply(this, arguments);
+          // "receiver" points to the proxy, is necessary to work with method-chaining
+          return propValue.apply(receiver, arguments);
         };
       },
 
