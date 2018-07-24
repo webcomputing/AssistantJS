@@ -21,6 +21,8 @@ export function SessionDataMixin<CustomTypes extends BasicAnswerTypes, CustomHan
      * or use another SessionStorage like Redis. And it has some more features.
      */
     public setSessionData(sessionData: CustomTypes["sessionData"] | Promise<CustomTypes["sessionData"]>): this {
+      this.failIfInactive();
+
       this.promises.sessionData = { resolver: sessionData };
 
       return this;

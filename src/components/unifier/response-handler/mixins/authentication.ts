@@ -15,6 +15,8 @@ export function AuthenticationMixin<CustomTypes extends BasicAnswerTypes, Custom
     }
 
     public setUnauthenticated(): this {
+      this.failIfInactive();
+
       this.promises.shouldAuthenticate = { resolver: true };
       return this;
     }

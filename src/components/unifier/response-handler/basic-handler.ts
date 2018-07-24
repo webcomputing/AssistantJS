@@ -142,7 +142,7 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     // give results to the specific handler
     this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders());
     if (this.results.shouldSessionEnd) {
-      this.killSession();
+      await this.killSession();
     }
 
     // first check if AfterResponseHandlers are set,
@@ -160,11 +160,15 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
   }
 
   public setEndSession(): this {
+    this.failIfInactive();
+
     this.promises.shouldSessionEnd = { resolver: true };
     return this;
   }
 
   public endSessionWith(text: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>): this {
+    this.failIfInactive();
+
     this.promises.shouldSessionEnd = { resolver: true };
     this.prompt(text);
 
@@ -172,6 +176,8 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
   }
 
   public prompt(inputText: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>): this {
+    this.failIfInactive();
+
     // add a thenMap function to build the correct object from the simple strings
     this.promises.voiceMessage = {
       resolver: Promise.resolve(inputText),
@@ -209,10 +215,10 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     };
   }
 
-  private failIfInactive() {
+  protected failIfInactive() {
     if (this.isSent) {
       throw Error(
-        "This handle is already inactive, an response was already sent. You cannot send text to a platform multiple times in one request. Current response handler: " +
+        "This handle is already inactive, an response was already sent. You cannot send text or any oher data to a platform multiple times in one request. Current response handler: " +
           util.inspect(this)
       );
     }

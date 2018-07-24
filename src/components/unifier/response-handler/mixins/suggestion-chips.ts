@@ -15,6 +15,8 @@ export function SuggestionChipsMixin<CustomTypes extends BasicAnswerTypes, Custo
     }
 
     public setSuggestionChips(suggestionChips: CustomTypes["suggestionChips"] | Promise<CustomTypes["suggestionChips"]>): this {
+      this.failIfInactive();
+
       this.promises.suggestionChips = { resolver: suggestionChips };
       return this;
     }

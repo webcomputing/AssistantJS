@@ -15,6 +15,8 @@ export function CardMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerCon
     }
 
     public setCard(card: CustomTypes["card"] | Promise<CustomTypes["card"]>): this {
+      this.failIfInactive();
+
       this.promises.card = { resolver: card };
       return this;
     }

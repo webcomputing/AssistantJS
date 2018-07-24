@@ -18,6 +18,8 @@ export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandl
       inputText: CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>,
       ...reprompts: Array<CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>>
     ): this {
+      this.failIfInactive();
+
       // add reprompts with remapper function
       if (reprompts && reprompts.length > 0) {
         this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
@@ -29,6 +31,8 @@ export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandl
     public setReprompts(
       reprompts: Array<CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>> | Promise<Array<CustomTypes["voiceMessage"]["text"]>>
     ): this {
+      this.failIfInactive();
+
       // check wether it is an Arry or an Promise
       if (Array.isArray(reprompts)) {
         // add reprompts as Array with remapper function

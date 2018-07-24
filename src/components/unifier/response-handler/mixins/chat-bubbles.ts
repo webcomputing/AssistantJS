@@ -15,6 +15,8 @@ export function ChatBubblesMixin<CustomTypes extends BasicAnswerTypes, CustomHan
     }
 
     public setChatBubbles(chatBubbles: CustomTypes["chatBubbles"] | Promise<CustomTypes["chatBubbles"]>): this {
+      this.failIfInactive();
+
       this.promises.chatBubbles = { resolver: chatBubbles };
       return this;
     }

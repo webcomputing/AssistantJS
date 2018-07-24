@@ -59,8 +59,10 @@ export class PlatformSession implements Session {
 
   /** Stores current session data -> sets them to handler */
   protected async storeSessionData(newSessionData: { [key: string]: string }) {
-    // We cannot send this to null if there are no elements left, because this will always fall back to extraction (if there is data in extraction.)
-    this.handler.setSessionData(this.encode(newSessionData));
+    if (!this.handler.wasSent()) {
+      // We cannot send this to null if there are no elements left, because this will always fall back to extraction (if there is data in extraction.)
+      this.handler.setSessionData(this.encode(newSessionData));
+    }
   }
 
   /** Decodes stored session data */
