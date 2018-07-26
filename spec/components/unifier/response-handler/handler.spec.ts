@@ -41,7 +41,7 @@ describe("BaseHandler", function() {
     this.mockVoiceMessage = "Prompt";
     this.mockSSMLPrompt = "<ssml>Prompt</ssml>";
     this.mockReprompts = ["Reprompt A", "Reprompt B"];
-    this.mockSuggestionChips = [{ displayText: "Suggestion A", spokenText: "Suggestion A" }, { displayText: "Suggestion B", spokenText: "Suggestion A" }];
+    this.mockSuggestionChips = ["Suggestion A", "Suggestion B"];
     this.mockSessionData = "My Mock Session Data";
     this.mockShouldAuthenticate = true;
     this.mockShouldSessionEnd = true;

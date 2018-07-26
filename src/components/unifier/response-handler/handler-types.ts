@@ -19,7 +19,7 @@ export interface BasicAnswerTypes {
   };
 
   /** Minimal type to represent SuggestionChips */
-  suggestionChips: Array<{ displayText: string; spokenText: string }>;
+  suggestionChips: string[];
 
   /** Minimal type to represent ChatBubbles, an array containing all chat messages / chat bubbles to display */
   chatBubbles: string[];
