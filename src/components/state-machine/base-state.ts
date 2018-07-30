@@ -78,7 +78,7 @@ export abstract class BaseState<CurrentTypes extends BasicAnswerTypes, CurrentHa
 
   /** Sends empty response */
   public async unansweredGenericIntent(machine: Transitionable, ...args: any[]): Promise<any> {
-    await this.responseHandler.send();
+    await this.responseHandler.endSessionWith("").send();
   }
 
   /**

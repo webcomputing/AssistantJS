@@ -4,7 +4,8 @@ version 0.4.0
     - Method-Chaining `this.handler.prompt(...).setCard(...).setSuggestionChips(...)`
     - dynamic types and methods based on the installed and used platforms `this.handler.addGoogleTable(...).addAlexaList(...)`. To Work you have to specif a intersection-type like `type MixedTypes = GoogleSpecificTypes & AlexaSpecificTypes; type MixedHandler = GoogleHandler<MixedTypes> & AlexaHandler<MixedTypes>;`
     - every Method can be used either with plain objects or with promises
-    - for ever common feature like SuggestionChips, Authentication or Cards there is a mixin whoch can be extended from a specific ResponseHandler
+    - for every common feature like SuggestionChips, Authentication or Cards there is a mixin which can be used and extended by specific ResponseHandler
+    - removed createAndSendEmptyResponse(), use endSessionWith("") instead.
 
 version 0.3.2
 - fixes intent configuration in generator. Entities will be mapped with utterances only once. (@denselmann)
