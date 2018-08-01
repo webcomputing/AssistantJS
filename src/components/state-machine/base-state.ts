@@ -13,7 +13,7 @@ import { State, Transitionable } from "./public-interfaces";
  */
 
 @injectable()
-export abstract class BaseState<MergedTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedTypes>>
+export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>>
   implements State.Required, Voiceable, TranslateHelper {
   /** Current response handler */
   public responseHandler: MergedHandler;
@@ -40,10 +40,10 @@ export abstract class BaseState<MergedTypes extends BasicAnswerTypes, MergedHand
    * As an alternative to passing all objects on it's own, you can also pass a set of them
    * @param {StateSetupSet} stateSetupSet A set containing response factory, translate helper and extraction.
    */
-  constructor(stateSetupSet: State.SetupSet<MergedTypes, MergedHandler>);
+  constructor(stateSetupSet: State.SetupSet<MergedAnswerTypes, MergedHandler>);
 
   constructor(
-    @unmanaged() responseHandlerOrSet: MergedHandler | State.SetupSet<MergedTypes, MergedHandler>,
+    @unmanaged() responseHandlerOrSet: MergedHandler | State.SetupSet<MergedAnswerTypes, MergedHandler>,
     @unmanaged() translateHelper?: TranslateHelper,
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
@@ -64,10 +64,10 @@ export abstract class BaseState<MergedTypes extends BasicAnswerTypes, MergedHand
         throw new Error("If you pass a StateSetupSet as first parameter, you cannot pass either translateHelper, extraction or logger.");
       }
 
-      this.responseHandler = (responseHandlerOrSet as State.SetupSet<MergedTypes, MergedHandler>).responseHandler;
-      this.translateHelper = (responseHandlerOrSet as State.SetupSet<MergedTypes, MergedHandler>).translateHelper;
-      this.extraction = (responseHandlerOrSet as State.SetupSet<MergedTypes, MergedHandler>).extraction;
-      this.logger = (responseHandlerOrSet as State.SetupSet<MergedTypes, MergedHandler>).logger;
+      this.responseHandler = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).responseHandler;
+      this.translateHelper = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).translateHelper;
+      this.extraction = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).extraction;
+      this.logger = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).logger;
     }
   }
 
@@ -108,7 +108,7 @@ export abstract class BaseState<MergedTypes extends BasicAnswerTypes, MergedHand
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    */
-  public prompt: MergedHandler["prompt"] = (text: MergedTypes["voiceMessage"]["text"], ...args: any[]) => {
+  public prompt: MergedHandler["prompt"] = (text: MergedAnswerTypes["voiceMessage"]["text"], ...args: any[]) => {
     return (this.responseHandler as any).prompt(text, ...args);
   };
 
@@ -116,7 +116,7 @@ export abstract class BaseState<MergedTypes extends BasicAnswerTypes, MergedHand
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  public endSessionWith: MergedHandler["endSessionWith"] = (text: MergedTypes["voiceMessage"]["text"]) => {
+  public endSessionWith: MergedHandler["endSessionWith"] = (text: MergedAnswerTypes["voiceMessage"]["text"]) => {
     return this.responseHandler.endSessionWith(text);
   };
 
@@ -133,7 +133,7 @@ export abstract class BaseState<MergedTypes extends BasicAnswerTypes, MergedHand
     return this.getPlatform();
   }
 
-  private isResponseHandler(container: MergedHandler | State.SetupSet<MergedTypes, MergedHandler>): container is MergedHandler {
+  private isResponseHandler(container: MergedHandler | State.SetupSet<MergedAnswerTypes, MergedHandler>): container is MergedHandler {
     return container instanceof BasicHandler;
   }
 }

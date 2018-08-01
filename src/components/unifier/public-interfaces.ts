@@ -400,7 +400,7 @@ export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHa
 export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, SessionDataMixin, SuggestionChipsMixin } from "./response-handler/mixins";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
-export interface PlatformSpecHelper<AnswerTypes extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerTypes>> {
+export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
   /** Link to assistantJS SpecSetup */
   specSetup: SpecHelper;
 
@@ -411,7 +411,7 @@ export interface PlatformSpecHelper<AnswerTypes extends BasicAnswerTypes, Custom
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<CustomHandler>;
+  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<MergedHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */

@@ -25,8 +25,8 @@ export interface MockHandlerASpecificTypes extends BasicAnswerTypes {
   };
 }
 
-export interface MockHandlerASpecificHandable<CustomTypes extends MockHandlerASpecificTypes> extends BasicHandable<CustomTypes> {
-  setMockHandlerATable(table: CustomTypes["table"] | Promise<CustomTypes["table"]>): this;
+export interface MockHandlerASpecificHandable<MergedAnswerTypes extends MockHandlerASpecificTypes> extends BasicHandable<MergedAnswerTypes> {
+  setMockHandlerATable(table: MergedAnswerTypes["table"] | Promise<MergedAnswerTypes["table"]>): this;
 }
 
 @injectable()

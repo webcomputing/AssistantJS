@@ -6,22 +6,22 @@ import { BasicAnswerTypes } from "../handler-types";
 /**
  * Mixin to add SuggestionChips-Feature
  */
-export function SuggestionChipsMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
-  superHandler: CustomHandlerConstructor
-): Mixin<OptionalHandlerFeatures.SuggestionChips<CustomTypes>> & CustomHandlerConstructor {
-  abstract class SuggestionChipsHandler extends superHandler implements OptionalHandlerFeatures.SuggestionChips<CustomTypes> {
+export function SuggestionChipsMixin<MergedAnswerTypes extends BasicAnswerTypes, MergedHandlerConstructor extends Constructor<BasicHandler<MergedAnswerTypes>>>(
+  superHandler: MergedHandlerConstructor
+): Mixin<OptionalHandlerFeatures.SuggestionChips<MergedAnswerTypes>> & MergedHandlerConstructor {
+  abstract class SuggestionChipsHandler extends superHandler implements OptionalHandlerFeatures.SuggestionChips<MergedAnswerTypes> {
     constructor(...args: any[]) {
       super(...args);
     }
 
-    public setSuggestionChips(suggestionChips: CustomTypes["suggestionChips"] | Promise<CustomTypes["suggestionChips"]>): this {
+    public setSuggestionChips(suggestionChips: MergedAnswerTypes["suggestionChips"] | Promise<MergedAnswerTypes["suggestionChips"]>): this {
       this.failIfInactive();
 
       this.promises.suggestionChips = { resolver: suggestionChips };
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>): any;
+    protected abstract getBody(results: Partial<MergedAnswerTypes>): any;
   }
 
   return SuggestionChipsHandler;

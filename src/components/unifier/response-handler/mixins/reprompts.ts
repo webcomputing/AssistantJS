@@ -6,17 +6,17 @@ import { BasicAnswerTypes } from "../handler-types";
 /**
  * Mixin to add Reprompts-Feature
  */
-export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
-  superHandler: CustomHandlerConstructor
-): Mixin<OptionalHandlerFeatures.Reprompts<CustomTypes>> & CustomHandlerConstructor {
-  abstract class RepromptsHandler extends superHandler implements OptionalHandlerFeatures.Reprompts<CustomTypes> {
+export function RepromptsMixin<MergedAnswerTypes extends BasicAnswerTypes, MergedHandlerConstructor extends Constructor<BasicHandler<MergedAnswerTypes>>>(
+  superHandler: MergedHandlerConstructor
+): Mixin<OptionalHandlerFeatures.Reprompts<MergedAnswerTypes>> & MergedHandlerConstructor {
+  abstract class RepromptsHandler extends superHandler implements OptionalHandlerFeatures.Reprompts<MergedAnswerTypes> {
     constructor(...args: any[]) {
       super(...args);
     }
 
     public prompt(
-      inputText: CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>,
-      ...reprompts: Array<CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>>
+      inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>,
+      ...reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
     ): this {
       this.failIfInactive();
 
@@ -29,7 +29,9 @@ export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandl
     }
 
     public setReprompts(
-      reprompts: Array<CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>> | Promise<Array<CustomTypes["voiceMessage"]["text"]>>
+      reprompts:
+        | Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+        | Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>
     ): this {
       this.failIfInactive();
 
@@ -48,17 +50,17 @@ export function RepromptsMixin<CustomTypes extends BasicAnswerTypes, CustomHandl
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>): any;
+    protected abstract getBody(results: Partial<MergedAnswerTypes>): any;
 
     /**
      * Builds the Remapper for Reprompts in an Array of promises and strings
      * @param reprompts
      */
     private getRepromptArrayRemapper(
-      reprompts: Array<CustomTypes["voiceMessage"]["text"] | Promise<CustomTypes["voiceMessage"]["text"]>>
+      reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
     ): {
-      resolver: Promise<Array<CustomTypes["voiceMessage"]["text"]>>;
-      thenMap: (finaleReprompts: Array<CustomTypes["voiceMessage"]["text"]>) => CustomTypes["reprompts"];
+      resolver: Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>;
+      thenMap: (finaleReprompts: Array<MergedAnswerTypes["voiceMessage"]["text"]>) => MergedAnswerTypes["reprompts"];
     } {
       return {
         resolver: Promise.all(reprompts),

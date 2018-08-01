@@ -15,22 +15,24 @@ export interface MockHandlerBSpecificTypes extends BasicAnswerTypes {
   };
 }
 
-export interface MockHandlerBSpecificHandable<CustomTypes extends MockHandlerBSpecificTypes> extends BasicHandable<CustomTypes> {
-  setMockHandlerBList(list: CustomTypes["list"]): this;
+export interface MockHandlerBSpecificHandable<MergedAnswerTypes extends MockHandlerBSpecificTypes> extends BasicHandable<MergedAnswerTypes> {
+  setMockHandlerBList(list: MergedAnswerTypes["list"]): this;
 }
 
 @injectable()
-export class MockHandlerB<T extends MockHandlerBSpecificTypes> extends BasicHandler<T> implements MockHandlerBSpecificHandable<T> {
+export class MockHandlerB<MergedAnswerTypes extends MockHandlerBSpecificTypes> extends BasicHandler<MergedAnswerTypes>
+  implements MockHandlerBSpecificHandable<MergedAnswerTypes> {
   constructor(
     @inject(injectionNames.current.requestContext) requestContext: RequestContext,
     @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,
     @inject(injectionNames.current.killSessionService) killSession: () => Promise<void>,
-    @inject(injectionNames.current.responseHandlerExtensions) responseHandlerExtensions: ResponseHandlerExtensions<T, MockHandlerB<T>>
+    @inject(injectionNames.current.responseHandlerExtensions)
+    responseHandlerExtensions: ResponseHandlerExtensions<MergedAnswerTypes, MockHandlerB<MergedAnswerTypes>>
   ) {
     super(requestContext, extraction, killSession, responseHandlerExtensions);
   }
 
-  public setMockHandlerBList(list: T["list"]): this {
+  public setMockHandlerBList(list: MergedAnswerTypes["list"]): this {
     this.promises.list = { resolver: list };
     return this;
   }

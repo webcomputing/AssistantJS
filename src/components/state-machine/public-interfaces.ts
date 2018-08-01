@@ -75,7 +75,7 @@ export namespace State {
   export type Factory = <T extends State.Required = State.Required>(stateName?: string) => T;
 
   /** Set containing all objects needed to setup a BaseState. */
-  export interface SetupSet<MergedTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedTypes>> {
+  export interface SetupSet<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
     responseHandler: MergedHandler;
     translateHelper: TranslateHelper;
     extraction: MinimalRequestExtraction;

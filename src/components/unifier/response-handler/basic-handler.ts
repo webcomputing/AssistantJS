@@ -17,7 +17,7 @@ import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./ha
  * For the docs of the Methods see also the implemented interfaces
  */
 @injectable()
-export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B> {
+export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements BasicHandable<MergedAnswerTypes> {
   /**
    * As every call can add a Promise, this property is used to save all Promises
    *
@@ -39,19 +39,19 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
    * and can build and provide the correct object.
    */
   protected promises: {
-    [key in keyof B]?: {
+    [key in keyof MergedAnswerTypes]?: {
       /**
        * 1.) Promise of a final object
        * 2.) final object itself
        * 3.) Promise of intermediate Object which is given to the thenMap-function
        * 4.) intermediate Object which is given to the thenMap-function
        */
-      resolver: Promise<B[key]> | B[key] | Promise<any> | any;
+      resolver: Promise<MergedAnswerTypes[key]> | MergedAnswerTypes[key] | Promise<any> | any;
 
       /**
        * function to build the final object from an intermediate object
        */
-      thenMap?: (value: any) => B[key] | Promise<B[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
+      thenMap?: (value: any) => MergedAnswerTypes[key] | Promise<MergedAnswerTypes[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
     }
   } = {} as any;
 
@@ -70,7 +70,7 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
    * }
    * </code></pre>
    */
-  private results: Partial<B> = {} as any;
+  private results: Partial<MergedAnswerTypes> = {} as any;
 
   /**
    * property to save if the answers were sent
@@ -83,7 +83,8 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     @inject(injectionNames.current.requestContext) private requestContext: RequestContext,
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
     @inject(injectionNames.current.killSessionService) private killSession: () => Promise<void>,
-    @inject(injectionNames.current.responseHandlerExtensions) private responseHandlerExtensions: ResponseHandlerExtensions<B, BasicHandable<B>>
+    @inject(injectionNames.current.responseHandlerExtensions)
+    private responseHandlerExtensions: ResponseHandlerExtensions<MergedAnswerTypes, BasicHandable<MergedAnswerTypes>>
   ) {
     this.responseCallback = requestContext.responseCallback;
   }
@@ -170,7 +171,7 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     return this;
   }
 
-  public endSessionWith(text: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>): this {
+  public endSessionWith(text: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
     this.failIfInactive();
 
     this.promises.shouldSessionEnd = { resolver: true };
@@ -179,7 +180,7 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
     return this;
   }
 
-  public prompt(inputText: B["voiceMessage"]["text"] | Promise<B["voiceMessage"]["text"]>): this {
+  public prompt(inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
     this.failIfInactive();
 
     // add a thenMap function to build the correct object from the simple strings
@@ -197,7 +198,7 @@ export class BasicHandler<B extends BasicAnswerTypes> implements BasicHandable<B
    * @param results one file which contains all answers/prompts
    * @returns e.g. the Object to send as result to the calling service
    */
-  protected getBody(results: Partial<B>): any {
+  protected getBody(results: Partial<MergedAnswerTypes>): any {
     throw new Error("Not implemented");
   }
 

@@ -52,8 +52,8 @@ export interface BasicAnswerTypes {
  * Interface to Implement if you want to use beforeSendResponse extensionpoint
  * The BeforeResponseHandler gets the Handler to add or change values
  */
-export interface BeforeResponseHandler<AnswerType extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerType>> {
-  execute(handler: CustomHandler): Promise<void>;
+export interface BeforeResponseHandler<MergedAnswerType extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerType>> {
+  execute(handler: MergedHandler): Promise<void>;
 }
 
 /**
@@ -67,9 +67,9 @@ export interface AfterResponseHandler<AnswerType extends BasicAnswerTypes> {
 /**
  * Interface to get all Before- and AfterResponseHandler
  */
-export interface ResponseHandlerExtensions<AnswerType extends BasicAnswerTypes, CustomHandler extends BasicHandable<AnswerType>> {
-  beforeExtensions: Array<BeforeResponseHandler<AnswerType, CustomHandler>>;
-  afterExtensions: Array<AfterResponseHandler<AnswerType>>;
+export interface ResponseHandlerExtensions<MergedAnswerType extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerType>> {
+  beforeExtensions: Array<BeforeResponseHandler<MergedAnswerType, MergedHandler>>;
+  afterExtensions: Array<AfterResponseHandler<MergedAnswerType>>;
 }
 
 /**

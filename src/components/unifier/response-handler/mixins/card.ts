@@ -6,22 +6,22 @@ import { BasicAnswerTypes } from "../handler-types";
 /**
  * Mixin to add Card-Feature
  */
-export function CardMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
-  superHandler: CustomHandlerConstructor
-): Mixin<OptionalHandlerFeatures.Card<CustomTypes>> & CustomHandlerConstructor {
-  abstract class CardHandler extends superHandler implements OptionalHandlerFeatures.Card<CustomTypes> {
+export function CardMixin<MergedAnswerTypes extends BasicAnswerTypes, MergedHandlerConstructor extends Constructor<BasicHandler<MergedAnswerTypes>>>(
+  superHandler: MergedHandlerConstructor
+): Mixin<OptionalHandlerFeatures.Card<MergedAnswerTypes>> & MergedHandlerConstructor {
+  abstract class CardHandler extends superHandler implements OptionalHandlerFeatures.Card<MergedAnswerTypes> {
     constructor(...args: any[]) {
       super(...args);
     }
 
-    public setCard(card: CustomTypes["card"] | Promise<CustomTypes["card"]>): this {
+    public setCard(card: MergedAnswerTypes["card"] | Promise<MergedAnswerTypes["card"]>): this {
       this.failIfInactive();
 
       this.promises.card = { resolver: card };
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>): any;
+    protected abstract getBody(results: Partial<MergedAnswerTypes>): any;
   }
 
   return CardHandler;

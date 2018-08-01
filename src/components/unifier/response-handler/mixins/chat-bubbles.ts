@@ -6,22 +6,22 @@ import { BasicAnswerTypes } from "../handler-types";
 /**
  * Mixin to add ChatBubbles-Feature
  */
-export function ChatBubblesMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
-  superHandler: CustomHandlerConstructor
-): Mixin<OptionalHandlerFeatures.ChatBubbles<CustomTypes>> & CustomHandlerConstructor {
-  abstract class ChatBubblesHandler extends superHandler implements OptionalHandlerFeatures.ChatBubbles<CustomTypes> {
+export function ChatBubblesMixin<MergedAnswerTypes extends BasicAnswerTypes, MergedHandlerConstructor extends Constructor<BasicHandler<MergedAnswerTypes>>>(
+  superHandler: MergedHandlerConstructor
+): Mixin<OptionalHandlerFeatures.ChatBubbles<MergedAnswerTypes>> & MergedHandlerConstructor {
+  abstract class ChatBubblesHandler extends superHandler implements OptionalHandlerFeatures.ChatBubbles<MergedAnswerTypes> {
     constructor(...args: any[]) {
       super(...args);
     }
 
-    public setChatBubbles(chatBubbles: CustomTypes["chatBubbles"] | Promise<CustomTypes["chatBubbles"]>): this {
+    public setChatBubbles(chatBubbles: MergedAnswerTypes["chatBubbles"] | Promise<MergedAnswerTypes["chatBubbles"]>): this {
       this.failIfInactive();
 
       this.promises.chatBubbles = { resolver: chatBubbles };
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>): any;
+    protected abstract getBody(results: Partial<MergedAnswerTypes>): any;
   }
 
   return ChatBubblesHandler;

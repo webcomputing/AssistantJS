@@ -6,9 +6,9 @@ import { BasicAnswerTypes } from "../handler-types";
 /**
  * Mixin to add Authentication-Feature
  */
-export function AuthenticationMixin<CustomTypes extends BasicAnswerTypes, CustomHandlerConstructor extends Constructor<BasicHandler<CustomTypes>>>(
-  superHandler: CustomHandlerConstructor
-): Mixin<OptionalHandlerFeatures.Authentication> & CustomHandlerConstructor {
+export function AuthenticationMixin<MergedAnswerTypes extends BasicAnswerTypes, MergedHandlerConstructor extends Constructor<BasicHandler<MergedAnswerTypes>>>(
+  superHandler: MergedHandlerConstructor
+): Mixin<OptionalHandlerFeatures.Authentication> & MergedHandlerConstructor {
   abstract class AuthenticationHandler extends superHandler implements OptionalHandlerFeatures.Authentication {
     constructor(...args: any[]) {
       super(...args);
@@ -21,7 +21,7 @@ export function AuthenticationMixin<CustomTypes extends BasicAnswerTypes, Custom
       return this;
     }
 
-    protected abstract getBody(results: Partial<CustomTypes>): any;
+    protected abstract getBody(results: Partial<MergedAnswerTypes>): any;
   }
 
   return AuthenticationHandler;
