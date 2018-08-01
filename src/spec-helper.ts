@@ -57,15 +57,15 @@ export class SpecHelper {
     responseHandler?: { new (...args: any[]): BasicHandable<any> }
   ) {
     // Get request handle instance and create child container of it
-    const requestHandle = this.setup.container.inversifyInstance.get(GenericRequestHandler);
-    const childContainer = requestHandle.createChildContainer(this.setup.container);
+    const requestHandler = this.setup.container.inversifyInstance.get(GenericRequestHandler);
+    const childContainer = requestHandler.createChildContainer(this.setup.container);
 
     // Bind request context
-    requestHandle.bindContextToContainer(requestContext, childContainer, "core:root:current-request-context");
+    requestHandler.bindContextToContainer(requestContext, childContainer, "core:root:current-request-context");
 
     // Add minimal extraction if wanted
     if (minimalExtraction !== null) {
-      requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
+      requestHandler.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
     }
 
     // Add minimal response handler

@@ -416,3 +416,5 @@ export interface PlatformSpecHelper<AnswerTypes extends BasicAnswerTypes, Custom
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
+
+export type OptionallyPromise<T> = T | Promise<T>;
