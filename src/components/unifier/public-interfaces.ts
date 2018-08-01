@@ -291,7 +291,7 @@ export namespace OptionalExtractions {
 
   /** For internal feature checking since TypeScript does not emit interfaces */
   // tslint:disable-next-line:variable-name
-  export const FeatureChecker: { [key: string]: string[] } = {
+  export const FeatureChecker = {
     /** Are OAuth tokens available? */
     OAuthExtraction: ["oAuthToken"] /** Is the spoken text available? */,
     SpokenTextExtraction: ["spokenText"] /** Is a platform-specific temporal auth token available? */,
@@ -379,7 +379,7 @@ export namespace OptionalHandlerFeatures {
   }
 
   // tslint:disable-next-line:variable-name
-  export const FeatureChecker: { [key: string]: string[] } = {
+  export const FeatureChecker = {
     Authentication: ["setUnauthenticated"],
     Card: ["setCard"],
     ChatBubbles: ["setChatBubbles"],
@@ -417,4 +417,7 @@ export interface PlatformSpecHelper<AnswerTypes extends BasicAnswerTypes, Custom
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
 
+/**
+ * Combination of normal Type and Promise of Type
+ */
 export type OptionallyPromise<T> = T | Promise<T>;
