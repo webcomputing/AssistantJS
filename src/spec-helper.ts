@@ -177,11 +177,11 @@ export class SpecHelper {
   /**
    * This Method returns the resolved Results from the current ResponseHandler
    */
-  public getResponseResults<CurrentTypes extends BasicAnswerTypes = BasicAnswerTypes>(): Partial<CurrentTypes> {
-    const requestHandler: BasicHandable<CurrentTypes> = this.setup.container.inversifyInstance.get(injectionNames.current.responseHandler);
+  public getResponseResults<MergedTypes extends BasicAnswerTypes = BasicAnswerTypes>(): Partial<MergedTypes> {
+    const requestHandler: BasicHandable<MergedTypes> = this.setup.container.inversifyInstance.get(injectionNames.current.responseHandler);
 
-    const results = (requestHandler as any).results as Partial<CurrentTypes>;
-    const promises = (requestHandler as any).promises as { [key in keyof CurrentTypes]?: any };
+    const results = (requestHandler as any).results as Partial<MergedTypes>;
+    const promises = (requestHandler as any).promises as { [key in keyof MergedTypes]?: any };
 
     for (const key in promises) {
       if (promises.hasOwnProperty(key) && (!results.hasOwnProperty(key) || !results[key])) {

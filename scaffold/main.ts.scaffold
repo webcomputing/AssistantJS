@@ -1,8 +1,8 @@
-import { injectionNames, State, Transitionable } from "assistant-source";
+import { injectionNames, Transitionable } from "assistant-source";
 import { inject, injectable } from "inversify";
 
 import { ApplicationState } from "./application";
-import { CurrentAnswerTypes, CurrentHandler } from "../../config/handler";
+import { MergedSetupSet } from "../../config/handler";
 
 /**
  * This is your MainState.
@@ -12,9 +12,7 @@ import { CurrentAnswerTypes, CurrentHandler } from "../../config/handler";
 
 @injectable()
 export class MainState extends ApplicationState {
-  constructor(
-    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet<CurrentAnswerTypes, CurrentHandler>
-  ) {
+  constructor(@inject(injectionNames.current.stateSetupSet) stateSetupSet: MergedSetupSet) {
     super(stateSetupSet);
   }
 

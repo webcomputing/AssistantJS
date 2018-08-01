@@ -3,10 +3,10 @@ import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
-type CurrentHandler = MockHandlerA<MockHandlerASpecificTypes>;
+type MergedHandler = MockHandlerA<MockHandlerASpecificTypes>;
 
 interface CurrentThisContext extends ThisContext {
-  handlerInstance: CurrentHandler & { getBody: () => void };
+  handlerInstance: MergedHandler & { getBody: () => void };
 
   mockCard: MockHandlerASpecificTypes["card"];
   mockChatBubbles: MockHandlerASpecificTypes["chatBubbles"];
