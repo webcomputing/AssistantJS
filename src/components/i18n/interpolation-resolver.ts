@@ -18,7 +18,7 @@ export class InterpolationResolver implements InterpolationResolverInterface {
   ) {
     if (typeof missingInterpolationExtensions === "undefined") {
       // tslint:disable-next-line:no-parameter-reassignment
-      missingInterpolationExtensions = [];
+      this.missingInterpolationExtensions = [];
     }
   }
 
@@ -61,7 +61,7 @@ export class InterpolationResolver implements InterpolationResolverInterface {
         this.logger.warn(
           `Missing translation interpolation value for {{${interpolation}}}. Neither you nor one of the ${
             this.missingInterpolationExtensions.length
-          } registered missingInterpolationExtensions provided a value. Now using "" instead.`
+          } registered missingInterpolationExtensions provided a value. Now using '' instead.`
         );
         replacement = "";
       }
@@ -74,7 +74,7 @@ export class InterpolationResolver implements InterpolationResolverInterface {
 
     /** replace interpolations in given Text with replacements */
     resultSets.forEach(set => {
-      resolvedText = translatedValue.replace(TEMPORARY_INTERPOLATION_START + set.interpolation + TEMPORARY_INTERPOLATION_END, set.replacement);
+      resolvedText = resolvedText.replace(TEMPORARY_INTERPOLATION_START + set.interpolation + TEMPORARY_INTERPOLATION_END, set.replacement);
     });
 
     return resolvedText;
