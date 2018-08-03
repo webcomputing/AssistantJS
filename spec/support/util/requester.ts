@@ -18,7 +18,7 @@ export class RequestProxy {
   }
 }
 
-export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
+export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, () => void]> {
   const specSetup = new SpecSetup(assistantJs);
   const stopFunction = await specSetup.withServer(expressApp);
   return [new RequestProxy(), stopFunction];

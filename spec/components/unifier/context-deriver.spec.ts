@@ -15,9 +15,12 @@ import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-ext
 describe("ContextDeriver", function() {
   describe("with server started", function() {
     let request: RequestProxy;
-    let stopServer: Function;
+    let stopServer: () => void;
 
     beforeEach(function() {
+      // Remove emitting of warnings
+      this.specHelper.bindSpecLogger("error");
+
       configureI18nLocale((this as any).container, false);
     });
 

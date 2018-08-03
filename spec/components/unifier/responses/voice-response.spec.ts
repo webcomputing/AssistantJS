@@ -4,9 +4,12 @@ import { createRequestScope } from "../../../support/util/setup";
 
 describe("VoiceResponse", function() {
   beforeEach(function() {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
-    this.handler = {...this.handler,  isSSML: false};
+    this.handler = { ...this.handler, isSSML: false };
     this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
 
     this.voiceResponse = this.responseFactory.createVoiceResponse();

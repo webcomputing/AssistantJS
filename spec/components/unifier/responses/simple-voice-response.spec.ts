@@ -14,6 +14,9 @@ interface CurrentThisContext {
 
 describe("VoiceResponse", function() {
   beforeEach(function(this: CurrentThisContext) {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.logger = this.container.inversifyInstance.get("core:root:current-logger");

@@ -14,6 +14,9 @@ import { SuggestionChipsResponse } from "../../../src/components/unifier/respons
 
 describe("ResponseFactory", function() {
   beforeEach(function() {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.responseFactory = this.container.inversifyInstance.get("core:unifier:current-response-factory");
@@ -142,7 +145,7 @@ describe("ResponseFactory", function() {
 
       it("sends an empty response", function() {
         this.sent = false;
-        this.handler = {...this.handler,  sendResponse: () => (this.sent = true)};
+        this.handler = { ...this.handler, sendResponse: () => (this.sent = true) };
         this.responseFactory.handler = this.handler;
 
         this.responseFactory.createAndSendEmptyResponse();
@@ -153,7 +156,7 @@ describe("ResponseFactory", function() {
 
   describe("with handler as SSML enabled handler", function() {
     beforeEach(function() {
-      this.handler = {...this.handler,  isSSML: false};
+      this.handler = { ...this.handler, isSSML: false };
       this.responseFactory.handler = this.handler;
     });
 
@@ -173,7 +176,7 @@ describe("ResponseFactory", function() {
 
   describe("with handler as chat messages enabled handler", function() {
     beforeEach(function() {
-      this.handler = {...this.handler,  chatBubbles: null};
+      this.handler = { ...this.handler, chatBubbles: null };
       this.responseFactory.handler = this.handler;
     });
 
@@ -186,7 +189,7 @@ describe("ResponseFactory", function() {
 
   describe("with handler as suggestion chips enabled handler", function() {
     beforeEach(function() {
-      this.handler = {...this.handler,  suggestionChips: null};
+      this.handler = { ...this.handler, suggestionChips: null };
       this.responseFactory.handler = this.handler;
     });
 
@@ -200,9 +203,11 @@ describe("ResponseFactory", function() {
   describe("with handler as OAuth enabled handler", function() {
     beforeEach(function() {
       this.sent = false;
-      this.handler = {...this.handler, 
+      this.handler = {
+        ...this.handler,
         sendResponse: () => (this.sent = true),
-        forceAuthenticated: false};
+        forceAuthenticated: false,
+      };
       this.responseFactory.handler = this.handler;
     });
 

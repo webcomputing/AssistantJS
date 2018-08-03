@@ -1,12 +1,19 @@
 import { Container } from "inversify-components";
 import { RequestContext } from "../../../src/components/root/public-interfaces";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { RequestProxy, withServer } from "../../support/util/requester";
 
 describe("GenericRequestHelper", function() {
+  beforeEach(async function() {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
+    configureI18nLocale(this.container);
+  });
+
   describe("resulting context object", function() {
     let request: RequestProxy;
-    let stopServer: Function;
-    let requestContext: RequestContext;
+    let stopServer: () => void;
     const diContextName = "core:root:current-request-context";
 
     beforeEach(async function(done) {

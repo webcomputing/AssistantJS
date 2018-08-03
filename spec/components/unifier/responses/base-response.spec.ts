@@ -4,6 +4,9 @@ import { createRequestScope } from "../../../support/util/setup";
 
 describe("BaseResponse", function() {
   beforeEach(function() {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
     createRequestScope(this.specHelper);
     this.handler = this.container.inversifyInstance.get("core:unifier:current-response-handler");
     this.logger = this.container.inversifyInstance.get("core:root:current-logger");
