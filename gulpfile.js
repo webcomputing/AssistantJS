@@ -37,6 +37,8 @@ function runJasmine(file) {
 /** Default task: Cleans build files, executes linter, builds project. Is executed automatically if using "gulp". Does not emit sourcefiles, good for deployment. */
 gulp.task("default", ["build-sources", "build-dts", "test-coverage"]);
 
+gulp.task("build", ["build-sources", "build-dts"]);
+
 /** Cleans project: Removes build folders ("lib", "dts", ".nyc_output") */
 gulp.task("clean", function() {
   return gulp.src(["js", "lib", "dts", ".nyc_output", "coverage"], { read: false }).pipe(clean());
@@ -124,6 +126,7 @@ const tsDtsProject = tsc.createProject("tsconfig.json", {
   noResolve: false,
   typescript: require("typescript"),
 });
+
 gulp.task("build-dts", ["clean"], function() {
   return gulp
     .src(SOURCES)

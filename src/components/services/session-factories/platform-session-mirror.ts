@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
-import { featureIsAvailable } from "../../../components/unifier/feature-checker";
 import { injectionNames } from "../../../injection-names";
+import { featureIsAvailable } from "../../unifier/feature-checker";
 import {
   BeforeResponseHandler,
   MinimalRequestExtraction,

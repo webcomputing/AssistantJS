@@ -1,6 +1,5 @@
 import { ComponentDescriptor, Container, ContainerImpl, MainApplication } from "inversify-components";
-
-import * as internalComponents from "./components/index";
+import * as internalComponents from "./components";
 
 export class AssistantJSSetup {
   public static globalContainer = new ContainerImpl();
