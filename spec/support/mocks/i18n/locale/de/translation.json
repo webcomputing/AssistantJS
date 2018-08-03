@@ -4,6 +4,7 @@
   },
   "multiple": ["a", "b"],
   "var": "a{{var}}",
+  "multipleVars": "a{{firstVar}}b{{secondVar}}c{{thirdVar}}",
   "mainState": {
     "testIntent": {
       "embedded": {
