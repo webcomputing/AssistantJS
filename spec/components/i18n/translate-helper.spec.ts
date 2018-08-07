@@ -1,18 +1,5 @@
-import { injectable } from "inversify";
-import { Container } from "inversify-components";
-import { MissingInterpolationExtension } from "../../../src/assistant-source";
-import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
-import { TranslateHelper } from "../../../src/components/i18n/translate-helper";
-import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
-import { injectionNames } from "../../../src/injection-names";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
-
-interface CurrentThisContext {
-  container: Container;
-  missingInterpolationExtension: MissingInterpolationExtension;
-  translateHelper: TranslateHelper;
-}
 
 describe("TranslateHelper", function() {
   beforeEach(function() {
@@ -224,41 +211,6 @@ describe("TranslateHelper", function() {
           });
         });
       });
-    });
-  });
-
-  describe("missingInterpolationHandler", function() {
-    beforeEach(function(this: CurrentThisContext) {
-      @injectable()
-      class MockMissingInterpolationExtension implements MissingInterpolationExtension {
-        public execute(generatorClassName: string): string | undefined {
-          return "test";
-        }
-      }
-
-      this.container.inversifyInstance
-        .bind(componentInterfaces.missingInterpolation)
-        .to(MockMissingInterpolationExtension)
-        .inSingletonScope();
-
-      this.missingInterpolationExtension = this.container.inversifyInstance.get<MissingInterpolationExtension>(componentInterfaces.missingInterpolation);
-      spyOn(this.missingInterpolationExtension, "execute").and.callThrough();
-      this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
-    });
-
-    it("executes MissingInterpolationExtensions if interpolation is missing", async function(this: CurrentThisContext) {
-      await this.translateHelper.t("templateSyntaxSmall");
-      expect(this.missingInterpolationExtension.execute).toHaveBeenCalled();
-    });
-
-    it("replaces interpolation with the return value of execute-method of MissingInterpolationExtension", async function(this: CurrentThisContext) {
-      const translation = await this.translateHelper.t("templateSyntaxSmall");
-      expect(translation).toContain("test");
-    });
-
-    it("does not call missingInterpolationExtensions if all interpolations are present", async function(this: CurrentThisContext) {
-      await this.translateHelper.t("noInterpolation");
-      expect(this.missingInterpolationExtension.execute).not.toHaveBeenCalled();
     });
   });
 });

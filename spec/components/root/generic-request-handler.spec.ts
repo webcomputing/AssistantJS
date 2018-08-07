@@ -1,5 +1,6 @@
 import { RequestContext } from "../../../src/components/root/public-interfaces";
 import { AssistantJSSetup } from "../../../src/setup";
+import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { RequestProxy, withServer } from "../../support/util/requester";
 import { ThisContext } from "../../this-context";
 
@@ -12,6 +13,13 @@ interface CurrentThisContext extends ThisContext {
 }
 
 describe("GenericRequestHelper", function() {
+  beforeEach(async function() {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
+    configureI18nLocale(this.container);
+  });
+
   describe("resulting context object", function() {
     beforeEach(async function(this: CurrentThisContext) {
       this.diContextName = "core:root:current-request-context";

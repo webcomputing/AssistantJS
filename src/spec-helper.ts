@@ -11,7 +11,7 @@ import { BasicHandable, intent, MinimalRequestExtraction } from "./components/un
 
 import { Constructor } from "./assistant-source";
 import { FilterSetup } from "./components/state-machine/filter-setup";
-import { BasicAnswerTypes, BasicHandler } from "./components/unifier/response-handler";
+import { BasicAnswerTypes } from "./components/unifier/response-handler";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
@@ -29,8 +29,16 @@ export class SpecHelper {
    * @param autobind If true, calls setup.autobind()
    * @param useChilds If set to false, does not set child containers
    * @param autoSetup If set to true, registers internal components
+   * @param minimumLogLevel If you do not enable logging in specs explicitly using SPEC_LOGS=true, this is the minimum level applied to logger.
    */
-  public prepare(states: State.Constructor[] = [], filters: Array<Constructor<Filter>> = [], autoBind = true, useChilds = false, autoSetup = true) {
+  public prepare(
+    states: State.Constructor[] = [],
+    filters: Array<Constructor<Filter>> = [],
+    autoBind = true,
+    useChilds = false,
+    autoSetup = true,
+    minimumLogLevel: Logger.LogLevel = "warn"
+  ) {
     if (autoSetup) this.setup.registerInternalComponents();
     if (states.length > 0) this.registerStates(states);
     if (filters.length > 0) this.registerFilters(filters);
@@ -40,7 +48,7 @@ export class SpecHelper {
 
     // Change logger unless env variable is set
     const specLogging = process.env.SPEC_LOGS || process.env.SPECS_LOG || process.env.SPECS_LOGS || process.env.LOG_SPECS;
-    if (!(specLogging === "true")) this.bindSpecLogger();
+    if (!(specLogging === "true")) this.bindSpecLogger(minimumLogLevel);
   }
 
   /**
@@ -86,15 +94,15 @@ export class SpecHelper {
    * @param stateName Name of state to run. If not passed, uses state in session
    * @param intent Name of intent to run. If not passed, uses extracted intent
    */
-  public async runMachine(stateName?: string, intent?: intent) {
+  public async runMachine(stateName?: string, runIntent?: intent) {
     if (
       this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") &&
       this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")
     ) {
       // get current Extraction, set intent and bind it back to
       const extraction = this.setup.container.inversifyInstance.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-      if (intent) {
-        extraction.intent = intent;
+      if (runIntent) {
+        extraction.intent = runIntent;
       }
       this.setup.container.inversifyInstance.unbind("core:unifier:current-extraction");
       this.setup.container.inversifyInstance.bind<MinimalRequestExtraction>("core:unifier:current-extraction").toConstantValue(extraction);
@@ -145,11 +153,11 @@ export class SpecHelper {
   /**
    * Changes logger to a new one without any streams configured. Makes the logger silent.
    */
-  public bindSpecLogger() {
+  public bindSpecLogger(minimumLevel: Logger.LogLevel) {
     this.setup.container.inversifyInstance.unbind(injectionNames.logger);
     this.setup.container.inversifyInstance
       .bind<Logger>(injectionNames.logger)
-      .toConstantValue(createLogger({ name: "assistantjs-testing", streams: [{ level: "error", stream: process.stdout }] }));
+      .toConstantValue(createLogger({ name: "assistantjs-testing", streams: [{ level: minimumLevel, stream: process.stdout }] }));
   }
 
   /**
@@ -158,7 +166,7 @@ export class SpecHelper {
    *
    * @return Promise<Function> stopFunction If you call this function, server will be stopped.
    */
-  public withServer(expressApp: express.Express = express()): Promise<Function> {
+  public withServer(expressApp: express.Express = express()): Promise<(() => void)> {
     return new Promise(resolve => {
       this.setup.run(
         new ServerApplication(

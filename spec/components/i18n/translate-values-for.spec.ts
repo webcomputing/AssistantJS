@@ -5,14 +5,16 @@ import { createRequestScope } from "../../support/util/setup";
 
 describe("translateValuesFor", function() {
   beforeEach(function() {
+    // Remove emitting of warnings
+    this.specHelper.bindSpecLogger("error");
+
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
     this.translateValuesFor = this.container.inversifyInstance.get(injectionNames.current.i18nTranslateValuesFor);
-  })
+  });
 
   it("returns all values of given key", async function() {
-
-    const results = await this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+    const results = await this.translateValuesFor("templateSyntaxSmall", { name: "my name" });
     expect(results).toEqual(["hello my name", "hi my name", "welcome my name"]);
   });
 
@@ -22,7 +24,7 @@ describe("translateValuesFor", function() {
     });
 
     it("does not change behaviour of translateHelper.t", async function() {
-      await this.translateValuesFor("templateSyntaxSmall", { "name": "my name" });
+      await this.translateValuesFor("templateSyntaxSmall", { name: "my name" });
       expect(this.translateHelper.t("templateSyntaxSmall") as string).not.toContain(arraySplitter);
     });
   });

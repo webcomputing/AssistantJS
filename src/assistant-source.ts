@@ -32,3 +32,8 @@ export type Constructor<T> = new (...args: any[]) => T;
 export interface Mixin<T> {
   new (...args: any[]): T;
 }
+
+// Export decorators
+export { stayInContext } from "./components/state-machine/decorators/stay-in-context-decorator";
+export { clearContext } from "./components/state-machine/decorators/clear-context-decorator";
+export { filter } from "./components/state-machine/filter-decorator";

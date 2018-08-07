@@ -1,8 +1,5 @@
-import * as request from "request-promise";
-export { RequestPromise } from "request-promise";
-import * as timeout from "connect-timeout";
 import * as express from "express";
-import { Container } from "inversify-components";
+import * as request from "request-promise";
 
 import { AssistantJSSetup } from "../../../src/setup";
 import { SpecHelper } from "../../../src/spec-helper";
@@ -18,7 +15,7 @@ export class RequestProxy {
   }
 }
 
-export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, Function]> {
+export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, () => void]> {
   const specSetup = new SpecHelper(assistantJs);
   const stopFunction = await specSetup.withServer(expressApp);
   return [new RequestProxy(), stopFunction];
