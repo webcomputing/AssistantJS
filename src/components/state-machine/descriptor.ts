@@ -117,18 +117,17 @@ export const descriptor: ComponentDescriptor = {
 
       // Provider for context states. Returns array of states or empty array if no state is present.
       bindService.bindGlobalService("current-context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
-        return () => {
+        return async (): Promise<Array<{ instance: State.Required; name: string }>> => {
           const factory = context.container.get<Function>("core:state-machine:state-factory");
-          return context.container
-            .get<() => Session>(injectionNames.current.sessionFactory)()
-            .get("__context_states")
-            .then(contextStates => {
-              if (contextStates) {
-                const contextStatesArr: string[] = JSON.parse(contextStates);
-                return Array.isArray(contextStatesArr) ? contextStatesArr.map(stateName => ({ instance: factory(stateName), name: stateName })) : [];
-              }
-              return [];
-            });
+
+          const session = context.container.get<() => Session>(injectionNames.current.sessionFactory)();
+          const contextStates = await session.get("__context_states");
+
+          if (contextStates) {
+            const contextStatesArr: string[] = JSON.parse(contextStates);
+            return Array.isArray(contextStatesArr) ? contextStatesArr.map(stateName => ({ instance: factory(stateName), name: stateName })) : [];
+          }
+          return [];
         };
       });
 

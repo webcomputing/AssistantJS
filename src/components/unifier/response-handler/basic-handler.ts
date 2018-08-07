@@ -25,7 +25,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
    * <pre><code>
    * {
    *    prompt: {
-   *       resolver: "<ssml>Hallo</ssml>",
+   *       resolver: "<speak>Hallo</speak>",
    *       thenMap: (value: string) => {...}
    *     }
    * }
@@ -64,7 +64,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
    * <pre><code>
    * {
    *    prompt: {
-   *       text: "<ssml>Hallo</ssml>",
+   *       text: "<speak>Hallo</speak>",
    *       isSSML: true
    *     }
    * }
@@ -214,9 +214,11 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
    * @param text text with or without SSML
    */
   protected createPromptAnswer(text: string): BasicAnswerTypes["voiceMessage"] {
+    const isSSML = BasicHandler.isSSML(text);
+
     return {
-      text,
-      isSSML: BasicHandler.isSSML(text),
+      isSSML,
+      text: isSSML ? `<speak>${text}</speak>` : text,
     };
   }
 

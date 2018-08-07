@@ -39,7 +39,7 @@ describe("BaseHandler", function() {
     this.mockCard = { description: "desc", title: "title" };
     this.mockChatBubbles = ["Bubble A", "Bubble B"];
     this.mockVoiceMessage = "Prompt";
-    this.mockSSMLPrompt = "<ssml>Prompt</ssml>";
+    this.mockSSMLPrompt = "Prompt <break time='500ms'/> Kann ich sonst noch etwas für dich erledigen?";
     this.mockReprompts = ["Reprompt A", "Reprompt B"];
     this.mockSuggestionChips = ["Suggestion A", "Suggestion B"];
     this.mockSessionData = "My Mock Session Data";
@@ -75,7 +75,7 @@ describe("BaseHandler", function() {
   function mapPrompt(value: string, isSSML = false) {
     return {
       isSSML,
-      text: value,
+      text: isSSML ? `<speak>${value}</speak>` : value,
     };
   }
 
