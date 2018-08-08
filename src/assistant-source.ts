@@ -18,6 +18,7 @@ export { StateMachineSetup } from "./components/state-machine/state-intent-setup
 export { BaseState } from "./components/state-machine/base-state";
 export { FilterSetup } from "./components/state-machine/filter-setup";
 export { BasicHandler } from "./components/unifier/response-handler/basic-handler";
+export { applyMixin } from "./components/unifier/response-handler";
 export { HandlerProxyFactory } from "./components/unifier/response-handler/handler-proxy-factory";
 export { featureIsAvailable } from "./components/unifier/feature-checker";
 export { cli } from "./cli";

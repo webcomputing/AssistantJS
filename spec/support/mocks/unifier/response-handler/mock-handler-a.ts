@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { MinimalRequestExtraction } from "../../../../../src/assistant-source";
+import { applyMixin, MinimalRequestExtraction, OptionalHandlerFeatures } from "../../../../../src/assistant-source";
 import { RequestContext } from "../../../../../src/components/root/public-interfaces";
 import {
   AuthenticationMixin,
@@ -30,9 +30,23 @@ export interface MockHandlerASpecificHandable<MergedAnswerTypes extends MockHand
 }
 
 @injectable()
-export class MockHandlerA<T extends MockHandlerASpecificTypes>
-  extends AuthenticationMixin(CardMixin(ChatBubblesMixin(RepromptsMixin(SessionDataMixin(SuggestionChipsMixin(BasicHandler))))))<T>
-  implements MockHandlerASpecificHandable<T> {
+export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHandler<T>
+  implements
+    MockHandlerASpecificHandable<T>,
+    OptionalHandlerFeatures.Authentication,
+    OptionalHandlerFeatures.Card<T>,
+    OptionalHandlerFeatures.ChatBubbles<T>,
+    OptionalHandlerFeatures.Reprompts<T>,
+    OptionalHandlerFeatures.SessionData<T>,
+    OptionalHandlerFeatures.SuggestionChips<T> {
+  public setCard!: (card: T["card"] | Promise<T["card"]>) => this;
+  public setChatBubbles!: (chatBubbles: T["chatBubbles"] | Promise<T["chatBubbles"]>) => this;
+  public setReprompts!: (reprompts: Array<T["voiceMessage"]["text"] | Promise<T["voiceMessage"]["text"]>> | Promise<Array<T["voiceMessage"]["text"]>>) => this;
+  public setSessionData!: (sessionData: T["sessionData"] | Promise<T["sessionData"]>) => this;
+  public getSessionData!: () => Promise<T["sessionData"]> | undefined;
+  public setSuggestionChips!: (suggestionChips: T["suggestionChips"] | Promise<T["suggestionChips"]>) => this;
+  public setUnauthenticated!: () => this;
+
   constructor(
     @inject(injectionNames.current.requestContext) requestContext: RequestContext,
     @inject(injectionNames.current.extraction) extraction: MinimalRequestExtraction,
@@ -52,3 +66,6 @@ export class MockHandlerA<T extends MockHandlerASpecificTypes>
     return (results.voiceMessage && results.voiceMessage.text) || {};
   }
 }
+
+// apply all mixins
+applyMixin(MockHandlerA, [AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, SessionDataMixin, SuggestionChipsMixin]);
