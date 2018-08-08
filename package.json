@@ -40,7 +40,7 @@
     "cuid": "^2.0.2",
     "express": "^4.16.2",
     "fast-levenshtein": "^2.0.6",
-    "i18next": "^10.6.0",
+    "i18next": "^11.5.0",
     "i18next-sync-fs-backend": "^1.0.0",
     "inversify": "4.1.1",
     "inversify-components": "^0.4.0",
