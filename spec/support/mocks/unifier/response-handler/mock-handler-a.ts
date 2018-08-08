@@ -41,6 +41,11 @@ export class MockHandlerA<T extends MockHandlerASpecificTypes> extends BasicHand
     OptionalHandlerFeatures.SuggestionChips<T> {
   public setCard!: (card: T["card"] | Promise<T["card"]>) => this;
   public setChatBubbles!: (chatBubbles: T["chatBubbles"] | Promise<T["chatBubbles"]>) => this;
+  // @ts-ignore
+  public prompt!: (
+    inputText: T["voiceMessage"]["text"] | Promise<T["voiceMessage"]["text"]>,
+    ...reprompts: Array<T["voiceMessage"]["text"] | Promise<T["voiceMessage"]["text"]>>
+  ) => this;
   public setReprompts!: (reprompts: Array<T["voiceMessage"]["text"] | Promise<T["voiceMessage"]["text"]>> | Promise<Array<T["voiceMessage"]["text"]>>) => this;
   public setSessionData!: (sessionData: T["sessionData"] | Promise<T["sessionData"]>) => this;
   public getSessionData!: () => Promise<T["sessionData"]> | undefined;

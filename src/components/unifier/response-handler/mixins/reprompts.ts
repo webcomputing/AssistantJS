@@ -8,6 +8,9 @@ import { BasicAnswerTypes } from "../handler-types";
  */
 export class RepromptsMixin<MergedAnswerTypes extends BasicAnswerTypes> extends BasicHandler<MergedAnswerTypes>
   implements OptionalHandlerFeatures.Reprompts<MergedAnswerTypes> {
+  /**
+   * implementation of prompt with reprompts
+   */
   public prompt(
     inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>,
     ...reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
