@@ -48,7 +48,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
 
       // bind HandlerProxyFactory
-      bindService.bindLocalServiceToSelf(HandlerProxyFactory).inSingletonScope();
+      bindService
+        .bindGlobalService("handler-proxy-factory")
+        .to(HandlerProxyFactory)
+        .inSingletonScope();
     },
 
     request: (bindService, lookupService) => {
@@ -57,7 +60,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .toDynamicValue(context => {
           const currentExtraction = context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction);
           const platformSpecificHandler = context.container.get<BasicHandable<any>>(currentExtraction.platform + ":current-response-handler");
-          const handlerProxyFactory = context.container.get(HandlerProxyFactory);
+          const handlerProxyFactory = context.container.get<HandlerProxyFactory>(injectionNames.handlerProxyFactory);
 
           return handlerProxyFactory.createHandlerProxy(platformSpecificHandler);
         })

@@ -31,7 +31,7 @@ describe("HandlerProxyFactory", function() {
     spyOn(this.handlerInstance, "setMockHandlerATable").and.callThrough();
 
     this.buildProxiedHandler = () => {
-      const handlerProxyFactory = this.container.inversifyInstance.get(HandlerProxyFactory);
+      const handlerProxyFactory = this.container.inversifyInstance.get<HandlerProxyFactory>(injectionNames.handlerProxyFactory);
       this.proxiedHandler = handlerProxyFactory.createHandlerProxy(this.handlerInstance);
     };
 
