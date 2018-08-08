@@ -193,7 +193,7 @@ export class SpecHelper {
 
     for (const key in promises) {
       if (promises.hasOwnProperty(key) && (!results.hasOwnProperty(key) || !results[key])) {
-        throw new Error("Not all Promises has been resolved. Did you await send() on the ResponseHandler?");
+        throw new Error("Not all Promises has been resolved. Did you await send() or resolveResults() on the ResponseHandler?");
       }
     }
 

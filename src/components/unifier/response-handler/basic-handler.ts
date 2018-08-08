@@ -106,38 +106,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
       await Promise.all(beforeResponseHandlerPromises);
     }
 
-    // first get all keys, these are the properties which are filled
-    const promiseKeys: string[] = [];
-    for (const key in this.promises) {
-      if (this.promises.hasOwnProperty(key)) {
-        promiseKeys.push(key);
-      }
-    }
-
-    // resolve all intermediate and final results from the Promises and build an Array of new Promises
-    // and fill the results array
-    const concurrentProcesses = promiseKeys.map(async (key: string) => {
-      const currentKey = key as keyof BasicAnswerTypes; // we have to set the type here to 'BasicAnswerTypes', as if we set the type to 'B' the type of the const resolver is wrong
-
-      // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
-      const resolver = this.promises[currentKey];
-      if (resolver) {
-        // resolve the final or intermediate result
-        const currentValue = await Promise.resolve(resolver.resolver);
-
-        // remap the intermediate Results, when an thenMap function is present
-        if (resolver.thenMap) {
-          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
-          this.results[currentKey] = finalResult;
-        } else {
-          // here are only final results
-          this.results[currentKey] = currentValue;
-        }
-      }
-    });
-
-    // wait for all Prmises at once, after this
-    await Promise.all(concurrentProcesses);
+    await this.resolveResults();
 
     // everything was sent successfully
     this.isSent = true;
@@ -229,6 +198,41 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
           util.inspect(this)
       );
     }
+  }
+
+  /**
+   * This method resolves all promises which were added via the Handler-Functions
+   * It should only be called once at a time, as otherwise the results could interfere
+   */
+  private async resolveResults(): Promise<void> {
+    // first get all keys, these are the properties which are filled
+    const promiseKeys: string[] = [];
+    for (const key in this.promises) {
+      if (this.promises.hasOwnProperty(key)) {
+        promiseKeys.push(key);
+      }
+    }
+    // resolve all intermediate and final results from the Promises and build an Array of new Promises
+    // and fill the results array
+    const concurrentProcesses = promiseKeys.map(async (key: string) => {
+      const currentKey = key as keyof BasicAnswerTypes; // we have to set the type here to 'BasicAnswerTypes', as if we set the type to 'B' the type of the const resolver is wrong
+      // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
+      const resolver = this.promises[currentKey];
+      if (resolver) {
+        // resolve the final or intermediate result
+        const currentValue = await Promise.resolve(resolver.resolver);
+        // remap the intermediate Results, when an thenMap function is present
+        if (resolver.thenMap) {
+          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
+          this.results[currentKey] = finalResult;
+        } else {
+          // here are only final results
+          this.results[currentKey] = currentValue;
+        }
+      }
+    });
+    // wait for all Prmises at once, after this
+    await Promise.all(concurrentProcesses);
   }
 
   /**
