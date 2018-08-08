@@ -67,7 +67,14 @@ export class HandlerProxyFactory {
 
         // return proxy in case there is no function with the specific name, optional properties MUST have the value null to get here ignored.
         // we have exclude then and catch, so that this handler does not look like a Promise
-        if (typeof propValue === "undefined" && propKey.toString() !== "then" && propKey.toString() !== "catch") {
+        if (
+          typeof propValue === "undefined" &&
+          propKey.toString() !== "then" &&
+          propKey.toString() !== "catch" &&
+          propKey.toString() !== "Symbol(util.inspect.custom)" &&
+          propKey.toString() !== "Symbol(Symbol.iterator)" &&
+          propKey.toString() !== "Symbol(Symbol.toStringTag)"
+        ) {
           const message = "Method " + propKey.toString() + "() is not implemented or supported on " + handlerName;
           logger.warn(message);
           if (!failSilentlyOnUnsupportedFeatures) {
