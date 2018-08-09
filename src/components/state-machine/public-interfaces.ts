@@ -1,9 +1,7 @@
 import { ExecutableExtension } from "inversify-components";
 import { TranslateHelper } from "../i18n/translate-helper";
-import { Logger, RequestContext } from "../root/public-interfaces";
-import { Session } from "../services/public-interfaces";
-import { GenericIntent, intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
-import { ResponseFactory } from "../unifier/response-factory";
+import { Logger } from "../root/public-interfaces";
+import { BasicAnswerTypes, BasicHandable, intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 
 /** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
@@ -77,8 +75,8 @@ export namespace State {
   export type Factory = <T extends State.Required = State.Required>(stateName?: string) => T;
 
   /** Set containing all objects needed to setup a BaseState. */
-  export interface SetupSet {
-    responseFactory: ResponseFactory;
+  export interface SetupSet<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
+    responseHandler: MergedHandler;
     translateHelper: TranslateHelper;
     extraction: MinimalRequestExtraction;
     logger: Logger;

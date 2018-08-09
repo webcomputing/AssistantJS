@@ -4,13 +4,13 @@ import { componentInterfaces } from "../../../src/components/i18n/component-inte
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "../../../src/components/i18n/interpolation-resolver";
 import { arraySplitter } from "../../../src/components/i18n/plugins/array-returns-sample.plugin";
 import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
-import { SpecSetup } from "../../../src/spec-setup";
+import { SpecHelper } from "../../../src/spec-helper";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 
 interface CurrentThisContext {
   container: Container;
   wrapper: I18nextWrapper;
-  specHelper: SpecSetup;
+  specHelper: SpecHelper;
 }
 describe("I18nWrapper", function() {
   const expectedTranslations = ["hello my name", "hi my name", "welcome my name"];

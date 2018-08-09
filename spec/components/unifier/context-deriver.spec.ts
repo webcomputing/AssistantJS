@@ -2,15 +2,23 @@ import { Container } from "inversify-components";
 import { componentInterfaces as rootComponentInterfaces } from "../../../src/components/root/private-interfaces";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { expressAppWithTimeout, RequestProxy, withServer } from "../../support/util/requester";
+import { RequestProxy, withServer } from "../../support/util/requester";
 
-import { MinimalRequestExtraction } from "../../../src/assistant-source";
+import { AfterContextExtension, AssistantJSSetup, MinimalRequestExtraction, OptionalExtractions, RequestContext } from "../../../src/assistant-source";
 import { createContext } from "../../support/mocks/root/request-context";
 import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
 import { MockRequestExtractionModifier } from "../../support/mocks/unifier/mock-request-modifier";
 import { MockRequestExtractionSessionModifier } from "../../support/mocks/unifier/mock-request-session-modifier";
+import { MockHandlerA } from "../../support/mocks/unifier/response-handler/mock-handler-a";
 import { SpokenTextExtractor } from "../../support/mocks/unifier/spoken-text-extractor";
+import { ThisContext } from "../../this-context";
+
+interface CurrentThisContext extends ThisContext {
+  mockExtraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
+  mockRequestContext: RequestContext;
+  assistantJs: AssistantJSSetup;
+}
 
 describe("ContextDeriver", function() {
   describe("with server started", function() {
@@ -28,10 +36,10 @@ describe("ContextDeriver", function() {
       if (typeof stopServer !== "undefined") stopServer();
     });
 
-    describe("with a valid extractor registered", function() {
+    describe("with a valid extractor registered", function(this: CurrentThisContext) {
       beforeEach(function() {
-        (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-        (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
+        this.container.inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
+        this.container.inversifyInstance.bind(extraction.platform + ":current-response-handler").to(MockHandlerA);
       });
 
       describe("when an invalid request was sent", function() {
@@ -41,10 +49,8 @@ describe("ContextDeriver", function() {
           done();
         });
 
-        it("does not set 'core:unifier:current-extraction'", function() {
-          expect(() => {
-            (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
-          }).toThrow();
+        it("does not set 'core:unifier:current-extraction'", function(this: CurrentThisContext) {
+          expect(this.container.inversifyInstance.isBound("core:unifier:current-extraction")).toBeFalsy();
         });
       });
 
@@ -52,38 +58,38 @@ describe("ContextDeriver", function() {
         const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
         beforeEach(async function(done) {
-          [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
+          [request, stopServer] = await withServer(this.assistantJs);
           await request.post(MockExtractor.fittingPath(), extractionData);
           done();
         });
 
-        it("sets 'core:unifier:current-extraction' to extraction result", function() {
-          const extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
-          expect(extraction).toEqual(extractionData);
+        it("sets 'core:unifier:current-extraction' to extraction result", function(this: CurrentThisContext) {
+          const currentExtraction = this.container.inversifyInstance.get<any>("core:unifier:current-extraction");
+          expect(currentExtraction).toEqual(extractionData);
         });
       });
     });
 
     describe("with two valid extractors registered", function() {
       describe("with one of them supporting more interfaces", function() {
-        beforeEach(function() {
-          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-          (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(SpokenTextExtractor);
-          (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
+        beforeEach(function(this: CurrentThisContext) {
+          this.container.inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
+          this.container.inversifyInstance.bind(componentInterfaces.requestProcessor).to(SpokenTextExtractor);
+          this.container.inversifyInstance.bind(extraction.platform + ":current-response-handler").to(MockHandlerA);
         });
 
         describe("when a valid request was sent", function() {
           const extractionData = { intent: "MyIntent", furtherExtraction: "MyExtraction", platform: extraction.platform, sessionData: null };
 
-          beforeEach(async function(done) {
-            [request, stopServer] = await withServer(this.assistantJs, expressAppWithTimeout("50ms"));
+          beforeEach(async function(this: CurrentThisContext, done) {
+            [request, stopServer] = await withServer(this.assistantJs);
             await request.post(MockExtractor.fittingPath(), extractionData);
             done();
           });
 
-          it("uses extractor with more implemented features", function() {
-            const extraction = (this.container as Container).inversifyInstance.get<any>("core:unifier:current-extraction");
-            expect(extraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
+          it("uses extractor with more implemented features", async function(this: CurrentThisContext) {
+            const currentExtraction = this.container.inversifyInstance.get<any>("core:unifier:current-extraction");
+            expect(currentExtraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
           });
         });
       });
@@ -91,9 +97,9 @@ describe("ContextDeriver", function() {
   });
 
   describe("with a valid extractor configured", function() {
-    beforeEach(function() {
-      (this.container as Container).inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
-      (this.container as Container).inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
+    beforeEach(function(this: CurrentThisContext) {
+      this.container.inversifyInstance.bind(componentInterfaces.requestProcessor).to(MockExtractor);
+      this.container.inversifyInstance.bind(extraction.platform + ":current-response-handler").toConstantValue({ sessionData: null });
 
       // Craete mock extraction and a fitting request context for it
       this.mockExtraction = createExtraction("myTest", { testEntity: "value1", testEntity2: "value2" });

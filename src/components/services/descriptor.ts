@@ -69,7 +69,9 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       });
 
       // Bind platform session mirror to componentInterfaces.beforeSendResponse remain in session even if nothing was changed
-      bindService.bindExtension<BeforeResponseHandler>(lookupService.lookup("core:unifier").getInterface("beforeSendResponse")).to(PlatformSessionMirror);
+      bindService
+        .bindExtension<BeforeResponseHandler<any, any>>(lookupService.lookup("core:unifier").getInterface("beforeSendResponse"))
+        .to(PlatformSessionMirror);
     },
   },
 };

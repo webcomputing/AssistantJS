@@ -1,7 +1,16 @@
-import { Container } from "inversify-components";
 import { RequestContext } from "../../../src/components/root/public-interfaces";
+import { AssistantJSSetup } from "../../../src/setup";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { RequestProxy, withServer } from "../../support/util/requester";
+import { ThisContext } from "../../this-context";
+
+interface CurrentThisContext extends ThisContext {
+  request: RequestProxy;
+  stopServer: Function;
+  requestContext: RequestContext;
+  diContextName: string;
+  assistantJs: AssistantJSSetup;
+}
 
 describe("GenericRequestHelper", function() {
   beforeEach(async function() {
@@ -12,28 +21,25 @@ describe("GenericRequestHelper", function() {
   });
 
   describe("resulting context object", function() {
-    let request: RequestProxy;
-    let stopServer: () => void;
-    const diContextName = "core:root:current-request-context";
+    beforeEach(async function(this: CurrentThisContext) {
+      this.diContextName = "core:root:current-request-context";
 
-    beforeEach(async function(done) {
-      [request, stopServer] = await withServer(this.assistantJs);
-      await request.post("/any-given-route", { a: "b" }, { "header-a": "b" });
-      done();
+      [this.request, this.stopServer] = await withServer(this.assistantJs);
+      await this.request.post("/any-given-route", { a: "b" }, { "header-a": "b" });
     });
 
     afterEach(function() {
-      stopServer();
+      this.stopServer();
     });
 
-    it("is fetchable via dependency injection", function() {
+    it("is fetchable via dependency injection", function(this: CurrentThisContext) {
       expect(() => {
-        (this.container as Container).inversifyInstance.get<RequestContext>(diContextName);
+        this.container.inversifyInstance.get<RequestContext>(this.diContextName);
       }).not.toThrow();
     });
 
-    it("contains all request information", function() {
-      const requestContext = (this.container as Container).inversifyInstance.get<RequestContext>(diContextName);
+    it("contains all request information", function(this: CurrentThisContext) {
+      const requestContext = this.container.inversifyInstance.get<RequestContext>(this.diContextName);
 
       // Multiple expections for performance reasons
       expect(requestContext.method).toBe("POST");

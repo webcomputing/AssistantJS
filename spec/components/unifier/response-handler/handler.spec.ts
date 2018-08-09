@@ -1,14 +1,12 @@
-import { Container } from "inversify";
-import { MockHandlerA, MockHandlerASpecificTypes } from "./mocks/mock-handler-a";
-import { MockHandlerBSpecificTypes } from "./mocks/mock-handler-b";
+import { PLATFORM } from "../../../support/mocks/unifier/extraction";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { createRequestScope } from "../../../support/util/setup";
+import { ThisContext } from "../../../this-context";
 
-type CurrentHandler = MockHandlerA<MockHandlerASpecificTypes>;
+type MergedHandler = MockHandlerA<MockHandlerASpecificTypes>;
 
-interface CurrentThisContext {
-  specHelper;
-  assistantJs;
-  container: Container;
-  handlerInstance: CurrentHandler & { sendResults: () => void };
+interface CurrentThisContext extends ThisContext {
+  handlerInstance: MergedHandler & { getBody: () => void };
 
   mockCard: MockHandlerASpecificTypes["card"];
   mockChatBubbles: MockHandlerASpecificTypes["chatBubbles"];
@@ -28,17 +26,22 @@ interface CurrentThisContext {
 
 describe("BaseHandler", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    // has to set type to any to spy on protected method sendResults()
-    this.handlerInstance = new MockHandlerA() as any; // todo change to container instantiation
-    spyOn(this.handlerInstance, "sendResults");
+    createRequestScope(this.specHelper);
+
+    this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
+    this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
+
+    spyOn(this.handlerInstance, "getBody");
+
+    this.container.inversifyInstance.bind(PLATFORM + ":current-response-handler").toConstantValue(this.handlerInstance);
 
     this.mockTable = { header: ["A", "B"], elements: [["A1", "A2"], ["B1", "B2"]] };
     this.mockCard = { description: "desc", title: "title" };
     this.mockChatBubbles = ["Bubble A", "Bubble B"];
     this.mockVoiceMessage = "Prompt";
-    this.mockSSMLPrompt = "<ssml>Prompt</ssml>";
+    this.mockSSMLPrompt = "Prompt <break time='500ms'/> Kann ich sonst noch etwas für dich erledigen?";
     this.mockReprompts = ["Reprompt A", "Reprompt B"];
-    this.mockSuggestionChips = [{ displayText: "Suggestion A", spokenText: "Suggestion A" }, { displayText: "Suggestion B", spokenText: "Suggestion A" }];
+    this.mockSuggestionChips = ["Suggestion A", "Suggestion B"];
     this.mockSessionData = "My Mock Session Data";
     this.mockShouldAuthenticate = true;
     this.mockShouldSessionEnd = true;
@@ -65,14 +68,14 @@ describe("BaseHandler", function() {
 
   function expectResult() {
     it("calls sendResponse with corresponding object", async function(this: CurrentThisContext) {
-      expect(this.handlerInstance.sendResults).toHaveBeenCalledWith(this.expectedResult);
+      expect(this.handlerInstance.getBody).toHaveBeenCalledWith(this.expectedResult);
     });
   }
 
   function mapPrompt(value: string, isSSML = false) {
     return {
       isSSML,
-      text: value,
+      text: isSSML ? `<speak>${value}</speak>` : value,
     };
   }
 
@@ -86,7 +89,7 @@ describe("BaseHandler", function() {
     });
 
     it("calls sendResponse with empty object", async function(this: CurrentThisContext) {
-      expect(this.handlerInstance.sendResults).toHaveBeenCalledWith(this.expectedResult);
+      expect(this.handlerInstance.getBody).toHaveBeenCalledWith(this.expectedResult);
     });
   });
 
@@ -331,13 +334,14 @@ describe("BaseHandler", function() {
 
   describe("without sending activly", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.expectedResult = {};
+      this.expectedResult = { suggestionChips: this.mockSuggestionChips, table: this.mockTable };
 
       this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).setMockHandlerATable(this.mockTable);
+      await this.specHelper.runMachine();
     });
 
-    it("calls send in AfterStateMachine", async function(this: CurrentThisContext) {
-      pending("not implemented");
+    it("calls getBody() in AfterStateMachine", async function(this: CurrentThisContext) {
+      expect(this.handlerInstance.getBody).toHaveBeenCalledWith(this.expectedResult);
     });
   });
 });

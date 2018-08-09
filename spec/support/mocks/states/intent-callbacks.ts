@@ -2,13 +2,15 @@ import { inject, injectable, optional } from "inversify";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
 import { injectionNames } from "../../../../src/injection-names";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../unifier/response-handler/mock-handler-a";
 
 /** Just a plain state to test the BaseState easily */
 
 @injectable()
-export class IntentCallbackState extends BaseState implements State.AfterIntent, State.BeforeIntent {
+export class IntentCallbackState extends BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>
+  implements State.AfterIntent, State.BeforeIntent {
   constructor(
-    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet,
+    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>,
     @optional()
     @inject("mocks:states:call-spy")
     private spy: (...args: any[]) => void

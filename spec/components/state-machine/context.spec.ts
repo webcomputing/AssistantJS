@@ -1,11 +1,11 @@
 import { Container } from "inversify-components";
-import { GenericIntent, injectionNames, SpecSetup, State } from "../../../src/assistant-source";
+import { GenericIntent, injectionNames, SpecHelper, State } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
 interface CurrentThisContext {
-  specHelper: SpecSetup;
+  specHelper: SpecHelper;
   stateMachine: StateMachine;
   container: Container;
   getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>;

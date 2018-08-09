@@ -1,8 +1,11 @@
-import { OptionalExtractions, OptionalHandlerFeatures } from "../../../../src/assistant-source";
+import { injectionNames, OptionalExtractions } from "../../../../src/assistant-source";
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
+import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
+import { createRequestScope } from "../../../support/util/setup";
+import { ThisContext } from "../../../this-context";
 
-interface CurrentThisContext {
-  handlerData: OptionalHandlerFeatures.SessionData;
+interface CurrentThisContext extends ThisContext {
+  handler: BasicSessionHandable<any>;
   extractionData: OptionalExtractions.SessionData;
   session: PlatformSession;
   params: any;
@@ -16,11 +19,13 @@ interface CurrentThisContext {
 
 describe("PlatformSession", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.handlerData = { sessionData: null };
+    createRequestScope(this.specHelper);
+
+    this.handler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
     this.extractionData = { sessionData: null };
 
     this.createSession = () => {
-      this.session = new PlatformSession(this.extractionData, this.handlerData);
+      this.session = new PlatformSession(this.extractionData, this.handler);
     };
 
     this.createFilledSession = () => {
@@ -71,7 +76,7 @@ describe("PlatformSession", function() {
 
   describe("with handler data set", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.handlerData = { sessionData: '{ "handlerKey": "handlerValue" }' };
+      this.handler.setSessionData('{ "handlerKey": "handlerValue" }');
       this.createSession();
     });
 
@@ -87,7 +92,7 @@ describe("PlatformSession", function() {
       describe("with deep stringifyed json structure in data", function() {
         beforeEach(async function(this: CurrentThisContext) {
           this.params.nestedData = JSON.stringify({ array: [{ nested: "nestedValue" }] });
-          this.handlerData = { sessionData: JSON.stringify({ key: this.params.nestedData }) };
+          this.handler.setSessionData(JSON.stringify({ key: this.params.nestedData }));
           this.createSession();
         });
 
@@ -115,7 +120,7 @@ describe("PlatformSession", function() {
 
   describe("with a prefilled session", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.params.concurrentSession = new PlatformSession(this.extractionData, this.handlerData);
+      this.params.concurrentSession = new PlatformSession(this.extractionData, this.handler);
       this.createFilledSession();
     });
 
@@ -125,7 +130,7 @@ describe("PlatformSession", function() {
       });
 
       it("enables new session instance to reflect this change", async function(this: CurrentThisContext) {
-        const newSession = new PlatformSession(this.extractionData, this.handlerData);
+        const newSession = new PlatformSession(this.extractionData, this.handler);
         expect(await newSession.get("test")).toEqual("test");
       });
 
@@ -178,7 +183,7 @@ describe("PlatformSession", function() {
 
       it("touches handler afterwards", async function(this: CurrentThisContext) {
         await this.session.set("key", "v2");
-        expect(this.handlerData.sessionData).toEqual(JSON.stringify({ key: "v2" }));
+        expect(await this.handler.getSessionData()).toEqual(JSON.stringify({ key: "v2" }));
       });
     });
   });
@@ -211,7 +216,7 @@ describe("PlatformSession", function() {
     it("touches handler afterwards", async function(this: CurrentThisContext) {
       expect(await this.session.get("key")).toEqual("value");
       await this.session.delete("key");
-      expect(this.handlerData.sessionData).toEqual("{}");
+      expect(await this.handler.getSessionData()).toEqual("{}");
     });
   });
 
@@ -222,7 +227,7 @@ describe("PlatformSession", function() {
 
     it("resets store", async function(this: CurrentThisContext) {
       await this.session.deleteAllFields();
-      expect(this.handlerData.sessionData).toEqual("{}");
+      expect(await this.handler.getSessionData()).toEqual("{}");
     });
   });
 });

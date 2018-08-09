@@ -1,6 +1,7 @@
 import { interfaces as inversifyInterfaces } from "inversify";
 import { BindingDescriptor, Component, ComponentDescriptor, ExecutableExtension } from "inversify-components";
 
+import { injectionNames } from "../../injection-names";
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
@@ -12,14 +13,11 @@ import {
   BeforeResponseHandler,
   EntityDictionary,
   MinimalRequestExtraction,
-  MinimalResponseHandler,
   PlatformGenerator,
-  ResponseFactory,
   ResponseHandlerExtensions,
 } from "./public-interfaces";
-import { ResponseFactory as ResponseFactoryImpl } from "./response-factory";
-import { CardResponse } from "./responses/card-response";
-import { VoiceResponse } from "./responses/voice-response";
+import { BasicHandable, HandlerProxyFactory } from "./response-handler";
+import { AfterStateResponseSender } from "./response-handler/after-state-handler";
 import { swapHash } from "./swap-hash";
 
 const configuration: Configuration.Defaults = {
@@ -48,23 +46,32 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService
         .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
         .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
+
+      // bind HandlerProxyFactory
+      bindService
+        .bindGlobalService("handler-proxy-factory")
+        .to(HandlerProxyFactory)
+        .inSingletonScope();
     },
 
     request: (bindService, lookupService) => {
       bindService
-        .bindGlobalService<MinimalResponseHandler>("current-response-handler")
+        .bindGlobalService<BasicHandable<any>>("current-response-handler")
         .toDynamicValue(context => {
-          const currentExtraction = context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction");
-          return context.container.get<MinimalResponseHandler>(currentExtraction.platform + ":current-response-handler");
+          const currentExtraction = context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction);
+          const platformSpecificHandler = context.container.get<BasicHandable<any>>(currentExtraction.platform + ":current-response-handler");
+          const handlerProxyFactory = context.container.get<HandlerProxyFactory>(injectionNames.handlerProxyFactory);
+
+          return handlerProxyFactory.createHandlerProxy(platformSpecificHandler);
         })
         .inSingletonScope();
 
-      bindService.bindGlobalService<ResponseHandlerExtensions>("response-handler-extensions").toDynamicValue(context => {
+      bindService.bindGlobalService<ResponseHandlerExtensions<any, any>>("response-handler-extensions").toDynamicValue(context => {
         const afterExtensions = context.container.isBound(componentInterfaces.afterSendResponse)
-          ? context.container.getAll<BeforeResponseHandler>(componentInterfaces.afterSendResponse)
+          ? context.container.getAll<AfterResponseHandler<any>>(componentInterfaces.afterSendResponse)
           : [];
         const beforeExtensions = context.container.isBound(componentInterfaces.beforeSendResponse)
-          ? context.container.getAll<AfterResponseHandler>(componentInterfaces.beforeSendResponse)
+          ? context.container.getAll<BeforeResponseHandler<any, any>>(componentInterfaces.beforeSendResponse)
           : [];
 
         return {
@@ -72,8 +79,6 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           beforeExtensions,
         };
       });
-
-      bindService.bindGlobalService<ResponseFactory>("current-response-factory").to(ResponseFactoryImpl);
 
       bindService
         .bindGlobalService<EntityDictionary>("current-entity-dictionary")
@@ -87,6 +92,9 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           : undefined;
         return createUnifierLoggerMiddleware(currentExtraction);
       });
+
+      // send all unsent messages
+      bindService.bindExtension(lookupService.lookup("core:state-machine").getInterface("afterStateMachine")).to(AfterStateResponseSender);
     },
   },
 };

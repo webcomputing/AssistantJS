@@ -26,18 +26,29 @@ export class GenericRequestHandler {
     // Request handlers have the ability to add something to current di scope.
     const extensions = scopedRequestContainer.getAll<ContextDeriver>(componentInterfaces.contextDeriver);
     const results = await Promise.all(extensions.map(extension => extension.derive(context)));
-    results.forEach(result => {
-      if (typeof result !== "undefined") {
-        this.bindContextToContainer(result[0], scopedRequestContainer, result[1], true);
-      }
-    });
+    const needsRequestScope = results
+      // returning true, when a result has been returned by the ContextDeriver, otherwise false
+      .map(result => {
+        if (typeof result !== "undefined") {
+          this.bindContextToContainer(result[0], scopedRequestContainer, result[1], true);
+          return true;
+        }
+        return false;
+      })
+      // reducing all results of the (multiple) ContextDeriver to one boolean
+      .reduce((previousValue, currentValue) => {
+        return previousValue || currentValue;
+      }, false);
 
-    // Register this child container as request-scope and make context available in all descriptors
-    container.componentRegistry.autobind(scopedRequestContainer, [], "request", context);
+    // open the request scope only when the request can be handled
+    if (needsRequestScope) {
+      // Register this child container as request-scope and make context available in all descriptors
+      container.componentRegistry.autobind(scopedRequestContainer, [], "request", context);
 
-    // Execute additional extensions, including our state machine
-    const additionalExtensions = await Promise.all(scopedRequestContainer.getAll<AfterContextExtension>(componentInterfaces.afterContextExtension));
-    additionalExtensions.forEach(e => e.execute());
+      // Execute additional extensions, including our state machine
+      const additionalExtensions = await Promise.all(scopedRequestContainer.getAll<AfterContextExtension>(componentInterfaces.afterContextExtension));
+      additionalExtensions.forEach(e => e.execute());
+    }
   }
 
   /** Binds a constant object to a given container */

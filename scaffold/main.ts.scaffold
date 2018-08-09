@@ -1,7 +1,8 @@
-import { injectionNames, State, Transitionable } from "assistant-source";
+import { injectionNames, Transitionable } from "assistant-source";
 import { inject, injectable } from "inversify";
 
 import { ApplicationState } from "./application";
+import { MergedSetupSet } from "../../config/handler";
 
 /**
  * This is your MainState.
@@ -11,9 +12,7 @@ import { ApplicationState } from "./application";
 
 @injectable()
 export class MainState extends ApplicationState {
-  constructor(
-    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet
-  ) {
+  constructor(@inject(injectionNames.current.stateSetupSet) stateSetupSet: MergedSetupSet) {
     super(stateSetupSet);
   }
 

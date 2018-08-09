@@ -4,33 +4,33 @@ import { Logger } from "../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { filter } from "../../../../src/components/state-machine/filter-decorator";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { BasicHandable } from "../../../../src/components/unifier/response-handler";
+import { injectionNames } from "../../../../src/injection-names";
 import { TestFilterB } from "../filters/test-filter-b";
 import { TestFilterC } from "../filters/test-filter-c";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../unifier/response-handler/mock-handler-a";
 
 @injectable()
-export class FilterCState extends BaseState implements State.Required {
-  public responseFactory: ResponseFactory;
+export class FilterCState extends BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>> implements State.Required {
   public extraction: any;
 
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
+    @inject(injectionNames.current.responseHandler) responseHandler: MockHandlerA<MockHandlerASpecificTypes>,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
     @inject("core:root:current-logger") logger: Logger
   ) {
-    super(responseFactory, translateHelper, extraction, logger);
+    super(responseHandler, translateHelper, extraction, logger);
     this.extraction = extraction;
-    this.responseFactory = responseFactory;
   }
 
   @filter(TestFilterC)
   public filterTestAIntent(...args: any[]) {
-    this.endSessionWith(this.t("filter.stateC.intentA"));
+    this.responseHandler.endSessionWith(this.t("filter.stateC.intentA")).send();
   }
 
   public filterTestBIntent() {
-    this.endSessionWith(this.t("filter.stateC.intentB"));
+    this.responseHandler.endSessionWith(this.t("filter.stateC.intentB")).send();
   }
 
   @filter(TestFilterB)

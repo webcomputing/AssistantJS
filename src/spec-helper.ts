@@ -5,17 +5,18 @@ import { ContainerImpl } from "inversify-components";
 import { ServerApplication } from "./components/root/app-server";
 import { GenericRequestHandler } from "./components/root/generic-request-handler";
 import { Logger, RequestContext } from "./components/root/public-interfaces";
-import { Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
+import { AfterContextExtension, Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
 import { StateMachineSetup } from "./components/state-machine/state-intent-setup";
-import { intent, MinimalRequestExtraction, MinimalResponseHandler } from "./components/unifier/public-interfaces";
+import { BasicHandable, intent, MinimalRequestExtraction } from "./components/unifier/public-interfaces";
 
 import { Constructor } from "./assistant-source";
 import { FilterSetup } from "./components/state-machine/filter-setup";
+import { BasicAnswerTypes } from "./components/unifier/response-handler";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
 
 /** Helper for specs, which is also useful in other npm modules */
-export class SpecSetup {
+export class SpecHelper {
   public setup: AssistantJSSetup;
 
   constructor(originalSetup: AssistantJSSetup = new AssistantJSSetup(new ContainerImpl())) {
@@ -61,24 +62,24 @@ export class SpecSetup {
   public createRequestScope(
     minimalExtraction: MinimalRequestExtraction | null,
     requestContext: RequestContext,
-    responseHandler?: { new (...args: any[]): MinimalResponseHandler }
+    responseHandler?: { new (...args: any[]): BasicHandable<any> }
   ) {
     // Get request handle instance and create child container of it
-    const requestHandle = this.setup.container.inversifyInstance.get(GenericRequestHandler);
-    const childContainer = requestHandle.createChildContainer(this.setup.container);
+    const requestHandler = this.setup.container.inversifyInstance.get(GenericRequestHandler);
+    const childContainer = requestHandler.createChildContainer(this.setup.container);
 
     // Bind request context
-    requestHandle.bindContextToContainer(requestContext, childContainer, "core:root:current-request-context");
+    requestHandler.bindContextToContainer(requestContext, childContainer, "core:root:current-request-context");
 
     // Add minimal extraction if wanted
     if (minimalExtraction !== null) {
-      requestHandle.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
+      requestHandler.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
     }
 
     // Add minimal response handler
     if (typeof responseHandler !== "undefined") {
       if (minimalExtraction !== null) {
-        childContainer.bind<MinimalResponseHandler>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
+        childContainer.bind<BasicHandable<any>>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
       } else {
         throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");
       }
@@ -98,14 +99,30 @@ export class SpecSetup {
       this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") &&
       this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")
     ) {
-      const machine = this.setup.container.inversifyInstance.get<Transitionable>("core:state-machine:current-state-machine");
+      // get current Extraction, set intent and bind it back to
       const extraction = this.setup.container.inversifyInstance.get<MinimalRequestExtraction>("core:unifier:current-extraction");
+      if (runIntent) {
+        extraction.intent = runIntent;
+      }
+      this.setup.container.inversifyInstance.unbind("core:unifier:current-extraction");
+      this.setup.container.inversifyInstance.bind<MinimalRequestExtraction>("core:unifier:current-extraction").toConstantValue(extraction);
+
+      const machine = this.setup.container.inversifyInstance.get<Transitionable>("core:state-machine:current-state-machine");
 
       if (typeof stateName !== "undefined") {
         await machine.transitionTo(stateName);
       }
 
-      return machine.handleIntent(typeof runIntent === "undefined" ? extraction.intent : runIntent);
+      /**
+       * Here, we need the state machine runner instead of machine.handleIntent()
+       * because we won't execute after state machine extensions otherwise
+       */
+      const afterContextExtensions = this.setup.container.inversifyInstance.getAll<AfterContextExtension>(
+        this.setup.container.componentRegistry.lookup("core:root").getInterface("afterContextExtension")
+      );
+      const runner = afterContextExtensions.filter(extensionClass => extensionClass.constructor.name === "Runner")[0];
+
+      return runner.execute();
     }
 
     throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
@@ -163,6 +180,24 @@ export class SpecSetup {
         )
       );
     });
+  }
+
+  /**
+   * This Method returns the resolved Results from the current ResponseHandler
+   */
+  public getResponseResults<MergedAnswerTypes extends BasicAnswerTypes = BasicAnswerTypes>(): Partial<MergedAnswerTypes> {
+    const requestHandler: BasicHandable<MergedAnswerTypes> = this.setup.container.inversifyInstance.get(injectionNames.current.responseHandler);
+
+    const results = (requestHandler as any).results as Partial<MergedAnswerTypes>;
+    const promises = (requestHandler as any).promises as { [key in keyof MergedAnswerTypes]?: any };
+
+    for (const key in promises) {
+      if (promises.hasOwnProperty(key) && (!results.hasOwnProperty(key) || !results[key])) {
+        throw new Error("Not all Promises has been resolved. Did you await send() or resolveResults() on the ResponseHandler?");
+      }
+    }
+
+    return results;
   }
 }
 

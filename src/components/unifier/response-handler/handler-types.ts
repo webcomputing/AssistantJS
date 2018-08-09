@@ -1,3 +1,5 @@
+import { OptionalHandlerFeatures } from "../public-interfaces";
+
 /**
  * This interface defines the types which can be used on all Handlers
  * Handler should extend this interface to define own specific types.
@@ -17,7 +19,7 @@ export interface BasicAnswerTypes {
   };
 
   /** Minimal type to represent SuggestionChips */
-  suggestionChips: Array<{ displayText: string; spokenText: string }>;
+  suggestionChips: string[];
 
   /** Minimal type to represent ChatBubbles, an array containing all chat messages / chat bubbles to display */
   chatBubbles: string[];
@@ -47,6 +49,30 @@ export interface BasicAnswerTypes {
 }
 
 /**
+ * Interface to Implement if you want to use beforeSendResponse extensionpoint
+ * The BeforeResponseHandler gets the Handler to add or change values
+ */
+export interface BeforeResponseHandler<MergedAnswerType extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerType>> {
+  execute(handler: MergedHandler): Promise<void>;
+}
+
+/**
+ * Interface to Implement if you want to use afterSendResponse extensionpoint
+ * The AfterResponseHandler does only get the results, as the answers cannot be changed anymore
+ */
+export interface AfterResponseHandler<AnswerType extends BasicAnswerTypes> {
+  execute(results: Partial<AnswerType>): Promise<void>;
+}
+
+/**
+ * Interface to get all Before- and AfterResponseHandler
+ */
+export interface ResponseHandlerExtensions<MergedAnswerType extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerType>> {
+  beforeExtensions: Array<BeforeResponseHandler<MergedAnswerType, MergedHandler>>;
+  afterExtensions: Array<AfterResponseHandler<MergedAnswerType>>;
+}
+
+/**
  * This interface defines which methods every handler should have.
  * Types are referenced to the merged handler-specific types, like 'AlexaSpecificTypes & GoogleSpecificType'
  *
@@ -55,46 +81,11 @@ export interface BasicAnswerTypes {
  * that all missing feature-methods get traped and return also the correct this-context. This Proxy is return by the @see {@link HandlerProxyFactory}.
  */
 export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
-  readonly whitelist: string[];
-
   /**
    * Sends voice message
    * @param text Text to say to user
-   * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(
-    inputText: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>,
-    ...reprompts: Array<AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>>
-  ): this; // cannot set type via B["reprompts"] as typescript thinks this type is not an array
-
-  /**
-   * Adds voice messages when the User does not answer in a given time
-   * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
-   */
-  setReprompts(reprompts: Array<AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>>): this;
-
-  /**
-   * Sets the current Session as Unauthenticated.
-   */
-  setUnauthenticated(): this;
-
-  /**
-   * Adds a common Card to all Handlers
-   * @param card Card which should be shown
-   */
-  setCard(card: AnswerType["card"] | Promise<AnswerType["card"]>): this;
-
-  /**
-   * Add some sugestions for Devices with a Display after the response is shown and/or read to the user
-   * @param suggestionChips Texts to show (mostly) under the previous responses (prompts)
-   */
-  setSuggestionChips(suggestionChips: AnswerType["suggestionChips"] | Promise<AnswerType["suggestionChips"]>): this;
-
-  /**
-   * Add multiple texts as seperate text-bubbles
-   * @param chatBubbles Array of texts to shown as Bubbles
-   */
-  setChatBubbles(chatBubbles: AnswerType["chatBubbles"] | Promise<AnswerType["chatBubbles"]>): this;
+  prompt(inputText: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>): this;
 
   /**
    * End the current session, so the user cannot respond anymore
@@ -118,3 +109,8 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    */
   wasSent(): boolean;
 }
+
+/**
+ * Combination of BasicHandable and SessionHandable
+ */
+export type BasicSessionHandable<B extends BasicAnswerTypes> = BasicHandable<B> & OptionalHandlerFeatures.SessionData<B>;

@@ -1,35 +1,36 @@
-import {
-  injectionNames,
-  MinimalRequestExtraction,
-  MinimalResponseHandler,
-  OptionalExtractions,
-  OptionalHandlerFeatures,
-} from "../../../../src/assistant-source";
+import { BasicHandable, BasicHandler, injectionNames, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/assistant-source";
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
 import { PlatformSessionFactory } from "../../../../src/components/services/session-factories/platform-session-factory";
+import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
+import { PLATFORM } from "../../../support/mocks/unifier/extraction";
+import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
+import { MockHandlerB } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
-  handler: MinimalResponseHandler & OptionalHandlerFeatures.SessionData;
+  sessionHandler: BasicSessionHandable<any>;
   sessionFactory: PlatformSessionFactory;
+  prepareCurrentSpecSetup: (responseHandler?: { new (...args: any[]): BasicHandable<any> }) => void;
 }
 
 describe("PlatformSessionFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    createRequestScope(this.specHelper);
+    this.prepareCurrentSpecSetup = (responseHandler: { new (...args: any[]): BasicHandable<any> } = MockHandlerA) => {
+      createRequestScope(this.specHelper, undefined, undefined, responseHandler);
 
-    this.extraction = this.container.inversifyInstance.get(injectionNames.current.extraction);
-    this.handler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+      this.extraction = this.container.inversifyInstance.get(injectionNames.current.extraction);
+      this.sessionHandler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
 
-    this.sessionFactory = new PlatformSessionFactory(this.extraction, this.handler);
+      this.sessionFactory = new PlatformSessionFactory(this.extraction, this.sessionHandler);
+    };
   });
 
   describe("#getCurrentSession", function() {
     describe("with responseHandler not having support for sessionData", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        delete this.handler.sessionData;
+        this.prepareCurrentSpecSetup(MockHandlerB);
       });
 
       describe("with extraction having support for sessionData", function() {
@@ -45,7 +46,8 @@ describe("PlatformSessionFactory", function() {
 
     describe("with responseHandler having support for sessionData", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.handler.sessionData = null;
+        this.prepareCurrentSpecSetup();
+        this.sessionHandler.setSessionData(null);
       });
 
       describe("with extraction not having support for sessionData", function() {
@@ -64,7 +66,7 @@ describe("PlatformSessionFactory", function() {
         });
 
         it("returns session data with extraction and handler configured", async function(this: CurrentThisContext) {
-          expect(this.sessionFactory.getCurrentSession()).toEqual(new PlatformSession(this.extraction, this.handler));
+          expect(this.sessionFactory.getCurrentSession()).toEqual(new PlatformSession(this.extraction, this.sessionHandler));
         });
       });
     });

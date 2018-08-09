@@ -5,10 +5,8 @@ import { RequestProxy, withServer } from "../../support/util/requester";
 import { createSpecHelper } from "../../support/util/setup";
 
 import { extraction } from "../../support/mocks/unifier/extraction";
-import { RealResponseHandler } from "../../support/mocks/unifier/handler";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
-
-import { RequestPromise } from "request-promise";
+import { MockHandlerA as RealResponseHandler } from "../../support/mocks/unifier/response-handler/mock-handler-a";
 
 describe("with child containers enabled", function() {
   beforeEach(function() {
@@ -40,20 +38,20 @@ describe("with child containers enabled", function() {
 
     it("handles all of them correctly", async function(done) {
       const requests: Array<Promise<any>> = [];
-      let extractions: any[];
+      const extractions: any[] = [];
 
       for (let i = 0; i < FIRE_AMOUNT; i++) {
-        extraction[i] = { ...extractionData, message: "My message " + i };
+        extractions[i] = { ...extractionData, message: "My message " + i };
         requests.push(
           new Promise<any>((resolve, reject) => {
-            request.post(MockExtractor.fittingPath(), extraction[i]).then(value => resolve(value));
+            request.post(MockExtractor.fittingPath(), extractions[i]).then(value => resolve(value));
           })
         );
       }
 
       const fulfilledPromises = await Promise.all(requests);
       for (const i in fulfilledPromises) {
-        expect(fulfilledPromises[i].body).toEqual(extraction[i].message);
+        expect(fulfilledPromises[i].body).toEqual(extractions[i].message);
       }
 
       done();

@@ -7,7 +7,7 @@
     "test": "jasmine-ts spec/**/*.spec.ts"
   },
   "dependencies": {
-    "assistant-source": "^0.3.0",
+    "assistant-source": "^0.4.0",
     "inversify-components": "^0.4.0",
     "inversify": "4.1.1",
     "reflect-metadata": "^0.1.12",

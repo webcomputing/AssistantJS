@@ -1,19 +1,14 @@
 import { SessionConfiguration } from "../../../../src/components/services/private-interfaces";
 import { CryptedPlatformSessionFactory } from "../../../../src/components/services/session-factories/crypted-platform-session-factory";
-import { PlatformSessionFactory } from "../../../../src/components/services/session-factories/platform-session-factory";
-import {
-  MinimalRequestExtraction,
-  MinimalResponseHandler,
-  OptionalExtractions,
-  OptionalHandlerFeatures,
-} from "../../../../src/components/unifier/public-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
+import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
 import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
-  handler: MinimalResponseHandler & OptionalHandlerFeatures.SessionData;
+  handler: BasicSessionHandable<any>;
   sessionFactory: CryptedPlatformSessionFactory;
 }
 

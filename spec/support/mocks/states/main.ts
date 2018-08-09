@@ -3,16 +3,16 @@ import { TranslateHelper } from "../../../../src/components/i18n/public-interfac
 import { Logger } from "../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
+import { injectionNames } from "../../../../src/injection-names";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../unifier/response-handler/mock-handler-a";
 
 @injectable()
-export class MainState extends BaseState implements State.Required {
-  public responseFactory: ResponseFactory;
+export class MainState extends BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>> implements State.Required {
   public extraction: any;
   public spy?: (...args: any[]) => void;
 
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
+    @inject(injectionNames.current.responseHandler) responseHandler: MockHandlerA<MockHandlerASpecificTypes>,
     @inject("core:unifier:current-extraction") extraction: any,
     @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
     @inject("core:root:current-logger") logger: Logger,
@@ -20,10 +20,9 @@ export class MainState extends BaseState implements State.Required {
     @inject("mocks:states:call-spy")
     spy: (...args: any[]) => void
   ) {
-    super(responseFactory, translateHelper, extraction, logger);
+    super(responseHandler, translateHelper, extraction, logger);
     this.extraction = extraction;
     this.spy = spy;
-    this.responseFactory = responseFactory;
   }
 
   public async unhandledGenericIntent(...args: any[]) {
@@ -36,7 +35,7 @@ export class MainState extends BaseState implements State.Required {
 
   public answerIntent(...args: any[]) {
     this.spyIfExistent("answer", ...args);
-    this.responseFactory.createSimpleVoiceResponse().endSessionWith(this.extraction.message);
+    this.responseHandler.endSessionWith(this.extraction.message);
   }
 
   public otherIntent(...args: any[]) {

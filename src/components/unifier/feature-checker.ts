@@ -1,4 +1,5 @@
-import { MinimalRequestExtraction, MinimalResponseHandler } from "./public-interfaces";
+import { MinimalRequestExtraction } from "./public-interfaces";
+import { BasicHandable } from "./response-handler";
 
 /**
  * Checks whether a given feature exists in an extraction result.
@@ -12,15 +13,12 @@ export function featureIsAvailable<FeatureInterface>(
 
 /**
  * Checks whether a given feature is supported by a response handler.
- * @param {MinimalResponseHandler} container The response handler which might support the feature
+ * @param {BasicHandable} container The response handler which might support the feature
  * @param {string[]} feature The feature to check. Just pass a value of the FeatureChecker object from OptionalFeatures
  */
-export function featureIsAvailable<FeatureInterface>(
-  container: MinimalResponseHandler,
-  feature: string[]
-): container is FeatureInterface & MinimalResponseHandler;
+export function featureIsAvailable<FeatureInterface>(container: BasicHandable<any>, feature: string[]): container is FeatureInterface & BasicHandable<any>;
 
-export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction | MinimalResponseHandler, feature: string[]) {
+export function featureIsAvailable<FeatureInterface>(container: MinimalRequestExtraction | BasicHandable<any>, feature: string[]) {
   const objectKeys = Object.keys(container);
   return feature.filter(f => objectKeys.indexOf(f) === -1).length === 0;
 }

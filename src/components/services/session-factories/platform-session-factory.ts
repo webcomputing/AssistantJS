@@ -1,9 +1,9 @@
 import { inject, injectable } from "inversify";
-import { Constructor } from "../../../assistant-source";
 import { injectionNames } from "../../../injection-names";
 import { featureIsAvailable } from "../../unifier/feature-checker";
-import { MinimalRequestExtraction, MinimalResponseHandler, OptionalExtractions, OptionalHandlerFeatures } from "../../unifier/public-interfaces";
-import { CurrentSessionFactory, Session, SessionFactory } from "../public-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions, OptionalHandlerFeatures } from "../../unifier/public-interfaces";
+import { BasicSessionHandable } from "../../unifier/response-handler";
+import { Session, SessionFactory } from "../public-interfaces";
 import { PlatformSession } from "./platform-session";
 
 /** Gets current platform-based session by current request handler & extraction. Needs SessionData feature support by request handler. */
@@ -12,20 +12,20 @@ import { PlatformSession } from "./platform-session";
 export class PlatformSessionFactory implements SessionFactory {
   constructor(
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
-    @inject(injectionNames.current.responseHandler) private handler: MinimalResponseHandler
+    @inject(injectionNames.current.responseHandler) private handler: BasicSessionHandable<any>
   ) {}
 
   /** Gets current platform-based session by current request handler & extraction. Needs SessionData feature support by request handler. */
   public getCurrentSession(configurationAttributes?: any): Session {
     if (featureIsAvailable<OptionalExtractions.SessionData>(this.extraction, OptionalExtractions.FeatureChecker.SessionData)) {
-      if (featureIsAvailable<OptionalHandlerFeatures.SessionData>(this.handler, OptionalHandlerFeatures.FeatureChecker.SessionData)) {
+      if (featureIsAvailable(this.handler, OptionalHandlerFeatures.FeatureChecker.SessionData)) {
         return this.createSession(this.extraction, this.handler, configurationAttributes);
       }
 
       throw new Error(
-        `The response handler of the currently used platform (${
+        `You are trying to use the platform's (${
           this.extraction.platform
-        }) does not support storing session data. You might want to switch to a redis-based session storage.`
+        }) session handling, but the platform's response handler does not support session handling. In consequence, you can't remain in sessions. Please consider using redis as session storage.`
       );
     }
 
@@ -37,7 +37,7 @@ export class PlatformSessionFactory implements SessionFactory {
   }
 
   /** Creates the object */
-  protected createSession(extraction: OptionalExtractions.SessionData, handler: OptionalHandlerFeatures.SessionData, configurationAttributes?: any): Session {
+  protected createSession(extraction: OptionalExtractions.SessionData, handler: BasicSessionHandable<any>, configurationAttributes?: any): Session {
     return new PlatformSession(extraction, handler);
   }
 }

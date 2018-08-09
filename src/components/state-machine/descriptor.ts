@@ -6,9 +6,9 @@ import { TranslateHelper } from "../i18n/translate-helper";
 import { Logger } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
-import { ResponseFactory } from "../unifier/response-factory";
 
 import { Hooks } from "../joined-interfaces";
+import { BasicHandable } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
 import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
@@ -75,9 +75,9 @@ export const descriptor: ComponentDescriptor = {
 
     request: (bindService, lookupService) => {
       // Returns set of dependencies fitting for BaseState
-      bindService.bindGlobalService<State.SetupSet>("current-state-setup-set").toDynamicValue(context => {
+      bindService.bindGlobalService<State.SetupSet<any, any>>("current-state-setup-set").toDynamicValue(context => {
         return {
-          responseFactory: context.container.get<ResponseFactory>(injectionNames.current.responseFactory),
+          responseHandler: context.container.get<BasicHandable<any>>(injectionNames.current.responseHandler),
           translateHelper: context.container.get<TranslateHelper>(injectionNames.current.translateHelper),
           extraction: context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction),
           logger: context.container.get<Logger>(injectionNames.current.logger),
@@ -114,24 +114,23 @@ export const descriptor: ComponentDescriptor = {
             });
         };
       });
-      
+
       // Provider for context states. Returns array of states or empty array if no state is present.
       bindService.bindGlobalService("current-context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
-        return () => {
+        return async (): Promise<Array<{ instance: State.Required; name: string }>> => {
           const factory = context.container.get<Function>("core:state-machine:state-factory");
-          return context.container
-            .get<() => Session>(injectionNames.current.sessionFactory)()
-            .get("__context_states")
-            .then(contextStates => {
-              if (contextStates) {
-                const contextStatesArr: string[] = JSON.parse(contextStates);
-                return Array.isArray(contextStatesArr) ? contextStatesArr.map(stateName => ({ instance: factory(stateName), name: stateName })) : [];
-              }
-              return [];
-            });
+
+          const session = context.container.get<() => Session>(injectionNames.current.sessionFactory)();
+          const contextStates = await session.get("__context_states");
+
+          if (contextStates) {
+            const contextStatesArr: string[] = JSON.parse(contextStates);
+            return Array.isArray(contextStatesArr) ? contextStatesArr.map(stateName => ({ instance: factory(stateName), name: stateName })) : [];
+          }
+          return [];
         };
       });
-      
+
       bindService.bindLocalServiceToSelf(ExecuteFiltersHook);
 
       // Returns before intent hook

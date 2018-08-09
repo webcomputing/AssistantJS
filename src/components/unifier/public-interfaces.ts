@@ -1,66 +1,26 @@
 import { Component, ExecutableExtension } from "inversify-components";
-import { SpecSetup } from "../../spec-setup";
+import { SpecHelper } from "../../spec-helper";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { Configuration } from "./private-interfaces";
-import { CardResponse } from "./responses/card-response";
-import { ChatResponse } from "./responses/chat-response";
-import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
+import { BasicAnswerTypes, BasicHandable } from "./response-handler";
 
 /** Intent type - intents are either strings or type of GenericIntent */
 export declare type intent = string | GenericIntent;
-
-/** Main AssistantJS class to send responses to the user. */
-export interface ResponseFactory {
-  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
-  failSilentlyOnUnsupportedFeatures: boolean;
-
-  /** Creates a Voiceable response object which decides wheter or wheter not to use SSML based on input and platform features */
-  createVoiceResponse(): Voiceable;
-
-  /** Creates a Voiceable response object without SSML availability */
-  createSimpleVoiceResponse(): Voiceable;
-
-  /** Creates a Voiceable response object with SSML enabled. Throws an exception of SSML is not possible on platform. */
-  createSSMLResponse(): Voiceable;
-
-  /** Creates a response object for adding suggestion chips to the current response */
-  createSuggestionChipsResponse(): SuggestionChipsResponse;
-
-  /** Creates a response object for adding text/chat messsages (for displaying) to the current response */
-  createChatResponse(): ChatResponse;
-
-  /** Creates and sends an empty response */
-  createAndSendEmptyResponse(): {};
-
-  /**
-   * Sends a authentication prompt if available on current platform (else throws exception), possibly allows to add a message to it
-   * @param text String to add say in authentication prompt
-   */
-  createAndSendUnauthenticatedResponse(text?: string): {};
-
-  /** Creates a card response for adding simple graphical elements to your response */
-  createCardResponse(): CardResponse;
-}
-
-export type ConditionalTypeEndSessionWith<T extends string | Promise<string>> = T extends string ? void : Promise<void>;
-export type ConditionalTypePrompt<T extends string | Promise<string>, X extends string | Promise<string>> = T extends Promise<string>
-  ? Promise<void>
-  : (X extends Promise<string> ? Promise<void> : void);
 
 export interface Voiceable {
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith<T extends string | Promise<string>>(text: T): ConditionalTypeEndSessionWith<T>;
+  endSessionWith(text: string | Promise<string>): void;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt<T extends string | Promise<string>, X extends string | Promise<string>>(inputText: T, ...inputReprompts: X[]): ConditionalTypePrompt<T, X>;
+  prompt(inputText: string | Promise<string>, ...inputReprompts: Array<string | Promise<string>>): void;
 }
 
 // Currently, we are not allowed to use camelCase here! So try to just use a single word!
@@ -342,117 +302,109 @@ export namespace OptionalExtractions {
   };
 }
 
-/** Minimum interface a response handler has to fulfill */
-export interface MinimalResponseHandler extends VoiceMessage {
-  /** If set to false, the session should go on after sending the response */
-  endSession: boolean;
+/**
+ * optional features a custom handler can use
+ */
+export namespace OptionalHandlerFeatures {
+  /**
+   * This interface defines which methodes are necessary for ResponseHandler to handle Sessions
+   */
+  export interface SessionData<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Adds Data to session
+     *
+     * Most of the time it is better to use the @see {@link Session}-Implementation, as the Session-Implemention will set it automatically to the handler
+     * or use another SessionStorage like Redis. And it has some more features.
+     */
+    setSessionData(sessionData: MergedAnswerTypes["sessionData"] | Promise<MergedAnswerTypes["sessionData"]>): this;
 
-  /** Called automatically if the response should be sent */
-  sendResponse(): void;
-}
+    /**
+     * gets the current SessionData as Promise or undefined if no session is set
+     */
+    getSessionData(): Promise<MergedAnswerTypes["sessionData"]> | undefined;
+  }
 
-/** Minimum interface for an VoiceMessage */
-export interface VoiceMessage {
-  /** Voice message to speak to the user */
-  voiceMessage: string | null;
+  /**
+   * Adds SuggestionChips to Handler
+   */
+  export interface SuggestionChips<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Add some sugestions for Devices with a Display after the response is shown and/or read to the user
+     * @param suggestionChips Texts to show (mostly) under the previous responses (prompts)
+     */
+    setSuggestionChips(suggestionChips: MergedAnswerTypes["suggestionChips"] | Promise<MergedAnswerTypes["suggestionChips"]>): this;
+  }
+
+  export interface Reprompts<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Sends voice message
+     * @param text Text to say to user
+     * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
+     */
+    prompt(
+      inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>,
+      ...reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+    ): this; // cannot set type via B["reprompts"] as typescript thinks this type is not an array
+
+    /**
+     * Adds voice messages when the User does not answer in a given time
+     * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
+     */
+    setReprompts(
+      reprompts:
+        | Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+        | Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>
+    ): this;
+  }
+
+  export interface Card<MergedAnswerTypespe extends BasicAnswerTypes> {
+    /**
+     * Adds a common Card to all Handlers
+     * @param card Card which should be shown
+     */
+    setCard(card: MergedAnswerTypespe["card"] | Promise<MergedAnswerTypespe["card"]>): this;
+  }
+
+  export interface ChatBubbles<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Add multiple texts as seperate text-bubbles
+     * @param chatBubbles Array of texts to shown as Bubbles
+     */
+    setChatBubbles(chatBubbles: MergedAnswerTypes["chatBubbles"] | Promise<MergedAnswerTypes["chatBubbles"]>): this;
+  }
+
+  export interface Authentication {
+    /**
+     * Sets the current Session as Unauthenticated.
+     */
+    setUnauthenticated(): this;
+  }
+
+  // tslint:disable-next-line:variable-name
+  export const FeatureChecker = {
+    Authentication: ["setUnauthenticated"],
+    Card: ["setCard"],
+    ChatBubbles: ["setChatBubbles"],
+    Reprompt: ["setReprompts"],
+    SessionData: ["getSessionData", "setSessionData"],
+    SuggestionChips: ["setSuggestionChips"],
+  };
 }
 
 /**
  * Export all interfaces from the response handle specific types
  */
-export { BasicAnswerTypes, BasicHandable } from "./response-handler/handler-types";
+export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHandler, ResponseHandlerExtensions } from "./response-handler/handler-types";
 
-export namespace OptionalHandlerFeatures {
-  /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
-  export interface Authentication {
-    /** If set to true, the assistant will be informed about a missing oauth token */
-    forceAuthenticated: boolean;
-  }
-
-  /** If implemented, a response handler is able to parse SSML voice message */
-  export interface SSML {
-    /** If set to true, this voice message is in SSML format */
-    isSSML: boolean;
-  }
-
-  /** If implemented, the response handler's platform supports reprompts */
-  export interface Reprompt {
-    /** Reprompts for the current voice message */
-    reprompts: string[] | null;
-  }
-
-  /** If implemented, the response handler's platform supports storing of session data */
-  export interface SessionData {
-    /**
-     * Blob of all session data to set or NULL if we don't want to set any session data.
-     */
-    sessionData: string | null;
-  }
-
-  export namespace GUI {
-    export namespace Card {
-      /** Minimal Interface to represent a simple Card */
-      export interface Simple {
-        /** The card's title */
-        cardTitle: string | null;
-
-        /** The card's body */
-        cardBody: string | null;
-      }
-
-      /* Interface to represent a Card with Image */
-      export interface Image {
-        /** The image to display in the card */
-        cardImage: string | null;
-      }
-    }
-
-    /** Minimal Interface to represent SuggestionChips */
-    export interface SuggestionChips {
-      /** The suggestion chips to show */
-      suggestionChips: string[] | null;
-    }
-
-    /** Minimal Interface to represent ChatBubbles */
-    export interface ChatBubbles {
-      /** An array containing all chat messages / chat bubbles to display */
-      chatBubbles: string[] | null;
-    }
-  }
-
-  /** For internal feature checking since TypeScript does not emit interfaces */
-  // tslint:disable-next-line:variable-name
-  export const FeatureChecker = {
-    /** Can we force the existance of OAuth tokens? */
-    AuthenticationHandler: ["forceAuthenticated"],
-
-    /** Are chat messages / chat bubbles available? */
-    ChatBubble: ["chatBubbles"],
-
-    /** Does this response handler support reprompts? */
-    Reprompt: ["reprompts"],
-
-    /** Does this response handler support SSML? */
-    SSMLHandler: ["isSSML"],
-
-    /** Does this response handler support cards containing a textual title and body? */
-    SimpleCard: ["cardBody", "cardTitle"],
-
-    /** Are cards containing a textual title, body and an image available? */
-    ImageCard: ["cardBody", "cardTitle", "cardImage"],
-
-    /** Does this response handler support suggestion chips? */
-    SuggestionChip: ["suggestionChips"],
-
-    /** Does this response handler support storing of session data? */
-    SessionData: ["sessionData"],
-  };
-}
+/**
+ * Export mixins
+ */
+export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, SessionDataMixin, SuggestionChipsMixin } from "./response-handler/mixins";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
-export interface PlatformSpecHelper {
+export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
   /** Link to assistantJS SpecSetup */
-  specSetup: SpecSetup;
+  specSetup: SpecHelper;
 
   /**
    * Pretends call of given intent (and entities, ...)
@@ -461,24 +413,13 @@ export interface PlatformSpecHelper {
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
+  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<MergedHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
 
-/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
-export interface BeforeResponseHandler {
-  execute(responseHandler: MinimalResponseHandler);
-}
-
-/** Interface to Implement if you want to use beforeSendResponse extensionpoint */
-export interface AfterResponseHandler {
-  execute(responseHandler: MinimalResponseHandler);
-}
-
-/** Interface to get all Before- and AfterResponseHandler */
-export interface ResponseHandlerExtensions {
-  beforeExtensions: BeforeResponseHandler[];
-  afterExtensions: AfterResponseHandler[];
-}
+/**
+ * Combination of normal Type and Promise of Type
+ */
+export type OptionallyPromise<T> = T | Promise<T>;

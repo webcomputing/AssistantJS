@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { Container } from "inversify-components";
-import { injectionNames, MissingInterpolationExtension, SpecSetup } from "../../../src/assistant-source";
+import { injectionNames, MissingInterpolationExtension, SpecHelper } from "../../../src/assistant-source";
 import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
 import { TranslateHelper } from "../../../src/components/i18n/translate-helper";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
@@ -10,7 +10,7 @@ interface CurrentThisContext {
   container: Container;
   missingInterpolationExtension: MissingInterpolationExtension;
   translateHelper: TranslateHelper;
-  specHelper: SpecSetup;
+  specHelper: SpecHelper;
 }
 
 describe("InterpolationResolver", function() {

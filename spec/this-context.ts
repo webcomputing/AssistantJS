@@ -1,7 +1,7 @@
 import { Container } from "inversify-components";
-import { SpecSetup } from "../src/spec-setup";
+import { SpecHelper } from "../src/spec-helper";
 
 export interface ThisContext {
-  specHelper: SpecSetup;
+  specHelper: SpecHelper;
   container: Container;
 }
