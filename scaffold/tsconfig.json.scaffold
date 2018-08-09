@@ -6,6 +6,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "outDir": "js"
+    "outDir": "js",
+    "skipLibCheck": true
   }
 }

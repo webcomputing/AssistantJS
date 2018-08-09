@@ -6,6 +6,7 @@ version 0.4.0
     - every Method can be used either with plain objects or with promises
     - for every common feature like SuggestionChips, Authentication or Cards there is a mixin which can be used and extended by specific ResponseHandler
     - removed createAndSendEmptyResponse(), use endSessionWith("") instead.
+    - as of https://github.com/Microsoft/TypeScript/issues/17113 projects need to use `"skipLibCheck": true` in tsconfig.json
 
 version 0.3.2
 - fixes intent configuration in generator. Entities will be mapped with utterances only once. (@denselmann)
