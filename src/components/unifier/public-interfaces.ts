@@ -50,6 +50,9 @@ export enum GenericIntent {
 
   /** Say: "Stop" */
   Stop,
+
+  /** Called when Element is selected on a display */
+  SelectedElement,
 }
 
 /** Intents which are not specific to a given platform. */
@@ -60,7 +63,7 @@ export namespace GenericIntent {
    * @param platform intent to check
    */
   export function isSpeakable(currIntent: GenericIntent) {
-    const unspeakableIntents: GenericIntent[] = [GenericIntent.Invoke, GenericIntent.Unanswered, GenericIntent.Unhandled];
+    const unspeakableIntents: GenericIntent[] = [GenericIntent.Invoke, GenericIntent.Unanswered, GenericIntent.Unhandled, GenericIntent.SelectedElement];
 
     return unspeakableIntents.indexOf(currIntent) === -1;
   }
