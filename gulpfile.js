@@ -46,7 +46,7 @@ gulp.task("clean", function() {
 
 /** Runs all tests. We dont need to emit sourcemaps here since jasmine-ts handles this for us. */
 gulp.task("test", ["build-sources"], shell.task('jasmine-ts "**/*.spec.ts"'));
-gulp.task("test-coverage", ["build-sources"], shell.task('nyc -e .ts -x "*.spec.ts" jasmine-ts "**/*.spec.ts"'));
+gulp.task("test-coverage", ["build-sources"], shell.task('nyc --include "src" --all -e .ts -x "*.spec.ts" jasmine-ts "**/*.spec.ts"'));
 
 /** Watches file changes in source or spec files and executes specs automatically */
 gulp.task("specs-watcher", ["build-sources"], function() {
