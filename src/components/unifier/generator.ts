@@ -1,4 +1,3 @@
-import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
 import * as fs from "fs";
 import * as combinatorics from "js-combinatorics";
 import { inject, injectable, multiInject, optional } from "inversify";
