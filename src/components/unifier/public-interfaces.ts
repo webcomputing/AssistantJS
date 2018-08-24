@@ -67,15 +67,20 @@ export namespace GenericIntent {
 }
 
 /** A custom entity set to use in your utterances and AssistantJS configuration */
-export interface EntitySet {
-  /** Name of AssistantJS entity to link with this entity set */
-  mapsTo: string;
+export interface CustomEntity {
   /**
    * Allowed values of this entity set. Needs language id as hash key and a list
    * of string values or objects with string value and possible synonyms.
    */
-  // tslint:disable-next-line:prefer-array-literal
-  values: { [language: string]: Array<string | { value: string; synonyms: string[] }> };
+  values: {
+    [language: string]: Array<
+      | string
+      | {
+          value: string;
+          synonyms: string[];
+        }
+    >;
+  };
 }
 
 /** Manages access to entities */
@@ -148,7 +153,7 @@ export namespace PlatformGenerator {
     entities: string[];
 
     /** Configured entitySet of this intent */
-    entitySets: { [name: string]: EntitySet };
+    customEntities: { [name: string]: CustomEntity };
   }
 
   /** Service extension, gets utterances by language */

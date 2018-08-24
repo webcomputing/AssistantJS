@@ -1,5 +1,6 @@
 import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
 import * as fs from "fs";
+import * as combinatorics from "js-combinatorics";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
@@ -45,67 +46,74 @@ export class Generator implements CLIGeneratorExtension {
   public async execute(buildDir: string): Promise<void> {
     // Combine all registered parameter mappings to single object
     const parameterMapping = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
+    // The users custom entities
+    const customEntities = this.configuration.customEntities;
+    // Get the main utterance templates for each defined language
+    const utteranceTemplates = this.getUtteranceTemplates();
 
-    const entitySets = this.configuration.entitySets;
-
-    // Get utterance templates per language
-    const templatesPerLanguage = this.getUtteranceTemplatesPerLanguage();
-
-    // For each found language...
-    const promises = Object.keys(templatesPerLanguage)
+    // Iterate through each found language and build the utterance corresponding to the users entities
+    const generatorPromises = Object.keys(utteranceTemplates)
       .map(language => {
-        const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
-
-        // Build Slots and Dictionary for possible entitySets
-        const slots = {};
+        // A hash of entity values
         const dictionary = {};
-        Object.keys(entitySets).forEach(key => {
+        // Language specific build directory
+        const localeBuildDirectory = buildDir + "/" + language;
+        // Mapping of intent, utterances and entities
+        const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
+        // Contains the utterances generated from the utterance templates
+        const utterances: { [intent: string]: string[] } = {};
+
+        // Create build dir
+        fs.mkdirSync(localeBuildDirectory);
+
+        // Fill dictionary with synonyms and entity value name
+        Object.keys(customEntities).forEach(entityName => {
           // Values can either be given as string array or as object with property 'synonyms'
           const synonyms: string[] = [];
-          entitySets[key].values[language].forEach(cValue => {
-            if (typeof cValue === "string") {
-              synonyms.push(cValue);
+          customEntities[entityName].values[language].forEach(entity => {
+            if (typeof entity === "string") {
+              synonyms.push(entity);
             } else {
-              synonyms.push(...cValue.synonyms);
+              synonyms.push(entity.value);
+              synonyms.push(...entity.synonyms);
             }
           });
-          slots[entitySets[key].mapsTo] = "LITERAL";
-          dictionary[key] = synonyms;
+          dictionary[entityName] = synonyms;
         });
 
-        // Create language specific build dir
-        const languageSpecificBuildDir = buildDir + "/" + language;
-        fs.mkdirSync(languageSpecificBuildDir);
+        // Add utterances from extensions to current template
+        utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
+          const source = curr.getUtterancesFor(language);
+          Object.keys(source).forEach(currIntent => {
+            // Merge arrays of utterances or add intent to target
+            target[currIntent] = target.hasOwnProperty(currIntent) ? target[currIntent].concat(source[currIntent]) : source[currIntent];
+          });
+          return target;
+        }, utteranceTemplates[language]); // Initial value
 
-        // Add additional utterances from extensions to current templates
-        const currentTemplates = this.additionalUtteranceTemplatesServices.reduce(
-          (prev, curr) => this.mergeUtterances(prev, curr.getUtterancesFor(language)),
-          templatesPerLanguage[language]
-        );
-
-        // ... convert templates into built utterances
-        Object.keys(currentTemplates).forEach(currIntent => {
-          currentTemplates[currIntent] = this.buildUtterances(currentTemplates[currIntent], parameterMapping, slots, dictionary);
+        // Build utterances from templates
+        Object.keys(utteranceTemplates[language]).forEach(currIntent => {
+          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent]);
         });
 
-        // ... build the GenerateIntentConfiguration[] array based on these utterances and the found intents
+        // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
         this.intents.forEach(currIntent => {
-          let utterances: string[] = [];
+          let phrases: string[] = [];
 
           // Associate utterances to intent
           if (typeof currIntent === "string") {
-            utterances = currentTemplates[currIntent + "Intent"];
+            phrases = utterances[currIntent + "Intent"];
           } else {
             const baseName = GenericIntent[currIntent] + "GenericIntent";
-            utterances = currentTemplates[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
+            phrases = utterances[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
           }
-          if (typeof utterances === "undefined") utterances = [];
+          if (typeof phrases === "undefined") phrases = [];
 
           // Associate parameters
           let parameters =
-            utterances
+            phrases
               // Match all {parameters}
-              .map(utterance => utterance.match(/\{(\w+)?\}/g))
+              .map(phrase => phrase.match(/\{(\w+)?\}/g))
 
               // Create one array with all matches
               .reduce((prev, curr) => {
@@ -116,12 +124,12 @@ export class Generator implements CLIGeneratorExtension {
                 return prev;
               }, []) || [];
 
-          // Remove duplicates from this one array
+          // Remove duplicates from array
           parameters = [...new Set(parameters)];
 
           // Check for parameters in utterances which have no mapping
           const unmatchedParameter = parameters.find(
-            name => typeof parameterMapping[name as string] === "undefined" && typeof entitySets[name as string] === "undefined"
+            name => typeof parameterMapping[name as string] === "undefined" && typeof customEntities[name as string] === "undefined"
           );
           if (typeof unmatchedParameter === "string") {
             throw Error(
@@ -137,8 +145,8 @@ export class Generator implements CLIGeneratorExtension {
           }
 
           buildIntentConfigs.push({
-            entitySets,
-            utterances,
+            customEntities,
+            utterances: phrases,
             entities: parameters,
             intent: currIntent,
           });
@@ -149,7 +157,7 @@ export class Generator implements CLIGeneratorExtension {
           Promise.resolve(
             generator.execute(
               language,
-              languageSpecificBuildDir,
+              localeBuildDirectory,
               buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))),
               JSON.parse(JSON.stringify(parameterMapping))
             )
@@ -159,32 +167,49 @@ export class Generator implements CLIGeneratorExtension {
       .reduce((prev, curr) => prev.concat(curr));
 
     // Wait for all platform generators to finish
-    await Promise.all(promises);
+    await Promise.all(generatorPromises);
   }
 
   /**
-   * Builds utterances for the given templateStrings
-   * @param {string[]} templateStrings that are the specified utterance-strings per intent from translation.json
-   * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
-   * @param { [name: string]: string } [slots] to give to alexa-utterances
-   * @param { [name: string]: string[] } [dictionary] to give to alexa-utterances
+   * Generate an array of utterances, based on the users utterance templates
+   * @param templates
    */
-  public buildUtterances(
-    templateStrings: string[],
-    parameterMapping: PlatformGenerator.EntityMapping,
-    slots?: { [name: string]: string },
-    dictionary?: { [name: string]: string[] }
-  ): string[] {
-    return (
-      templateStrings
-        // convert {{param}} into alexa-utterances-specific format
-        .map(templateString => templateString.replace(/\{\{(\w+)\}\}/g, (match, param) => this.getEntity(param, parameterMapping)))
-        .map(templateString => generateUtterances(templateString, slots, dictionary))
-        .reduce((prev, curr) => prev.concat(curr), [])
-    );
-  }
+  public generateUtterances(templates: string[]): string[] {
+    let utterances: string[] = [];
+    templates.map(template => {
+      const values: string[] = [];
+      template = template
+        // Convert entities in custom entity syntax
+        .replace(/\{\{(\w+)\}\}/g, (match, param) => {
+          return "{{-|" + param + "}}";
+        })
+        // Extract all possible values and substitute them with a placeholder
+        .replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match, param) => {
+          values.push(param.split("|"));
+          return `{${values.length - 1}}`;
+        });
 
-  public getUtteranceTemplatesPerLanguage(): { [language: string]: { [intent: string]: string[] } } {
+      // Generate all possible combinations with cartesian product
+      if (values.length > 0) {
+        const combinations = combinatorics.cartesianProduct.apply(combinatorics, values).toArray();
+        // Substitute placeholders with combinations
+        combinations.forEach(combi => {
+          utterances.push(
+            template.replace(/\{(\d+)\}/g, (match, param) => {
+              return combi[param];
+            })
+          );
+        });
+      } else {
+        utterances.push(template);
+      }
+    });
+    return utterances;
+  }
+  /**
+   * Return the user defined utterance templates for each language in locales folder
+   */
+  private getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } } {
     const utterances = {};
     const utterancesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(utterancesDir);
@@ -195,30 +220,6 @@ export class Generator implements CLIGeneratorExtension {
         utterances[language] = current;
       }
     });
-
     return utterances;
-  }
-
-  /**
-   * Creates an alexa-utterances-specific format of an entity declaration,
-   * {-|param} for existing entities and {param|MAPPED_ENTITY} for entitySets
-   * @param {string} param that is either an existing entity name or an entitySet name
-   * @param {PlatformGenerator.EntityMapping} parameterMapping that mapps all registered entities in an single object
-   */
-  private getEntity(param: string, parameterMapping: PlatformGenerator.EntityMapping): string {
-    if (typeof parameterMapping[param] === "undefined" && typeof this.configuration.entitySets[param] !== "undefined") {
-      // param is part of an entitySet
-      return `{${param}|${this.configuration.entitySets[param].mapsTo}}`;
-    }
-    return "{-|" + param + "}";
-  }
-
-  private mergeUtterances(target: { [intent: string]: string[] }, source: { [intent: string]: string[] }) {
-    Object.keys(source).forEach(currIntent => {
-      // Merge arrays of utterances or add intent to target
-      target[currIntent] = target.hasOwnProperty(currIntent) ? target[currIntent].concat(source[currIntent]) : source[currIntent];
-    });
-
-    return target;
   }
 }

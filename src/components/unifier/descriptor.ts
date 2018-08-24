@@ -23,7 +23,7 @@ import { swapHash } from "./swap-hash";
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
   entities: {},
-  entitySets: {},
+  customEntities: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"],
 };

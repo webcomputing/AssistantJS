@@ -1,4 +1,4 @@
-import { EntitySet } from "./public-interfaces";
+import { CustomEntity } from "./public-interfaces";
 
 export const componentInterfaces = {
   afterSendResponse: Symbol("after-send-response"),
@@ -23,7 +23,7 @@ export namespace Configuration {
     entities: { [type: string]: string[] };
 
     /** Sets of custom entities and allowed / example entity values */
-    entitySets: { [name: string]: EntitySet };
+    customEntities: { [name: string]: CustomEntity };
 
     /** If set to false, created response objects will throw an exception if an unsupported feature if used */
     failSilentlyOnUnsupportedFeatures: boolean;
