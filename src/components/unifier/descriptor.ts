@@ -18,7 +18,7 @@ import {
 } from "./public-interfaces";
 import { BasicHandable, HandlerProxyFactory } from "./response-handler";
 import { AfterStateResponseSender } from "./response-handler/after-state-handler";
-import { swapHash } from "./swap-hash";
+import { mapEntity } from "./entity-mapper";
 
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
@@ -39,7 +39,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return swapHash(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
+        return {
+          ...mapEntity(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities),
+          ...mapEntity(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.customEntities),
+        };
       });
 
       // Bind same swapped entity configuration to own extension

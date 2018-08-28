@@ -4,7 +4,7 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
+import { GenericIntent, intent, PlatformGenerator, CustomEntity } from "./public-interfaces";
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
@@ -53,32 +53,17 @@ export class Generator implements CLIGeneratorExtension {
     // Iterate through each found language and build the utterance corresponding to the users entities
     const generatorPromises = Object.keys(utteranceTemplates)
       .map(language => {
-        // A hash of entity values
-        const dictionary = {};
         // Language specific build directory
         const localeBuildDirectory = buildDir + "/" + language;
         // Mapping of intent, utterances and entities
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
         // Contains the utterances generated from the utterance templates
         const utterances: { [intent: string]: string[] } = {};
+        // A hash of custom entity values
+        const dictionary: { [name: string]: string[] } = {};
 
         // Create build dir
         fs.mkdirSync(localeBuildDirectory);
-
-        // Fill dictionary with synonyms and entity value name
-        Object.keys(customEntities).forEach(entityName => {
-          // Values can either be given as string array or as object with property 'synonyms'
-          const synonyms: string[] = [];
-          customEntities[entityName].values[language].forEach(entity => {
-            if (typeof entity === "string") {
-              synonyms.push(entity);
-            } else {
-              synonyms.push(entity.value);
-              synonyms.push(...entity.synonyms);
-            }
-          });
-          dictionary[entityName] = synonyms;
-        });
 
         // Add utterances from extensions to current template
         utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
@@ -95,24 +80,40 @@ export class Generator implements CLIGeneratorExtension {
           utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent]);
         });
 
+        // Fill dictionary with synonyms and entity value name
+        Object.keys(customEntities).forEach(entityName => {
+          // Values can either be given as string array or as object with property 'synonyms'
+          const synonyms: string[] = [];
+          customEntities[entityName].values[language].forEach(entity => {
+            if (typeof entity === "string") {
+              synonyms.push(entity);
+            } else {
+              synonyms.push(entity.value);
+              synonyms.push(...entity.synonyms);
+            }
+          });
+          dictionary[entityName] = synonyms;
+        });
+
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
         this.intents.forEach(currIntent => {
-          let phrases: string[] = [];
+          let intentUtterances: string[] = [];
 
           // Associate utterances to intent
           if (typeof currIntent === "string") {
-            phrases = utterances[currIntent + "Intent"];
+            intentUtterances = utterances[currIntent + "Intent"];
           } else {
             const baseName = GenericIntent[currIntent] + "GenericIntent";
-            phrases = utterances[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
+            intentUtterances = utterances[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
           }
-          if (typeof phrases === "undefined") phrases = [];
+          // If intentUtterances is "undefined", assign empty array
+          if (typeof intentUtterances === "undefined") intentUtterances = [];
 
           // Associate parameters
-          let parameters =
-            phrases
+          let entities =
+            intentUtterances
               // Match all {parameters}
-              .map(phrase => phrase.match(/\{(\w+)?\}/g))
+              .map(utterance => utterance.match(/\{(\w+)?\}/g))
 
               // Create one array with all matches
               .reduce((prev, curr) => {
@@ -124,16 +125,14 @@ export class Generator implements CLIGeneratorExtension {
               }, []) || [];
 
           // Remove duplicates from array
-          parameters = [...new Set(parameters)];
+          entities = [...new Set(entities)];
 
-          // Check for parameters in utterances which have no mapping
-          const unmatchedParameter = parameters.find(
-            name => typeof parameterMapping[name as string] === "undefined" && typeof customEntities[name as string] === "undefined"
-          );
-          if (typeof unmatchedParameter === "string") {
+          // Check for entities in utterances which have no mapping
+          const unmatchedEntity = entities.find(name => typeof parameterMapping[name] === "undefined");
+          if (typeof unmatchedEntity === "string") {
             throw Error(
               "Unknown entity '" +
-                unmatchedParameter +
+                unmatchedEntity +
                 "' found in utterances of intent '" +
                 currIntent +
                 "'. \n" +
@@ -145,11 +144,13 @@ export class Generator implements CLIGeneratorExtension {
 
           buildIntentConfigs.push({
             customEntities,
-            utterances: phrases,
-            entities: parameters,
+            utterances: intentUtterances,
+            entities,
             intent: currIntent,
           });
         });
+
+        console.log("BuildIntentConfigs: ", buildIntentConfigs);
 
         // Call all platform generators
         return this.platformGenerators.map(generator =>
@@ -176,21 +177,17 @@ export class Generator implements CLIGeneratorExtension {
   public generateUtterances(templates: string[]): string[] {
     let utterances: string[] = [];
     templates.map(template => {
-      const values: string[] = [];
-      template = template
-        // Convert entities in custom entity syntax
-        .replace(/\{\{(\w+)\}\}/g, (match, param) => {
-          return "{{-|" + param + "}}";
-        })
-        // Extract all possible values and substitute them with a placeholder
-        .replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match, param) => {
-          values.push(param.split("|"));
-          return `{${values.length - 1}}`;
-        });
+      const slotValues: string[] = [];
+
+      // Extract all slot values and substitute them with a placeholder
+      template = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match, param) => {
+        slotValues.push(param.split("|"));
+        return `{${slotValues.length - 1}}`;
+      });
 
       // Generate all possible combinations with cartesian product
-      if (values.length > 0) {
-        const combinations = combinatorics.cartesianProduct.apply(combinatorics, values).toArray();
+      if (slotValues.length > 0) {
+        const combinations = combinatorics.cartesianProduct.apply(combinatorics, slotValues).toArray();
         // Substitute placeholders with combinations
         combinations.forEach(combi => {
           utterances.push(
@@ -205,8 +202,9 @@ export class Generator implements CLIGeneratorExtension {
     });
     return utterances;
   }
+
   /**
-   * Return the user defined utterance templates for each language in locales folder
+   * Return the user defined utterance templates for each language found in locales folder
    */
   private getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } } {
     const utterances = {};
@@ -220,5 +218,19 @@ export class Generator implements CLIGeneratorExtension {
       }
     });
     return utterances;
+  }
+
+  /**
+   * Validates
+   * @param utterances
+   * @param customEntites
+   */
+  private validateCustomEntityExamples(utterances: string[], dictionary: { [name: string]: string[] }, customEntites: { [name: string]: CustomEntity }) {
+    // Iterate through custom entities
+    Object.keys(customEntites).forEach(entity => {
+      customEntites[entity].names.forEach(name => {
+        utterances.forEach(utterance => {});
+      });
+    });
   }
 }

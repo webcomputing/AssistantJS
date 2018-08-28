@@ -69,6 +69,10 @@ export namespace GenericIntent {
 /** A custom entity set to use in your utterances and AssistantJS configuration */
 export interface CustomEntity {
   /**
+   * Names of the entities which are mentioned in the utterances
+   */
+  names: string[];
+  /**
    * Allowed values of this entity set. Needs language id as hash key and a list
    * of string values or objects with string value and possible synonyms.
    */
