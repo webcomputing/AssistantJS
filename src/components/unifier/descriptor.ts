@@ -23,7 +23,6 @@ import { mapEntity } from "./entity-mapper";
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
   entities: {},
-  customEntities: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"],
 };
@@ -39,10 +38,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return {
-          ...mapEntity(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities),
-          ...mapEntity(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.customEntities),
-        };
+        return mapEntity(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
       });
 
       // Bind same swapped entity configuration to own extension

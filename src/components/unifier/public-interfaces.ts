@@ -66,7 +66,7 @@ export namespace GenericIntent {
   }
 }
 
-/** A custom entity set to use in your utterances and AssistantJS configuration */
+/** A language specfic custom entity. */
 export interface CustomEntity {
   /**
    * Names of the entities which are mentioned in the utterances
@@ -84,6 +84,25 @@ export interface CustomEntity {
           synonyms: string[];
         }
     >;
+  };
+}
+
+/** A non-language specfic entity. */
+export interface Entity {
+  /** Name of the AssistantJS entity to link with */
+  names: string[];
+  /** Array of synonyms and examples */
+  examples: string[];
+}
+
+/** An entity set for generator configuration */
+export interface EntitySet {
+  /** Name of AssistantJS entity to link with this entity set */
+  [name: string]: {
+    /** Linked entity type */
+    type: string;
+    /** Allowed values of this entity set */
+    values: string[];
   };
 }
 
@@ -155,9 +174,6 @@ export namespace PlatformGenerator {
 
     /** Configured entities of this intent */
     entities: string[];
-
-    /** Configured entitySet of this intent */
-    customEntities: { [name: string]: CustomEntity };
   }
 
   /** Service extension, gets utterances by language */

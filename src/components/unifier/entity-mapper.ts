@@ -1,32 +1,24 @@
-import { CustomEntity } from "./public-interfaces";
+import { Entity, CustomEntity } from "./public-interfaces";
 
 /**
  * Maps the entitý name to their specific types
  * @param entity
  */
-export function mapEntity(entity: { [type: string]: string[] } | { [name: string]: CustomEntity }) {
+export function mapEntity(entity: { [type: string]: string[] | CustomEntity | Entity }) {
   const result = {};
-  Object.keys(entity).forEach(val => {
-    const currEntity = entity[val];
-    if (isCustomEntity(currEntity)) {
-      currEntity.names.forEach(name => {
-        result[name] = val;
+  Object.keys(entity).forEach(type => {
+    const currEntity = entity[type];
+    if (currEntity instanceof Array) {
+      currEntity.forEach(parameter => {
+        result[parameter] = type;
       });
     } else {
-      currEntity.forEach(parameter => {
-        result[parameter] = val;
+      currEntity.names.forEach(name => {
+        result[name] = type;
       });
     }
     // Add type as possible parameter, for answer prompt
-    result[val] = val;
+    result[type] = type;
   });
   return result;
-}
-
-/**
- * Type Guard to check whether an entity is a custom entity
- * @param entity
- */
-function isCustomEntity(entity): entity is CustomEntity {
-  return typeof (<CustomEntity>entity).names !== "undefined";
 }

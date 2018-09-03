@@ -4,7 +4,7 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { GenericIntent, intent, PlatformGenerator, CustomEntity } from "./public-interfaces";
+import { GenericIntent, intent, PlatformGenerator, CustomEntity, EntitySet, Entity } from "./public-interfaces";
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
@@ -45,8 +45,6 @@ export class Generator implements CLIGeneratorExtension {
   public async execute(buildDir: string): Promise<void> {
     // Combine all registered parameter mappings to single object
     const parameterMapping = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
-    // The users custom entities
-    const customEntities = this.configuration.customEntities;
     // Get the main utterance templates for each defined language
     const utteranceTemplates = this.getUtteranceTemplates();
 
@@ -59,8 +57,6 @@ export class Generator implements CLIGeneratorExtension {
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
         // Contains the utterances generated from the utterance templates
         const utterances: { [intent: string]: string[] } = {};
-        // A hash of custom entity values
-        const dictionary: { [name: string]: string[] } = {};
 
         // Create build dir
         fs.mkdirSync(localeBuildDirectory);
@@ -80,20 +76,8 @@ export class Generator implements CLIGeneratorExtension {
           utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent]);
         });
 
-        // Fill dictionary with synonyms and entity value name
-        Object.keys(customEntities).forEach(entityName => {
-          // Values can either be given as string array or as object with property 'synonyms'
-          const synonyms: string[] = [];
-          customEntities[entityName].values[language].forEach(entity => {
-            if (typeof entity === "string") {
-              synonyms.push(entity);
-            } else {
-              synonyms.push(entity.value);
-              synonyms.push(...entity.synonyms);
-            }
-          });
-          dictionary[entityName] = synonyms;
-        });
+        // Build Entity Set for generator configuration
+        const entitySet = this.generateEntitySet(this.configuration.entities, language);
 
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
         this.intents.forEach(currIntent => {
@@ -143,7 +127,6 @@ export class Generator implements CLIGeneratorExtension {
           }
 
           buildIntentConfigs.push({
-            customEntities,
             utterances: intentUtterances,
             entities,
             intent: currIntent,
@@ -151,7 +134,6 @@ export class Generator implements CLIGeneratorExtension {
         });
 
         console.log("BuildIntentConfigs: ", buildIntentConfigs);
-
         // Call all platform generators
         return this.platformGenerators.map(generator =>
           Promise.resolve(
@@ -221,16 +203,61 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   /**
-   * Validates
-   * @param utterances
-   * @param customEntites
+   * Return the mapped EntitySet, based on the users entities
+   * @param entities
+   * @param language
    */
-  private validateCustomEntityExamples(utterances: string[], dictionary: { [name: string]: string[] }, customEntites: { [name: string]: CustomEntity }) {
-    // Iterate through custom entities
-    Object.keys(customEntites).forEach(entity => {
-      customEntites[entity].names.forEach(name => {
-        utterances.forEach(utterance => {});
-      });
+  private generateEntitySet(entities: { [type: string]: string[] | Entity | CustomEntity }, language: string) {
+    const entitySet: EntitySet = {};
+    Object.keys(entities).forEach(type => {
+      const entity = entities[type];
+      if (entity instanceof Array) {
+        entity.forEach(name => {
+          entitySet[name] = {
+            type: type,
+            values: [],
+          };
+        });
+      } else {
+        entity.names.forEach(name => {
+          entitySet[name] = {
+            type: type,
+            values: [],
+          };
+          if (this.isCustomEntity(entity)) {
+            if (typeof entity.values[language] !== "undefined") {
+              entity.values[language].forEach(param => {
+                if (typeof param === "string") {
+                  entitySet[name].values.push(param);
+                } else {
+                  entitySet[name].values.push(param.value);
+                  entitySet[name].values.push(...param.synonyms);
+                }
+              });
+            } else {
+              throw Error(
+                "Unknown language configuration for '" +
+                  name +
+                  "'. \n" +
+                  "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " +
+                  "Your configured entity mappings are: " +
+                  JSON.stringify(this.entityMappings)
+              );
+            }
+          } else {
+            entitySet[name].values.push(...entity.examples);
+          }
+        });
+      }
     });
+    return entitySet;
+  }
+
+  /**
+   * Type Guard to check whether an entity is a custom entity
+   * @param entity
+   */
+  private isCustomEntity(entity): entity is CustomEntity {
+    return typeof (<CustomEntity>entity).values !== "undefined";
   }
 }
