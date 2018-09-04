@@ -4,7 +4,7 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { GenericIntent, intent, PlatformGenerator, DeveloperEntity, Entity } from "./public-interfaces";
+import { GenericIntent, intent, PlatformGenerator, CustomEntity } from "./public-interfaces";
 import { EntityMapper } from "./entity-mapper";
 
 @injectable()
@@ -54,6 +54,8 @@ export class Generator implements CLIGeneratorExtension {
     // Get the main utterance templates for each defined language
     const utteranceTemplates = this.getUtteranceTemplates();
 
+    console.log("EntityMapper: ", JSON.stringify(this.entityMapper));
+
     // Iterate through each found language and build the utterance corresponding to the users entities
     const generatorPromises = Object.keys(utteranceTemplates)
       .map(language => {
@@ -81,11 +83,6 @@ export class Generator implements CLIGeneratorExtension {
         Object.keys(utteranceTemplates[language]).forEach(currIntent => {
           utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent]);
         });
-
-        // Build Entity Set for generator configuration
-        const entitySet = this.generateEntitySet(this.configuration.entities, language);
-
-        console.log("EntitySet: ", entitySet);
 
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
         this.intents.forEach(currIntent => {
@@ -141,7 +138,6 @@ export class Generator implements CLIGeneratorExtension {
           });
         });
 
-        console.log("BuildIntentConfigs: ", buildIntentConfigs);
         // Call all platform generators
         return this.platformGenerators.map(generator =>
           Promise.resolve(
@@ -208,58 +204,5 @@ export class Generator implements CLIGeneratorExtension {
       }
     });
     return utterances;
-  }
-
-  /**
-   * Return the mapped EntitySet, based on the users entities
-   * @param entities
-   * @param language
-   */
-  private generateEntitySet(entities: { [type: string]: string[] | Entity | DeveloperEntity }, language: string) {
-    console.log("Entites: ", entities);
-    Object.keys(entities).forEach(type => {
-      const entity = entities[type];
-      if (entity instanceof Array) {
-        entity.forEach(name => {
-          this.entityMapper.set(name, { type: type, values: [] });
-        });
-      } else {
-        entity.names.forEach(name => {
-          this.entityMapper.set(name, { type: type, values: [] });
-          if (this.isDeveloperEntity(entity)) {
-            if (typeof entity.values[language] !== "undefined") {
-              entity.values[language].forEach(param => {
-                if (typeof param === "string") {
-                  this.entityMapper.get(name).values.push(param);
-                } else {
-                  this.entityMapper.get(name).values.push(param.value);
-                  this.entityMapper.get(name).values.push(...param.synonyms);
-                }
-              });
-            } else {
-              throw Error(
-                "Unknown language configuration for '" +
-                  name +
-                  "'. \n" +
-                  "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " +
-                  "Your configured entity mappings are: " +
-                  JSON.stringify(this.entityMappings)
-              );
-            }
-          } else {
-            this.entityMapper.get(name).values.push(...entity.examples);
-          }
-        });
-      }
-    });
-    return this.entityMapper;
-  }
-
-  /**
-   * Type Guard to check whether an entity is a custom entity
-   * @param entity
-   */
-  private isDeveloperEntity(entity): entity is DeveloperEntity {
-    return typeof (<DeveloperEntity>entity).values !== "undefined";
   }
 }

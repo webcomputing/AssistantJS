@@ -66,16 +66,8 @@ export namespace GenericIntent {
   }
 }
 
-/** A non-language specfic entity. */
-export interface Entity {
-  /** Name of the AssistantJS entity to link with */
-  names: string[];
-  /** Array of synonyms and examples */
-  examples: string[];
-}
-
-/** Developer entities can and should be used for anything that's not covered by system entities */
-export interface DeveloperEntity {
+/** Custom entities can and should be used for anything that's not covered by system entities */
+export interface CustomEntity {
   /**
    * Names of the entities which are mentioned in the utterances
    */
@@ -193,12 +185,17 @@ export namespace PlatformGenerator {
     [type: string]: string;
   }
 
-  /** Represents a mapping between an entity type and the allowed values */
+  /** Represents a mapping between an entity type and its allowed values */
   export interface EntityMap {
     /** Linked entity type */
     type: string;
     /** Allowed values of this entity set */
-    values: string[];
+    values?: {
+      [language: string]: {
+        value: string;
+        synonyms?: string[];
+      };
+    };
   }
 
   /** Manage the several */
@@ -210,9 +207,6 @@ export namespace PlatformGenerator {
 
     /** Checks, whether the entity is in the set */
     contains(name: string): boolean;
-
-    /** Adds a new entity to the store */
-    set(name: string, entity: EntityMap);
 
     /** Gets an entity when the entitiy is definded. */
     get(name: string): EntityMap | undefined;
