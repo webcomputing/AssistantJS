@@ -5,6 +5,7 @@ import { injectionNames } from "../../injection-names";
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
+import { EntityMapper } from "./entity-mapper";
 import { Generator } from "./generator";
 import { createUnifierLoggerMiddleware } from "./logger-middleware";
 import { componentInterfaces, Configuration } from "./private-interfaces";
@@ -51,6 +52,9 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindGlobalService("handler-proxy-factory")
         .to(HandlerProxyFactory)
         .inSingletonScope();
+
+      // Bind EntityMapper
+      bindService.bindGlobalService<PlatformGenerator.EntityMapper>("entity-mapper").to(EntityMapper);
     },
 
     request: (bindService, lookupService) => {

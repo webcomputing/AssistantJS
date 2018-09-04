@@ -1,4 +1,4 @@
-import { Entity, CustomEntity } from "./public-interfaces";
+import { Entity, DeveloperEntity } from "./public-interfaces";
 
 export const componentInterfaces = {
   afterSendResponse: Symbol("after-send-response"),
@@ -8,6 +8,7 @@ export const componentInterfaces = {
   requestProcessor: Symbol("request-processor"),
   requestModifier: Symbol("request-modifier"),
   utteranceTemplateService: Symbol("utterance-template-service"),
+  entityMapper: Symbol("entity-mapping"),
 };
 
 export namespace Configuration {
@@ -20,7 +21,7 @@ export namespace Configuration {
     utterancePath: string;
 
     /** Maps all entities of your app to their respective internal types. You later have to map these types to platform-specific types. */
-    entities: { [type: string]: string[] | Entity | CustomEntity };
+    entities: { [type: string]: string[] | Entity | DeveloperEntity };
 
     /** If set to false, created response objects will throw an exception if an unsupported feature if used */
     failSilentlyOnUnsupportedFeatures: boolean;

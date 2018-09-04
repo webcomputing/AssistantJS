@@ -4,7 +4,8 @@ import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { GenericIntent, intent, PlatformGenerator, CustomEntity, EntitySet, Entity } from "./public-interfaces";
+import { GenericIntent, intent, PlatformGenerator, DeveloperEntity, Entity } from "./public-interfaces";
+import { EntityMapper } from "./entity-mapper";
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
@@ -13,6 +14,7 @@ export class Generator implements CLIGeneratorExtension {
   private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration.Runtime;
+  private entityMapper: EntityMapper;
 
   constructor(
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>,
@@ -27,10 +29,13 @@ export class Generator implements CLIGeneratorExtension {
     utteranceServices: PlatformGenerator.UtteranceTemplateService[],
     @multiInject(componentInterfaces.entityMapping)
     @optional()
-    entityMappings: PlatformGenerator.EntityMapping[]
+    entityMappings: PlatformGenerator.EntityMapping[],
+    @inject("core:unifier:entity-mapper")
+    @optional()
+    entityMapper: EntityMapper
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    [intents, generators, utteranceServices, entityMappings].forEach(v => {
+    [intents, generators, utteranceServices, entityMappings, entityMapper].forEach(v => {
       // tslint:disable-next-line:no-parameter-reassignment
       if (typeof v === "undefined") v = [];
     });
@@ -40,6 +45,7 @@ export class Generator implements CLIGeneratorExtension {
     this.platformGenerators = generators;
     this.additionalUtteranceTemplatesServices = utteranceServices;
     this.entityMappings = entityMappings;
+    this.entityMapper = entityMapper;
   }
 
   public async execute(buildDir: string): Promise<void> {
@@ -78,6 +84,8 @@ export class Generator implements CLIGeneratorExtension {
 
         // Build Entity Set for generator configuration
         const entitySet = this.generateEntitySet(this.configuration.entities, language);
+
+        console.log("EntitySet: ", entitySet);
 
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
         this.intents.forEach(currIntent => {
@@ -207,31 +215,25 @@ export class Generator implements CLIGeneratorExtension {
    * @param entities
    * @param language
    */
-  private generateEntitySet(entities: { [type: string]: string[] | Entity | CustomEntity }, language: string) {
-    const entitySet: EntitySet = {};
+  private generateEntitySet(entities: { [type: string]: string[] | Entity | DeveloperEntity }, language: string) {
+    console.log("Entites: ", entities);
     Object.keys(entities).forEach(type => {
       const entity = entities[type];
       if (entity instanceof Array) {
         entity.forEach(name => {
-          entitySet[name] = {
-            type: type,
-            values: [],
-          };
+          this.entityMapper.set(name, { type: type, values: [] });
         });
       } else {
         entity.names.forEach(name => {
-          entitySet[name] = {
-            type: type,
-            values: [],
-          };
-          if (this.isCustomEntity(entity)) {
+          this.entityMapper.set(name, { type: type, values: [] });
+          if (this.isDeveloperEntity(entity)) {
             if (typeof entity.values[language] !== "undefined") {
               entity.values[language].forEach(param => {
                 if (typeof param === "string") {
-                  entitySet[name].values.push(param);
+                  this.entityMapper.get(name).values.push(param);
                 } else {
-                  entitySet[name].values.push(param.value);
-                  entitySet[name].values.push(...param.synonyms);
+                  this.entityMapper.get(name).values.push(param.value);
+                  this.entityMapper.get(name).values.push(...param.synonyms);
                 }
               });
             } else {
@@ -245,19 +247,19 @@ export class Generator implements CLIGeneratorExtension {
               );
             }
           } else {
-            entitySet[name].values.push(...entity.examples);
+            this.entityMapper.get(name).values.push(...entity.examples);
           }
         });
       }
     });
-    return entitySet;
+    return this.entityMapper;
   }
 
   /**
    * Type Guard to check whether an entity is a custom entity
    * @param entity
    */
-  private isCustomEntity(entity): entity is CustomEntity {
-    return typeof (<CustomEntity>entity).values !== "undefined";
+  private isDeveloperEntity(entity): entity is DeveloperEntity {
+    return typeof (<DeveloperEntity>entity).values !== "undefined";
   }
 }

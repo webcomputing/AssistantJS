@@ -66,8 +66,16 @@ export namespace GenericIntent {
   }
 }
 
-/** A language specfic custom entity. */
-export interface CustomEntity {
+/** A non-language specfic entity. */
+export interface Entity {
+  /** Name of the AssistantJS entity to link with */
+  names: string[];
+  /** Array of synonyms and examples */
+  examples: string[];
+}
+
+/** Developer entities can and should be used for anything that's not covered by system entities */
+export interface DeveloperEntity {
   /**
    * Names of the entities which are mentioned in the utterances
    */
@@ -84,25 +92,6 @@ export interface CustomEntity {
           synonyms: string[];
         }
     >;
-  };
-}
-
-/** A non-language specfic entity. */
-export interface Entity {
-  /** Name of the AssistantJS entity to link with */
-  names: string[];
-  /** Array of synonyms and examples */
-  examples: string[];
-}
-
-/** An entity set for generator configuration */
-export interface EntitySet {
-  /** Name of AssistantJS entity to link with this entity set */
-  [name: string]: {
-    /** Linked entity type */
-    type: string;
-    /** Allowed values of this entity set */
-    values: string[];
   };
 }
 
@@ -202,6 +191,31 @@ export namespace PlatformGenerator {
   /** Mapping of entity types and names */
   export interface EntityMapping {
     [type: string]: string;
+  }
+
+  /** Represents a mapping between an entity type and the allowed values */
+  export interface EntityMap {
+    /** Linked entity type */
+    type: string;
+    /** Allowed values of this entity set */
+    values: string[];
+  }
+
+  /** Manage the several */
+  export interface EntityMapper {
+    /** Name of AssistantJS entity to link with this entity set */
+    store: {
+      [name: string]: EntityMap;
+    };
+
+    /** Checks, whether the entity is in the set */
+    contains(name: string): boolean;
+
+    /** Adds a new entity to the store */
+    set(name: string, entity: EntityMap);
+
+    /** Gets an entity when the entitiy is definded. */
+    get(name: string): EntityMap | undefined;
   }
 }
 
