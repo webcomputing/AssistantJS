@@ -20,6 +20,14 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
     return this.store[name] === null ? undefined : this.store[name];
   }
 
+  public getEntityNames(): string[] {
+    const names: string[] = [];
+    Object.keys(this.store).forEach(name => {
+      names.push(name);
+    });
+    return names;
+  }
+
   private set(name: string, entity: PlatformGenerator.EntityMap) {
     // Set value to undefined if passed value is null.
     const valueToSet = entity === null ? undefined : entity;
@@ -51,6 +59,8 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
           this.set(name, { type: type });
         });
       }
+      // Add type as possible parameter, for answer prompt
+      this.set(type, { type: type });
     });
   }
 
@@ -58,27 +68,4 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
   private isCustomEntity(entity: string[] | CustomEntity): entity is CustomEntity {
     return (<CustomEntity>entity).names !== undefined;
   }
-}
-
-/**
- * Maps the entitý name to their specific types
- * @param entity
- */
-export function mapEntity(entity: { [type: string]: string[] | CustomEntity }) {
-  const result = {};
-  Object.keys(entity).forEach(type => {
-    const currEntity = entity[type];
-    if (currEntity instanceof Array) {
-      currEntity.forEach(parameter => {
-        result[parameter] = type;
-      });
-    } else {
-      currEntity.names.forEach(name => {
-        result[name] = type;
-      });
-    }
-    // Add type as possible parameter, for answer prompt
-    result[type] = type;
-  });
-  return result;
 }

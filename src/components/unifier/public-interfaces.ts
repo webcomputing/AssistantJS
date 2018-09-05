@@ -177,12 +177,7 @@ export namespace PlatformGenerator {
      * @param {EntityMapping} entityMapping Mapping of entity types and names
      * @return {void|Promise<void>}
      */
-    execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[], entityMapping: EntityMapping): void | Promise<void>;
-  }
-
-  /** Mapping of entity types and names */
-  export interface EntityMapping {
-    [type: string]: string;
+    execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[]): void | Promise<void>;
   }
 
   /** Represents a mapping between an entity type and its allowed values */
@@ -198,7 +193,7 @@ export namespace PlatformGenerator {
     };
   }
 
-  /** Manage the several */
+  /** Manage the mapped entities and its types */
   export interface EntityMapper {
     /** Name of AssistantJS entity to link with this entity set */
     store: {

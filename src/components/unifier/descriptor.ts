@@ -19,7 +19,6 @@ import {
 } from "./public-interfaces";
 import { BasicHandable, HandlerProxyFactory } from "./response-handler";
 import { AfterStateResponseSender } from "./response-handler/after-state-handler";
-import { mapEntity } from "./entity-mapper";
 
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
@@ -37,24 +36,14 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindExtension<ContextDeriverI>(lookupService.lookup("core:root").getInterface("contextDeriver")).to(ContextDeriver);
       bindService.bindExtension<CLIGeneratorExtension>(lookupService.lookup("core:root").getInterface("generator")).to(Generator);
 
-      // Bind swapped entity configuration
-      bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return mapEntity(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
-      });
-
-      // Bind same swapped entity configuration to own extension
-      bindService
-        .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
-        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
+      // Bind EntityMapper
+      bindService.bindGlobalService<PlatformGenerator.EntityMapper>("entity-mapper").to(EntityMapper);
 
       // bind HandlerProxyFactory
       bindService
         .bindGlobalService("handler-proxy-factory")
         .to(HandlerProxyFactory)
         .inSingletonScope();
-
-      // Bind EntityMapper
-      bindService.bindGlobalService<PlatformGenerator.EntityMapper>("entity-mapper").to(EntityMapper);
     },
 
     request: (bindService, lookupService) => {

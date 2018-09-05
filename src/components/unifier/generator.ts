@@ -10,7 +10,6 @@ import { EntityMapper } from "./entity-mapper";
 @injectable()
 export class Generator implements CLIGeneratorExtension {
   private platformGenerators: PlatformGenerator.Extension[] = [];
-  private entityMappings: PlatformGenerator.EntityMapping[] = [];
   private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration.Runtime;
@@ -27,15 +26,12 @@ export class Generator implements CLIGeneratorExtension {
     @multiInject(componentInterfaces.utteranceTemplateService)
     @optional()
     utteranceServices: PlatformGenerator.UtteranceTemplateService[],
-    @multiInject(componentInterfaces.entityMapping)
-    @optional()
-    entityMappings: PlatformGenerator.EntityMapping[],
     @inject("core:unifier:entity-mapper")
     @optional()
     entityMapper: EntityMapper
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    [intents, generators, utteranceServices, entityMappings, entityMapper].forEach(v => {
+    [intents, generators, utteranceServices, entityMapper].forEach(v => {
       // tslint:disable-next-line:no-parameter-reassignment
       if (typeof v === "undefined") v = [];
     });
@@ -44,13 +40,10 @@ export class Generator implements CLIGeneratorExtension {
     this.intents = intents;
     this.platformGenerators = generators;
     this.additionalUtteranceTemplatesServices = utteranceServices;
-    this.entityMappings = entityMappings;
     this.entityMapper = entityMapper;
   }
 
   public async execute(buildDir: string): Promise<void> {
-    // Combine all registered parameter mappings to single object
-    const parameterMapping = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
     // Get the main utterance templates for each defined language
     const utteranceTemplates = this.getUtteranceTemplates();
 
@@ -61,7 +54,7 @@ export class Generator implements CLIGeneratorExtension {
       .map(language => {
         // Language specific build directory
         const localeBuildDirectory = buildDir + "/" + language;
-        // Mapping of intent, utterances and entities
+        // Configuration for PlatformGenerator
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
         // Contains the utterances generated from the utterance templates
         const utterances: { [intent: string]: string[] } = {};
@@ -95,29 +88,28 @@ export class Generator implements CLIGeneratorExtension {
             const baseName = GenericIntent[currIntent] + "GenericIntent";
             intentUtterances = utterances[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
           }
+
           // If intentUtterances is "undefined", assign empty array
           if (typeof intentUtterances === "undefined") intentUtterances = [];
 
-          // Associate parameters
-          let entities =
-            intentUtterances
-              // Match all {parameters}
-              .map(utterance => utterance.match(/\{(\w+)?\}/g))
+          // Extract entities from utterances
+          const entities: string[] = [
+            ...new Set(
+              intentUtterances
+                // Match all entities
+                .map(utterance => utterance.match(/(?<=\{\{[A-Za-z0-9_äÄöÖüÜß,;'"\|-\s]*)(\w)+(?=\}\})/g))
+                // Flatten array
+                .reduce((prev, curr) => {
+                  if (curr !== null) {
+                    curr.forEach(parameter => (prev as string[]).push(parameter));
+                  }
+                  return prev;
+                }, []) || []
+            ),
+          ];
 
-              // Create one array with all matches
-              .reduce((prev, curr) => {
-                if (curr !== null) {
-                  // Remove "{", "}"
-                  curr.forEach(parameter => (prev as string[]).push(parameter.replace(/\{|\}/g, "")));
-                }
-                return prev;
-              }, []) || [];
-
-          // Remove duplicates from array
-          entities = [...new Set(entities)];
-
-          // Check for entities in utterances which have no mapping
-          const unmatchedEntity = entities.find(name => typeof parameterMapping[name] === "undefined");
+          // Check for unmapped entities
+          const unmatchedEntity = entities.find(name => typeof this.entityMapper.store[name] === "undefined");
           if (typeof unmatchedEntity === "string") {
             throw Error(
               "Unknown entity '" +
@@ -127,7 +119,7 @@ export class Generator implements CLIGeneratorExtension {
                 "'. \n" +
                 "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " +
                 "Your configured entity mappings are: " +
-                JSON.stringify(this.entityMappings)
+                JSON.stringify(this.entityMapper.getEntityNames())
             );
           }
 
@@ -140,14 +132,7 @@ export class Generator implements CLIGeneratorExtension {
 
         // Call all platform generators
         return this.platformGenerators.map(generator =>
-          Promise.resolve(
-            generator.execute(
-              language,
-              localeBuildDirectory,
-              buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))),
-              JSON.parse(JSON.stringify(parameterMapping))
-            )
-          )
+          Promise.resolve(generator.execute(language, localeBuildDirectory, buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config)))))
         );
       })
       .reduce((prev, curr) => prev.concat(curr));
