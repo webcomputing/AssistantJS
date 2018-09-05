@@ -60,6 +60,8 @@ export class Generator implements CLIGeneratorExtension {
         // Create build dir
         fs.mkdirSync(localeBuildDirectory);
 
+        console.log("EntityMapper: ", JSON.stringify(this.entityMapper));
+
         // Add utterances from extensions to current template
         utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
           const source = curr.getUtterancesFor(language);
@@ -72,7 +74,7 @@ export class Generator implements CLIGeneratorExtension {
 
         // Build utterances from templates
         Object.keys(utteranceTemplates[language]).forEach(currIntent => {
-          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent]);
+          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], language);
         });
 
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
@@ -106,8 +108,16 @@ export class Generator implements CLIGeneratorExtension {
             ),
           ];
 
+          // Build intent specific entity mappings
+          entities.map(name => {
+            const entityMap = this.entityMapper.get(name);
+            const entityMappings: PlatformGenerator.EntityMap[] = [];
+
+            if (typeof entityMap !== "undefined") {
+            }
+          });
           // Check for unmapped entities
-          const unmatchedEntity = entities.find(name => typeof this.entityMapper.store[name] === "undefined");
+          const unmatchedEntity = entities.find(name => typeof this.entityMapper.get(name) === "undefined");
           if (typeof unmatchedEntity === "string") {
             throw Error(
               "Unknown entity '" +
@@ -143,12 +153,13 @@ export class Generator implements CLIGeneratorExtension {
    * Generate an array of utterances, based on the users utterance templates
    * @param templates
    */
-  public generateUtterances(templates: string[]): string[] {
-    let utterances: string[] = [];
+  private generateUtterances(templates: string[], language: string): string[] {
+    const utterances: string[] = [];
+
+    // Extract all slot values and substitute them with a placeholder
     templates.map(template => {
       const slotValues: string[] = [];
 
-      // Extract all slot values and substitute them with a placeholder
       template = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match, param) => {
         slotValues.push(param.split("|"));
         return `{${slotValues.length - 1}}`;
@@ -167,6 +178,50 @@ export class Generator implements CLIGeneratorExtension {
         });
       } else {
         utterances.push(template);
+      }
+    });
+
+    // Extend utterances with entity synonyms and values
+    return this.extendUtterances(utterances, language);
+  }
+
+  /**
+   *
+   * @param utterances
+   */
+  private extendUtterances(preUtterances: string[], language: string): string[] {
+    const utterances: string[] = [];
+
+    preUtterances.map(utterance => {
+      const slotValues: any = [];
+      // Replace all slots with a placeholder
+      utterance = utterance.replace(/(?<=\{\{)([\-]{1})\|(\w+)*(?=\}\})/g, (match, value, name) => {
+        const entityMap = this.entityMapper.get(name);
+        if (typeof entityMap !== "undefined" && typeof entityMap.values !== "undefined") {
+          const mergedValues: string[] = [];
+          entityMap.values[language].forEach(param => {
+            mergedValues.push(...param.synonyms, param.value);
+          });
+          slotValues.push(mergedValues);
+          console.log("SlotValueS: ", slotValues);
+          return `${slotValues.length - 1}|${name}`;
+        }
+        return name;
+      });
+
+      // Generate all possible entity combinations
+      if (slotValues.length > 0) {
+        const combinations = combinatorics.cartesianProduct.apply(combinatorics, slotValues).toArray();
+        // Substitute placeholders with combinations
+        combinations.forEach(combi => {
+          utterances.push(
+            utterance.replace(/(?<=[\{]+)(\d+)(?=\|)/g, (match, param) => {
+              return combi[param];
+            })
+          );
+        });
+      } else {
+        utterances.push(utterance);
       }
     });
     return utterances;

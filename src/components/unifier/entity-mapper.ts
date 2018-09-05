@@ -43,14 +43,7 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
       if (this.isCustomEntity(entity)) {
         entity.names.forEach(name => {
           Object.keys(entity.values).forEach(lang => {
-            entity.values[lang].forEach(param => {
-              if (typeof param === "string") {
-                this.set(name, { type: type, values: { [lang]: { value: param } } });
-              } else {
-                const mergedParam = [...param.synonyms, param.value];
-                this.set(name, { type: type, values: { [lang]: { value: param.value, synonyms: mergedParam } } });
-              }
-            });
+            this.set(name, { type: type, values: { [lang]: entity.values[lang] } });
           });
         });
       } else {

@@ -77,13 +77,10 @@ export interface CustomEntity {
    * of string values or objects with string value and possible synonyms.
    */
   values: {
-    [language: string]: Array<
-      | string
-      | {
-          value: string;
-          synonyms: string[];
-        }
-    >;
+    [language: string]: Array<{
+      value: string;
+      synonyms: string[];
+    }>;
   };
 }
 
@@ -191,10 +188,10 @@ export namespace PlatformGenerator {
     type: string;
     /** Allowed values of this entity set */
     values?: {
-      [language: string]: {
+      [language: string]: Array<{
         value: string;
-        synonyms?: string[];
-      };
+        synonyms: string[];
+      }>;
     };
   }
 
