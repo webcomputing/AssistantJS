@@ -180,6 +180,11 @@ export namespace PlatformGenerator {
     execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[]): void | Promise<void>;
   }
 
+  /** Mapping of entity types and names */
+  export interface EntityMapping {
+    [type: string]: string;
+  }
+
   /** Represents a mapping between an entity type and its allowed values */
   export interface EntityMap {
     /** Linked entity type */
