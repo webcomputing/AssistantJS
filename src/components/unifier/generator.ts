@@ -47,8 +47,6 @@ export class Generator implements CLIGeneratorExtension {
     // Get the main utterance templates for each defined language
     const utteranceTemplates = this.getUtteranceTemplates();
 
-    console.log("EntityMapper: ", JSON.stringify(this.entityMapper));
-
     // Iterate through each found language and build the utterance corresponding to the users entities
     const generatorPromises = Object.keys(utteranceTemplates)
       .map(language => {
