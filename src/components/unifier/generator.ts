@@ -60,8 +60,6 @@ export class Generator implements CLIGeneratorExtension {
         // Create build dir
         fs.mkdirSync(localeBuildDirectory);
 
-        console.log("EntityMapper: ", JSON.stringify(this.entityMapper));
-
         // Add utterances from extensions to current template
         utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
           const source = curr.getUtterancesFor(language);
@@ -129,8 +127,6 @@ export class Generator implements CLIGeneratorExtension {
             intent: currIntent,
           });
         });
-
-        console.log("Intentconfigs: ", buildIntentConfigs);
 
         // Call all platform generators
         return this.platformGenerators.map(generator =>
