@@ -11,16 +11,19 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
     this.fillStore(componentMeta.configuration.entities);
   }
 
+  /** Check whether the entity mapper contains an entity */
   public contains(name: string) {
     return typeof this.get(name) !== "undefined";
   }
 
+  /** Return the entity map object from the store */
   public get(name: string): PlatformGenerator.EntityMap | undefined {
     // Return undefined instead of null. Uniforms all "missing" results to undefined.
     return this.store[name] === null ? undefined : this.store[name];
   }
 
-  public getEntityNames(): string[] {
+  /** Get alle saved entity names */
+  public getNames(): string[] {
     const names: string[] = [];
     Object.keys(this.store).forEach(name => {
       names.push(name);
@@ -28,6 +31,7 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
     return names;
   }
 
+  /** Add an entity to the store */
   private set(name: string, entity: PlatformGenerator.EntityMap) {
     // Set value to undefined if passed value is null.
     const valueToSet = entity === null ? undefined : entity;

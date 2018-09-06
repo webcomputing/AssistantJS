@@ -108,14 +108,6 @@ export class Generator implements CLIGeneratorExtension {
             ),
           ];
 
-          // Build intent specific entity mappings
-          entities.map(name => {
-            const entityMap = this.entityMapper.get(name);
-            const entityMappings: PlatformGenerator.EntityMap[] = [];
-
-            if (typeof entityMap !== "undefined") {
-            }
-          });
           // Check for unmapped entities
           const unmatchedEntity = entities.find(name => typeof this.entityMapper.get(name) === "undefined");
           if (typeof unmatchedEntity === "string") {
@@ -127,7 +119,7 @@ export class Generator implements CLIGeneratorExtension {
                 "'. \n" +
                 "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " +
                 "Your configured entity mappings are: " +
-                JSON.stringify(this.entityMapper.getEntityNames())
+                JSON.stringify(this.entityMapper.getNames())
             );
           }
 
@@ -137,6 +129,8 @@ export class Generator implements CLIGeneratorExtension {
             intent: currIntent,
           });
         });
+
+        console.log("Intentconfigs: ", buildIntentConfigs);
 
         // Call all platform generators
         return this.platformGenerators.map(generator =>
@@ -150,81 +144,83 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   /**
-   * Generate an array of utterances, based on the users utterance templates
+   * Generate an array of utterances, based on the utterance templates and entities
    * @param templates
    */
   private generateUtterances(templates: string[], language: string): string[] {
     const utterances: string[] = [];
+    const preUtterances: string[] = [];
 
-    // Extract all slot values and substitute them with a placeholder
+    // Extract all slots and substitute them with a placeholder
     templates.map(template => {
-      const slotValues: string[] = [];
+      const slots: string[][] = [];
 
-      template = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match, param) => {
-        slotValues.push(param.split("|"));
-        return `{${slotValues.length - 1}}`;
+      // Set placeholder
+      template = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match: string, param: string) => {
+        slots.push(param.split("|"));
+        return `{${slots.length - 1}}`;
       });
 
-      // Generate all possible combinations with cartesian product
-      if (slotValues.length > 0) {
-        const combinations = combinatorics.cartesianProduct.apply(combinatorics, slotValues).toArray();
-        // Substitute placeholders with combinations
-        combinations.forEach(combi => {
-          utterances.push(
-            template.replace(/\{(\d+)\}/g, (match, param) => {
-              return combi[param];
-            })
-          );
-        });
+      // Build all possible combinations
+      const result = this.buildCartesianProduct(template, slots, /\{(\d+)\}/g);
+      if (result.length > 0) {
+        preUtterances.push(...result);
       } else {
-        utterances.push(template);
+        preUtterances.push(template);
       }
     });
 
-    // Extend utterances with entity synonyms and values
-    return this.extendUtterances(utterances, language);
-  }
-
-  /**
-   *
-   * @param utterances
-   */
-  private extendUtterances(preUtterances: string[], language: string): string[] {
-    const utterances: string[] = [];
-
+    // Extend utterances with entity combinations
     preUtterances.map(utterance => {
-      const slotValues: any = [];
-      // Replace all slots with a placeholder
-      utterance = utterance.replace(/(?<=\{\{)([\-]{1})\|(\w+)*(?=\}\})/g, (match, value, name) => {
+      const slots: string[][] = [];
+
+      // Set placeholder
+      utterance = utterance.replace(/(?<=\{\{)([[A-Za-z0-9_äÄöÖüÜß-]+)\|(\w+)*(?=\}\})/g, (match: string, value: string, name: string) => {
         const entityMap = this.entityMapper.get(name);
+
         if (typeof entityMap !== "undefined" && typeof entityMap.values !== "undefined") {
-          const mergedValues: string[] = [];
-          entityMap.values[language].forEach(param => {
-            mergedValues.push(...param.synonyms, param.value);
-          });
-          slotValues.push(mergedValues);
-          console.log("SlotValueS: ", slotValues);
-          return `${slotValues.length - 1}|${name}`;
+          if (value === "-") {
+            entityMap.values[language].forEach(param => {
+              slots.push([...param.synonyms, param.value]);
+            });
+            return `${slots.length - 1}|${name}`;
+          }
         }
-        return name;
+        return `${value}|${name}`;
       });
 
-      // Generate all possible entity combinations
-      if (slotValues.length > 0) {
-        const combinations = combinatorics.cartesianProduct.apply(combinatorics, slotValues).toArray();
-        // Substitute placeholders with combinations
-        combinations.forEach(combi => {
-          utterances.push(
-            utterance.replace(/(?<=[\{]+)(\d+)(?=\|)/g, (match, param) => {
-              return combi[param];
-            })
-          );
-        });
+      /// Build all possible entity combinations
+      const result = this.buildCartesianProduct(utterance, slots, /(?<=[\{]+)(\d+)(?=\|)/g);
+      if (result.length > 0) {
+        utterances.push(...result);
       } else {
         utterances.push(utterance);
       }
     });
+
     return utterances;
+  }
+
+  /**
+   * Return the set of all ordered pair of elements
+   * @param template
+   * @param slots
+   * @param repRegExp
+   */
+  private buildCartesianProduct(template: string, slots: string[][], placeholderExp: RegExp): string[] {
+    const result: string[] = [];
+    if (slots.length > 0) {
+      const combinations = combinatorics.cartesianProduct.apply(combinatorics, slots).toArray();
+      // Substitute placeholders with combinations
+      combinations.forEach(combi => {
+        result.push(
+          template.replace(placeholderExp, (match, param) => {
+            return combi[param];
+          })
+        );
+      });
+    }
+    return result;
   }
 
   /**
