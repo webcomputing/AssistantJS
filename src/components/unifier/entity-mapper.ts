@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import { CustomEntity, PlatformGenerator } from "./public-interfaces";
 import { injectable, inject } from "inversify";
 import { Component } from "inversify-components";
@@ -5,59 +6,61 @@ import { Configuration } from "./private-interfaces";
 
 @injectable()
 export class EntityMapper implements PlatformGenerator.EntityMapper {
-  public store: { [name: string]: any } = {};
+  public store: { [language: string]: { [name: string]: PlatformGenerator.EntityMap } } = {};
+  private configuration: Configuration.Runtime;
 
   constructor(@inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>) {
-    this.fillStore(componentMeta.configuration.entities);
-  }
-
-  /** Check whether the entity mapper contains an entity */
-  public contains(name: string) {
-    return typeof this.get(name) !== "undefined";
-  }
-
-  /** Return the entity map object from the store */
-  public get(name: string): PlatformGenerator.EntityMap | undefined {
-    // Return undefined instead of null. Uniforms all "missing" results to undefined.
-    return this.store[name] === null ? undefined : this.store[name];
-  }
-
-  /** Get alle saved entity names */
-  public getNames(): string[] {
-    const names: string[] = [];
-    Object.keys(this.store).forEach(name => {
-      names.push(name);
-    });
-    return names;
+    this.configuration = componentMeta.configuration;
+    this.prepareLocales();
+    this.fillStore();
   }
 
   /** Add an entity to the store */
-  private set(name: string, entity: PlatformGenerator.EntityMap) {
-    // Set value to undefined if passed value is null.
-    const valueToSet = entity === null ? undefined : entity;
-    this.store[name] = valueToSet;
+  private set(name, entity: PlatformGenerator.EntityMap, language?: string) {
+    if (language) {
+      this.store[language][name] = entity;
+    } else {
+      Object.keys(this.store).forEach(lang => {
+        this.store[lang][name] = entity;
+      });
+    }
   }
 
   /** Fills the entity mapper store */
-  private fillStore(entities: { [type: string]: string[] | CustomEntity }) {
+  private fillStore() {
+    const entities = this.configuration.entities;
     Object.keys(entities).forEach(type => {
-      // Get current entity
       const entity = entities[type];
-      // Iterate through custom entities
       if (this.isCustomEntity(entity)) {
         entity.names.forEach(name => {
-          Object.keys(entity.values).forEach(lang => {
-            this.set(name, { type: type, values: { [lang]: entity.values[lang] } });
+          const valueMapping: Array<{ value: string; synonyms: string[] }> = [];
+          Object.keys(entity.values).forEach(language => {
+            entity.values[language].forEach(param => {
+              valueMapping.push(param);
+            });
+            // Push entity into store
+            this.set(name, { type: type, values: valueMapping }, language);
           });
         });
       } else {
-        // Iterate through string array
         entity.forEach(name => {
           this.set(name, { type: type });
         });
       }
       // Add type as possible parameter, for answer prompt
       this.set(type, { type: type });
+    });
+  }
+
+  /** Set the store locale for each language found in locales folder */
+  private prepareLocales() {
+    const utterancesDir = this.configuration.utterancePath;
+    const languages = fs.readdirSync(utterancesDir);
+    languages.forEach(language => {
+      const utterancePath = utterancesDir + "/" + language + "/utterances.json";
+      if (fs.existsSync(utterancePath)) {
+        this.store[language] = {};
+      }
     });
   }
 
@@ -71,7 +74,6 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
  * Maps the entitý name to their specific types
  * @param entity
  */
-
 export function mapEntity(entity: { [type: string]: string[] | CustomEntity }) {
   const result = {};
   Object.keys(entity).forEach(type => {

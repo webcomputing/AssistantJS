@@ -13,7 +13,7 @@ export class Generator implements CLIGeneratorExtension {
   private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration.Runtime;
-  private entityMapper: EntityMapper;
+  private entityMapper: PlatformGenerator.EntityMapper;
 
   constructor(
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>,
@@ -28,7 +28,7 @@ export class Generator implements CLIGeneratorExtension {
     utteranceServices: PlatformGenerator.UtteranceTemplateService[],
     @inject("core:unifier:entity-mapper")
     @optional()
-    entityMapper: EntityMapper
+    entityMapper: PlatformGenerator.EntityMapper
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
     [intents, generators, utteranceServices, entityMapper].forEach(v => {
@@ -52,10 +52,12 @@ export class Generator implements CLIGeneratorExtension {
       .map(language => {
         // Language specific build directory
         const localeBuildDirectory = buildDir + "/" + language;
-        // Configuration for PlatformGenerator
-        const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
         // Contains the utterances generated from the utterance templates
         const utterances: { [intent: string]: string[] } = {};
+        // Language specific entity mappings
+        const entityMappings = this.entityMapper.store[language];
+        // Configuration for PlatformGenerator
+        const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
 
         // Create build dir
         fs.mkdirSync(localeBuildDirectory);
@@ -72,7 +74,7 @@ export class Generator implements CLIGeneratorExtension {
 
         // Build utterances from templates
         Object.keys(utteranceTemplates[language]).forEach(currIntent => {
-          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], language);
+          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], entityMappings);
         });
 
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
@@ -107,7 +109,7 @@ export class Generator implements CLIGeneratorExtension {
           ];
 
           // Check for unmapped entities
-          const unmatchedEntity = entities.find(name => typeof this.entityMapper.get(name) === "undefined");
+          const unmatchedEntity = entities.find(name => typeof entityMappings[name] === "undefined");
           if (typeof unmatchedEntity === "string") {
             throw Error(
               "Unknown entity '" +
@@ -117,7 +119,11 @@ export class Generator implements CLIGeneratorExtension {
                 "'. \n" +
                 "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " +
                 "Your configured entity mappings are: " +
-                JSON.stringify(this.entityMapper.getNames())
+                JSON.stringify(
+                  Object.keys(entityMappings).map(name => {
+                    return name;
+                  })
+                )
             );
           }
 
@@ -130,7 +136,9 @@ export class Generator implements CLIGeneratorExtension {
 
         // Call all platform generators
         return this.platformGenerators.map(generator =>
-          Promise.resolve(generator.execute(language, localeBuildDirectory, buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config)))))
+          Promise.resolve(
+            generator.execute(language, localeBuildDirectory, buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))), entityMappings)
+          )
         );
       })
       .reduce((prev, curr) => prev.concat(curr));
@@ -143,7 +151,7 @@ export class Generator implements CLIGeneratorExtension {
    * Generate an array of utterances, based on the utterance templates and entities
    * @param templates
    */
-  private generateUtterances(templates: string[], language: string): string[] {
+  private generateUtterances(templates: string[], entityMappings: { [name: string]: PlatformGenerator.EntityMap }): string[] {
     const utterances: string[] = [];
     const preUtterances: string[] = [];
 
@@ -172,11 +180,10 @@ export class Generator implements CLIGeneratorExtension {
 
       // Set placeholder
       utterance = utterance.replace(/(?<=\{\{)([[A-Za-z0-9_äÄöÖüÜß-]+)\|(\w+)*(?=\}\})/g, (match: string, value: string, name: string) => {
-        const entityMap = this.entityMapper.get(name);
-
-        if (typeof entityMap !== "undefined" && typeof entityMap.values !== "undefined") {
+        if (typeof entityMappings[name] !== "undefined") {
+          const entityValues = entityMappings[name].values || [];
           if (value === "-") {
-            entityMap.values[language].forEach(param => {
+            entityValues.forEach(param => {
               slots.push([...param.synonyms, param.value]);
             });
             return `${slots.length - 1}|${name}`;
