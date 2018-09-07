@@ -58,8 +58,6 @@ export class HandlerProxyFactory {
       get(target, propKey, receiver) {
         const propValue = target[propKey];
 
-        const handlerName = handler.constructor.name;
-
         const fakeFunction = function() {
           // "receiver" points to the proxy, is necessary to work with method-chaining
           return receiver;
@@ -75,8 +73,8 @@ export class HandlerProxyFactory {
           propKey.toString() !== "Symbol(Symbol.iterator)" &&
           propKey.toString() !== "Symbol(Symbol.toStringTag)"
         ) {
-          const message = "Method " + propKey.toString() + "() is not implemented or supported on " + handlerName;
-          logger.warn(message);
+          const message = "Method " + propKey.toString() + "() is not implemented or supported on the current ResponseHandler";
+          logger.debug(message);
           if (!failSilentlyOnUnsupportedFeatures) {
             throw new Error(message);
           }

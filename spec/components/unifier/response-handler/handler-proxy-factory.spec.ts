@@ -121,7 +121,7 @@ describe("HandlerProxyFactory", function() {
         describe("with logging only", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.logger = this.container.inversifyInstance.get(injectionNames.logger);
-            spyOn(this.logger, "warn").and.callThrough();
+            spyOn(this.logger, "debug").and.callThrough();
             this.container.inversifyInstance.unbind(injectionNames.logger);
             this.container.inversifyInstance.bind(injectionNames.logger).toConstantValue(this.logger);
 
@@ -133,7 +133,7 @@ describe("HandlerProxyFactory", function() {
           checkProxiedInstance();
 
           it("calls logger", async function(this: CurrentThisContext) {
-            expect(this.logger.warn).toHaveBeenCalled();
+            expect(this.logger.debug).toHaveBeenCalled();
           });
         });
 
