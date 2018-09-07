@@ -171,7 +171,11 @@ export namespace PlatformGenerator {
      * @param {string} langauge langauge to build in
      * @param {string} buildDir path of the build directory
      * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
+<<<<<<< HEAD
      * @param {{[name: string]: EntityMap}} entityMappings Mappings of entity types and values
+=======
+     * @param {EntityMapper} parameterMapper Mapping of entity types, names and values
+>>>>>>> 514d316bda1ab8e52d220febc910cdbfbcbf7836
      * @return {void|Promise<void>}
      */
     execute(

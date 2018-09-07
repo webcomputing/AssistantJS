@@ -17,6 +17,7 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
 
   /** Add an entity to the store */
   private set(name, entity: PlatformGenerator.EntityMap, language?: string) {
+<<<<<<< HEAD
     if (!language) {
       Object.keys(this.store).forEach(lang => {
         this.store[lang][name] = entity;
@@ -25,6 +26,14 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
       this.store[language][name] = entity;
     } else {
       console.warn("Unknown entity '" + name + "' for locale: '" + language + "'. Please check your utterances and type mappings. Omitting.");
+=======
+    if (language) {
+      this.store[language][name] = entity;
+    } else {
+      Object.keys(this.store).forEach(lang => {
+        this.store[lang][name] = entity;
+      });
+>>>>>>> 514d316bda1ab8e52d220febc910cdbfbcbf7836
     }
   }
 
@@ -35,8 +44,13 @@ export class EntityMapper implements PlatformGenerator.EntityMapper {
       const entity = entities[type];
       if (this.isCustomEntity(entity)) {
         entity.names.forEach(name => {
+<<<<<<< HEAD
           Object.keys(entity.values).forEach(language => {
             const valueMapping: Array<{ value: string; synonyms: string[] }> = [];
+=======
+          const valueMapping: Array<{ value: string; synonyms: string[] }> = [];
+          Object.keys(entity.values).forEach(language => {
+>>>>>>> 514d316bda1ab8e52d220febc910cdbfbcbf7836
             entity.values[language].forEach(param => {
               valueMapping.push(param);
             });
