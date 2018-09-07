@@ -171,10 +171,15 @@ export namespace PlatformGenerator {
      * @param {string} langauge langauge to build in
      * @param {string} buildDir path of the build directory
      * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
-     * @param {EntityMapping} entityMapping Mapping of entity types and names
+     * @param {{[name: string]: EntityMap}} entityMappings Mappings of entity types and values
      * @return {void|Promise<void>}
      */
-    execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[]): void | Promise<void>;
+    execute(
+      language: string,
+      buildDir: string,
+      intentConfigurations: IntentConfiguration[],
+      entityMappings: { [name: string]: EntityMap }
+    ): void | Promise<void>;
   }
 
   /** Mapping of entity types and names */
@@ -187,26 +192,20 @@ export namespace PlatformGenerator {
     /** Linked entity type */
     type: string;
     /** Allowed values of this entity set */
-    values?: {
-      [language: string]: Array<{
-        value: string;
-        synonyms: string[];
-      }>;
-    };
+    values?: Array<{
+      value: string;
+      synonyms: string[];
+    }>;
   }
 
   /** Manage the mapped entities and its types */
   export interface EntityMapper {
     /** Name of AssistantJS entity to link with this entity set */
     store: {
-      [name: string]: EntityMap;
+      [language: string]: {
+        [name: string]: EntityMap;
+      };
     };
-
-    /** Checks, whether the entity is in the set */
-    contains(name: string): boolean;
-
-    /** Gets an entity when the entitiy is definded. */
-    get(name: string): EntityMap | undefined;
   }
 }
 
