@@ -1,19 +1,18 @@
 import * as fs from "fs";
-import * as combinatorics from "js-combinatorics";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
+import * as combinatorics from "js-combinatorics";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { GenericIntent, intent, PlatformGenerator, CustomEntity } from "./public-interfaces";
-import { EntityMapper } from "./entity-mapper";
+import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
-  private platformGenerators: PlatformGenerator.Extension[] = [];
-  private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration.Runtime;
-  private entityMapper: PlatformGenerator.EntityMapper;
+  private entityMappings: PlatformGenerator.EntityMapping[] = [];
+  private platformGenerators: PlatformGenerator.Extension[] = [];
+  private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
 
   constructor(
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>,
@@ -26,26 +25,28 @@ export class Generator implements CLIGeneratorExtension {
     @multiInject(componentInterfaces.utteranceTemplateService)
     @optional()
     utteranceServices: PlatformGenerator.UtteranceTemplateService[],
-    @inject("core:unifier:entity-mapper")
+    @multiInject(componentInterfaces.entityMapping)
     @optional()
-    entityMapper: PlatformGenerator.EntityMapper
+    entityMappings: PlatformGenerator.EntityMapping[]
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    [intents, generators, utteranceServices, entityMapper].forEach(v => {
+    [intents, generators, utteranceServices, entityMappings].forEach(v => {
       // tslint:disable-next-line:no-parameter-reassignment
       if (typeof v === "undefined") v = [];
     });
 
-    this.configuration = componentMeta.configuration;
     this.intents = intents;
     this.platformGenerators = generators;
+    this.entityMappings = entityMappings;
+    this.configuration = componentMeta.configuration;
     this.additionalUtteranceTemplatesServices = utteranceServices;
-    this.entityMapper = entityMapper;
   }
 
   public async execute(buildDir: string): Promise<void> {
-    // Get the main utterance templates for each defined language
+    // Get the main utterance templates from locales folder
     const utteranceTemplates = this.getUtteranceTemplates();
+    // Get the entities from locales folder
+    const customEntities = this.getEntities();
 
     // Iterate through each found language and build the utterance corresponding to the users entities
     const generatorPromises = Object.keys(utteranceTemplates)
@@ -54,8 +55,8 @@ export class Generator implements CLIGeneratorExtension {
         const localeBuildDirectory = buildDir + "/" + language;
         // Contains the utterances generated from the utterance templates
         const utterances: { [intent: string]: string[] } = {};
-        // Language specific entity mappings
-        const entityMappings = this.entityMapper.store[language];
+        // Mappings of the registered entities
+        const entityMappings = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
         // Configuration for PlatformGenerator
         const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
 
@@ -74,7 +75,7 @@ export class Generator implements CLIGeneratorExtension {
 
         // Build utterances from templates
         Object.keys(utteranceTemplates[language]).forEach(currIntent => {
-          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], entityMappings);
+          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], customEntities[language], entityMappings);
         });
 
         // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
@@ -128,16 +129,22 @@ export class Generator implements CLIGeneratorExtension {
           }
 
           buildIntentConfigs.push({
-            utterances: intentUtterances,
             entities,
             intent: currIntent,
+            utterances: intentUtterances,
           });
         });
 
         // Call all platform generators
         return this.platformGenerators.map(generator =>
           Promise.resolve(
-            generator.execute(language, localeBuildDirectory, buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))), entityMappings)
+            generator.execute(
+              language,
+              localeBuildDirectory,
+              buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))),
+              JSON.parse(JSON.stringify(entityMappings)),
+              customEntities[language]
+            )
           )
         );
       })
@@ -148,10 +155,10 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   /**
-   * Generate an array of utterances, based on the utterance templates and entities
+   * Generate permutations of utterances, based on the templates and entities
    * @param templates
    */
-  private generateUtterances(templates: string[], entityMappings: { [name: string]: PlatformGenerator.EntityMap }): string[] {
+  private generateUtterances(templates: string[], entities: PlatformGenerator.CustomEntity[], entityMappings: PlatformGenerator.EntityMapping): string[] {
     const utterances: string[] = [];
     const preUtterances: string[] = [];
 
@@ -159,14 +166,13 @@ export class Generator implements CLIGeneratorExtension {
     templates.map(template => {
       const slots: string[][] = [];
 
-      // Set placeholder
-      template = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match: string, param: string) => {
+      const repTemplate = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match: string, param: string) => {
         slots.push(param.split("|"));
         return `{${slots.length - 1}}`;
       });
 
-      // Build all possible combinations
-      const result = this.buildCartesianProduct(template, slots, /\{(\d+)\}/g);
+      // Auto-expand the template to build utterance permutations
+      const result = this.buildCartesianProduct(repTemplate, slots, /\{(\d+)\}/g);
       if (result.length > 0) {
         preUtterances.push(...result);
       } else {
@@ -174,33 +180,36 @@ export class Generator implements CLIGeneratorExtension {
       }
     });
 
-    // Extend utterances with entity combinations
+    // Extract entities and expland utterances with entity combinations
     preUtterances.map(utterance => {
       const slots: string[][] = [];
 
-      // Set placeholder
-      utterance = utterance.replace(/(?<=\{\{)([[A-Za-z0-9_äÄöÖüÜß-]+)\|(\w+)*(?=\}\})/g, (match: string, value: string, name: string) => {
-        if (typeof entityMappings[name] !== "undefined") {
-          const entityValues = entityMappings[name].values || [];
-          if (value === "-") {
-            entityValues.forEach(param => {
-              slots.push([...param.synonyms, param.value]);
+      const repUtterance = utterance.replace(/(?<=\{\{)([[A-Za-z0-9_äÄöÖüÜß]+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
+        const entityName = match.split("|").pop();
+
+        // Iterate through values when no example like {{example|entity}} is given
+        if (entityValue === entityName) {
+          const entityType = entities[entityMappings[entityName]];
+          if (typeof entityType !== "undefined") {
+            const tmp: string[] = [];
+            entityType.map(param => {
+              tmp.push(...(param.synonyms || []), param.value);
             });
-            return `${slots.length - 1}|${name}`;
+            slots.push(tmp);
+            return `{${slots.length - 1}}|${entityName}`;
           }
         }
-        return `${value}|${name}`;
+        return match;
       });
 
-      /// Build all possible entity combinations
-      const result = this.buildCartesianProduct(utterance, slots, /(?<=[\{]+)(\d+)(?=\|)/g);
+      // Auto-expand the utterance to build permutations
+      const result = this.buildCartesianProduct(repUtterance, slots, /\{(\d+)\}/g);
       if (result.length > 0) {
         utterances.push(...result);
       } else {
         utterances.push(utterance);
       }
     });
-
     return utterances;
   }
 
@@ -241,5 +250,22 @@ export class Generator implements CLIGeneratorExtension {
       }
     });
     return utterances;
+  }
+
+  /**
+   * Return the user defined entities for each language found in locales folder
+   */
+  private getEntities(): { [language: string]: PlatformGenerator.CustomEntity[] } {
+    const entities = {};
+    const localesDir = this.configuration.utterancePath;
+    const languages = fs.readdirSync(this.configuration.utterancePath);
+    languages.forEach(language => {
+      const entitiesPath = localesDir + "/" + language + "/entities.json";
+      if (fs.existsSync(entitiesPath)) {
+        const current = JSON.parse(fs.readFileSync(entitiesPath).toString());
+        entities[language] = current;
+      }
+    });
+    return entities;
   }
 }

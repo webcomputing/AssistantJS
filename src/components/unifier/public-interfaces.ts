@@ -69,24 +69,6 @@ export namespace GenericIntent {
   }
 }
 
-/** Custom entities can and should be used for anything that's not covered by system entities */
-export interface CustomEntity {
-  /**
-   * Names of the entities which are mentioned in the utterances
-   */
-  names: string[];
-  /**
-   * Allowed values of this entity set. Needs language id as hash key and a list
-   * of string values or objects with string value and possible synonyms.
-   */
-  values: {
-    [language: string]: Array<{
-      value: string;
-      synonyms: string[];
-    }>;
-  };
-}
-
 /** Manages access to entities */
 export interface EntityDictionary {
   /** Object containing all current entities */
@@ -174,18 +156,16 @@ export namespace PlatformGenerator {
      * @param {string} langauge langauge to build in
      * @param {string} buildDir path of the build directory
      * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
-<<<<<<< HEAD
-     * @param {{[name: string]: EntityMap}} entityMappings Mappings of entity types and values
-=======
-     * @param {EntityMapper} parameterMapper Mapping of entity types, names and values
->>>>>>> 514d316bda1ab8e52d220febc910cdbfbcbf7836
+     * @param {EntityMapping} entityMapping Mapping of entity types and names
+     * @param {CustomEntity} entityMapping Mapping of entity types and names
      * @return {void|Promise<void>}
      */
     execute(
       language: string,
       buildDir: string,
       intentConfigurations: IntentConfiguration[],
-      entityMappings: { [name: string]: EntityMap }
+      entityMapping: EntityMapping,
+      customEntities: CustomEntity[]
     ): void | Promise<void>;
   }
 
@@ -194,25 +174,17 @@ export namespace PlatformGenerator {
     [type: string]: string;
   }
 
-  /** Represents a mapping between an entity type and its allowed values */
-  export interface EntityMap {
-    /** Linked entity type */
-    type: string;
+  /** Represents an user specified entiy */
+  export interface CustomEntity {
     /** Allowed values of this entity set */
-    values?: Array<{
-      value: string;
-      synonyms: string[];
-    }>;
+    [type: string]: Array<{ CustomEntityValue }>;
   }
 
-  /** Manage the mapped entities and its types */
-  export interface EntityMapper {
-    /** Name of AssistantJS entity to link with this entity set */
-    store: {
-      [language: string]: {
-        [name: string]: EntityMap;
-      };
-    };
+  export interface CustomEntityValue {
+    /** Value for the custom entity */
+    value: string;
+    /** Other ways a user might express */
+    synonyms?: string[];
   }
 }
 
