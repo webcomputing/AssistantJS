@@ -165,7 +165,7 @@ export namespace PlatformGenerator {
       buildDir: string,
       intentConfigurations: IntentConfiguration[],
       entityMapping: EntityMapping,
-      customEntities: CustomEntity[]
+      customEntities: CustomEntityMapping
     ): void | Promise<void>;
   }
 
@@ -175,9 +175,9 @@ export namespace PlatformGenerator {
   }
 
   /** Represents an user specified entiy */
-  export interface CustomEntity {
+  export interface CustomEntityMapping {
     /** Allowed values of this entity set */
-    [type: string]: Array<{ CustomEntityValue }>;
+    [type: string]: CustomEntityValue[];
   }
 
   export interface CustomEntityValue {

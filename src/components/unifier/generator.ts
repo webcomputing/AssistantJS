@@ -90,7 +90,7 @@ export class Generator implements CLIGeneratorExtension {
             intentUtterances = utterances[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
           }
 
-          // If intentUtterances is "undefined", assign empty array
+          // When utterances are "undefined", assign empty array
           if (typeof intentUtterances === "undefined") intentUtterances = [];
 
           // Extract entities from utterances
@@ -98,7 +98,7 @@ export class Generator implements CLIGeneratorExtension {
             ...new Set(
               intentUtterances
                 // Match all entities
-                .map(utterance => utterance.match(/(?<=\{\{[A-Za-z0-9_äÄöÖüÜß,;'"\|-\s]*)(\w)+(?=\}\})/g))
+                .map(utterance => utterance.match(/(?<=\{\{[A-Za-z0-9_äÄöÖüÜß,;'"\|\s]*)(\w)+(?=\}\})/g))
                 // Flatten array
                 .reduce((prev, curr) => {
                   if (curr !== null) {
@@ -158,7 +158,7 @@ export class Generator implements CLIGeneratorExtension {
    * Generate permutations of utterances, based on the templates and entities
    * @param templates
    */
-  private generateUtterances(templates: string[], entities: PlatformGenerator.CustomEntity[], entityMappings: PlatformGenerator.EntityMapping): string[] {
+  private generateUtterances(templates: string[], entities: PlatformGenerator.CustomEntityMapping, entityMappings: PlatformGenerator.EntityMapping): string[] {
     const utterances: string[] = [];
     const preUtterances: string[] = [];
 
@@ -255,7 +255,7 @@ export class Generator implements CLIGeneratorExtension {
   /**
    * Return the user defined entities for each language found in locales folder
    */
-  private getEntities(): { [language: string]: PlatformGenerator.CustomEntity[] } {
+  private getEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
     const entities = {};
     const localesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(this.configuration.utterancePath);
@@ -266,6 +266,7 @@ export class Generator implements CLIGeneratorExtension {
         entities[language] = current;
       }
     });
+
     return entities;
   }
 }
