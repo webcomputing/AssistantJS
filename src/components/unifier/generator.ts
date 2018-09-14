@@ -143,7 +143,7 @@ export class Generator implements CLIGeneratorExtension {
               localeBuildDirectory,
               buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))),
               JSON.parse(JSON.stringify(entityMappings)),
-              customEntities[language]
+              JSON.parse(JSON.stringify(customEntities[language]))
             )
           )
         );
