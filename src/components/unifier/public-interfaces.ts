@@ -2,7 +2,6 @@ import { Component, ExecutableExtension } from "inversify-components";
 import { SpecHelper } from "../../spec-helper";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
-import { AccountLinkingStatus } from "./enums";
 import { Configuration } from "./private-interfaces";
 import { BasicAnswerTypes, BasicHandable } from "./response-handler";
 
@@ -242,6 +241,21 @@ export interface MinimalRequestExtraction extends CommonRequestExtraction {
   platform: string;
 }
 
+/**
+ * All status of AccountLinking
+ */
+export enum AccountLinkingStatus {
+  /**
+   * When AccountLinking was successfull
+   */
+  OK,
+
+  /**
+   * When AccountLinking was cancelled by user
+   */
+  CANCELLED,
+}
+
 /** Optional, additional informations which extractors may extract from a request */
 export namespace OptionalExtractions {
   /** Interface for extraction of oauth key */
@@ -252,8 +266,8 @@ export namespace OptionalExtractions {
 
   /** Interface for AccountLinkingStatus */
   export interface AccountLinking {
-    /** The current status */
-    accountLinkingStatus: AccountLinkingStatus;
+    /** The current status, or null, if not present in current extraction */
+    accountLinkingStatus: AccountLinkingStatus | null;
   }
 
   /** Interface for extraction of platform-specific temporal auth */
