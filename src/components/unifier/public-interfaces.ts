@@ -2,6 +2,7 @@ import { Component, ExecutableExtension } from "inversify-components";
 import { SpecHelper } from "../../spec-helper";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
+import { AccountLinkingStatus } from "./enums";
 import { Configuration } from "./private-interfaces";
 import { BasicAnswerTypes, BasicHandable } from "./response-handler";
 
@@ -247,6 +248,12 @@ export namespace OptionalExtractions {
   export interface OAuth {
     /** The oauth token, or null, if not present in current extraction */
     oAuthToken: string | null;
+  }
+
+  /** Interface for AccountLinkingStatus */
+  export interface AccountLinking {
+    /** The current status */
+    accountLinkingStatus: AccountLinkingStatus;
   }
 
   /** Interface for extraction of platform-specific temporal auth */
