@@ -246,7 +246,7 @@ export interface MinimalRequestExtraction extends CommonRequestExtraction {
  */
 export enum AccountLinkingStatus {
   /**
-   * When AccountLinking was successfull
+   * When AccountLinking was successful
    */
   OK,
 
