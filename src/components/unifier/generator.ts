@@ -251,7 +251,7 @@ export class Generator implements CLIGeneratorExtension {
         utterances[language] = current;
       } else if (fs.existsSync(utterancePath.replace(/\.js$/, ".json"))) {
         // Load JSON file
-        const current = JSON.parse(fs.readFileSync(utterancePath.replace(/\.js$/, ".json")).toString());
+        const current = require(utterancePath.replace(/\.js$/, ".json"));
         utterances[language] = current;
       }
     });
@@ -273,7 +273,7 @@ export class Generator implements CLIGeneratorExtension {
         entities[language] = current;
       } else if (fs.existsSync(entitiesPath.replace(/\.js$/, ".json"))) {
         // Load JSON file
-        const current = JSON.parse(fs.readFileSync(entitiesPath.replace(/\.js$/, ".json")).toString());
+        const current = require(entitiesPath.replace(/\.js$/, ".json"));
         entities[language] = current;
       }
     });
