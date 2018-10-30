@@ -69,18 +69,6 @@ export namespace GenericIntent {
   }
 }
 
-/** A custom entity set to use in your utterances and AssistantJS configuration */
-export interface EntitySet {
-  /** Name of AssistantJS entity to link with this entity set */
-  mapsTo: string;
-  /**
-   * Allowed values of this entity set. Needs language id as hash key and a list
-   * of string values or objects with string value and possible synonyms.
-   */
-  // tslint:disable-next-line:prefer-array-literal
-  values: { [language: string]: Array<string | { value: string; synonyms: string[] }> };
-}
-
 /** Manages access to entities */
 export interface EntityDictionary {
   /** Object containing all current entities */
@@ -149,9 +137,6 @@ export namespace PlatformGenerator {
 
     /** Configured entities of this intent */
     entities: string[];
-
-    /** Configured entitySet of this intent */
-    entitySets: { [name: string]: EntitySet };
   }
 
   /** Service extension, gets utterances by language */
@@ -172,14 +157,34 @@ export namespace PlatformGenerator {
      * @param {string} buildDir path of the build directory
      * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
      * @param {EntityMapping} entityMapping Mapping of entity types and names
+     * @param {CustomEntity} entityMapping Mapping of entity types and names
      * @return {void|Promise<void>}
      */
-    execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[], entityMapping: EntityMapping): void | Promise<void>;
+    execute(
+      language: string,
+      buildDir: string,
+      intentConfigurations: IntentConfiguration[],
+      entityMapping: EntityMapping,
+      customEntities: CustomEntityMapping
+    ): void | Promise<void>;
   }
 
   /** Mapping of entity types and names */
   export interface EntityMapping {
     [type: string]: string;
+  }
+
+  /** Represents an user specified entiy */
+  export interface CustomEntityMapping {
+    /** Allowed values of this entity set */
+    [type: string]: CustomEntityValue[];
+  }
+
+  export interface CustomEntityValue {
+    /** Value for the custom entity */
+    value: string;
+    /** Other ways a user might express */
+    synonyms?: string[];
   }
 }
 

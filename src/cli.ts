@@ -97,7 +97,7 @@ export function cli(argv, resolvedIndex) {
     });
 
     // Create empty json files
-    ["config/locales/en/translation.json", "config/locales/en/utterances.json"].forEach(filePath => {
+    ["config/locales/en/translation.json", "config/locales/en/utterances.json", "config/locales/en/entities.json"].forEach(filePath => {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(projectPath + filePath, "{}");
     });
