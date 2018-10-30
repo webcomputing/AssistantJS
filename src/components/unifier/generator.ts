@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import * as combinatorics from "js-combinatorics";
+import * as path from "path";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
@@ -243,9 +244,14 @@ export class Generator implements CLIGeneratorExtension {
     const utterancesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(utterancesDir);
     languages.forEach(language => {
-      const utterancePath = utterancesDir + "/" + language + "/utterances.json";
+      const utterancePath = path.join(utterancesDir, language, "/utterances.js");
       if (fs.existsSync(utterancePath)) {
-        const current = JSON.parse(fs.readFileSync(utterancePath).toString());
+        // Load JS module (priority before JSON, because it could also load a JSON of same name)
+        const current = require(utterancePath);
+        utterances[language] = current;
+      } else if (fs.existsSync(utterancePath.replace(/\.js$/, ".json"))) {
+        // Load JSON file
+        const current = JSON.parse(fs.readFileSync(utterancePath.replace(/\.js$/, ".json")).toString());
         utterances[language] = current;
       }
     });
@@ -260,9 +266,14 @@ export class Generator implements CLIGeneratorExtension {
     const localesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(this.configuration.utterancePath);
     languages.forEach(language => {
-      const entitiesPath = localesDir + "/" + language + "/entities.json";
+      const entitiesPath = path.join(localesDir, language, "entities.js");
       if (fs.existsSync(entitiesPath)) {
-        const current = JSON.parse(fs.readFileSync(entitiesPath).toString());
+        // Load JS module (priority before JSON, because it could also load a JSON of same name)
+        const current = require(entitiesPath);
+        entities[language] = current;
+      } else if (fs.existsSync(entitiesPath.replace(/\.js$/, ".json"))) {
+        // Load JSON file
+        const current = JSON.parse(fs.readFileSync(entitiesPath.replace(/\.js$/, ".json")).toString());
         entities[language] = current;
       }
     });
