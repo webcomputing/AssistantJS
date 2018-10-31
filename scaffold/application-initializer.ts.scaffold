@@ -81,10 +81,8 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     return new AssistantJSSetup();
   }
 
-  /** HELPER METHODS */
-
   /** Creates all relevant setup instances for preparing our AssistantJS application */
-  private createAndPrepareSetups(): { assistantJs: AssistantJSSetup; stateMachine: StateMachineSetup; filter: FilterSetup } {
+  public createAndPrepareSetups(): { assistantJs: AssistantJSSetup; stateMachine: StateMachineSetup; filter: FilterSetup } {
     // Create setup instances
     const assistantJs = this.createAssistantJsSetup();
     const setups = { assistantJs, stateMachine: new StateMachineSetup(assistantJs), filter: new FilterSetup(assistantJs) };
@@ -98,6 +96,8 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     // Return all instances
     return setups;
   }
+
+  /** HELPER METHODS */
 
   /**
    * Configures current node process to print all unhandledRejections to console.
