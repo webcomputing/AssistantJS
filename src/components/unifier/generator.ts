@@ -245,15 +245,7 @@ export class Generator implements CLIGeneratorExtension {
     const languages = fs.readdirSync(utterancesDir);
     languages.forEach(language => {
       const utterancePath = path.join(utterancesDir, language, "/utterances.js");
-      if (fs.existsSync(utterancePath)) {
-        // Load JS module (priority before JSON, because it could also load a JSON of same name)
-        const current = require(utterancePath);
-        utterances[language] = current;
-      } else if (fs.existsSync(utterancePath.replace(/\.js$/, ".json"))) {
-        // Load JSON file
-        const current = require(utterancePath.replace(/\.js$/, ".json"));
-        utterances[language] = current;
-      }
+      utterances[language] = this.loadJsOrJson(utterancePath);
     });
     return utterances;
   }
@@ -267,17 +259,21 @@ export class Generator implements CLIGeneratorExtension {
     const languages = fs.readdirSync(this.configuration.utterancePath);
     languages.forEach(language => {
       const entitiesPath = path.join(localesDir, language, "entities.js");
-      if (fs.existsSync(entitiesPath)) {
-        // Load JS module (priority before JSON, because it could also load a JSON of same name)
-        const current = require(entitiesPath);
-        entities[language] = current;
-      } else if (fs.existsSync(entitiesPath.replace(/\.js$/, ".json"))) {
-        // Load JSON file
-        const current = require(entitiesPath.replace(/\.js$/, ".json"));
-        entities[language] = current;
-      }
+      entities[language] = this.loadJsOrJson(entitiesPath);
     });
 
     return entities;
+  }
+
+  /**
+   * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
+   */
+  private loadJsOrJson(src: string) {
+    const ext = path.extname(src);
+    const jsSrc = src.replace(new RegExp(`${ext}$`), "").concat(".js");
+    const jsonSrc = src.replace(new RegExp(`${ext}$`), "").concat(".json");
+
+    // Load JS module with priority before JSON, because it could also load a JSON of same name
+    return require(fs.existsSync(jsSrc) ? jsSrc : jsonSrc);
   }
 }
