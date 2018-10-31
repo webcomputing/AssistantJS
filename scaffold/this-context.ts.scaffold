@@ -23,6 +23,9 @@ export interface ThisContext {
   /** Default spec options to pass into specHelper.prepareSpec(). You might want to override some options per spec. */
   defaultSpecOptions: Partial<SpecHelperOptions>;
 
+  /** Result of current intent call. Usage: this.responseResults = this.specHelper.runMachineAndGetResults(stateName) */
+  responseResults: Partial<MergedAnswerTypes>;
+
   /** Use this for any untyped test params */
   params: any;
 }
