@@ -334,10 +334,14 @@ describe("BaseHandler", function() {
 
   describe("without sending activly", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.expectedResult = { suggestionChips: this.mockSuggestionChips, table: this.mockTable };
+      this.expectedResult = {
+        suggestionChips: this.mockSuggestionChips,
+        table: this.mockTable,
+        sessionData: '{"__context_states":"[]","__current_state":"MainState"}',
+      };
 
       this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).setMockHandlerATable(this.mockTable);
-      await this.specHelper.runMachine();
+      await this.specHelper.runMachine("MainState");
     });
 
     it("calls getBody() in AfterStateMachine", async function(this: CurrentThisContext) {
