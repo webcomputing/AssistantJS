@@ -1,4 +1,5 @@
 version 0.4.0
+- changed spec setup and made spec-helper more powerful. To make use of the improved spec setup in your 0.3.x project, create a new assistant js application and have a look at the generated spec setup.
 - removed index.ts and replaced it with application-initializer.ts to make the AssitantJS initialization process more adaptable. To migrate easily, create a new AssistantJS application, copy the created application-initializer.ts, paste it into your application and merge all locally made changes of your index.ts into your new application-initializer.ts
 - renamed SpecSetup to SpecHelper
 - new ResponsHandler: ResponseFactory and old Response-Types are obsolete now. A new ResponseHandler is introduced, which allows you the following:
