@@ -1,4 +1,5 @@
 import { Hooks as BaseHooks } from "inversify-components";
+import { AssistantJSSetup } from "../setup";
 import { I18nConfiguration } from "./i18n/public-interfaces";
 import { RootConfiguration } from "./root/public-interfaces";
 import { ServicesConfiguration, Session } from "./services/public-interfaces";
@@ -18,6 +19,21 @@ export interface AssistantJSConfiguration {
 
   /** Configuration options of "i18n" component */
   "core:i18n"?: I18nConfiguration;
+}
+
+/** You have to implement this interface in your exported ApplicationInitializer class to make the integration into AssistantJS's cli work */
+export interface AssistantJSApplicationInitializer {
+  /**
+   * Called via cli command "assistant server" when an AssistantJS server should be started
+   * @param {number} port The port to listen on
+   */
+  runServer(port?: number): AssistantJSSetup;
+
+  /** Called via cli command "assistant generate" */
+  runGenerator(): AssistantJSSetup;
+
+  /** Creates a ready-to-use AssistantJSSetup instance */
+  createAssistantJsSetup(): AssistantJSSetup;
 }
 
 /** Common component-independent AssistantJS namespace for hooks */
