@@ -246,12 +246,33 @@ export interface MinimalRequestExtraction extends CommonRequestExtraction {
   platform: string;
 }
 
+/**
+ * All status of AccountLinking
+ */
+export enum AccountLinkingStatus {
+  /**
+   * When AccountLinking was successful
+   */
+  OK,
+
+  /**
+   * When AccountLinking was cancelled by user
+   */
+  CANCELLED,
+}
+
 /** Optional, additional informations which extractors may extract from a request */
 export namespace OptionalExtractions {
   /** Interface for extraction of oauth key */
   export interface OAuth {
     /** The oauth token, or null, if not present in current extraction */
     oAuthToken: string | null;
+  }
+
+  /** Interface for AccountLinkingStatus */
+  export interface AccountLinking {
+    /** The current status, or null, if not present in current extraction */
+    accountLinkingStatus: AccountLinkingStatus | null;
   }
 
   /** Interface for extraction of platform-specific temporal auth */

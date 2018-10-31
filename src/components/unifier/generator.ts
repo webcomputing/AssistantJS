@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
 import * as combinatorics from "js-combinatorics";
+import * as path from "path";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
@@ -243,11 +244,8 @@ export class Generator implements CLIGeneratorExtension {
     const utterancesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(utterancesDir);
     languages.forEach(language => {
-      const utterancePath = utterancesDir + "/" + language + "/utterances.json";
-      if (fs.existsSync(utterancePath)) {
-        const current = JSON.parse(fs.readFileSync(utterancePath).toString());
-        utterances[language] = current;
-      }
+      const utterancePath = path.join(utterancesDir, language, "/utterances.js");
+      utterances[language] = this.loadJsOrJson(utterancePath);
     });
     return utterances;
   }
@@ -260,13 +258,22 @@ export class Generator implements CLIGeneratorExtension {
     const localesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(this.configuration.utterancePath);
     languages.forEach(language => {
-      const entitiesPath = localesDir + "/" + language + "/entities.json";
-      if (fs.existsSync(entitiesPath)) {
-        const current = JSON.parse(fs.readFileSync(entitiesPath).toString());
-        entities[language] = current;
-      }
+      const entitiesPath = path.join(localesDir, language, "entities.js");
+      entities[language] = this.loadJsOrJson(entitiesPath);
     });
 
     return entities;
+  }
+
+  /**
+   * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
+   */
+  private loadJsOrJson(src: string) {
+    const ext = path.extname(src);
+    const jsSrc = src.replace(new RegExp(`${ext}$`), "").concat(".js");
+    const jsonSrc = src.replace(new RegExp(`${ext}$`), "").concat(".json");
+
+    // Load JS module with priority before JSON, because it could also load a JSON of same name
+    return require(fs.existsSync(jsSrc) ? jsSrc : jsonSrc);
   }
 }
