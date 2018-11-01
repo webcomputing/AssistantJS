@@ -7,7 +7,7 @@ interface CurrentThisContext extends ThisContext {
 
 describe("MainState", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.specHelper.prepareSpec();
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
   });
 
   describe("#invokeGenericIntent", function() {

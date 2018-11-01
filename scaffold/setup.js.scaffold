@@ -5,8 +5,8 @@ const AssistantSource = require("assistant-source");
 beforeEach(function() {
   // Get application initializer and initializer main variables
   this.applicationInitializer = new ApplicationInitializer();
-  this.setups = applicationInitializer.createAndPrepareSetups();
-  this.specHelper = new AssistantSource.SpecSetup(this.setups.assistantJs, this.setups.stateMachine);
+  this.setups = this.applicationInitializer.createAndPrepareSetups();
+  this.specHelper = new AssistantSource.SpecHelper(this.setups.assistantJs, this.setups.stateMachine);
   this.inversify = this.specHelper.assistantJs.container.inversifyInstance;
 
   // Register all platforms. For every platform you install, you want to add an entry here.
