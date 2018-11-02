@@ -167,7 +167,7 @@ export class Generator implements CLIGeneratorExtension {
     templates.map(template => {
       const slots: string[][] = [];
 
-      const repTemplate = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match: string, param: string) => {
+      const repTemplate = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"()-\|\s]+)\}(?!\})/g, (match: string, param: string) => {
         slots.push(param.split("|"));
         return `{${slots.length - 1}}`;
       });
@@ -185,7 +185,7 @@ export class Generator implements CLIGeneratorExtension {
     preUtterances.map(utterance => {
       const slots: string[][] = [];
 
-      const repUtterance = utterance.replace(/(?<=\{\{)([[A-Za-z0-9_äÄöÖüÜß]+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
+      const repUtterance = utterance.replace(/(?<=\{\{)([A-Za-z0-9_äÄöÖüÜß,;'"()-\|\s]+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
         const entityName = match.split("|").pop();
 
         // Iterate through values when no example like {{example|entity}} is given
