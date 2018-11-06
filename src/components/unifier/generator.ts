@@ -2,6 +2,7 @@ import * as generateUtterances from "alexa-utterances"; // We are only using ale
 import * as fs from "fs";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
+import * as path from "path";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
@@ -220,5 +221,24 @@ export class Generator implements CLIGeneratorExtension {
     });
 
     return target;
+  }
+
+  /**
+   * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
+   */
+  private loadJsOrJson(src: string) {
+    const cwdRelativePath = path.relative(process.cwd(), src);
+    const builtSource = path.join("js", cwdRelativePath);
+
+    const ext = path.extname(cwdRelativePath);
+    const jsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".js");
+    const jsonSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".json");
+
+    // Load JS module with priority before JSON, because it could also load a JSON of same name
+    try {
+      return require(fs.existsSync(path.resolve(jsSrc)) ? path.resolve(jsSrc) : path.resolve(jsonSrc));
+    } catch (e) {
+      return require(fs.existsSync(path.resolve("js", jsSrc)) ? path.resolve("js", jsSrc) : path.resolve("js", jsonSrc));
+    }
   }
 }
