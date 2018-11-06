@@ -4,7 +4,6 @@ export function swapHash(configHash) {
     configHash[parameterType].forEach(parameter => {
       result[parameter] = parameterType;
     });
-
     // Add type as possible parameter, for answer prompt
     result[parameterType] = parameterType;
   });

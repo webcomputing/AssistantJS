@@ -23,7 +23,6 @@ import { swapHash } from "./swap-hash";
 const configuration: Configuration.Defaults = {
   utterancePath: process.cwd() + "/config/locales",
   entities: {},
-  entitySets: {},
   failSilentlyOnUnsupportedFeatures: true,
   logExtractionWhitelist: ["platform", "device", "intent", "language"],
 };
@@ -41,6 +40,11 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
         return swapHash(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
       });
+
+      // Bind same swapped entity configuration to own extension
+      bindService
+        .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
+        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
 
       // Bind same swapped entity configuration to own extension
       bindService

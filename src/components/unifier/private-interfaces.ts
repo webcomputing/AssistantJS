@@ -1,5 +1,3 @@
-import { EntitySet } from "./public-interfaces";
-
 export const componentInterfaces = {
   afterSendResponse: Symbol("after-send-response"),
   beforeSendResponse: Symbol("before-send-response"),
@@ -8,6 +6,7 @@ export const componentInterfaces = {
   requestProcessor: Symbol("request-processor"),
   requestModifier: Symbol("request-modifier"),
   utteranceTemplateService: Symbol("utterance-template-service"),
+  entityMapper: Symbol("entity-mapping"),
 };
 
 export namespace Configuration {
@@ -21,9 +20,6 @@ export namespace Configuration {
 
     /** Maps all entities of your app to their respective internal types. You later have to map these types to platform-specific types. */
     entities: { [type: string]: string[] };
-
-    /** Sets of custom entities and allowed / example entity values */
-    entitySets: { [name: string]: EntitySet };
 
     /** If set to false, created response objects will throw an exception if an unsupported feature if used */
     failSilentlyOnUnsupportedFeatures: boolean;
