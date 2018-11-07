@@ -99,7 +99,7 @@ export class Generator implements CLIGeneratorExtension {
             ...new Set(
               intentUtterances
                 // Match all entities
-                .map(utterance => utterance.match(/(?<=\{\{[A-Za-z0-9_äÄöÖüÜß,;'"\|\s]*)(\w)+(?=\}\})/g))
+                .map(utterance => utterance.match(/(?<=\{\{)(\w)+(?=\}\})/g))
                 // Flatten array
                 .reduce((prev, curr) => {
                   if (curr !== null) {
@@ -166,8 +166,7 @@ export class Generator implements CLIGeneratorExtension {
     // Extract all slots and substitute them with a placeholder
     templates.map(template => {
       const slots: string[][] = [];
-
-      const repTemplate = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"()-\|\s]+)\}(?!\})/g, (match: string, param: string) => {
+      const repTemplate = template.replace(/\{([^}]+)\}(?!\})/g, (match: string, param: string) => {
         slots.push(param.split("|"));
         return `{${slots.length - 1}}`;
       });
@@ -180,12 +179,11 @@ export class Generator implements CLIGeneratorExtension {
         preUtterances.push(template);
       }
     });
-
     // Extract entities and expland utterances with entity combinations
     preUtterances.map(utterance => {
       const slots: string[][] = [];
 
-      const repUtterance = utterance.replace(/(?<=\{\{)([A-Za-z0-9_äÄöÖüÜß,;'"()-\|\s]+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
+      const repUtterance = utterance.replace(/(?<=\{\{)(.+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
         const entityName = match.split("|").pop();
 
         // Iterate through values when no example like {{example|entity}} is given

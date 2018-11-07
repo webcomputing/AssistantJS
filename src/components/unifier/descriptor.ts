@@ -46,11 +46,6 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
         .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
 
-      // Bind same swapped entity configuration to own extension
-      bindService
-        .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
-        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
-
       // bind HandlerProxyFactory
       bindService
         .bindGlobalService("handler-proxy-factory")
