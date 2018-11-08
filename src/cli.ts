@@ -1,3 +1,5 @@
+// tslint:disable:no-console
+
 // Execute setup and get runner
 import { AssistantJSSetup } from "./setup";
 
@@ -77,6 +79,7 @@ export function cli(argv, resolvedIndex) {
       ["main.ts", "app/states/main.ts"],
       ["example-filter.ts", "app/filters/example-filter.ts"],
       ["handler.ts", "config/handler.ts"],
+      ["entities.ts", "config/locales/en/entities.ts"],
     ];
 
     // Merge root files into array
@@ -97,7 +100,7 @@ export function cli(argv, resolvedIndex) {
     });
 
     // Create empty json files
-    ["config/locales/en/translation.json", "config/locales/en/utterances.json", "config/locales/en/entities.json"].forEach(filePath => {
+    ["config/locales/en/translation.json", "config/locales/en/utterances.json"].forEach(filePath => {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(projectPath + filePath, "{}");
     });
