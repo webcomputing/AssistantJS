@@ -1,4 +1,5 @@
 version 0.4.0
+- changed the "assistant" binary to load the new application-initializer.js instead of index.js. To migrate, install the new assistant-source version globally.
 - removed index.ts and replaced it with application-initializer.ts to make the AssitantJS initialization process more adaptable. To migrate easily, create a new AssistantJS application, copy the created application-initializer.ts, paste it into your application and merge all locally made changes of your index.ts into your new application-initializer.ts
 - renamed SpecSetup to SpecHelper
 - new ResponsHandler: ResponseFactory and old Response-Types are obsolete now. A new ResponseHandler is introduced, which allows you the following:
