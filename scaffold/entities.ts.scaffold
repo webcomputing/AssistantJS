@@ -1,4 +1,4 @@
 import { PlatformGenerator } from "assistant-source";
 
 const entities: PlatformGenerator.CustomEntityMapping = {};
-export default entities;
+export = entities;
