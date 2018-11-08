@@ -47,7 +47,7 @@ export class Generator implements CLIGeneratorExtension {
     // Get the main utterance templates from locales folder
     const utteranceTemplates = this.getUtteranceTemplates();
     // Get the entities from locales folder
-    const customEntities = this.getEntities();
+    const customEntities = this.getCustomEntities();
 
     // Iterate through each found language and build the utterance corresponding to the users entities
     const generatorPromises = Object.keys(utteranceTemplates)
@@ -253,7 +253,7 @@ export class Generator implements CLIGeneratorExtension {
   /**
    * Return the user defined entities for each language found in locales folder
    */
-  private getEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
+  private getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
     const entities = {};
     const localesDir = this.configuration.utterancePath;
     const languages = fs.readdirSync(this.configuration.utterancePath);

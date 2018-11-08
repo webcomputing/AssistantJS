@@ -174,17 +174,15 @@ export namespace PlatformGenerator {
     [type: string]: string;
   }
 
-  /** Represents an user specified entiy */
+  /** Represents an user specified entity */
   export interface CustomEntityMapping {
     /** Allowed values of this entity set */
-    [type: string]: CustomEntityValue[];
-  }
-
-  export interface CustomEntityValue {
-    /** Value for the custom entity */
-    value: string;
-    /** Other ways a user might express */
-    synonyms?: string[];
+    [type: string]: Array<{
+      /** Reference value for the custom entity */
+      value: string;
+      /** Synonyms that map to the reference value */
+      synonyms?: string[];
+    }>;
   }
 }
 
