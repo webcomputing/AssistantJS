@@ -1,24 +1,24 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
-require('reflect-metadata');
+require("reflect-metadata");
 
-process.title = 'assistant';
+process.title = "assistant";
 
-var resolve = require('resolve');
+var resolve = require("resolve");
 
-resolve('assistant-source', { basedir: process.cwd() }, function(error, projectLocalSource) {
+resolve("assistant-source", { basedir: process.cwd() }, function(error, projectLocalSource) {
   var cli;
   if (error) {
     // Use it as global module
-    cli = require('../lib/cli').cli;
+    cli = require("../lib/cli").cli;
   } else {
     // Use it as local module
     cli = require(projectLocalSource).cli;
   }
 
-  // resolve local index.js configuration
-  resolve("./js/index.js", { basedir: process.cwd() }, function(error, projectIndex) {
+  // resolve local application initializer
+  resolve("./js/application-initializer.js", { basedir: process.cwd() }, function(error, projectIndex) {
     cli(process.argv, error ? false : require(projectIndex));
-  });  
+  });
 });

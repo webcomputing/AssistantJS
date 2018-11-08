@@ -167,7 +167,7 @@ export class Generator implements CLIGeneratorExtension {
     templates.map(template => {
       const slots: string[][] = [];
 
-      const repTemplate = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"\|\s]+)\}(?!\})/g, (match: string, param: string) => {
+      const repTemplate = template.replace(/\{([A-Za-z0-9_äÄöÖüÜß,;'"()-\|\s]+)\}(?!\})/g, (match: string, param: string) => {
         slots.push(param.split("|"));
         return `{${slots.length - 1}}`;
       });
@@ -185,7 +185,7 @@ export class Generator implements CLIGeneratorExtension {
     preUtterances.map(utterance => {
       const slots: string[][] = [];
 
-      const repUtterance = utterance.replace(/(?<=\{\{)([[A-Za-z0-9_äÄöÖüÜß]+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
+      const repUtterance = utterance.replace(/(?<=\{\{)([A-Za-z0-9_äÄöÖüÜß,;'"()-\|\s]+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
         const entityName = match.split("|").pop();
 
         // Iterate through values when no example like {{example|entity}} is given
@@ -269,11 +269,18 @@ export class Generator implements CLIGeneratorExtension {
    * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
    */
   private loadJsOrJson(src: string) {
-    const ext = path.extname(src);
-    const jsSrc = src.replace(new RegExp(`${ext}$`), "").concat(".js");
-    const jsonSrc = src.replace(new RegExp(`${ext}$`), "").concat(".json");
+    const cwdRelativePath = path.relative(process.cwd(), src);
+    const builtSource = path.join("js", cwdRelativePath);
+
+    const ext = path.extname(cwdRelativePath);
+    const jsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".js");
+    const jsonSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".json");
 
     // Load JS module with priority before JSON, because it could also load a JSON of same name
-    return require(fs.existsSync(jsSrc) ? jsSrc : jsonSrc);
+    try {
+      return require(fs.existsSync(path.resolve(jsSrc)) ? path.resolve(jsSrc) : path.resolve(jsonSrc));
+    } catch (e) {
+      return require(fs.existsSync(path.resolve("js", jsSrc)) ? path.resolve("js", jsSrc) : path.resolve("js", jsonSrc));
+    }
   }
 }

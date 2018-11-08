@@ -1,5 +1,4 @@
 import { inject, injectable } from "inversify";
-import * as util from "util";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
 import { MinimalRequestExtraction } from "../public-interfaces";
@@ -194,8 +193,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   protected failIfInactive() {
     if (this.isSent) {
       throw Error(
-        "This handle is already inactive, an response was already sent. You cannot send text or any oher data to a platform multiple times in one request. Current response handler: " +
-          util.inspect(this)
+        "The currently used response handle is already inactive, a response was already sent. You cannot send text or any oher data to a platform multiple times in one request."
       );
     }
   }
