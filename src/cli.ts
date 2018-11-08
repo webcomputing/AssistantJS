@@ -80,6 +80,7 @@ export function cli(argv, resolvedApplicationInitializer) {
       ["main.ts", "app/states/main.ts"],
       ["example-filter.ts", "app/filters/example-filter.ts"],
       ["handler.ts", "config/handler.ts"],
+      ["entities.ts", "config/locales/en/entities.ts"],
     ];
 
     // Merge root files into array
