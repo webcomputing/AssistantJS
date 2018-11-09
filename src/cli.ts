@@ -82,12 +82,9 @@ export function cli(argv, resolvedApplicationInitializer) {
       ["main.ts", "app/states/main.ts"],
       ["example-filter.ts", "app/filters/example-filter.ts"],
       ["handler.ts", "config/handler.ts"],
-<<<<<<< HEAD
       ["this-context.ts", "spec/support/this-context.ts"],
       ["main.spec.ts", "spec/app/states/main.spec.ts"],
-=======
       ["entities.ts", "config/locales/en/entities.ts"],
->>>>>>> develop
     ];
 
     // Merge root files into array
