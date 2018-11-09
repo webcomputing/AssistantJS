@@ -93,9 +93,6 @@ export class Generator implements CLIGeneratorExtension {
 
           // When utterances are "undefined", assign empty array
           if (typeof intentUtterances === "undefined") intentUtterances = [];
-
-          console.log("IntentUtterances: ", intentUtterances);
-
           // Extract entities from utterances
           const entities: string[] = [
             ...new Set(
