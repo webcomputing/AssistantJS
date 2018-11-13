@@ -1,0 +1,57 @@
+import { ThisContext } from "./this-context";
+
+/**
+ * Executes specs with all registered platforms.
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithAllPlatforms(specsCallback: () => void, withAllDevices?: boolean) {
+  return runWithPlatforms(["alexa", "google"], specsCallback, withAllDevices);
+}
+
+/**
+ * Executes specs with a given platform.
+ * @param platforms Array of platforms to execute specs with
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithPlatforms(platforms: string[], specsCallback: () => void, withAllDevices?: boolean) {
+  platforms.forEach(platformName => {
+    describe(`with platform: ${platformName}`, function() {
+      beforeEach(function(this: ThisContext) {
+        this.platforms.current = this.platforms[platformName];
+      });
+      // Excute specs callback
+      if (withAllDevices) {
+        return runWithAllDevices(platformName, specsCallback);
+      }
+      specsCallback();
+    });
+  });
+}
+
+/**
+ * Executes specs with all platform registered devices.
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithAllDevices(platform: string, specsCallback: () => void) {
+  if (platform === "alexa") {
+    return runWithDevices("alexa", ["alexaScreen", "alexaSpeaker"], specsCallback);
+  }
+  return runWithDevices("google", ["googlePhone", "googleSpeaker"], specsCallback);
+}
+
+/**
+ * Executes specs with platform given devices.
+ * @param platform Registered platform
+ * @param devices Devices to run the specs with
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithDevices(platform: string, devices: string[], specsCallback: () => void) {
+  devices.forEach(deviceName => {
+    describe(`with device: ${deviceName}`, function() {
+      beforeEach(function(this: ThisContext) {
+        (this as any)._currentDevice = deviceName;
+      });
+      specsCallback();
+    });
+  });
+}

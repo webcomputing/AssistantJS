@@ -1,8 +1,8 @@
 require("reflect-metadata");
-const ApplicationInitializer = require("../../application-initializer").ApplicationInitializer;
-const AssistantSource = require("assistant-source");
+import { SpecHelper } from "assistant-source";
+import { ApplicationInitializer } from "../../application-initializer";
 
-beforeEach(function() {
+beforeEach(function(this: ThisContext) {
   // Get application initializer and initializer main variables
   this.applicationInitializer = new ApplicationInitializer();
   this.setups = this.applicationInitializer.createAndPrepareSetups();
