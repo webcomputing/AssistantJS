@@ -20,7 +20,7 @@ export declare type Platform = string;
  * @param specsCallback Specs to execute (in callback)
  */
 export function runWithAllPlatforms(specsCallback: () => void, withDevices?: boolean) {
-  return runWithPlatforms(["google"], specsCallback, withDevices);
+  return runWithPlatforms(["alexa", "google"], specsCallback, withDevices);
 }
 
 /**
@@ -53,7 +53,7 @@ export function runWithPlatforms(platforms: Platform[], specsCallback: () => voi
 export function runWithAllDevices(platform: Platform, specsCallback: () => void) {
   switch (platform) {
     case "alexa":
-      return runWithDevices(["alexaScreen", "alexaSpeaker"], specsCallback);
+      return runWithDevices(["echo", "echoSpot", "echoShow"], specsCallback);
     case "google":
       return runWithDevices(["googlePhone", "googleSpeaker"], specsCallback);
     default:
@@ -78,9 +78,9 @@ export function runWithDevices(devices: Device[], specsCallback: () => void) {
     };
   };
   devices.forEach(deviceName => {
-    if (deviceName === "alexaScreen" || deviceName === "alexaSpeaker") {
+    if (deviceName.startsWith("echo")) {
       runWithPlatforms(["alexa"], deviceContext(deviceName));
-    } else if (deviceName === "googleSpeaker" || deviceName === "googlePhone") {
+    } else if (deviceName.startsWith("google")) {
       runWithPlatforms(["google"], deviceContext(deviceName));
     } else {
       throw Error(`Device ${deviceName} is unknown!`);
