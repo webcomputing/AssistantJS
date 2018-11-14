@@ -7,7 +7,7 @@ import { GenericRequestHandler } from "./components/root/generic-request-handler
 import { Logger, RequestContext } from "./components/root/public-interfaces";
 import { AfterContextExtension, Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
 import { StateMachineSetup } from "./components/state-machine/state-intent-setup";
-import { BasicHandable, intent, MinimalRequestExtraction, PlatformSpecHelper } from "./components/unifier/public-interfaces";
+import { BasicHandable, intent, MinimalRequestExtraction, PlatformSpecHelper, VirtualDevices } from "./components/unifier/public-interfaces";
 
 import { BaseState, Constructor } from "./assistant-source";
 import { TranslateValuesFor } from "./components/i18n/public-interfaces";
@@ -135,12 +135,15 @@ export class SpecHelper {
    * @param {any} additionalExtractions Additional extractions to append, for example to set entities
    */
   public async prepareIntentCall<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>>(
-    platformSpecHelper: PlatformSpecHelper<MergedAnswerTypes, MergedHandler>,
     intentToCall: intent,
-    additionalExtractions = {},
-    additionalRequestContext = {}
+    runtimeEnvironment:
+      | { platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler>; device?: string }
+      | PlatformSpecHelper<MergedAnswerTypes, MergedHandler>
   ): Promise<MergedHandler> {
-    return platformSpecHelper.pretendIntentCalled(intentToCall, additionalExtractions, additionalRequestContext);
+    if ("platform" in runtimeEnvironment) {
+      return runtimeEnvironment.platform.pretendIntentCalled(intentToCall, runtimeEnvironment.device);
+    }
+    return runtimeEnvironment.pretendIntentCalled(intentToCall);
   }
 
   /** Runs state machine to execute prepared intent method and collects and return all reponse handler results afterwards */

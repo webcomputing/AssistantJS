@@ -433,13 +433,32 @@ export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, 
   /** Link to assistantJS SpecSetup */
   specSetup: SpecHelper;
 
+  /** Reference to virtual devices */
+  devices: VirtualDevices;
+
   /**
    * Pretends call of given intent (and entities, ...)
-   * @param {intent} intent intent to call
-   * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
-   * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
+   * @param intent Intent to call
+   * @param devicesName Optional device
    */
-  pretendIntentCalled(intent: intent, additionalExtractions?: any, additionalContext?: any): Promise<MergedHandler>;
+  pretendIntentCalled(intent: intent, devicesName?: string): Promise<MergedHandler>;
+
+  /**
+   * Initialize the platform specific devices
+   */
+  setupDevices(): VirtualDevices;
+}
+
+/** Virtual device interface for platform specific unit testing */
+export interface VirtualDevices {
+  [deviceName: string]: VirtualDeviceOptions;
+}
+
+/** Inteface for virtual device options */
+export interface VirtualDeviceOptions {
+  additionalExtractions?: any;
+
+  additionalRequestContext?: Partial<RequestContext>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */

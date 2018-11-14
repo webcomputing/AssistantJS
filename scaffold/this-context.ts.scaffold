@@ -1,7 +1,8 @@
-import { PlatformSpecHelper, SpecHelper, SpecHelperOptions } from "assistant-source";
+import { PlatformSpecHelper, SpecHelper, SpecHelperOptions, VirtualDevices } from "assistant-source";
 import { interfaces as inversifyInterfaces } from "inversify";
 import { ApplicationInitializer } from "../../application-initializer";
 import { MergedAnswerTypes, MergedHandler } from "../../config/handler";
+import { VirtualDeviceOptions, VirtualDevices } from "../src/assistant-source";
 
 /** Use this context to describe your "this" in jasmine specs */
 export interface ThisContext {
@@ -19,6 +20,9 @@ export interface ThisContext {
 
   /** References a platform spec helper for every platform you'd like to use. Use this as the first parameter for this.specHelper.prepareIntentCall() */
   platforms: { [platformName: string]: PlatformSpecHelper<MergedAnswerTypes, MergedHandler> };
+
+  /** References the current platform spec helper and its optional devices for the testing runtime environment. */
+  runtimeEnvironment: { platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler>; devices?: VirtualDevices };
 
   /** Default spec options to pass into specHelper.prepareSpec(). You might want to override some options per spec. */
   defaultSpecOptions: Partial<SpecHelperOptions>;
