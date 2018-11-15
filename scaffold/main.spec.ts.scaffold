@@ -12,7 +12,7 @@ describe("MainState", function() {
 
   describe("#invokeGenericIntent", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      await this.specHelper.prepareIntentCall(this.platforms.alexa, "invokeGenericIntent"); // TODO: this.platforms.alexa doesn't exist yet, see setup.js!
+      await this.specHelper.prepareIntentCall("invokeGenericIntent", this.platforms.alexa); // TODO: this.platforms.alexa doesn't exist yet, see setup.ts!
       this.responseResults = await this.specHelper.runMachineAndGetResults("MainState");
     });
 

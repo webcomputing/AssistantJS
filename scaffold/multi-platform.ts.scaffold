@@ -19,8 +19,8 @@ export declare type Platform = string;
  * Executes specs with all registered platforms.
  * @param specsCallback Specs to execute (in callback)
  */
-export function runWithAllPlatforms(specsCallback: () => void, withDevices?: boolean) {
-  return runWithPlatforms(["alexa", "google"], specsCallback, withDevices);
+export function runWithAllPlatforms(specsCallback: () => void) {
+  return runWithPlatforms(["alexa", "google"], specsCallback);
 }
 
 /**
@@ -28,7 +28,7 @@ export function runWithAllPlatforms(specsCallback: () => void, withDevices?: boo
  * @param platforms Array of platforms to execute specs with
  * @param specsCallback Specs to execute (in callback)
  */
-export function runWithPlatforms(platforms: Platform[], specsCallback: () => void, withDevices?: boolean) {
+export function runWithPlatforms(platforms: Platform[], specsCallback: () => void) {
   platforms.forEach(platformName => {
     describe(`with platform: ${platformName}`, function() {
       beforeEach(function(this: ThisContext) {
@@ -37,10 +37,6 @@ export function runWithPlatforms(platforms: Platform[], specsCallback: () => voi
           device: "",
         };
       });
-      // Excute specs callback
-      if (withDevices) {
-        return runWithAllDevices(platformName, specsCallback);
-      }
       specsCallback();
     });
   });

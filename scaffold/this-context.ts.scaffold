@@ -22,7 +22,7 @@ export interface ThisContext {
   platforms: { [platformName: string]: PlatformSpecHelper<MergedAnswerTypes, MergedHandler> };
 
   /** References the current platform spec helper and its optional devices for the testing runtime environment. */
-  runtimeEnvironment: { platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler>; devices?: VirtualDevices };
+  runtimeEnvironment: { platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler>; device?: string };
 
   /** Default spec options to pass into specHelper.prepareSpec(). You might want to override some options per spec. */
   defaultSpecOptions: Partial<SpecHelperOptions>;

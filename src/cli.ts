@@ -77,7 +77,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     let copyInstructions = [
       ["components.ts", "config/components.ts"],
       ["jasmine.json", "spec/support/jasmine.json"],
-      ["setup.js", "spec/helpers/setup.js"],
+      ["setup.ts", "spec/helpers/setup.ts"],
       ["application.ts", "app/states/application.ts"],
       ["main.ts", "app/states/main.ts"],
       ["example-filter.ts", "app/filters/example-filter.ts"],
@@ -85,6 +85,7 @@ export function cli(argv, resolvedApplicationInitializer) {
       ["this-context.ts", "spec/support/this-context.ts"],
       ["main.spec.ts", "spec/app/states/main.spec.ts"],
       ["entities.ts", "config/locales/en/entities.ts"],
+      ["multi-platform.ts", "spec/support/multi-plattform.ts"]
     ];
 
     // Merge root files into array
