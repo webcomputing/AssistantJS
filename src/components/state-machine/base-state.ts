@@ -1,5 +1,5 @@
 import { injectable, unmanaged } from "inversify";
-import { TranslateHelper } from "../i18n/public-interfaces";
+import { ShortT, TranslateHelper } from "../i18n/public-interfaces";
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
 import { MinimalRequestExtraction, OptionalExtractions, Voiceable } from "../unifier/public-interfaces";
@@ -14,7 +14,7 @@ import { State, Transitionable } from "./public-interfaces";
 
 @injectable()
 export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>>
-  implements State.Required, Voiceable, TranslateHelper {
+  implements State.Required, Voiceable, ShortT {
   /** Current response handler */
   public responseHandler: MergedHandler;
 

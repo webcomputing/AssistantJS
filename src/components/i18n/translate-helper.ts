@@ -7,6 +7,7 @@ import { MinimalRequestExtraction, OptionalExtractions } from "../unifier/public
 
 import { componentInterfaces } from "./component-interfaces";
 import { I18nContext } from "./context";
+import { arraySplitter, optionEnablingArrayReturn, optionsObjectName } from "./plugins/array-returns-sample.plugin";
 import { InterpolationResolver, MissingInterpolationExtension, TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
 
 @injectable()
@@ -91,6 +92,19 @@ export class TranslateHelper implements TranslateHelperInterface {
     const translatedValue = this.translateOrFail(lookupKeys, options);
 
     return this.interpolationResolver.resolveMissingInterpolations(translatedValue, this);
+  }
+
+  public async getAllAlternatives(key?: string, locals?: {});
+  public async getAllAlternatives(key: {});
+  public async getAllAlternatives(key?: string | {}, locals = {}): Promise<string[]> {
+    // Set internal assistantjs option for array-returns-sample.plugin
+    locals[optionsObjectName] = { [optionEnablingArrayReturn]: true };
+
+    // Get regular translation string. Multiple translations are concatenated by arraySplitter per default...
+    const translation = await this.t(key as any, locals);
+
+    // ... so we have to split to return in array format
+    return translation.split(arraySplitter);
   }
 
   /**

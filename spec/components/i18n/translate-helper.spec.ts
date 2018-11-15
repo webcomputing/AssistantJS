@@ -6,17 +6,15 @@ describe("TranslateHelper", function() {
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
     this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
+
+    this.context = this.container.inversifyInstance.get("core:i18n:current-context");
+    this.context.intent = "testIntent";
+    this.context.state = "mainState";
+
+    this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
   });
 
   describe("t", function() {
-    beforeEach(function() {
-      this.context = this.container.inversifyInstance.get("core:i18n:current-context");
-      this.context.intent = "testIntent";
-      this.context.state = "mainState";
-
-      this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
-    });
-
     it("supports explicit keys", async function() {
       expect(await this.translateHelper.t("mySpecificKeys.keyOne")).toEqual("keyOneResult");
     });
@@ -210,6 +208,32 @@ describe("TranslateHelper", function() {
             expect(await this.translateHelper.t()).toEqual("root-only-platform-given");
           });
         });
+      });
+    });
+  });
+
+  describe("getAllAlternatives", function() {
+    describe("with array syntax", function() {
+      it("returns all alternatives as array", async function() {
+        expect(await this.translateHelper.getAllAlternatives("getAllAlternatives.withArray")).toEqual(["alternative 1", "alternative 2"]);
+      });
+    });
+
+    describe("with templating syntax", function() {
+      it("returns all alternatives as array", async function() {
+        expect(await this.translateHelper.getAllAlternatives("getAllAlternatives.withTemplating")).toEqual(["one", "two"]);
+      });
+    });
+
+    describe("with mixed syntax", function() {
+      it("returns all alternatives as array", async function() {
+        expect(await this.translateHelper.getAllAlternatives("getAllAlternatives.withBoth")).toEqual(["alternative 1", "alternative 2", "alternative 3"]);
+      });
+    });
+
+    describe("with only one entry", function() {
+      it("returns this entry as array", async function() {
+        expect(await this.translateHelper.getAllAlternatives("getAllAlternatives.withOne")).toEqual(["no other alternatives"]);
       });
     });
   });
