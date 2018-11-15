@@ -93,13 +93,12 @@ export class Generator implements CLIGeneratorExtension {
 
           // When utterances are "undefined", assign empty array
           if (typeof intentUtterances === "undefined") intentUtterances = [];
-
           // Extract entities from utterances
           const entities: string[] = [
             ...new Set(
               intentUtterances
                 // Match all entities
-                .map(utterance => utterance.match(/(?<=\{\{)(\w)+(?=\}\})/g))
+                .map(utterance => utterance.match(/(?<=\{\{.*)(\w)+(?=\}\})/g))
                 // Flatten array
                 .reduce((prev, curr) => {
                   if (curr !== null) {
