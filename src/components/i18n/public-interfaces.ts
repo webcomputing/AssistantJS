@@ -1,7 +1,7 @@
 import { Configuration } from "./private-interfaces";
 
-/** Uses I18next to get translations for keys */
-export interface TranslateHelper {
+/** Describes translateHelper's t() method */
+export interface ShortT {
   /**
    * Translates the given key using your json translations and a convention-over-configuration-approach.
    * First try is `currentState.currentIntent.platform.device`.
@@ -17,6 +17,28 @@ export interface TranslateHelper {
    * @param locals Variables to use in reponse
    */
   t(key?: string, locals?: { [name: string]: string | number | object }): Promise<string>;
+}
+
+/** Uses I18next to get translations for keys */
+export interface TranslateHelper extends ShortT {
+  /**
+   * Works the same as regular t(), but returns a list of all examples instead of a sample one.
+   * Translates the given key using your json translations.
+   * @param key String of the key to look for. If you pass a relative key (beginning with '.'),
+   * this method will apply several conventions, first looking for a translation for "currentState.currentIntent.KEY.platform.device".
+   * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
+   * @param locals Variables to use in reponse
+   * @return string array of all alternatives
+   */
+  getAllAlternatives(key?: string, locals?: { [name: string]: string | number | object }): Promise<string[]>;
+
+  /**
+   * Works the same as regular t(), but returns a list of all examples instead of a sample one.
+   * Translates the given key using your json translations and a convention-over-configuration-approach.
+   * First try is `currentState.currentIntent.platform.device`.
+   * @param locals If given: variables to use in response
+   */
+  getAllAlternatives(locals?: { [name: string]: string | number | object }): Promise<string[]>;
 }
 
 export interface InterpolationResolver {

@@ -99,5 +99,17 @@
       "intentB": "FilterCState - filterTestBIntent"
     }
   },
-  "noInterpolation": "no interpolation"
+  "noInterpolation": "no interpolation",
+  "getAllAlternatives": {
+    "withOne": "no other alternatives",
+    "withArray": [
+      "alternative 1",
+      "alternative 2"
+    ],
+    "withTemplating": "{one|two}",
+    "withBoth": [
+      "alternative 1",
+      "alternative {2|3}"
+    ]
+  }
 }
