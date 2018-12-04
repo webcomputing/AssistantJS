@@ -35,36 +35,36 @@ describe("RedisSession", function() {
     });
   });
 
-  describe("#find", function() {
-    interface CurrentThisContextFind extends CurrentThisContext {
+  describe("#getSubset", function() {
+    interface CurrentThisContextGetSubset extends CurrentThisContext {
       sessionData: { [key: string]: string };
     }
 
-    beforeEach(async function(this: CurrentThisContextFind) {
+    beforeEach(async function(this: CurrentThisContextGetSubset) {
       await this.session.set("my-key", "my-value");
       await this.session.set("not-the-key", "not-the-value");
     });
 
     describe("with parameter 'my-'", function() {
-      beforeEach(async function(this: CurrentThisContextFind) {
-        this.sessionData = await this.session.find("my-");
+      beforeEach(async function(this: CurrentThisContextGetSubset) {
+        this.sessionData = await this.session.getSubset("my-");
       });
 
-      it("returns a hash of my-value", async function(this: CurrentThisContextFind) {
+      it("returns a hash of my-value", async function(this: CurrentThisContextGetSubset) {
         expect(this.sessionData).toEqual({ "my-key": "my-value" });
       });
 
-      it("does not return a hash of not-the-value", async function(this: CurrentThisContextFind) {
+      it("does not return a hash of not-the-value", async function(this: CurrentThisContextGetSubset) {
         expect(this.sessionData).not.toEqual({ "not-the-key": "not-the-value" });
       });
     });
 
     describe("with parameter 'key'", function() {
-      beforeEach(async function(this: CurrentThisContextFind) {
-        this.sessionData = await this.session.find("key");
+      beforeEach(async function(this: CurrentThisContextGetSubset) {
+        this.sessionData = await this.session.getSubset("key");
       });
 
-      it("returns a hash of my-value and not-the-value", async function(this: CurrentThisContextFind) {
+      it("returns a hash of my-value and not-the-value", async function(this: CurrentThisContextGetSubset) {
         expect(this.sessionData).toEqual({
           "my-key": "my-value",
           "not-the-key": "not-the-value",
@@ -73,11 +73,11 @@ describe("RedisSession", function() {
     });
 
     describe("with empty parameter", function() {
-      beforeEach(async function(this: CurrentThisContextFind) {
-        this.sessionData = await this.session.find("");
+      beforeEach(async function(this: CurrentThisContextGetSubset) {
+        this.sessionData = await this.session.getSubset("");
       });
 
-      it("returns a hash of my-value and not-the-value", async function(this: CurrentThisContextFind) {
+      it("returns a hash of my-value and not-the-value", async function(this: CurrentThisContextGetSubset) {
         expect(this.sessionData).toEqual({
           "my-key": "my-value",
           "not-the-key": "not-the-value",
@@ -86,11 +86,11 @@ describe("RedisSession", function() {
     });
 
     describe("with parameter 'not-the'", function() {
-      beforeEach(async function(this: CurrentThisContextFind) {
-        this.sessionData = await this.session.find("not-the");
+      beforeEach(async function(this: CurrentThisContextGetSubset) {
+        this.sessionData = await this.session.getSubset("not-the");
       });
 
-      it("returns a hash of not-the-value", async function(this: CurrentThisContextFind) {
+      it("returns a hash of not-the-value", async function(this: CurrentThisContextGetSubset) {
         expect(this.sessionData).toEqual({
           "not-the-key": "not-the-value",
         });
@@ -99,7 +99,7 @@ describe("RedisSession", function() {
   });
 
   describe("#keys", function() {
-    interface CurrentThisContextKeys extends CurrentThisContext {
+    interface CurrentThisContextListKeys extends CurrentThisContext {
       sessionData: string[];
     }
     beforeEach(async function(this: CurrentThisContext) {
@@ -109,49 +109,49 @@ describe("RedisSession", function() {
 
     describe("with existing hash", function() {
       describe("with parameter 'my-'", function() {
-        beforeEach(async function(this: CurrentThisContextKeys) {
-          this.sessionData = await this.session.keys("my-");
+        beforeEach(async function(this: CurrentThisContextListKeys) {
+          this.sessionData = await this.session.listKeys("my-");
         });
 
-        it("returns array with my-key", async function(this: CurrentThisContextKeys) {
+        it("returns array with my-key", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).toEqual(["my-key"]);
         });
       });
 
       describe("with parameter 'the'", function() {
-        beforeEach(async function(this: CurrentThisContextKeys) {
-          this.sessionData = await this.session.keys("the");
+        beforeEach(async function(this: CurrentThisContextListKeys) {
+          this.sessionData = await this.session.listKeys("the");
         });
 
-        it("returns array with the-key", async function(this: CurrentThisContextKeys) {
+        it("returns array with the-key", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).toEqual(["the-key"]);
         });
       });
 
       describe("with empty parameter", function() {
-        beforeEach(async function(this: CurrentThisContextKeys) {
-          this.sessionData = await this.session.keys("");
+        beforeEach(async function(this: CurrentThisContextListKeys) {
+          this.sessionData = await this.session.listKeys("");
         });
 
-        it("return an array with my-key and the-key", async function(this: CurrentThisContextKeys) {
+        it("return an array with my-key and the-key", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).toEqual(["my-key", "the-key"]);
         });
 
-        it("does not return an empty array", async function(this: CurrentThisContextKeys) {
+        it("does not return an empty array", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).not.toEqual([]);
         });
       });
 
       describe("without parameter", function() {
-        beforeEach(async function(this: CurrentThisContextKeys) {
-          this.sessionData = await this.session.keys();
+        beforeEach(async function(this: CurrentThisContextListKeys) {
+          this.sessionData = await this.session.listKeys();
         });
 
-        it("return an array with my-key and the-key", async function(this: CurrentThisContextKeys) {
+        it("return an array with my-key and the-key", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).toEqual(["my-key", "the-key"]);
         });
 
-        it("does not return an empty array", async function(this: CurrentThisContextKeys) {
+        it("does not return an empty array", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).not.toEqual([]);
         });
       });

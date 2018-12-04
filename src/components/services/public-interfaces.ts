@@ -34,13 +34,13 @@ export interface Session {
    * Get a key value list of stored session data which match the given field substring
    * @param searchName field search name
    */
-  find(searchName: string): Promise<{ [name: string]: string }>;
+  getSubset(searchName: string): Promise<{ [name: string]: string }>;
 
   /**
    * Get an array of all keys in the redis session store which match to the given field substring
    * @param searchName field search name
    */
-  keys(searchName?: string): Promise<string[]>;
+  listKeys(searchName?: string): Promise<string[]>;
 }
 
 /** Implement this factory if you want to create your own session storage */
