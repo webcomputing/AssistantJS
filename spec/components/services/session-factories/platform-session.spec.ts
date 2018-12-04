@@ -188,6 +188,88 @@ describe("PlatformSession", function() {
     });
   });
 
+  describe("#keys", function() {
+    describe("with empty session store", function() {
+      describe("with empty parameters", function() {
+        it("returns empty array", async function(this: CurrentThisContext) {
+          expect(await this.session.keys()).toEqual([]);
+        });
+      });
+
+      describe("with parameter 'key-1'", function() {
+        it("returns empty array", async function(this: CurrentThisContext) {
+          expect(await this.session.keys("key-1")).toEqual([]);
+        });
+      });
+    });
+
+    describe("with filled session store", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.session.set("data-key-1", "data-value-1");
+        await this.session.set("data-key-2", "data-value-2");
+      });
+
+      describe("with empty parameters", function() {
+        it("returns empty array", async function(this: CurrentThisContext) {
+          expect(await this.session.keys()).toEqual(["data-key-1", "data-key-2"]);
+        });
+      });
+
+      describe("with parameter 'key-1'", function() {
+        it("returns an array with data-key-1 value", async function(this: CurrentThisContext) {
+          expect(await this.session.keys("key-1")).toEqual(["data-key-1"]);
+        });
+      });
+
+      describe("with parameter 'data-key'", function() {
+        it("returns an array with data-key-1 and data-key-2 value", async function(this: CurrentThisContext) {
+          expect(await this.session.keys("data-key")).toEqual(["data-key-1", "data-key-2"]);
+        });
+      });
+    });
+  });
+
+  describe("#find", function() {
+    describe("with empty session store", function() {
+      describe("with parameter ''", function() {
+        it("returns empty hash", async function(this: CurrentThisContext) {
+          expect(await this.session.find("")).toEqual({});
+        });
+      });
+
+      describe("with parameter 'key-1'", function() {
+        it("returns empty hash", async function(this: CurrentThisContext) {
+          expect(await this.session.find("key-1")).toEqual({});
+        });
+      });
+    });
+
+    describe("with filled session store", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        await this.session.set("data-key-1", "data-value-1");
+        await this.session.set("data-key-2", "data-value-2");
+      });
+
+      describe("with parameter ''", function() {
+        it("returns empty array", async function(this: CurrentThisContext) {
+          expect(await this.session.find("")).toEqual({ "data-key-1": "data-value-1", "data-key-2": "data-value-2" });
+        });
+      });
+
+      describe("with parameter 'key-1'", function() {
+        it("returns an hash with data-key-1 value", async function(this: CurrentThisContext) {
+          expect(await this.session.find("key-1")).toEqual({ "data-key-1": "data-value-1" });
+        });
+      });
+
+      describe("with parameter 'data-key'", function() {
+        it("returns a hash with data-key-1 and data-key-2 value", async function(this: CurrentThisContext) {
+          expect(await this.session.find("data-key")).toEqual({ "data-key-1": "data-value-1", "data-key-2": "data-value-2" });
+        });
+      });
+    });
+  });
+
   describe("#delete", function() {
     beforeEach(async function(this: CurrentThisContext) {
       this.createFilledSession();

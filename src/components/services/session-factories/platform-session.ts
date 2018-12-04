@@ -33,6 +33,25 @@ export class PlatformSession implements Session {
     return Object.keys(await this.getLatestSessionData()).length > 0;
   }
 
+  public async find(searchName: string): Promise<{ [name: string]: string }> {
+    const matchedSessionDataKeys: string[] = await this.keys(searchName);
+
+    const sessionData = {};
+    await Promise.all(
+      matchedSessionDataKeys.map(async sessionDataKeys => {
+        const currentSessionData = this.get(sessionDataKeys);
+        sessionData[sessionDataKeys] = await currentSessionData;
+        return currentSessionData;
+      })
+    );
+
+    return sessionData;
+  }
+
+  public async keys(searchName?: string): Promise<string[]> {
+    const sessionDataKeys = Object.keys(await this.getLatestSessionData());
+    return searchName ? sessionDataKeys.filter(sessionData => sessionData.includes(searchName)) : sessionDataKeys;
+  }
   /**
    * Returns latest session data. Gets them from extraction or checks if nothing is already stored in handler.
    * We have to priorize the handler's data to get eventually changed data
