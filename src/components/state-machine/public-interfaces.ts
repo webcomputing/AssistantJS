@@ -115,13 +115,13 @@ export interface Transitionable {
 
 export interface Filter {
   /**
-   * Method of filter that is executed when a filter decorator is given.
+   * Method of filter that is executed if the referenced filter is used as a decorator
    * @param {State.Required} state Instance of state which occured the execution of this filter
    * @param {string} stateName Name of state which occured the execution of this filter
    * @param {string} intentMethod Name of intent method which state machine wanted to call originally
-   * @param {[key: string]: any} params params you use while annotating a state/intent with a certain filter (eg. @filter({filter: ExampleFilter, params: {a: "a", b: "b"}})) will be passed here
-   * @param args all additional arguments passed to the intent method
-   * @returns an object containing a state/intent to be used instead of the intially called intent or a boolean (both as promises, if filter does some async operations). If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
+   * @param {[key: string]: any} params Parameters you use while annotating a state/intent with a certain filter (eg. @filter({filter: ExampleFilter, params: {a: "a", b: "b"}})) will be passed here
+   * @param args All additional arguments passed to the intent method
+   * @returns An object containing a state/intent to be used instead of the intially called intent or a boolean (both as promises, if filter does some async operations); If it returns true the filter gets ignored; If it's false the filter handles an intent execution by itself.
    */
   execute(
     state: State.Required,
@@ -150,6 +150,6 @@ export interface BeforeStateMachine {
 
 /**
  * Extensions of this type are executed after the statemachine is executed.
- * has same type like interface BeforeStateMachine
+ * Has same type like interface BeforeStateMachine
  */
 export type AfterStateMachine = BeforeStateMachine;
