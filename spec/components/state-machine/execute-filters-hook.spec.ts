@@ -59,9 +59,21 @@ describe("ExecuteFiltersHook", function() {
         expect(this.callSpyResults[0][1].constructor.name).toEqual("FilterAState");
         expect(this.callSpyResults[0][2]).toEqual("FilterAState");
         expect(this.callSpyResults[0][3]).toEqual("filterTestAIntent");
-        expect(this.callSpyResults[0][4]).toEqual("arg1");
-        expect(this.callSpyResults[0][5]).toEqual("arg2");
-        expect(typeof this.callSpyResults[0][6]).toEqual("undefined");
+        expect(this.callSpyResults[0][5]).toEqual("arg1");
+        expect(this.callSpyResults[0][6]).toEqual("arg2");
+        expect(typeof this.callSpyResults[0][7]).toEqual("undefined");
+      });
+
+      describe("with filter annotation using object format", function() {
+        it("executes filter", async function(this: CurrentThisContext) {
+          await this.stateMachine.handleIntent("filterTestEIntent");
+          expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
+        });
+
+        it("passes params from annotation to execute method of filter", async function(this: CurrentThisContext) {
+          await this.stateMachine.handleIntent("filterTestEIntent");
+          expect(this.callSpyResults[0][4]).toEqual({ exampleParam: "example" });
+        });
       });
 
       describe("with a filter returning arguments", function() {

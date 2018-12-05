@@ -29,9 +29,22 @@ export class ExecuteFiltersHook {
     const prioritizedFilters = [...this.retrieveStateFiltersFromMetadata(state), ...this.retrieveIntentFiltersFromMetadata(state, intent)];
 
     for (const prioritizedFilter of prioritizedFilters) {
-      const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilter);
+      const hasParams = typeof prioritizedFilter === "object" && prioritizedFilter !== null;
+      const prioritizedFilterConstructor = hasParams
+        ? (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).filter
+        : prioritizedFilter;
+
+      const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilterConstructor);
       if (fittingFilter) {
-        const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, ...args));
+        const filterResult = await Promise.resolve(
+          fittingFilter.execute(
+            state,
+            stateName,
+            intent,
+            hasParams ? (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).params : {},
+            ...args
+          )
+        );
 
         if (typeof filterResult === "object") {
           const filterArgs = filterResult.args ? filterResult.args : args;
@@ -43,18 +56,29 @@ export class ExecuteFiltersHook {
           return false;
         }
       } else {
-        this.logger.warn(`No matching filter class found for ${prioritizedFilter.name}`);
+        this.logger.warn(
+          `No matching filter class found for ${
+            hasParams
+              ? (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).filter.name
+              : (prioritizedFilter as Constructor<Filter>).name
+          }`
+        );
       }
     }
     return true;
   };
 
-  private retrieveStateFiltersFromMetadata(state: State.Required): Array<Constructor<Filter>> {
+  private retrieveStateFiltersFromMetadata(
+    state: State.Required
+  ): Array<Constructor<Filter> | { filter: Constructor<Filter>; params: { [key: string]: any } }> {
     const metadata = Reflect.getMetadata(filterMetadataKey, state.constructor);
     return metadata ? metadata.filters : [];
   }
 
-  private retrieveIntentFiltersFromMetadata(state: State.Required, intent: string): Array<Constructor<Filter>> {
+  private retrieveIntentFiltersFromMetadata(
+    state: State.Required,
+    intent: string
+  ): Array<Constructor<Filter> | { filter: Constructor<Filter>; params: { [key: string]: any } }> {
     if (typeof state[intent] !== "undefined") {
       const metadata = Reflect.getMetadata(filterMetadataKey, state[intent]);
       return metadata ? metadata.filters : [];

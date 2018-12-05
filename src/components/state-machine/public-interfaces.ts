@@ -119,6 +119,7 @@ export interface Filter {
    * @param {State.Required} state Instance of state which occured the execution of this filter
    * @param {string} stateName Name of state which occured the execution of this filter
    * @param {string} intentMethod Name of intent method which state machine wanted to call originally
+   * @param {[key: string]: any} params params you use while annotating a state/intent with a certain filter (eg. @filter({filter: ExampleFilter, params: {a: "a", b: "b"}})) will be passed here
    * @param args all additional arguments passed to the intent method
    * @returns an object containing a state/intent to be used instead of the intially called intent or a boolean (both as promises, if filter does some async operations). If it returns true the filter gets ignored. If it's false the filter handles an intent execution by itself.
    */
@@ -126,6 +127,7 @@ export interface Filter {
     state: State.Required,
     stateName: string,
     intentMethod: string,
+    params: {},
     ...args: any[]
   ): Promise<{ state: string; intent: string; args?: any[] } | boolean> | { state: string; intent: string; args?: any[] } | boolean;
 }
