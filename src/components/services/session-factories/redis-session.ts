@@ -28,7 +28,7 @@ export class RedisSession implements Session {
     });
   }
 
-  public async getSubset(searchName: string) {
+  public async getSubset(searchName?: string) {
     const matchedSessionDataKeys: string[] = await this.listKeys(searchName);
     const matchedSessionDataValues = await Promise.all(matchedSessionDataKeys.map(sessionDataKeys => this.get(sessionDataKeys)));
     const sessionData: { [name: string]: string } = {};

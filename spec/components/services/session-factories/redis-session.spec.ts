@@ -85,6 +85,19 @@ describe("RedisSession", function() {
       });
     });
 
+    describe("without parameter", function() {
+      beforeEach(async function(this: CurrentThisContextGetSubset) {
+        this.sessionData = await this.session.getSubset();
+      });
+
+      it("returns a hash of my-value and not-the-value", async function(this: CurrentThisContextGetSubset) {
+        expect(this.sessionData).toEqual({
+          "my-key": "my-value",
+          "not-the-key": "not-the-value",
+        });
+      });
+    });
+
     describe("with parameter 'not-the'", function() {
       beforeEach(async function(this: CurrentThisContextGetSubset) {
         this.sessionData = await this.session.getSubset("not-the");

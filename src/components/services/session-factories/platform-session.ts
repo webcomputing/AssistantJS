@@ -33,7 +33,7 @@ export class PlatformSession implements Session {
     return Object.keys(await this.getLatestSessionData()).length > 0;
   }
 
-  public async getSubset(searchName: string): Promise<{ [name: string]: string }> {
+  public async getSubset(searchName?: string): Promise<{ [name: string]: string }> {
     const matchedSessionDataKeys: string[] = await this.listKeys(searchName);
     const matchedSessionDataValues = await Promise.all(matchedSessionDataKeys.map(sessionDataKeys => this.get(sessionDataKeys)));
     const sessionData: { [name: string]: string } = {};
