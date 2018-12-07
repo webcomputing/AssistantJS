@@ -32,13 +32,13 @@ export interface Session {
 
   /**
    * Get a key value list of stored session data which match the given field substring
-   * @param {string?} searchName - Search for searchName in all data store keys and returns the data. If searchName will not be given or includes an empty string, all session date will be returned.
+   * @param {string?} searchName - Search for searchName in all data store keys and returns the data. If searchName is not given or includes an empty string, all session date will be returned.
    */
   getSubset(searchName?: string): Promise<{ [name: string]: string }>;
 
   /**
    * Get an array of all keys in the redis session store which match to the given field substring
-   * @param {string?} searchName - List all session data key identifier which match with the given searchName. If searchName will not be given or includes an empty string, all keys will be returned.
+   * @param {string?} searchName - List all session data key identifier which match with the given searchName. If searchName is not given or includes an empty string, all keys will be returned.
    */
   listKeys(searchName?: string): Promise<string[]>;
 }
