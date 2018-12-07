@@ -190,7 +190,7 @@ describe("PlatformSession", function() {
 
   describe("#listKeys", function() {
     describe("with empty session store", function() {
-      describe("with empty parameters", function() {
+      describe("without parameter", function() {
         it("returns empty array", async function(this: CurrentThisContext) {
           expect(await this.session.listKeys()).toEqual([]);
         });
@@ -209,8 +209,8 @@ describe("PlatformSession", function() {
         await this.session.set("data-key-2", "data-value-2");
       });
 
-      describe("with empty parameters", function() {
-        it("returns empty array", async function(this: CurrentThisContext) {
+      describe("without parameter", function() {
+        it("returns all session data keys", async function(this: CurrentThisContext) {
           expect(await this.session.listKeys()).toEqual(["data-key-1", "data-key-2"]);
         });
       });
@@ -222,7 +222,7 @@ describe("PlatformSession", function() {
       });
 
       describe("with parameter 'data-key'", function() {
-        it("returns an array with data-key-1 and data-key-2 value", async function(this: CurrentThisContext) {
+        it("returns all session store data keys", async function(this: CurrentThisContext) {
           expect(await this.session.listKeys("data-key")).toEqual(["data-key-1", "data-key-2"]);
         });
       });
@@ -230,27 +230,22 @@ describe("PlatformSession", function() {
   });
 
   describe("#getSubset", function() {
-    beforeEach(async function(this: CurrentThisContext) {
-      await this.session.set("data-key-1", "data-value-1");
-      await this.session.set("data-key-2", "data-value-2");
-    });
-
     describe("with empty session store", function() {
       describe("with parameter ''", function() {
-        it("returns all session data as an hash", async function(this: CurrentThisContext) {
-          expect(await this.session.getSubset("")).toEqual({ "data-key-1": "data-value-1", "data-key-2": "data-value-2" });
+        it("returns an empty hash", async function(this: CurrentThisContext) {
+          expect(await this.session.getSubset("")).toEqual({});
         });
       });
 
       describe("without parameter", function() {
-        it("returns all session data as an hash", async function(this: CurrentThisContext) {
-          expect(await this.session.getSubset()).toEqual({ "data-key-1": "data-value-1", "data-key-2": "data-value-2" });
+        it("returns an empty hash", async function(this: CurrentThisContext) {
+          expect(await this.session.getSubset()).toEqual({});
         });
       });
 
       describe("with parameter 'key-1'", function() {
-        it("returns a hash wit data-key-1 value", async function(this: CurrentThisContext) {
-          expect(await this.session.getSubset("key-1")).toEqual({ "data-key-1": "data-value-1" });
+        it("returns an empty hash", async function(this: CurrentThisContext) {
+          expect(await this.session.getSubset("key-1")).toEqual({});
         });
       });
     });
@@ -262,13 +257,13 @@ describe("PlatformSession", function() {
       });
 
       describe("with parameter ''", function() {
-        it("returns empty array", async function(this: CurrentThisContext) {
+        it("return all stored session data", async function(this: CurrentThisContext) {
           expect(await this.session.getSubset("")).toEqual({ "data-key-1": "data-value-1", "data-key-2": "data-value-2" });
         });
       });
 
       describe("without parameter", function() {
-        it("returns empty array", async function(this: CurrentThisContext) {
+        it("return all stored session data", async function(this: CurrentThisContext) {
           expect(await this.session.getSubset()).toEqual({ "data-key-1": "data-value-1", "data-key-2": "data-value-2" });
         });
       });

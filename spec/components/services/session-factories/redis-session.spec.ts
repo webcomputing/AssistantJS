@@ -72,7 +72,7 @@ describe("RedisSession", function() {
       });
     });
 
-    describe("with empty parameter", function() {
+    describe("with parameter ''", function() {
       beforeEach(async function(this: CurrentThisContextGetSubset) {
         this.sessionData = await this.session.getSubset("");
       });
@@ -111,7 +111,7 @@ describe("RedisSession", function() {
     });
   });
 
-  describe("#keys", function() {
+  describe("#listKeys", function() {
     interface CurrentThisContextListKeys extends CurrentThisContext {
       sessionData: string[];
     }
@@ -126,7 +126,7 @@ describe("RedisSession", function() {
           this.sessionData = await this.session.listKeys("my-");
         });
 
-        it("returns array with my-key", async function(this: CurrentThisContextListKeys) {
+        it("returns an array with my-key", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).toEqual(["my-key"]);
         });
       });
@@ -136,12 +136,12 @@ describe("RedisSession", function() {
           this.sessionData = await this.session.listKeys("the");
         });
 
-        it("returns array with the-key", async function(this: CurrentThisContextListKeys) {
+        it("returns an array with the-key", async function(this: CurrentThisContextListKeys) {
           expect(this.sessionData).toEqual(["the-key"]);
         });
       });
 
-      describe("with empty parameter", function() {
+      describe("with parameter ''", function() {
         beforeEach(async function(this: CurrentThisContextListKeys) {
           this.sessionData = await this.session.listKeys("");
         });
