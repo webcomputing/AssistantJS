@@ -1,11 +1,15 @@
+import { PlatformGenerator } from "./public-interfaces";
+
 export const componentInterfaces = {
   afterSendResponse: Symbol("after-send-response"),
   beforeSendResponse: Symbol("before-send-response"),
   entityMapping: Symbol("entity-mapping"),
+  generators: Symbol("generators"),
+  localesLoader: Symbol("locales-loader"),
   platformGenerator: Symbol("platform-generator"),
   requestProcessor: Symbol("request-processor"),
   requestModifier: Symbol("request-modifier"),
-  utteranceTemplateService: Symbol("utterance-template-service")
+  utteranceTemplateService: Symbol("utterance-template-service"),
 };
 
 export namespace Configuration {
@@ -33,4 +37,9 @@ export namespace Configuration {
 
   /** Available configuration settings in a runtime application */
   export interface Runtime extends Defaults, Required {}
+}
+
+export interface LocalesLoader {
+  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
 }

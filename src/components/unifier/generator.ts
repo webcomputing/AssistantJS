@@ -4,19 +4,18 @@ import { Component } from "inversify-components";
 import * as combinatorics from "js-combinatorics";
 import * as path from "path";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
+import { LocalesLoader } from "./locales-loader";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
   private intents: intent[] = [];
-  private configuration: Configuration.Runtime;
   private entityMappings: PlatformGenerator.EntityMapping[] = [];
   private platformGenerators: PlatformGenerator.Extension[] = [];
   private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
 
   constructor(
-    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>,
     @inject("core:state-machine:used-intents")
     @optional()
     intents: intent[],
@@ -28,7 +27,9 @@ export class Generator implements CLIGeneratorExtension {
     utteranceServices: PlatformGenerator.UtteranceTemplateService[],
     @multiInject(componentInterfaces.entityMapping)
     @optional()
-    entityMappings: PlatformGenerator.EntityMapping[]
+    entityMappings: PlatformGenerator.EntityMapping[],
+    @inject(componentInterfaces.localesLoader)
+    private localesLoader: LocalesLoader
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
     [intents, generators, utteranceServices, entityMappings].forEach(v => {
@@ -39,15 +40,14 @@ export class Generator implements CLIGeneratorExtension {
     this.intents = intents;
     this.platformGenerators = generators;
     this.entityMappings = entityMappings;
-    this.configuration = componentMeta.configuration;
     this.additionalUtteranceTemplatesServices = utteranceServices;
   }
 
   public async execute(buildDir: string): Promise<void> {
     // Get the main utterance templates from locales folder
-    const utteranceTemplates = this.getUtteranceTemplates();
+    const utteranceTemplates = this.localesLoader.getUtteranceTemplates();
     // Get the entities from locales folder
-    const customEntities = this.getCustomEntities();
+    const customEntities = this.localesLoader.getCustomEntities();
 
     // Iterate through each found language and build the utterance corresponding to the users entities
     const generatorPromises = Object.keys(utteranceTemplates)
@@ -233,51 +233,51 @@ export class Generator implements CLIGeneratorExtension {
     return result;
   }
 
-  /**
-   * Return the user defined utterance templates for each language found in locales folder
-   */
-  private getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } } {
-    const utterances = {};
-    const utterancesDir = this.configuration.utterancePath;
-    const languages = fs.readdirSync(utterancesDir);
-    languages.forEach(language => {
-      const utterancePath = path.join(utterancesDir, language, "/utterances.js");
-      utterances[language] = this.loadJsOrJson(utterancePath);
-    });
-    return utterances;
-  }
+  // /**
+  //  * Return the user defined utterance templates for each language found in locales folder
+  //  */
+  // private getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } } {
+  //   const utterances = {};
+  //   const utterancesDir = this.configuration.utterancePath;
+  //   const languages = fs.readdirSync(utterancesDir);
+  //   languages.forEach(language => {
+  //     const utterancePath = path.join(utterancesDir, language, "/utterances.js");
+  //     utterances[language] = this.loadJsOrJson(utterancePath);
+  //   });
+  //   return utterances;
+  // }
 
-  /**
-   * Return the user defined entities for each language found in locales folder
-   */
-  private getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
-    const entities = {};
-    const localesDir = this.configuration.utterancePath;
-    const languages = fs.readdirSync(this.configuration.utterancePath);
-    languages.forEach(language => {
-      const entitiesPath = path.join(localesDir, language, "entities.js");
-      entities[language] = this.loadJsOrJson(entitiesPath);
-    });
+  // /**
+  //  * Return the user defined entities for each language found in locales folder
+  //  */
+  // private getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
+  //   const entities = {};
+  //   const localesDir = this.configuration.utterancePath;
+  //   const languages = fs.readdirSync(this.configuration.utterancePath);
+  //   languages.forEach(language => {
+  //     const entitiesPath = path.join(localesDir, language, "entities.js");
+  //     entities[language] = this.loadJsOrJson(entitiesPath);
+  //   });
 
-    return entities;
-  }
+  //   return entities;
+  // }
 
-  /**
-   * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
-   */
-  private loadJsOrJson(src: string) {
-    const cwdRelativePath = path.relative(process.cwd(), src);
-    const builtSource = path.join("js", cwdRelativePath);
+  // /**
+  //  * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
+  //  */
+  // private loadJsOrJson(src: string) {
+  //   const cwdRelativePath = path.relative(process.cwd(), src);
+  //   const builtSource = path.join("js", cwdRelativePath);
 
-    const ext = path.extname(cwdRelativePath);
-    const jsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".js");
-    const jsonSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".json");
+  //   const ext = path.extname(cwdRelativePath);
+  //   const jsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".js");
+  //   const jsonSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".json");
 
-    // Load JS module with priority before JSON, because it could also load a JSON of same name
-    try {
-      return require(fs.existsSync(path.resolve(jsSrc)) ? path.resolve(jsSrc) : path.resolve(jsonSrc));
-    } catch (e) {
-      return require(fs.existsSync(path.resolve("js", jsSrc)) ? path.resolve("js", jsSrc) : path.resolve("js", jsonSrc));
-    }
-  }
+  //   // Load JS module with priority before JSON, because it could also load a JSON of same name
+  //   try {
+  //     return require(fs.existsSync(path.resolve(jsSrc)) ? path.resolve(jsSrc) : path.resolve(jsonSrc));
+  //   } catch (e) {
+  //     return require(fs.existsSync(path.resolve("js", jsSrc)) ? path.resolve("js", jsSrc) : path.resolve("js", jsonSrc));
+  //   }
+  // }
 }
