@@ -1,4 +1,5 @@
 version 0.4.0
+- adds listKeys and getSubset to session interface
 - introduces translateHelper's getAllAlternatives() method which returns all alternatives instead of a sample one. Useful for suggestion chips etc and as an alternative to getTranslationValuesFor.
 - changed the "assistant" binary to load the new application-initializer.js instead of index.js. To migrate, install the new assistant-source version globally.
 - the entry files for utterances/translations/entities now may be either .json, .js or .ts files
