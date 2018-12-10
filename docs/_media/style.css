@@ -1,0 +1,7 @@
+/** Resizes logo on coverpage and in sidebar */
+img[alt="coverpage-logo"] {
+  height: 150px;
+}
+img[alt="Dialogbits"] {
+  width: 250px;
+}
