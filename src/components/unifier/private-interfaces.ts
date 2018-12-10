@@ -4,7 +4,6 @@ export const componentInterfaces = {
   afterSendResponse: Symbol("after-send-response"),
   beforeSendResponse: Symbol("before-send-response"),
   entityMapping: Symbol("entity-mapping"),
-  generators: Symbol("generators"),
   localesLoader: Symbol("locales-loader"),
   platformGenerator: Symbol("platform-generator"),
   requestProcessor: Symbol("request-processor"),

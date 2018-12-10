@@ -1,8 +1,6 @@
-import { interfaces as inversifyInterfaces } from "inversify";
-import { BindingDescriptor, Component, ComponentDescriptor, ExecutableExtension } from "inversify-components";
+import { Component, ComponentDescriptor } from "inversify-components";
 
 import { injectionNames } from "../../injection-names";
-import { componentInterfaces as rootComponentInterfaces } from "../root/private-interfaces";
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
 import { ContextDeriver } from "./context-deriver";
 import { EntityDictionary as EntityDictionaryImpl } from "./entity-dictionary";
