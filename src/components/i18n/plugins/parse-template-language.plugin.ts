@@ -1,4 +1,3 @@
-// import * as generateUtterances from "alexa-utterances"; // We are only using alexa-independet stuff here
 import * as combinatorics from "js-combinatorics";
 import { arraySplitter } from "./array-returns-sample.plugin";
 
