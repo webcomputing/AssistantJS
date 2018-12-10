@@ -9,6 +9,7 @@ import { Logger } from "../root/public-interfaces";
 
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "./interpolation-resolver";
 import { arraySplitter, processor } from "./plugins/array-returns-sample.plugin";
+import { processor as templateProcessor } from "./plugins/parse-template-language.plugin";
 
 @injectable()
 export class I18nextWrapper {
@@ -61,6 +62,7 @@ export class I18nextWrapper {
     this.instance
       .use(i18nextBackend)
       .use(processor)
+      .use(templateProcessor)
       .init(i18nextConfiguration, err => {
         if (err) throw err;
       });
