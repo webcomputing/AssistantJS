@@ -16,14 +16,17 @@ export const processor = {
       const matches: RegExpMatchArray | null = templateString.match(re);
 
       if (matches !== null) {
+        // Removes curly braces and splits at "|"
         const slots: string[][] = matches.map(match => match.substring(1, match.length - 1).split("|"));
+        // Gets all combinations of variations in this string
         const combinations: string[][] = combinatorics.cartesianProduct.apply(combinatorics, slots).toArray();
-        combinations.forEach(combination => parsedStrings.push(templateString.replace(re, () => combination.shift() || "")));
-      } else {
-        parsedStrings.push(templateString);
+        // Fills all combinations back into the slots of templateString
+        const templateStringVariations = combinations.map(combination => templateString.replace(re, () => combination.shift() || ""));
+
+        return [...parsedStrings, ...templateStringVariations];
       }
 
-      return parsedStrings;
+      return [...parsedStrings, templateString];
     }, []);
 
     // Join with array splitter again to make it usable for other plugins
