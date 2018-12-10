@@ -20,7 +20,7 @@ export const processor = {
         const slots: string[][] = matches.map(match => match.substring(1, match.length - 1).split("|"));
         // Gets all combinations of variations in this string
         const combinations: string[][] = combinatorics.cartesianProduct.apply(combinatorics, slots).toArray();
-        // Fills all combinations back into the slots of templateString
+        // Fills all combinations back into positional slots of templateString
         const templateStringVariations = combinations.map(combination => templateString.replace(re, () => combination.shift() || ""));
 
         return [...parsedStrings, ...templateStringVariations];
