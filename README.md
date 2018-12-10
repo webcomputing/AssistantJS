@@ -15,7 +15,7 @@ of currently implemented AssistantJS components.
 - **Testable**: AssistantJS allows you to write voice applications which are fully testable, even across multiple voice assistants. To make testing even easier, AssistantJS gives you some nice test and mock helpers.
 - **I18n integration**: Thanks to [i18next][5], AssistantJS gives you full multi language support. In addition, it applies some really nice [convention-over-configuration][6] rulesets to speed up your development and
 help you to build better user interfaces using response text variation out of the box.
-- **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language (as known from [alexa-utterances][7]) to generate utterances efficiently. You are tired of maintaining your intents and utterances in dialogflow *and* in alexa? AssistantJS generates a fitting configuration for alexa and a zip file for dialogflow *based you the code you write*!
+- **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language a generate utterances efficiently. You are tired of maintaining your intents and utterances in dialogflow *and* in alexa? AssistantJS generates a fitting configuration for alexa and a zip file for dialogflow *based you the code you write*!
 - **Logging**: AssistantJS uses the awesome [bunyan][4] module to give you production-ready and request-specific logging options.
 - **CLI**: AssistantJS gives you a simple command line interface you can use to start your AssistantJS server (`assistant s`, backend by [express][8]) or generate nlu configurations (`assistant g`).
 - **Entity validation**: Don't check for presence of entities, let AssistantJS do this job for you. *(Optional dependency)*
@@ -118,7 +118,6 @@ describe("MainState", function () {
 [4]: https://github.com/trentm/node-bunyan
 [5]: https://www.i18next.com/
 [6]: https://en.wikipedia.org/wiki/Convention_over_configuration
-[7]: https://github.com/alexa-js/alexa-utterances
 [8]: http://expressjs.com
 [9]: https://redis.io/
 [10]: https://github.com/webcomputing/assistant-bootstrap

@@ -1,5 +1,4 @@
 import { Component } from "inversify-components";
-import { componentInterfaces } from "./component-interfaces";
 import { Configuration } from "./private-interfaces";
 
 import * as i18next from "i18next";
@@ -10,8 +9,6 @@ import { Logger } from "../root/public-interfaces";
 
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "./interpolation-resolver";
 import { arraySplitter, processor } from "./plugins/array-returns-sample.plugin";
-import { processor as templateParser } from "./plugins/parse-template-language.plugin";
-import { MissingInterpolationExtension } from "./public-interfaces";
 
 @injectable()
 export class I18nextWrapper {
@@ -63,7 +60,6 @@ export class I18nextWrapper {
 
     this.instance
       .use(i18nextBackend)
-      .use(templateParser)
       .use(processor)
       .init(i18nextConfiguration, err => {
         if (err) throw err;
