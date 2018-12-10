@@ -1,19 +1,50 @@
 import * as levenshtein from "fast-levenshtein";
 import { inject, injectable } from "inversify";
 import { Session } from "../services/public-interfaces";
+import { componentInterfaces, LocalesLoader } from "./private-interfaces";
 import { EntityDictionary as EntityDictionaryInterface, MinimalRequestExtraction } from "./public-interfaces";
 
 @injectable()
 export class EntityDictionary implements EntityDictionaryInterface {
   public store: { [name: string]: any } = {};
 
-  constructor(@inject("core:unifier:current-extraction") extraction: MinimalRequestExtraction) {
+  constructor(
+    @inject("core:unifier:current-extraction") private extraction: MinimalRequestExtraction,
+    @inject(componentInterfaces.localesLoader) private localesLoader: LocalesLoader
+  ) {
     this.store = typeof extraction.entities === "undefined" ? {} : { ...extraction.entities };
   }
 
   public get(name: string): any | undefined {
     // Return undefined instead of null. Uniforms all "missing" results to undefined.
-    return this.store[name] === null ? undefined : this.store[name];
+    let value = this.store[name] === null ? undefined : this.store[name];
+
+    const customEntities = this.localesLoader.getCustomEntities()[this.extraction.language];
+    if (typeof value === "string" && customEntities !== undefined && customEntities[name] !== undefined) {
+      // Try to find the choice of this entity by extraction's value
+      const choice = customEntities[name].find(ch => ch.value === value);
+
+      // If not found, try to map synonym to default value
+      if (choice === undefined) {
+        const valuesByDistance = customEntities[name]
+          .reduce<Array<{ value: string; distance: number }>>((agg, ch) => {
+            if (!ch.synonyms) {
+              return agg;
+            }
+
+            const distances = ch.synonyms.map(syn => {
+              return { value: syn, distance: levenshtein.get(syn.toLowerCase(), value.toLowerCase()) };
+            });
+
+            return [...agg, ...distances];
+          }, [])
+          .sort((a, b) => a.distance - b.distance);
+
+        value = valuesByDistance[0].value;
+      }
+    }
+
+    return value;
   }
 
   public contains(name: string) {
