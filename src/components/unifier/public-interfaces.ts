@@ -77,7 +77,11 @@ export interface EntityDictionary {
   /** Checks if the given entity is contained in the store */
   contains(name: string): boolean;
 
-  /** Gets the value of an entity, if the entity is defined */
+  /**
+   * Gets the value of an entity, if the entity is defined.
+   * If entity is a custom entity and extracted value is not equal to the default value, this method searches for the closest
+   * synonym using Levenshtein distance and returns its default value.
+   */
   get(name: string): string | undefined;
 
   /** Sets a value of an entity. */
