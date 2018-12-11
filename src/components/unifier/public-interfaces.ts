@@ -451,3 +451,9 @@ export interface UnifierConfiguration extends Partial<Configuration.Defaults>, C
  * Combination of normal Type and Promise of Type
  */
 export type OptionallyPromise<T> = T | Promise<T>;
+
+/** Implements logic to load utterances and custom entities from i18n files */
+export interface LocalesLoader {
+  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
+}

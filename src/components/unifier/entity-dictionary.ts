@@ -1,16 +1,16 @@
 import * as levenshtein from "fast-levenshtein";
 import { inject, injectable } from "inversify";
+import { injectionNames } from "../../injection-names";
 import { Session } from "../services/public-interfaces";
-import { componentInterfaces, LocalesLoader } from "./private-interfaces";
-import { EntityDictionary as EntityDictionaryInterface, MinimalRequestExtraction } from "./public-interfaces";
+import { EntityDictionary as EntityDictionaryInterface, LocalesLoader, MinimalRequestExtraction } from "./public-interfaces";
 
 @injectable()
 export class EntityDictionary implements EntityDictionaryInterface {
   public store: { [name: string]: any } = {};
 
   constructor(
-    @inject("core:unifier:current-extraction") private extraction: MinimalRequestExtraction,
-    @inject(componentInterfaces.localesLoader) private localesLoader: LocalesLoader
+    @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
+    @inject(injectionNames.localesLoader) private localesLoader: LocalesLoader
   ) {
     this.store = typeof extraction.entities === "undefined" ? {} : { ...extraction.entities };
   }

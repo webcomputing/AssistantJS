@@ -4,8 +4,8 @@ import { Component } from "inversify-components";
 import * as path from "path";
 import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
-import { Configuration, LocalesLoader as ILocalesLoader } from "./private-interfaces";
-import { PlatformGenerator } from "./public-interfaces";
+import { Configuration } from "./private-interfaces";
+import { LocalesLoader as ILocalesLoader, PlatformGenerator } from "./public-interfaces";
 
 @injectable()
 export class LocalesLoader implements ILocalesLoader {

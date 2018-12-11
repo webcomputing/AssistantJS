@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import { inject, injectable, multiInject, optional } from "inversify";
 import * as combinatorics from "js-combinatorics";
+import { injectionNames } from "../../injection-names";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
-import { LocalesLoader } from "./locales-loader";
 import { componentInterfaces } from "./private-interfaces";
-import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
+import { GenericIntent, intent, LocalesLoader, PlatformGenerator } from "./public-interfaces";
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
@@ -26,7 +26,7 @@ export class Generator implements CLIGeneratorExtension {
     @multiInject(componentInterfaces.entityMapping)
     @optional()
     entityMappings: PlatformGenerator.EntityMapping[],
-    @inject(componentInterfaces.localesLoader)
+    @inject(injectionNames.localesLoader)
     private localesLoader: LocalesLoader
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
