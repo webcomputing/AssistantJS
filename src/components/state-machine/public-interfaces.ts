@@ -135,7 +135,7 @@ export interface Filter {
  * This interface represents extensions which are used after the context is set. e.g the StateMachine
  */
 export interface AfterContextExtension extends ExecutableExtension {
-  execute(): any | Promise<any>;
+  execute(...args: any[]): any | Promise<any>;
 }
 
 /**

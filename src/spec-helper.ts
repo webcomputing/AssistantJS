@@ -94,7 +94,7 @@ export class SpecHelper {
    * @param stateName Name of state to run. If not passed, uses state in session
    * @param intent Name of intent to run. If not passed, uses extracted intent
    */
-  public async runMachine(stateName?: string, runIntent?: intent) {
+  public async runMachine(stateName?: string, runIntent?: intent, ...args: any[]) {
     if (
       this.setup.container.inversifyInstance.isBound("core:unifier:current-extraction") &&
       this.setup.container.inversifyInstance.isBound("core:state-machine:current-state-machine")
@@ -122,7 +122,7 @@ export class SpecHelper {
       );
       const runner = afterContextExtensions.filter(extensionClass => extensionClass.constructor.name === "Runner")[0];
 
-      return runner.execute();
+      return runner.execute(...args);
     }
 
     throw new Error("You cannot run machine without request scope opened. Did you call createRequestScope() or pretendIntentCalled()?");
