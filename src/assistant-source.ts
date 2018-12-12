@@ -24,7 +24,7 @@ export { featureIsAvailable } from "./components/unifier/feature-checker";
 export { cli } from "./cli";
 
 // Export SpecHelper
-export { SpecHelper } from "./spec-helper";
+export { SpecHelper, SpecHelperOptions } from "./spec-helper";
 
 // Export injectionNames (less type errors for most important injections)
 export { injectionNames } from "./injection-names";

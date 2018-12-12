@@ -9,7 +9,7 @@ describe("FilterSetup", function() {
 
   beforeEach(function() {
     this.specHelper = createSpecHelper(false);
-    this.assistantJs = this.specHelper.setup;
+    this.assistantJs = this.specHelper.assistantJs;
     this.container = this.assistantJs.container;
 
     createRequestScope(this.specHelper);

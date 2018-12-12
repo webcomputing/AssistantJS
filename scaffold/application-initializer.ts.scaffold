@@ -1,5 +1,6 @@
 import { AssistantJSApplicationInitializer, AssistantJSSetup, FilterSetup, GeneratorApplication, ServerApplication, StateMachineSetup } from "assistant-source";
 import componentConfiguration from "./config/components";
+import { ContainerImpl } from "inversify-components";
 
 /**
  * This is AssistantJS's main entrance into your application. With the help of this ApplicationInitializer class, you help AssistantJS
@@ -52,6 +53,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
+    setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
     const serverApplication = new ServerApplication(port);
@@ -67,6 +69,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
+    setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
     const serverApplication = new GeneratorApplication(`${process.cwd()}/builds`);
@@ -78,13 +81,11 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
   /** Creates a ready-to-use AssistantJSSetup instance */
   public createAssistantJsSetup() {
-    return new AssistantJSSetup();
+    return new AssistantJSSetup(new ContainerImpl());
   }
 
-  /** HELPER METHODS */
-
   /** Creates all relevant setup instances for preparing our AssistantJS application */
-  private createAndPrepareSetups(): { assistantJs: AssistantJSSetup; stateMachine: StateMachineSetup; filter: FilterSetup } {
+  public createAndPrepareSetups(): { assistantJs: AssistantJSSetup; stateMachine: StateMachineSetup; filter: FilterSetup } {
     // Create setup instances
     const assistantJs = this.createAssistantJsSetup();
     const setups = { assistantJs, stateMachine: new StateMachineSetup(assistantJs), filter: new FilterSetup(assistantJs) };
@@ -92,12 +93,11 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     // Register all descriptors
     this.initializeSetups(setups.assistantJs, setups.stateMachine, setups.filter);
 
-    // Bind everything to container
-    setups.assistantJs.autobind();
-
     // Return all instances
     return setups;
   }
+
+  /** HELPER METHODS */
 
   /**
    * Configures current node process to print all unhandledRejections to console.

@@ -1,0 +1,85 @@
+import { ThisContext } from "./this-context";
+
+/**
+ * Add supported devices in union type format
+ * e.g.
+ * import { AlexaDevice } from "assistant-alexa";
+ * import { GoogleDevice } from "assistant-google";
+ * export declare type Device = AlexaDevice | GoogleDevice
+ */
+export declare type Device = string;
+
+/**
+ * Add supported platform names in union type format
+ * e.g. export declare type Platform = "alexa" | "google"
+ */
+export declare type Platform = string;
+
+/**
+ * Executes specs with all registered platforms.
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithAllPlatforms(specsCallback: () => void) {
+  return runWithPlatforms(["alexa", "google"], specsCallback);
+}
+
+/**
+ * Executes specs with a given platform.
+ * @param platforms Array of platforms to execute specs with
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithPlatforms(platforms: Platform[], specsCallback: () => void) {
+  platforms.forEach(platformName => {
+    describe(`with platform: ${platformName}`, function() {
+      beforeEach(function(this: ThisContext) {
+        this.runtimeEnvironment = {
+          platform: this.platforms[platformName],
+          device: "",
+        };
+      });
+      specsCallback();
+    });
+  });
+}
+
+/**
+ * Executes specs with all platform registered devices.
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithAllDevices(platform: Platform, specsCallback: () => void) {
+  switch (platform) {
+    case "alexa":
+      return runWithDevices(["echo", "echoSpot", "echoShow"], specsCallback);
+    case "google":
+      return runWithDevices(["googlePhone", "googleSpeaker"], specsCallback);
+    default:
+      throw new Error(`Platform ${platform} is unknown!`);
+  }
+}
+
+/**
+ * Executes specs with a set of devices
+ * @param devices Devices to run the test with
+ * @param specsCallback Specs to execute (in callback)
+ */
+export function runWithDevices(devices: Device[], specsCallback: () => void) {
+  const deviceContext = function(device: string) {
+    return function() {
+      describe(`with device: ${device}`, function() {
+        beforeEach(function(this: ThisContext) {
+          this.runtimeEnvironment.device = device;
+        });
+        specsCallback();
+      });
+    };
+  };
+  devices.forEach(deviceName => {
+    if (deviceName.startsWith("echo")) {
+      runWithPlatforms(["alexa"], deviceContext(deviceName));
+    } else if (deviceName.startsWith("google")) {
+      runWithPlatforms(["google"], deviceContext(deviceName));
+    } else {
+      throw Error(`Device ${deviceName} is unknown!`);
+    }
+  });
+}

@@ -2,7 +2,7 @@
   "name": "{{__NAME__}}",
   "version": "0.1.0",
   "description": "AssistantJS implementation of {{__NAME__}}",
-  "main": "js/index.js",
+  "main": "js/application-initializer.js",
   "scripts": {
     "test": "jasmine-ts spec/**/*.spec.ts"
   },

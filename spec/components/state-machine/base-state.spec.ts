@@ -27,7 +27,7 @@ describe("BaseState", function() {
     this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
     this.container.inversifyInstance.bind(PLATFORM + ":current-response-handler").toDynamicValue(context => this.handler);
 
-    this.state = this.specHelper.setup.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<
+    this.state = this.specHelper.assistantJs.container.inversifyInstance.get<State.Factory>(injectionNames.stateFactory)<
       BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>
     >("PlainState");
   });
