@@ -440,9 +440,9 @@ export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, 
   /**
    * Pretends call of given intent (and entities, ...)
    * @param intent Intent to call
-   * @param devicesName Optional device
+   * @param deviceName Optional device
    */
-  pretendIntentCalled(intent: intent, devicesName?: string): Promise<MergedHandler>;
+  pretendIntentCalled(intent: intent, deviceName?: string): Promise<MergedHandler>;
 
   /**
    * Initialize the platform specific devices

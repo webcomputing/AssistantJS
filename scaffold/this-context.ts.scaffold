@@ -1,8 +1,7 @@
-import { PlatformSpecHelper, SpecHelper, SpecHelperOptions, VirtualDevices } from "assistant-source";
+import { PlatformSpecHelper, SpecHelper, SpecHelperOptions } from "assistant-source";
 import { interfaces as inversifyInterfaces } from "inversify";
 import { ApplicationInitializer } from "../../application-initializer";
 import { MergedAnswerTypes, MergedHandler } from "../../config/handler";
-import { VirtualDeviceOptions, VirtualDevices } from "../src/assistant-source";
 
 /** Use this context to describe your "this" in jasmine specs */
 export interface ThisContext {
