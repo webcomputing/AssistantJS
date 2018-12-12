@@ -1,5 +1,6 @@
 import { AssistantJSApplicationInitializer, AssistantJSSetup, FilterSetup, GeneratorApplication, ServerApplication, StateMachineSetup } from "assistant-source";
 import componentConfiguration from "./config/components";
+import { ContainerImpl } from "inversify-components";
 
 /**
  * This is AssistantJS's main entrance into your application. With the help of this ApplicationInitializer class, you help AssistantJS
@@ -80,7 +81,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
   /** Creates a ready-to-use AssistantJSSetup instance */
   public createAssistantJsSetup() {
-    return new AssistantJSSetup();
+    return new AssistantJSSetup(new ContainerImpl());
   }
 
   /** Creates all relevant setup instances for preparing our AssistantJS application */
