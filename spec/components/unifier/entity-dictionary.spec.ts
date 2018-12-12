@@ -6,6 +6,7 @@ import { ThisContext } from "../../this-context";
 
 interface MyThisContext extends ThisContext {
   createExtraction(entities: { [name: string]: any });
+  getEntityDictionary(): EntityDictionary;
 }
 
 describe("EntityDictionary", function() {
@@ -19,6 +20,10 @@ describe("EntityDictionary", function() {
         sessionID: "any",
       };
     };
+  });
+
+  beforeEach(async function(this: MyThisContext) {
+    this.getEntityDictionary = () => this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
   });
 
   describe("injection in request scope", function() {
@@ -113,9 +118,8 @@ describe("EntityDictionary", function() {
         createRequestScope(this.specHelper);
       });
 
-      it("returns undefined", function() {
-        const entities: EntityDictionary = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
-        expect(entities.get("color")).toBeUndefined();
+      it("returns undefined", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBeUndefined();
       });
     });
 
@@ -129,9 +133,8 @@ describe("EntityDictionary", function() {
         );
       });
 
-      it("returns the correct reference value", function() {
-        const entities: EntityDictionary = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
-        expect(entities.get("color")).toBe("red");
+      it("returns the correct reference value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("red");
       });
     });
 
@@ -145,9 +148,8 @@ describe("EntityDictionary", function() {
         );
       });
 
-      it("returns the correct reference value", function() {
-        const entities: EntityDictionary = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
-        expect(entities.get("color")).toBe("yellow");
+      it("returns the correct reference value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("yellow");
       });
     });
 
@@ -161,9 +163,8 @@ describe("EntityDictionary", function() {
         );
       });
 
-      it("returns the correct reference value", function() {
-        const entities: EntityDictionary = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
-        expect(entities.get("color")).toBe("red");
+      it("returns the correct reference value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("red");
       });
     });
 
@@ -177,9 +178,8 @@ describe("EntityDictionary", function() {
         );
       });
 
-      it("returns an unexpected value", function() {
-        const entities: EntityDictionary = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
-        expect(entities.get("color")).toBe("green");
+      it("returns an unexpected value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("green");
       });
     });
   });
