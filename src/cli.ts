@@ -9,6 +9,7 @@ import * as commander from "commander";
 
 // Import ts-node
 import Jasmine = require("jasmine");
+// tslint:disable-next-line:no-submodule-imports
 import JasmineCmd = require("jasmine/lib/command");
 import { register } from "ts-node";
 
