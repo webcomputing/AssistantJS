@@ -7,9 +7,15 @@ import { AssistantJSSetup } from "./setup";
 // Import commander
 import * as commander from "commander";
 
+// Import ts-node
+import Jasmine = require("jasmine");
+import JasmineCmd = require("jasmine/lib/command");
+import { register } from "ts-node";
+
 // Import node.js filesystem module
 import * as fs from "fs";
 import { Component } from "inversify-components";
+import * as path from "path";
 import { AssistantJSApplicationInitializer } from "./components/joined-interfaces";
 
 // Get package.json data
@@ -85,7 +91,7 @@ export function cli(argv, resolvedApplicationInitializer) {
       ["this-context.ts", "spec/support/this-context.ts"],
       ["main.spec.ts", "spec/app/states/main.spec.ts"],
       ["entities.ts", "config/locales/en/entities.ts"],
-      ["multi-platform.ts", "spec/support/multi-plattform.ts"]
+      ["multi-platform.ts", "spec/support/multi-plattform.ts"],
     ];
 
     // Merge root files into array
@@ -154,6 +160,45 @@ export function cli(argv, resolvedApplicationInitializer) {
     console.log("FINISHED LISTING EXTENSION POINTS");
   };
 
+  const startIntegrationTests = function(specs?: string) {
+    const commandArgs: string[] = [];
+    const jasmine = new Jasmine({ projectBaseDir: path.resolve() });
+    const examplesDir = path.join("node_modules", "jasmine-core", "lib", "jasmine-core", "example", "node_example");
+    const command = new JasmineCmd(path.resolve(), examplesDir, console.log);
+    const configPath = process.env.JASMINE_CONFIG_PATH || "spec/support/jasmine.json";
+
+    // Function to initialize optional reporters
+    const initReporters = (config: any) => {
+      if (config.reporters && config.reporters.length > 0) {
+        jasmine.env.clearReporters();
+        config.reporters.forEach((reporter: { name: string; options: any }) => {
+          const parts = reporter.name.split("#");
+          const name = parts[0];
+          const member = parts[1];
+          const reporterClass = member ? require(name)[member] : require(name);
+          jasmine.addReporter(new reporterClass(reporter.options));
+        });
+      }
+    };
+
+    // Read and parse jasmine config
+    const jasmineConfig = JSON.parse(fs.readFileSync(path.resolve(configPath), "utf8"));
+    initReporters(jasmineConfig);
+
+    // Validate specs
+    if (specs) {
+      commandArgs.push(specs);
+    } else {
+      commandArgs.push("spec/**/*e2e.spec.ts");
+    }
+
+    // Register ts-node
+    register();
+
+    // Run Jasmine via ts-node
+    command.run(jasmine, commandArgs);
+  };
+
   // Set version to CLI
   commander.version(pjson.version);
 
@@ -203,6 +248,14 @@ export function cli(argv, resolvedApplicationInitializer) {
     .action(component => {
       listExtensionPoints(component);
       process.exit(0);
+    });
+
+  commander
+    .command("e2e")
+    .description("Executes end-to-end specs by running jasmine")
+    .arguments("[specs]")
+    .action(specs => {
+      startIntegrationTests(specs);
     });
 
   // Display help as default
