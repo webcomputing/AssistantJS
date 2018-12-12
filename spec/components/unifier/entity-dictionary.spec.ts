@@ -108,6 +108,17 @@ describe("EntityDictionary", function() {
       this.container.inversifyInstance.bind(injectionNames.localesLoader).to(LocalesLoaderMock);
     });
 
+    describe("if custom entity is not present", function() {
+      beforeEach(function(this: MyThisContext) {
+        createRequestScope(this.specHelper);
+      });
+
+      it("returns undefined", function() {
+        const entities: EntityDictionary = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
+        expect(entities.get("color")).toBeUndefined();
+      });
+    });
+
     describe("extraction contains exact reference value", function() {
       beforeEach(function(this: MyThisContext) {
         createRequestScope(
