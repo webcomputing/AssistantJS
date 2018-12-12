@@ -33,6 +33,24 @@ export class PlatformSession implements Session {
     return Object.keys(await this.getLatestSessionData()).length > 0;
   }
 
+  public async getSubset(searchName?: string): Promise<{ [name: string]: string }> {
+    const matchedSessionDataKeys: string[] = await this.listKeys(searchName);
+    const matchedSessionDataValues = await Promise.all(matchedSessionDataKeys.map(sessionDataKeys => this.get(sessionDataKeys)));
+    const sessionData: { [name: string]: string } = {};
+
+    matchedSessionDataKeys.forEach((key: string, index: number) => {
+      if (typeof key === "string" && typeof matchedSessionDataValues[index] === "string") {
+        sessionData[key] = matchedSessionDataValues[index] as string;
+      }
+    });
+
+    return sessionData;
+  }
+
+  public async listKeys(searchName?: string): Promise<string[]> {
+    const sessionDataKeys = Object.keys(await this.getLatestSessionData());
+    return searchName ? sessionDataKeys.filter(sessionData => sessionData.includes(searchName)) : sessionDataKeys;
+  }
   /**
    * Returns latest session data. Gets them from extraction or checks if nothing is already stored in handler.
    * We have to priorize the handler's data to get eventually changed data

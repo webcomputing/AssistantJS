@@ -46,6 +46,13 @@ export interface BasicAnswerTypes {
    * If set to true, the assistant will be informed about a missing oauth token
    */
   shouldSessionEnd: boolean;
+
+  /**
+   * HTTP-Status-Code for Response.
+   * Warning: Use only if you know, what you are doing.
+   * Default: 200 --> OK
+   */
+  httpStatusCode: number;
 }
 
 /**
@@ -98,6 +105,13 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * @param text
    */
   endSessionWith(text: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>): this;
+
+  /**
+   * Allows to set a custom httpStatusCode
+   * if not set the default is 200
+   * @param httpStatusCode eg. 200 or 401
+   */
+  setHttpStatusCode(httpStatusCode: AnswerType["httpStatusCode"] | Promise<AnswerType["httpStatusCode"]>): this;
 
   /**
    * Sends all messages as answer. After sending it is not possible anymore to set or change the answer.

@@ -1,3 +1,4 @@
+import { ResponseCallback } from "../../../../src/components/root/public-interfaces";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { createRequestScope } from "../../../support/util/setup";
@@ -6,7 +7,7 @@ import { ThisContext } from "../../../this-context";
 type MergedHandler = MockHandlerA<MockHandlerASpecificTypes>;
 
 interface CurrentThisContext extends ThisContext {
-  handlerInstance: MergedHandler & { getBody: () => void };
+  handlerInstance: MergedHandler & { getBody: () => void; responseCallback: ResponseCallback };
 
   mockCard: MockHandlerASpecificTypes["card"];
   mockChatBubbles: MockHandlerASpecificTypes["chatBubbles"];
@@ -17,6 +18,7 @@ interface CurrentThisContext extends ThisContext {
   mockSessionData: MockHandlerASpecificTypes["sessionData"];
   mockShouldAuthenticate: MockHandlerASpecificTypes["shouldAuthenticate"];
   mockShouldSessionEnd: MockHandlerASpecificTypes["shouldSessionEnd"];
+  mockHttpStatusCode: MockHandlerASpecificTypes["httpStatusCode"];
   mockTable: MockHandlerASpecificTypes["table"];
 
   expectedResult: Partial<MockHandlerASpecificTypes>;
@@ -45,6 +47,7 @@ describe("BaseHandler", function() {
     this.mockSessionData = "My Mock Session Data";
     this.mockShouldAuthenticate = true;
     this.mockShouldSessionEnd = true;
+    this.mockHttpStatusCode = 200;
 
     this.expectedResult = {};
 
@@ -224,6 +227,19 @@ describe("BaseHandler", function() {
       });
 
       expectResult();
+    });
+
+    describe("with setHttpStatusCode()", function() {
+      beforeEach(async function(this: CurrentThisContext) {      
+        this.expectedResult.httpStatusCode = 401;
+
+        spyOn((this.handlerInstance as any), "responseCallback").and.callThrough();
+        await this.handlerInstance.setHttpStatusCode(401).send();
+      });
+
+      it("calls responseCallback with status Code", async function(this: CurrentThisContext) {
+        expect((this.handlerInstance as any).responseCallback).toHaveBeenCalledWith(undefined, jasmine.any(Object), 401);
+      });
     });
 
     describe("with endSessionWith()", function() {

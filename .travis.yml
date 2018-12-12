@@ -7,4 +7,5 @@ install:
 before_script:
   - npm install -g gulp-cli
 script: 
+  - gulp --version
   - gulp

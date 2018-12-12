@@ -28,6 +28,20 @@ export class RedisSession implements Session {
     });
   }
 
+  public async getSubset(searchName?: string) {
+    const matchedSessionDataKeys: string[] = await this.listKeys(searchName);
+    const matchedSessionDataValues = await Promise.all(matchedSessionDataKeys.map(sessionDataKeys => this.get(sessionDataKeys)));
+    const sessionData: { [name: string]: string } = {};
+
+    matchedSessionDataKeys.forEach((key: string, index: number) => {
+      if (typeof key === "string" && typeof matchedSessionDataValues[index] === "string") {
+        sessionData[key] = matchedSessionDataValues[index] as string;
+      }
+    });
+
+    return sessionData;
+  }
+
   public async set(field: string, value: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.redisInstance.hset(this.documentID, field, value, err => {
@@ -72,6 +86,19 @@ export class RedisSession implements Session {
       this.redisInstance.hlen(this.documentID, (err, response) => {
         if (!err) {
           resolve(response > 0);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  public async listKeys(searchName?: string): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.redisInstance.hkeys(this.documentID, (err, value) => {
+        if (!err) {
+          const result = searchName ? value.filter(v => v.includes(searchName)) : value;
+          resolve(result);
         } else {
           reject(err);
         }

@@ -325,6 +325,7 @@ export namespace OptionalExtractions {
     TemporalAuthExtraction: ["temporalAuthToken"] /** Are information about the used device available? */,
     DeviceExtraction: ["device"],
     TimestampExtraction: ["requestTimestamp"],
+    AdditionalParameters: ["additionalParameters"],
     SessionData: ["sessionData"],
   };
 }
