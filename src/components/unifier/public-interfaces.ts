@@ -430,7 +430,11 @@ export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHa
 export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, SessionDataMixin, SuggestionChipsMixin } from "./response-handler/mixins";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
-export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
+export interface PlatformSpecHelper<
+  MergedAnswerTypes extends BasicAnswerTypes,
+  MergedHandler extends BasicHandable<MergedAnswerTypes>,
+  MergedAssistResponse extends BasicAssistResponse
+> {
   /** Link to assistantJS SpecSetup */
   specSetup: SpecHelper;
 
@@ -448,6 +452,14 @@ export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, 
    * Initialize the platform specific devices
    */
   setupDevices(): VirtualDevices;
+
+  /**
+   * Calls the platform assistant api
+   * @param utterance The utterance you would say
+   */
+  callAssistant(utterance: string): Promise<MergedAssistResponse>;
+
+  prepareAssistant(): Promise<void>;
 }
 
 /** Virtual device interface for platform specific unit testing */
@@ -460,6 +472,42 @@ export interface VirtualDeviceOptions {
   additionalExtractions?: any;
 
   additionalRequestContext?: Partial<RequestContext>;
+}
+
+/** Virtual assistant interface for platform specific end-to-end testing */
+export interface VirtualAssistant<Response extends BasicAssistResponse> {
+  /**
+   * Setting up the virtual assistant (e.g. register devices, init dialog state) before test case execution
+   */
+  setup(): void | Promise<void>;
+
+  /**
+   * Run some teardown code
+   */
+  teardown(): void | Promise<void>;
+
+  /**
+   * Sends a message/ command to the assistant
+   * @param inputText Message to say
+   */
+  send(inputText: string): Promise<Partial<Response>>;
+}
+
+/**
+ * This interface defindes the request which can be send to an assistant
+ * IMPORTANT: You have to implement the interface in each component
+ */
+// tslint:disable-next-line:no-empty-interface
+export interface BasicAssistRequest {}
+/**
+ * This interface defines the response types which can be used on all implemented
+ * virtual device handlers
+ */
+export interface BasicAssistResponse {
+  /**
+   * The assistants text output. This should be the same as the speech spoken
+   */
+  text: string;
 }
 
 /** Configuration object for AssistantJS user for unifier component */

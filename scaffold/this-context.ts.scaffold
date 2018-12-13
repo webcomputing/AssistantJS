@@ -1,4 +1,4 @@
-import { PlatformSpecHelper, SpecHelper, SpecHelperOptions } from "assistant-source";
+import { PlatformSpecHelper, SpecHelper, SpecHelperOptions, E2ESpecHelperOptions } from "assistant-source";
 import { interfaces as inversifyInterfaces } from "inversify";
 import { ApplicationInitializer } from "../../application-initializer";
 import { MergedAnswerTypes, MergedHandler } from "../../config/handler";
@@ -25,6 +25,9 @@ export interface ThisContext {
 
   /** Default spec options to pass into specHelper.prepareSpec(). You might want to override some options per spec. */
   defaultSpecOptions: Partial<SpecHelperOptions>;
+
+  /** Default spec options to pass into specHelper.prepareE2ESpec(). You might want to override some options per spec. */
+  defaultE2ESpecOptions: Partial<E2ESpecHelperOptions>;
 
   /** Result of current intent call. Usage: this.responseResults = this.specHelper.runMachineAndGetResults(stateName) */
   responseResults: Partial<MergedAnswerTypes>;

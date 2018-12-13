@@ -5,7 +5,8 @@ export const componentInterfaces = {
   platformGenerator: Symbol("platform-generator"),
   requestProcessor: Symbol("request-processor"),
   requestModifier: Symbol("request-modifier"),
-  utteranceTemplateService: Symbol("utterance-template-service")
+  utteranceTemplateService: Symbol("utterance-template-service"),
+  virtualAssistant: Symbol("virtual-assistant"),
 };
 
 export namespace Configuration {

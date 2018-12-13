@@ -7,7 +7,15 @@ import { GenericRequestHandler } from "./components/root/generic-request-handler
 import { Logger, RequestContext } from "./components/root/public-interfaces";
 import { AfterContextExtension, Filter, State, Transitionable } from "./components/state-machine/public-interfaces";
 import { StateMachineSetup } from "./components/state-machine/state-intent-setup";
-import { BasicHandable, intent, MinimalRequestExtraction, PlatformSpecHelper, VirtualDevices } from "./components/unifier/public-interfaces";
+import {
+  BasicAssistResponse,
+  BasicHandable,
+  intent,
+  MinimalRequestExtraction,
+  PlatformSpecHelper,
+  VirtualAssistant,
+  VirtualDevices,
+} from "./components/unifier/public-interfaces";
 
 import { BaseState, Constructor } from "./assistant-source";
 import { TranslateValuesFor } from "./components/i18n/public-interfaces";
@@ -55,6 +63,30 @@ export interface SpecHelperOptions {
   registerStatesAsSingleton: boolean;
 }
 
+/** Describes available options of prepareE2ESpec() */
+export interface E2ESpecHelperOptions {
+  /** If set to true, calls autobind() on prepareSpec() to bind all dependencies to container. Default = true */
+  autoBindOnPrepare: boolean;
+
+  /**
+   * You are able to bind a different logger in specs, which will print less information and always print to stdout.
+   * All available built-in bind/logger options are available here.
+   */
+  loggerOptions: {
+    /** Log level of the spec-specific logger. Is only relevant if the spec specific logger is bound, so check out bindCondition, too. Default = "warn" */
+    logLevel: Logger.LogLevel;
+
+    /**
+     * Defines when the spec-specific logger should be bound and the original application logger unbound.
+     * force: Always bind spec-specific logger, don't care about environment variables
+     * optOut: Always bind spec-specific logger unless environment variable USE_APPLICATION_LOGGER is set to "true"
+     * never: Never bind spec-specific logger, so use application logger in specs
+     * Default = optOut
+     */
+    bindCondition: "force" | "optOut" | "never";
+  };
+}
+
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecHelper {
   constructor(public assistantJs: AssistantJSSetup, public stateMachineSetup: StateMachineSetup) {}
@@ -97,6 +129,30 @@ export class SpecHelper {
     }
   }
 
+  /** Interpretes the given SpecHelperOptions for integrationtests. */
+  public prepareE2ESpec(givenOptions: Partial<E2ESpecHelperOptions>) {
+    // Set default values
+    const defaults: E2ESpecHelperOptions = {
+      autoBindOnPrepare: true,
+      loggerOptions: {
+        logLevel: "warn",
+        bindCondition: "optOut",
+      },
+    };
+    // Merge default values with givenOptions
+    const options = { ...givenOptions, ...defaults };
+
+    // Bind container
+    if (options.autoBindOnPrepare) {
+      this.assistantJs.autobind();
+    }
+    // Bind spec logger if wanted
+    const checkedEnvironmentVariable = typeof process.env.USE_APPLICATION_LOGGER === "string" ? process.env.USE_APPLICATION_LOGGER.toLowerCase() : "false";
+    if (options.loggerOptions.bindCondition === "force" || (options.loggerOptions.bindCondition === "optOut" && checkedEnvironmentVariable !== "true")) {
+      this.bindSpecLogger(options.loggerOptions.logLevel);
+    }
+  }
+
   /**
    * Prepares assistant js setup
    * @param states States to add to container
@@ -134,16 +190,53 @@ export class SpecHelper {
    * @param {intent} intentToCall The intent you want to execute when calling runMachine() afterwards
    * @param {any} additionalExtractions Additional extractions to append, for example to set entities
    */
-  public async prepareIntentCall<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>>(
+  public async prepareIntentCall<
+    MergedAnswerTypes extends BasicAnswerTypes,
+    MergedHandler extends BasicHandable<MergedAnswerTypes>,
+    MergedAssistResponse extends BasicAssistResponse
+  >(
     intentToCall: intent,
     runtimeEnvironment:
-      | { platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler>; device?: string }
-      | PlatformSpecHelper<MergedAnswerTypes, MergedHandler>
+      | { platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler, MergedAssistResponse>; device?: string }
+      | PlatformSpecHelper<MergedAnswerTypes, MergedHandler, MergedAssistResponse>
   ): Promise<MergedHandler> {
     if ("platform" in runtimeEnvironment) {
       return runtimeEnvironment.platform.pretendIntentCalled(intentToCall, runtimeEnvironment.device);
     }
     return runtimeEnvironment.pretendIntentCalled(intentToCall);
+  }
+
+  /**
+   * Prepares the assistant and starts a new server instance. Use this first in your specs, then call callAssistant() to execute the request call.
+   * @param platform The platform you want to prepare
+   * @param port The port to run the server on
+   */
+  public async prepareAssistant<
+    MergedAnswerTypes extends BasicAnswerTypes,
+    MergedHandler extends BasicHandable<MergedAnswerTypes>,
+    MergedAssistResponse extends BasicAssistResponse
+  >(platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler, MergedAssistResponse>, port: number = 3005): Promise<() => void> {
+    // Start new server instance
+    const stopFunction = await this.withServer(express(), port);
+
+    // Prepare assistant (e.g. register device, setup dialogstate)
+    await platform.prepareAssistant();
+
+    // Return StopFunction
+    return stopFunction;
+  }
+
+  /**
+   *
+   * @param utterance Text you would say
+   * @param platform The specific platform
+   */
+  public async callAssistant<
+    MergedAnswerTypes extends BasicAnswerTypes,
+    MergedHandler extends BasicHandable<MergedAnswerTypes>,
+    MergedAssistResponse extends BasicAssistResponse
+  >(utterance: string, platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler, MergedAssistResponse>) {
+    return platform.callAssistant(utterance);
   }
 
   /** Runs state machine to execute prepared intent method and collects and return all reponse handler results afterwards */
@@ -291,11 +384,11 @@ export class SpecHelper {
    *
    * @return Promise<Function> stopFunction If you call this function, server will be stopped.
    */
-  public withServer(expressApp: express.Express = express()): Promise<(() => void)> {
+  public withServer(expressApp: express.Express = express(), port: number = 3000): Promise<(() => void)> {
     return new Promise(resolve => {
       this.assistantJs.run(
         new ServerApplication(
-          3000,
+          port,
           app => {
             resolve(() => {
               app.stop();
