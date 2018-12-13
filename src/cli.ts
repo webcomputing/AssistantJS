@@ -161,7 +161,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     console.log("FINISHED LISTING EXTENSION POINTS");
   };
 
-  const startIntegrationTests = function(specs?: string) {
+  const runTests = function(specs: string) {
     const commandArgs: string[] = [];
     const jasmine = new Jasmine({ projectBaseDir: path.resolve() });
     const examplesDir = path.join("node_modules", "jasmine-core", "lib", "jasmine-core", "example", "node_example");
@@ -182,21 +182,17 @@ export function cli(argv, resolvedApplicationInitializer) {
       }
     };
 
-    // Read and parse jasmine config
-    const jasmineConfig = JSON.parse(fs.readFileSync(path.resolve(configPath), "utf8"));
+    // Read jasmine config
+    const jasmineConfig = require(fs.existsSync(path.resolve(configPath)) ? path.resolve(configPath) : "{}");
     initReporters(jasmineConfig);
 
-    // Validate specs
-    if (specs) {
-      commandArgs.push(specs);
-    } else {
-      commandArgs.push("spec/**/*e2e.spec.ts");
-    }
+    // Add passed parameter specs
+    commandArgs.push(specs);
 
-    // Register ts-node
+    // Register ts-node env
     register();
 
-    // Run Jasmine via ts-node
+    // Run specs via jasmine in ts-node
     command.run(jasmine, commandArgs);
   };
 
@@ -251,12 +247,22 @@ export function cli(argv, resolvedApplicationInitializer) {
       process.exit(0);
     });
 
+  // Register new command
   commander
     .command("e2e")
-    .description("Executes end-to-end specs by running jasmine")
+    .description("Executes end-to-end specs by running jasmine via ts-node")
     .arguments("[specs]")
     .action(specs => {
-      startIntegrationTests(specs);
+      runTests(specs || "spec/**/*e2e.spec.ts");
+    });
+
+  // Register new command
+  commander
+    .command("test")
+    .description("Executes unit specs by running jasmine via ts-node")
+    .arguments("[specs]")
+    .action(specs => {
+      runTests(specs || "spec/**/*[!e2e].spec.ts");
     });
 
   // Display help as default
