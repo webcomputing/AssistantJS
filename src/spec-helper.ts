@@ -235,8 +235,17 @@ export class SpecHelper {
     MergedAnswerTypes extends BasicAnswerTypes,
     MergedHandler extends BasicHandable<MergedAnswerTypes>,
     MergedAssistResponse extends BasicAssistResponse
-  >(utterance: string, platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler, MergedAssistResponse>) {
-    return platform.callAssistant(utterance);
+  >(utterances: string | string[], platform: PlatformSpecHelper<MergedAnswerTypes, MergedHandler, MergedAssistResponse>): Promise<MergedAssistResponse> {
+    if (typeof utterances === "string") {
+      return platform.callAssistant(utterances);
+    }
+
+    // Iterate through utterances and return the last reslt
+    let result;
+    for (const utterance of utterances) {
+      result = await platform.callAssistant(utterance);
+    }
+    return result;
   }
 
   /** Runs state machine to execute prepared intent method and collects and return all reponse handler results afterwards */
