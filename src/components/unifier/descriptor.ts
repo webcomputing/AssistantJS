@@ -37,7 +37,10 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindExtension<CLIGeneratorExtension>(lookupService.lookup("core:root").getInterface("generator")).to(Generator);
 
       // Bind locales loader
-      bindService.bindGlobalService("locales-loader").to(LocalesLoader);
+      bindService
+        .bindGlobalService("locales-loader")
+        .to(LocalesLoader)
+        .inSingletonScope();
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
