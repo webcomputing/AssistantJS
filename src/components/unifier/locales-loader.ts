@@ -11,6 +11,10 @@ import { LocalesLoader as ILocalesLoader, PlatformGenerator } from "./public-int
 export class LocalesLoader implements ILocalesLoader {
   private configuration: Configuration.Runtime;
 
+  // For caching values read from file system
+  private utterances?: { [language: string]: { [intent: string]: string[] } };
+  private entities?: { [language: string]: PlatformGenerator.CustomEntityMapping };
+
   constructor(@inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>, @inject(injectionNames.logger) private logger: Logger) {
     this.configuration = componentMeta.configuration;
   }
@@ -19,6 +23,11 @@ export class LocalesLoader implements ILocalesLoader {
    * Return the user defined utterance templates for each language found in locales folder
    */
   public getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } } {
+    if (this.utterances) {
+      // Use cached data
+      return this.utterances;
+    }
+
     const utterances = {};
     const utterancesDir = this.configuration.utterancePath;
 
@@ -34,13 +43,19 @@ export class LocalesLoader implements ILocalesLoader {
       const utterancePath = path.join(utterancesDir, language, "/utterances.js");
       utterances[language] = this.loadJsOrJson(utterancePath);
     });
-    return utterances;
+
+    return (this.utterances = utterances);
   }
 
   /**
    * Return the user defined entities for each language found in locales folder
    */
   public getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
+    if (this.entities) {
+      // Use cached data
+      return this.entities;
+    }
+
     const entities = {};
     const localesDir = this.configuration.utterancePath;
 
@@ -57,7 +72,7 @@ export class LocalesLoader implements ILocalesLoader {
       entities[language] = this.loadJsOrJson(entitiesPath);
     });
 
-    return entities;
+    return (this.entities = entities);
   }
 
   /**
