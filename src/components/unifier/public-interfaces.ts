@@ -81,7 +81,7 @@ export interface EntityDictionary {
    * Gets the value of an entity, if the entity is defined.
    * If entity is a custom entity and extracted value is not equal to the default value, this method
    * searches for the closest synonym using Levenshtein distance and returns its default value.
-   * If entity is a custom entity `get` will never return `undefined`.
+   * If entity is a custom entity and a value present, `get` will never return `undefined`.
    */
   get(name: string): string | undefined;
 

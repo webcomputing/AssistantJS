@@ -2,46 +2,33 @@ import * as levenshtein from "fast-levenshtein";
 import { inject, injectable } from "inversify";
 import { injectionNames } from "../../injection-names";
 import { Session } from "../services/public-interfaces";
-import { EntityDictionary as EntityDictionaryInterface, LocalesLoader, MinimalRequestExtraction } from "./public-interfaces";
+import { EntityDictionary as EntityDictionaryInterface, LocalesLoader, MinimalRequestExtraction, PlatformGenerator } from "./public-interfaces";
 
 @injectable()
 export class EntityDictionary implements EntityDictionaryInterface {
   public store: { [name: string]: any } = {};
+
+  /** Contains configured custom entities */
+  private customEntities: PlatformGenerator.CustomEntityMapping;
 
   constructor(
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
     @inject(injectionNames.localesLoader) private localesLoader: LocalesLoader
   ) {
     this.store = typeof extraction.entities === "undefined" ? {} : { ...extraction.entities };
+    this.customEntities = this.localesLoader.getCustomEntities()[this.extraction.language];
   }
 
   public get(name: string): any | undefined {
     // Return undefined instead of null. Uniforms all "missing" results to undefined.
-    let value = this.store[name] === null ? undefined : this.store[name];
+    const valueFromStore = this.store[name] === null ? undefined : this.store[name];
 
-    const customEntities = this.localesLoader.getCustomEntities()[this.extraction.language];
-    if (typeof value === "string" && customEntities !== undefined && customEntities[name] !== undefined) {
-      // Try to find the choice of this entity by extraction's value
-      const choice = customEntities[name].find(ch => ch.value === value);
-
-      // If not found, try to map synonym to default value
-      if (choice === undefined) {
-        // Use Levenshtein distance to find ref value or synonym that's closest to extracted value
-        const allValidValues = ([] as string[]).concat(...customEntities[name].map(ch => (ch.synonyms || []).concat(ch.value)));
-        const closestSynonym = EntityDictionary.getClosestToValue(value, allValidValues);
-
-        if (closestSynonym !== undefined) {
-          // Find entity variation that contains the closest synonym
-          const matchedVariation = customEntities[name].find(ch => !!closestSynonym && !!ch.synonyms && ch.synonyms.indexOf(closestSynonym) !== -1);
-
-          if (matchedVariation) {
-            value = matchedVariation.value;
-          }
-        }
-      }
+    // If value from store is not undefined and this entity is a custom entity, select the custom entity by levenshtein and return it's reference value
+    if (typeof valueFromStore === "string" && typeof this.customEntities !== "undefined" && typeof this.customEntities[name] !== "undefined") {
+      return this.getReferenceValueOfCustomEntity(name, valueFromStore);
     }
 
-    return value;
+    return valueFromStore;
   }
 
   public contains(name: string) {
@@ -72,6 +59,36 @@ export class EntityDictionary implements EntityDictionaryInterface {
     const storedData = await session.get(storeKey);
     const storedEntities = typeof storedData === "undefined" ? {} : JSON.parse(storedData);
     this.store = preferCurrentStore ? { ...storedEntities, ...this.store } : { ...this.store, ...storedEntities };
+  }
+
+  /**
+   * Uses levenshtein to select correct custom entity and returns it's reference value
+   * @param {string} name Name of custom entity
+   * @param {string} valueFromStore Result of this.get(name)
+   */
+  private getReferenceValueOfCustomEntity(name: string, valueFromStore: string): string | undefined {
+    // Try to find the choice of this entity by extraction's value
+    const choice = this.customEntities[name].find(ch => ch.value === valueFromStore);
+
+    // If not found, try to map synonym to default value
+    if (typeof choice === "undefined") {
+      // Use Levenshtein distance to find ref value or synonym that's closest to extracted value
+      const allValidValues = ([] as string[]).concat(...this.customEntities[name].map(ch => (ch.synonyms || []).concat(ch.value)));
+      const closestSynonym = EntityDictionary.getClosestToValue(valueFromStore, allValidValues);
+
+      if (typeof closestSynonym !== "undefined") {
+        // Find entity variation that contains the closest synonym
+        const matchedEntity = this.customEntities[name].find(ch => !!closestSynonym && !!ch.synonyms && ch.synonyms.indexOf(closestSynonym) !== -1);
+
+        if (typeof matchedEntity !== "undefined") {
+          return matchedEntity.value;
+        }
+      }
+
+      return undefined;
+    }
+
+    return choice.value;
   }
 
   private static getClosestToValue(entityValue: string, validValues: string[], maxDistance?: number) {
