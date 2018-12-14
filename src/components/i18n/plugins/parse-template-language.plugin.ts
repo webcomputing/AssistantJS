@@ -11,7 +11,7 @@ export const processor = {
     // Parse language strings out of templates (respecting alternatives like "{Can I|May I} help you?")
     dialogOptions = dialogOptions.reduce<string[]>((parsedStrings, templateString) => {
       // Find all occurences of {Can I|May I} pattern
-      const re = /(?<!\{)\{([^\{\}]+)\}(?!\})/g;
+      const re = /\{([^\{\}]+)\}(?!\})/g;
       const matches: RegExpMatchArray | null = templateString.match(re);
 
       if (matches !== null) {
