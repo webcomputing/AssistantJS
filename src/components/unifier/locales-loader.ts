@@ -31,9 +31,7 @@ export class LocalesLoader implements ILocalesLoader {
     const utterances = {};
     const utterancesDir = this.configuration.utterancePath;
 
-    try {
-      fs.accessSync(utterancesDir);
-    } catch (e) {
+    if (!fs.existsSync(utterancesDir)) {
       this.logger.info(`No utterances were loaded because directory is not accessible: ${utterancesDir}`);
       return {};
     }
@@ -59,9 +57,7 @@ export class LocalesLoader implements ILocalesLoader {
     const entities = {};
     const localesDir = this.configuration.utterancePath;
 
-    try {
-      fs.accessSync(localesDir);
-    } catch (e) {
+    if (!fs.existsSync(localesDir)) {
       this.logger.info(`No custom entities were loaded because directory is not accessible: ${localesDir}`);
       return {};
     }
