@@ -80,13 +80,23 @@ export class LocalesLoader implements ILocalesLoader {
 
     const ext = path.extname(cwdRelativePath);
     const jsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".js");
+    const tsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".ts");
     const jsonSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".json");
 
     // Load JS module with priority before JSON, because it could also load a JSON of same name
-    try {
-      return require(fs.existsSync(path.resolve(jsSrc)) ? path.resolve(jsSrc) : path.resolve(jsonSrc));
-    } catch (e) {
-      return require(fs.existsSync(path.resolve("js", jsSrc)) ? path.resolve("js", jsSrc) : path.resolve("js", jsonSrc));
+    const file = this.getFirstExisting(jsSrc, tsSrc, jsonSrc, path.join("js", jsSrc), path.join("js", jsonSrc));
+
+    if (file !== undefined) {
+      return require(file);
+    }
+  }
+
+  private getFirstExisting(...paths: string[]) {
+    for (const p of paths) {
+      const absolutP = path.isAbsolute(p) ? p : path.resolve(p);
+      if (fs.existsSync(absolutP)) {
+        return absolutP;
+      }
     }
   }
 }
