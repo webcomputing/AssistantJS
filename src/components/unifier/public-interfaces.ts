@@ -85,6 +85,12 @@ export interface EntityDictionary {
    */
   get(name: string): string | undefined;
 
+  /**
+   * Always returns the original entity value even in `get` doesn't.
+   * @param name Name of the entity
+   */
+  getRaw(name: string): string | undefined;
+
   /** Sets a value of an entity. */
   set(name: string, value: any);
 

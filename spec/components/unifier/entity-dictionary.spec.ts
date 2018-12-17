@@ -181,6 +181,10 @@ describe("EntityDictionary", function() {
       it("returns an unexpected value", function(this: MyThisContext) {
         expect(this.getEntityDictionary().get("color")).toBe("green");
       });
+
+      it("also gives access to raw entity value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().getRaw("color")).toBe("ferrari");
+      });
     });
   });
 });
