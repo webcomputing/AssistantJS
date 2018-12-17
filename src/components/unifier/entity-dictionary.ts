@@ -21,7 +21,7 @@ export class EntityDictionary implements EntityDictionaryInterface {
 
   public get(name: string): any | undefined {
     // Return undefined instead of null. Uniforms all "missing" results to undefined.
-    const valueFromStore = this.store[name] === null ? undefined : this.store[name];
+    const valueFromStore = this.getRaw(name);
 
     // If value from store is not undefined and this entity is a custom entity, select the custom entity by levenshtein and return it's reference value
     if (typeof valueFromStore === "string" && typeof this.customEntities !== "undefined" && typeof this.customEntities[name] !== "undefined") {
@@ -29,6 +29,10 @@ export class EntityDictionary implements EntityDictionaryInterface {
     }
 
     return valueFromStore;
+  }
+
+  public getRaw(name: string) {
+    return this.store[name] === null ? undefined : this.store[name];
   }
 
   public contains(name: string) {
