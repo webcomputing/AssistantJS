@@ -44,7 +44,9 @@ describe("with child containers enabled", function() {
         extractions[i] = { ...extractionData, message: "My message " + i };
         requests.push(
           new Promise<any>((resolve, reject) => {
-            request.post(MockExtractor.fittingPath(), extractions[i]).then(value => resolve(value));
+            setTimeout(function() {
+              request.post(MockExtractor.fittingPath(), extractions[i]).then(value => resolve(value));
+            }, Math.random() * 100);
           })
         );
       }

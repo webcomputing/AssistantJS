@@ -110,8 +110,11 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     // everything was sent successfully
     this.isSent = true;
 
+    // default http status code 200 or resolved status code
+    const httpStatusCode = this.results.httpStatusCode ? this.results.httpStatusCode : 200;
+
     // give results to the specific handler
-    this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders());
+    this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders(), httpStatusCode);
     if (this.results.shouldSessionEnd) {
       await this.killSession();
     }
@@ -144,6 +147,12 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
     this.promises.shouldSessionEnd = { resolver: true };
     this.prompt(text);
+
+    return this;
+  }
+
+  public setHttpStatusCode(httpStatusCode: MergedAnswerTypes["httpStatusCode"] | Promise<MergedAnswerTypes["httpStatusCode"]>): this {
+    this.promises.httpStatusCode = { resolver: httpStatusCode };
 
     return this;
   }
