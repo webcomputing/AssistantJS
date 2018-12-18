@@ -31,9 +31,19 @@ export class ExecuteFiltersHook {
     /** Check for each retrieved filter if there is a registered filter matching it */
     for (const prioritizedFilter of prioritizedFilters) {
       const hasParams = typeof prioritizedFilter === "object" && prioritizedFilter !== null;
-      const prioritizedFilterConstructor = hasParams
-        ? (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).filter
-        : prioritizedFilter;
+
+      let prioritizedFilterConstructor: Constructor<Filter>;
+      let params: { [key: string]: any };
+
+      if (hasParams) {
+        /** If extended format --> extract filter class and params */
+        prioritizedFilterConstructor = (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).filter;
+        params = (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).params;
+      } else {
+        /** If plain format --> use given class as filter class and an empty object for params */
+        prioritizedFilterConstructor = prioritizedFilter as Constructor<Filter>;
+        params = {};
+      }
 
       /** Find the first matching registered filter */
 
@@ -41,15 +51,7 @@ export class ExecuteFiltersHook {
 
       /** If there is a matching filter registered, execute it */
       if (fittingFilter) {
-        const filterResult = await Promise.resolve(
-          fittingFilter.execute(
-            state,
-            stateName,
-            intent,
-            hasParams ? (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).params : {},
-            ...args
-          )
-        );
+        const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, params, ...args));
 
         /** If filter returns redirecting object => redirect */
         if (typeof filterResult === "object") {
@@ -63,13 +65,7 @@ export class ExecuteFiltersHook {
           return false;
         }
       } else {
-        this.logger.warn(
-          `No matching filter class found for ${
-            hasParams
-              ? (prioritizedFilter as { filter: Constructor<Filter>; params: { [key: string]: any } }).filter.name
-              : (prioritizedFilter as Constructor<Filter>).name
-          }`
-        );
+        this.logger.warn(`No matching filter class found for ${prioritizedFilterConstructor.name}`);
       }
     }
 
