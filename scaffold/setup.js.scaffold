@@ -1,5 +1,5 @@
 require("reflect-metadata");
-let initializeSetups = require("../../index").initializeSetups;
+let initializeSetups = require("../../application-initializer").initializeSetups;
 let AssistantSource = require("assistant-source");
 
 
