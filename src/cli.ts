@@ -107,7 +107,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     });
 
     // Create empty json files
-    ["config/locales/en/translation/main-state.ts", "config/locales/en/utterances/invokeGenericIntent.ts"].forEach(filePath => {
+    ["config/locales/en/translation/main-state.ts"].forEach(filePath => {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(
         projectPath + filePath,
@@ -115,11 +115,11 @@ export function cli(argv, resolvedApplicationInitializer) {
       );
     });
 
-    ["config/locales/en/translation/main-state.ts", "config/locales/en/utterances.ts"].forEach(filePath => {
+    ["config/locales/en/utterances/invokeGenericIntent.ts"].forEach(filePath => {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(
         projectPath + filePath,
-        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = {};`
+        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = [];`
       );
     });
   };

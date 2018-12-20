@@ -2,6 +2,8 @@ import * as generateUtterances from "alexa-utterances"; // We are only using ale
 import * as fs from "fs";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { Component } from "inversify-components";
+import { injectionNames } from "../../injection-names";
+import { I18nextWrapper } from "../i18n/wrapper";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { GenericIntent, intent, PlatformGenerator } from "./public-interfaces";
@@ -13,6 +15,7 @@ export class Generator implements CLIGeneratorExtension {
   private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
   private intents: intent[] = [];
   private configuration: Configuration.Runtime;
+  private translations: { [lang: string]: { translation: any; utterances: { [intent: string]: string[] }; entities?: any } };
 
   constructor(
     @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>,
@@ -27,7 +30,9 @@ export class Generator implements CLIGeneratorExtension {
     utteranceServices: PlatformGenerator.UtteranceTemplateService[],
     @multiInject(componentInterfaces.entityMapping)
     @optional()
-    entityMappings: PlatformGenerator.EntityMapping[]
+    entityMappings: PlatformGenerator.EntityMapping[],
+    @inject(injectionNames.i18nWrapper)
+    i18nWrapper: I18nextWrapper
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
     [intents, generators, utteranceServices, entityMappings].forEach(v => {
@@ -40,6 +45,7 @@ export class Generator implements CLIGeneratorExtension {
     this.platformGenerators = generators;
     this.additionalUtteranceTemplatesServices = utteranceServices;
     this.entityMappings = entityMappings;
+    this.translations = i18nWrapper.instance.store.data;
   }
 
   public async execute(buildDir: string): Promise<void> {
@@ -185,18 +191,7 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   public getUtteranceTemplatesPerLanguage(): { [language: string]: { [intent: string]: string[] } } {
-    const utterances = {};
-    const utterancesDir = this.configuration.utterancePath;
-    const languages = fs.readdirSync(utterancesDir);
-    languages.forEach(language => {
-      const utterancePath = utterancesDir + "/" + language + "/utterances.json";
-      if (fs.existsSync(utterancePath)) {
-        const current = JSON.parse(fs.readFileSync(utterancePath).toString());
-        utterances[language] = current;
-      }
-    });
-
-    return utterances;
+    return Object.keys(this.translations).reduce((utterances, lang) => ({ ...utterances, [lang]: this.translations[lang].utterances }), {});
   }
 
   /**
