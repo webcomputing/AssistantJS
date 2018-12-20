@@ -1,5 +1,5 @@
 import { injectable, unmanaged } from "inversify";
-import { TranslateHelper } from "../i18n/public-interfaces";
+import { TranslateHelper, TranslationKeys } from "../i18n/public-interfaces";
 import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
 import { MinimalRequestExtraction, OptionalExtractions, Voiceable } from "../unifier/public-interfaces";
@@ -13,13 +13,18 @@ import { State, Transitionable } from "./public-interfaces";
  */
 
 @injectable()
-export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>>
-  implements State.Required, Voiceable, TranslateHelper {
+export abstract class BaseState<
+  MergedAnswerTypes extends BasicAnswerTypes,
+  MergedHandler extends BasicHandable<MergedAnswerTypes>,
+  Platforms extends string = never,
+  AutocompletionTranslations extends {} = {},
+  StateName extends keyof AutocompletionTranslations = never
+> implements State.Required, Voiceable, TranslateHelper<Platforms, AutocompletionTranslations> {
   /** Current response handler */
   public responseHandler: MergedHandler;
 
   /** Current translate helper */
-  public translateHelper: TranslateHelper;
+  public translateHelper: TranslateHelper<Platforms, AutocompletionTranslations>;
 
   /** Current extracion result */
   public extraction: MinimalRequestExtraction;
@@ -34,7 +39,12 @@ export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, Merg
    * @param {MinimalRequestExtraction} extraction Extraction of current request
    * @param {Logger} logger Logger, prepared to log information about the current request
    */
-  constructor(responseHandler: MergedHandler, translateHelper: TranslateHelper, extraction: MinimalRequestExtraction, logger: Logger);
+  constructor(
+    responseHandler: MergedHandler,
+    translateHelper: TranslateHelper<Platforms, AutocompletionTranslations>,
+    extraction: MinimalRequestExtraction,
+    logger: Logger
+  );
 
   /**
    * As an alternative to passing all objects on it's own, you can also pass a set of them
@@ -44,7 +54,7 @@ export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, Merg
 
   constructor(
     @unmanaged() responseHandlerOrSet: MergedHandler | State.SetupSet<MergedAnswerTypes, MergedHandler>,
-    @unmanaged() translateHelper?: TranslateHelper,
+    @unmanaged() translateHelper?: TranslateHelper<Platforms, AutocompletionTranslations>,
     @unmanaged() extraction?: MinimalRequestExtraction,
     @unmanaged() logger?: Logger
   ) {
@@ -65,7 +75,7 @@ export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, Merg
       }
 
       this.responseHandler = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).responseHandler;
-      this.translateHelper = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).translateHelper;
+      this.translateHelper = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).translateHelper as any;
       this.extraction = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).extraction;
       this.logger = (responseHandlerOrSet as State.SetupSet<MergedAnswerTypes, MergedHandler>).logger;
     }
@@ -79,6 +89,15 @@ export abstract class BaseState<MergedAnswerTypes extends BasicAnswerTypes, Merg
   /** Sends empty response */
   public async unansweredGenericIntent(machine: Transitionable, ...args: any[]): Promise<any> {
     await this.responseHandler.endSessionWith("").send();
+  }
+
+  public tk<I extends keyof AutocompletionTranslations[StateName] | undefined = undefined>(): TranslationKeys<
+    AutocompletionTranslations[StateName] &
+      AutocompletionTranslations &
+      (I extends keyof AutocompletionTranslations[StateName] ? AutocompletionTranslations[StateName][I] : {}),
+    Platforms
+  > {
+    return this.translateHelper.tk() as any;
   }
 
   /**

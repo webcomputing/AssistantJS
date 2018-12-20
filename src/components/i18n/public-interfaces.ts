@@ -1,7 +1,19 @@
 import { Configuration } from "./private-interfaces";
 
+type Without<T, U extends string> = { [P in Exclude<keyof T, U>]: never };
+export type TranslationLeaf<Platforms extends string> = string | string[] | { [platform in Platforms]: string | string[] };
+export type TranslationKeys<T extends {}, Platforms extends string> = {
+  [k in keyof Without<T, Platforms>]: T[k] extends TranslationLeaf<Platforms> ? string : TranslationKeys<T[k], Platforms>
+};
+
 /** Uses I18next to get translations for keys */
-export interface TranslateHelper {
+export interface TranslateHelper<Platforms extends string = never, Autocompletion extends {} = {}> {
+  /**
+   * Access translations as "pathed" in translation files. Final element, which is called leaf, is a function
+   * working in the same way as `t()`, but on the path already given.
+   */
+  tk(): TranslationKeys<Autocompletion, Platforms>;
+
   /**
    * Translates the given key using your json translations and a convention-over-configuration-approach.
    * First try is `currentState.currentIntent.platform.device`.

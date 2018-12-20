@@ -7,7 +7,7 @@ import { MinimalRequestExtraction, OptionalExtractions } from "../unifier/public
 
 import { componentInterfaces } from "./component-interfaces";
 import { I18nContext } from "./context";
-import { InterpolationResolver, MissingInterpolationExtension, TranslateHelper as TranslateHelperInterface } from "./public-interfaces";
+import { InterpolationResolver, TranslateHelper as TranslateHelperInterface, TranslationKeys, TranslationLeaf } from "./public-interfaces";
 
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
@@ -18,6 +18,29 @@ export class TranslateHelper implements TranslateHelperInterface {
     @inject("core:root:current-logger") public logger: Logger,
     @inject("core:i18n:interpolation-resolver") public interpolationResolver: InterpolationResolver
   ) {}
+
+  /**
+   * Returns keys for function `t()`. Allows to browse available translations.
+   */
+  public tk() {
+    return new Proxy(this.buildTranslationKeyTree(this.i18n.store.data[this.extraction.language].translation), {
+      get: (target, prop, receiver) => {
+        if (target[this.context.state] && target[this.context.state][this.context.intent] && target[this.context.state][this.context.intent][prop]) {
+          return target[this.context.state][this.context.intent][prop];
+        }
+
+        if (target[this.context.state] && target[this.context.state][prop]) {
+          return target[this.context.state][prop];
+        }
+
+        if (typeof prop === "string" && target[prop]) {
+          return target[prop];
+        }
+
+        return undefined;
+      },
+    });
+  }
 
   // tslint:disable-next-line:function-name
   public async t(key?: string, locals?: {});
@@ -109,5 +132,40 @@ export class TranslateHelper implements TranslateHelperInterface {
     }
 
     throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
+  }
+
+  private isTranslationLeaf<P extends string>(obj: any): obj is TranslationLeaf<P> {
+    if (obj === undefined) {
+      return false;
+    }
+
+    if (typeof obj === "string") {
+      return true;
+    }
+
+    if (Array.isArray(obj)) {
+      if (obj.find(o => typeof o !== "string") === undefined) return true;
+      return false;
+    }
+
+    if (obj.rasa || obj.google || obj.alexa) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // tslint:disable
+  private buildTranslationKeyTree<T extends { [name: string]: any }, P extends string>(obj: T, p: string = ""): TranslationKeys<T, P> {
+    const keysObj = (Object.keys(obj) as any[]).reduce<TranslationKeys<T, P>>(
+      (agg, key) => {
+        const name = `${p}${p ? "." : ""}${key}`;
+        Object.assign(agg, { [key]: this.isTranslationLeaf(obj[key]) ? name : this.buildTranslationKeyTree(obj[key], name) });
+        return agg;
+      },
+      {} as any
+    );
+
+    return keysObj;
   }
 }
