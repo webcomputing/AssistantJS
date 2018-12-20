@@ -107,7 +107,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     });
 
     // Create empty json files
-    ["config/locales/en/translation/main-state.ts"].forEach(filePath => {
+    ["config/locales/en/translations.ts", "config/locales/en/translation/main-state.ts"].forEach(filePath => {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(
         projectPath + filePath,

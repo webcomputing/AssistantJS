@@ -140,7 +140,7 @@ export class SpecHelper {
     additionalExtractions = {},
     additionalRequestContext = {}
   ): Promise<MergedHandler> {
-    return platformSpecHelper.pretendIntentCalled(intentToCall, additionalExtractions, additionalRequestContext);
+    return (platformSpecHelper.pretendIntentCalled as any)(intentToCall, false, additionalExtractions, additionalRequestContext);
   }
 
   /** Runs state machine to execute prepared intent method and collects and return all reponse handler results afterwards */
