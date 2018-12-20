@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import { Component } from "inversify-components";
 import { componentInterfaces } from "./component-interfaces";
 import { Configuration } from "./private-interfaces";
@@ -7,6 +10,8 @@ import * as i18nextBackend from "i18next-sync-fs-backend";
 import { inject, injectable, multiInject, optional } from "inversify";
 import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
+
+import * as requireDir from "require-directory";
 
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "./interpolation-resolver";
 import { arraySplitter, processor } from "./plugins/array-returns-sample.plugin";
@@ -38,7 +43,14 @@ export class I18nextWrapper {
     }
 
     this.instance = Object.assign(Object.create(Object.getPrototypeOf(this.configuration.i18nextInstance)), this.configuration.i18nextInstance);
+
+    let resourcesFromLocalesDir: any;
+    if (this.component.configuration.localesDir) {
+      resourcesFromLocalesDir = I18nextWrapper.requireDir(this.component.configuration.localesDir);
+    }
+
     const i18nextConfiguration = {
+      ...(resourcesFromLocalesDir !== undefined ? { resources: resourcesFromLocalesDir } : {}),
       ...{ initImmediate: false, missingInterpolationHandler: this.onInterpolationMissing.bind(this) },
       ...this.configuration.i18nextAdditionalConfiguration,
     };
@@ -78,5 +90,38 @@ export class I18nextWrapper {
   private onInterpolationMissing(str: string, match: [string, string]) {
     this.logger.debug(`AssistantJS TranslateHelper's onInterpolationMissing callback was called. Missing interpolation = '${match[0]}'`);
     return match[0].replace("{{", TEMPORARY_INTERPOLATION_START).replace("}}", TEMPORARY_INTERPOLATION_END);
+  }
+
+  /**
+   * Returns camelcase of input string
+   */
+  private static camelcase(input: string) {
+    return input.replace(/[\-]+([a-s])/gi, (m, c) => c.toUpperCase());
+  }
+
+  /**
+   * Recursively requires locales from a given directory
+   */
+  private static requireDir(p: string) {
+    const absolutPath = path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+
+    return requireDir(module, path.relative(__dirname, absolutPath), {
+      extensions: ["ts", "js", "json"],
+      visit: (obj, filepath, fn) => {
+        let result = obj.default || obj[I18nextWrapper.camelcase(path.basename(fn, path.extname(fn)))];
+
+        // If there's a directory with the same name as the file, it's merged but can be overridden by the current file
+        const filenameAsDirname = path.join(path.dirname(filepath), path.basename(filepath, path.extname(__filename)));
+        if (fs.existsSync(filenameAsDirname) && fs.statSync(filenameAsDirname).isDirectory()) {
+          result = { ...I18nextWrapper.requireDir(filenameAsDirname), ...result };
+        }
+
+        // Extract only one object from the module: either that one with the camelcase filename as the file or default
+        return result;
+      },
+      rename: fn => {
+        return I18nextWrapper.camelcase(fn);
+      },
+    });
   }
 }

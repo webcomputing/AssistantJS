@@ -11,6 +11,13 @@ export namespace Configuration {
      * See i18next for more details.
      */
     i18nextAdditionalConfiguration: any;
+
+    /**
+     * The framework will deeply load all files from this directory and
+     * provide the content to the i18n library. Will always be overridden
+     * by settings in `i18nextAdditionalConfiguration`.
+     */
+    localesDir?: string;
   }
 
   /** Required configuration options, no defaults are used here */
