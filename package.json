@@ -70,7 +70,7 @@
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.9.2",
     "tslint-config-prettier": "^1.13.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.2.2"
   },
   "bin": {
     "assistant": "./bin/assistant"

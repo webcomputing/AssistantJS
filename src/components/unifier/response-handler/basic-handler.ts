@@ -223,7 +223,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
         const currentValue = await Promise.resolve(resolver.resolver);
         // remap the intermediate Results, when an thenMap function is present
         if (resolver.thenMap) {
-          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
+          const finalResult = await (resolver.thenMap as any).bind(this)(currentValue);
           this.results[currentKey] = finalResult;
         } else {
           // here are only final results
