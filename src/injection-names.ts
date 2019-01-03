@@ -6,6 +6,7 @@ export const injectionNames = {
   eventBus: "core:root:event-bus",
   componentSpecificLoggerFactory: "core:root:component-specific-logger-factory",
   handlerProxyFactory: "core:unifier:handler-proxy-factory",
+  localesLoader: "core:unifier:locales-loader",
   current: {
     i18nTranslateValuesFor: "core:i18n:current-translate-values-for",
     translateHelper: "core:i18n:current-translate-helper",

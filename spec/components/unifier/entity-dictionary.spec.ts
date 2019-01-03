@@ -1,6 +1,31 @@
+import { EntityDictionary } from "../../../src/components/unifier/public-interfaces";
+import { injectionNames } from "../../../src/injection-names";
+import { LocalesLoaderMock } from "../../support/mocks/unifier/mock-locale-loader";
 import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
+
+interface MyThisContext extends ThisContext {
+  createExtraction(entities: { [name: string]: any });
+  getEntityDictionary(): EntityDictionary;
+}
 
 describe("EntityDictionary", function() {
+  beforeAll(function(this: MyThisContext) {
+    this.createExtraction = function(entities) {
+      return {
+        entities,
+        intent: "testIntent",
+        language: "en",
+        platform: "custom",
+        sessionID: "any",
+      };
+    };
+  });
+
+  beforeEach(async function(this: MyThisContext) {
+    this.getEntityDictionary = () => this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
+  });
+
   describe("injection in request scope", function() {
     beforeEach(function() {
       createRequestScope(this.specHelper);
@@ -78,6 +103,87 @@ describe("EntityDictionary", function() {
             });
           });
         });
+      });
+    });
+  });
+
+  describe("get custom entities", function() {
+    beforeEach(function(this: MyThisContext) {
+      this.container.inversifyInstance.unbind(injectionNames.localesLoader);
+      this.container.inversifyInstance.bind(injectionNames.localesLoader).to(LocalesLoaderMock);
+    });
+
+    describe("if custom entity is not present", function() {
+      beforeEach(function(this: MyThisContext) {
+        createRequestScope(this.specHelper);
+      });
+
+      it("returns undefined", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBeUndefined();
+      });
+    });
+
+    describe("extraction contains exact reference value", function() {
+      beforeEach(function(this: MyThisContext) {
+        createRequestScope(
+          this.specHelper,
+          this.createExtraction({
+            color: "red",
+          })
+        );
+      });
+
+      it("returns the correct reference value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("red");
+      });
+    });
+
+    describe("extraction contains exact synonym", function() {
+      beforeEach(function(this: MyThisContext) {
+        createRequestScope(
+          this.specHelper,
+          this.createExtraction({
+            color: "corn",
+          })
+        );
+      });
+
+      it("returns the correct reference value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("yellow");
+      });
+    });
+
+    describe("extraction contains similar synonym", function() {
+      beforeEach(function(this: MyThisContext) {
+        createRequestScope(
+          this.specHelper,
+          this.createExtraction({
+            color: "scarlet",
+          })
+        );
+      });
+
+      it("returns the correct reference value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("red");
+      });
+    });
+
+    describe("extraction contains unsupported synonym or entity variation", function() {
+      beforeEach(function(this: MyThisContext) {
+        createRequestScope(
+          this.specHelper,
+          this.createExtraction({
+            color: "ferrari",
+          })
+        );
+      });
+
+      it("returns an unexpected value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().get("color")).toBe("green");
+      });
+
+      it("also gives access to raw entity value", function(this: MyThisContext) {
+        expect(this.getEntityDictionary().getRaw("color")).toBe("ferrari");
       });
     });
   });

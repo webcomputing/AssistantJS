@@ -77,8 +77,19 @@ export interface EntityDictionary {
   /** Checks if the given entity is contained in the store */
   contains(name: string): boolean;
 
-  /** Gets the value of an entity, if the entity is defined */
+  /**
+   * Gets the value of an entity, if the entity is defined.
+   * If entity is a custom entity and extracted value is not equal to the default value, this method
+   * searches for the closest synonym using Levenshtein distance and returns its default value.
+   * If entity is a custom entity and a value present, `get` will never return `undefined`.
+   */
   get(name: string): string | undefined;
+
+  /**
+   * Always returns the original entity value even in `get` doesn't.
+   * @param name Name of the entity
+   */
+  getRaw(name: string): string | undefined;
 
   /** Sets a value of an entity. */
   set(name: string, value: any);
@@ -451,3 +462,11 @@ export interface UnifierConfiguration extends Partial<Configuration.Defaults>, C
  * Combination of normal Type and Promise of Type
  */
 export type OptionallyPromise<T> = T | Promise<T>;
+
+/** Implements logic to load utterances and custom entities from i18n files */
+export interface LocalesLoader {
+  /** Returns all utterance templates for all languages */
+  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  /** Returns all custom entity mappings for all languages */
+  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
+}
