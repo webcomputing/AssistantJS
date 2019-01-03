@@ -13,8 +13,8 @@ const deEntities = require("../../support/mocks/i18n/locale/de/entities.json");
 const enEntities = require("../../support/mocks/i18n/locale/en/entities.js");
 // tslint:enable no-var-requires
 
-interface LocalThisContext extends ThisContext {
-  utterancePath: string;
+interface CurrentThisContext extends ThisContext {
+  localePath: string;
   fsAccess: {
     [fileName: string]: number;
   };
@@ -25,18 +25,18 @@ interface LocalThisContext extends ThisContext {
 const { existsSync } = fs;
 
 describe("LocalesLoader", function() {
-  beforeEach(function(this: LocalThisContext) {
+  beforeEach(function(this: CurrentThisContext) {
     this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
 
     // Update `utterancePath` in the default unifier configuration
     const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>("meta:component//core:unifier");
-    this.utterancePath = metaData.configuration.utterancePath = resolve(__dirname, "../../support/mocks/i18n/locale");
+    this.localePath = metaData.configuration.utterancePath = resolve(__dirname, "../../support/mocks/i18n/locale");
     this.container.inversifyInstance.unbind("meta:component//core:unifier");
     this.container.inversifyInstance.bind<Component<Configuration.Runtime>>("meta:component//core:unifier").toConstantValue(metaData);
   });
 
-  describe("Data reading behaviour", function() {
-    beforeEach(function(this: LocalThisContext) {
+  describe("data reading behaviour", function() {
+    beforeEach(function(this: CurrentThisContext) {
       this.fsAccess = {};
 
       // Extend `existsSync` to count access checks
@@ -46,27 +46,62 @@ describe("LocalesLoader", function() {
       };
     });
 
-    it("Reads utterances from file system only once", function(this: LocalThisContext) {
-      expect(this.fsAccess[this.utterancePath]).toBeUndefined();
-      this.localesLoader.getUtteranceTemplates();
-      expect(this.fsAccess[this.utterancePath]).toBe(1);
-
-      this.localesLoader.getUtteranceTemplates();
-      this.localesLoader.getUtteranceTemplates();
-      expect(this.fsAccess[this.utterancePath]).toBe(1);
+    it("does not touch mock if neither getUtteranceTemplates() nor getCustomEntities() was called", async function(this: CurrentThisContext) {
+      expect(this.fsAccess[this.localePath]).toBeUndefined();
     });
 
-    it("Reads custom entities from file system only once", function(this: LocalThisContext) {
-      expect(this.fsAccess[this.utterancePath]).toBeUndefined();
-      this.localesLoader.getCustomEntities();
-      expect(this.fsAccess[this.utterancePath]).toBe(1);
+    describe("regarding custom entities", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.localesLoader.getCustomEntities();
+      });
 
-      this.localesLoader.getCustomEntities();
-      this.localesLoader.getCustomEntities();
-      expect(this.fsAccess[this.utterancePath]).toBe(1);
+      it("reads from file system only once", function(this: CurrentThisContext) {
+        expect(this.fsAccess[this.localePath]).toBe(1);
+        this.localesLoader.getCustomEntities();
+        this.localesLoader.getCustomEntities();
+        expect(this.fsAccess[this.localePath]).toBe(1);
+      });
+
+      describe("regarding multiple injections", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
+        });
+
+        it("still reads only once from file system", async function(this: CurrentThisContext) {
+          expect(this.fsAccess[this.localePath]).toBe(1);
+          this.localesLoader.getCustomEntities();
+          this.localesLoader.getCustomEntities();
+          expect(this.fsAccess[this.localePath]).toBe(1);
+        });
+      });
     });
 
-    it("prioritizes JS files over JSON files", function(this: LocalThisContext) {
+    describe("regarding utterances", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.localesLoader.getUtteranceTemplates();
+      });
+
+      it("reads from file system only once", function(this: CurrentThisContext) {
+        expect(this.fsAccess[this.localePath]).toBe(1);
+        this.localesLoader.getUtteranceTemplates();
+        this.localesLoader.getUtteranceTemplates();
+        expect(this.fsAccess[this.localePath]).toBe(1);
+      });
+
+      describe("regarding multiple injections", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
+        });
+
+        it("still reads only once from file system", async function(this: CurrentThisContext) {
+          this.localesLoader.getUtteranceTemplates();
+          this.localesLoader.getUtteranceTemplates();
+          expect(this.fsAccess[this.localePath]).toBe(1);
+        });
+      });
+    });
+
+    it("prioritizes JS files over JSON files", function(this: CurrentThisContext) {
       const entities = this.localesLoader.getCustomEntities();
       const utterances = this.localesLoader.getUtteranceTemplates();
 
@@ -86,7 +121,7 @@ describe("LocalesLoader", function() {
   });
 
   describe("getUtteranceTemplates", function() {
-    it("loads all utterance templates of all languages from file system", function(this: LocalThisContext) {
+    it("loads all utterance templates of all languages from file system", function(this: CurrentThisContext) {
       const utterances = this.localesLoader.getUtteranceTemplates();
 
       expect(Object.keys(utterances)).toContain("de");
@@ -98,7 +133,7 @@ describe("LocalesLoader", function() {
   });
 
   describe("getCustomEntities", function() {
-    it("loads all custom entities of all languages from file system", function(this: LocalThisContext) {
+    it("loads all custom entities of all languages from file system", function(this: CurrentThisContext) {
       const entities = this.localesLoader.getCustomEntities();
 
       expect(Object.keys(entities)).toContain("de");
