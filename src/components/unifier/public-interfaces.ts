@@ -442,8 +442,8 @@ export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, Sessi
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
-  /** Link to assistantJS SpecSetup */
-  specSetup: SpecHelper;
+  /** Link to assistantJS SpecHelper */
+  specHelper: SpecHelper;
 
   /**
    * Pretends call of given intent (and entities, ...)
