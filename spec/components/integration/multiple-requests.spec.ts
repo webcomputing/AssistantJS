@@ -13,7 +13,7 @@ describe("with child containers enabled", function() {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
     this.specHelper = createSpecHelper(true, true);
-    this.assistantJs = this.specHelper.setup;
+    this.assistantJs = this.specHelper.assistantJs;
     this.container = this.assistantJs.container;
 
     configureI18nLocale((this as any).container, false);

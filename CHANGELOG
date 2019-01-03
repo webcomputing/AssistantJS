@@ -9,6 +9,7 @@ version 0.4.0
     - Remember that you need to set up a type mapping in your unifier configuration in config/components/unifier for your custom entities, too.
     - You do not need to set up platform specific mappings (for dialogflow, alexa, ...) for your custom entities. 
     - On the other hand, if you set up a platform specific mapping, our generators will use this platform specific mapping instead of your custom entity. This enables you to use custom entities as a fallback for missing platform specific types. For example, if you use the AMAZON.US_CITY slot type, but don't find a corresponding dialogflow entity for it, you are able to create a custom entity as a dialogflow fallback.
+- changed spec setup and made spec-helper more powerful. To make use of the improved spec setup in your 0.3.x project, create a new assistant js application and have a look at the generated spec setup.
 - removed index.ts and replaced it with application-initializer.ts to make the AssitantJS initialization process more adaptable. To migrate easily, create a new AssistantJS application, copy the created application-initializer.ts, paste it into your application and merge all locally made changes of your index.ts into your new application-initializer.ts
 - renamed SpecSetup to SpecHelper
 - new ResponsHandler: ResponseFactory and old Response-Types are obsolete now. A new ResponseHandler is introduced, which allows you the following:

@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as request from "request-promise";
 
+import { StateMachineSetup } from "../../../src/assistant-source";
 import { AssistantJSSetup } from "../../../src/setup";
 import { SpecHelper } from "../../../src/spec-helper";
 
@@ -16,7 +17,7 @@ export class RequestProxy {
 }
 
 export async function withServer(assistantJs: AssistantJSSetup, expressApp: express.Express = express()): Promise<[RequestProxy, () => void]> {
-  const specSetup = new SpecHelper(assistantJs);
+  const specSetup = new SpecHelper(assistantJs, new StateMachineSetup(assistantJs));
   const stopFunction = await specSetup.withServer(expressApp);
   return [new RequestProxy(), stopFunction];
 }
