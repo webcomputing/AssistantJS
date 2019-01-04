@@ -31,21 +31,26 @@ export class ExecuteFiltersHook {
     for (const prioritizedFilter of prioritizedFilters) {
       const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilter);
       if (fittingFilter) {
+        this.logger.debug(`Executing filter ${fittingFilter.constructor.name}...`);
         const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, ...args));
 
         if (typeof filterResult === "object") {
           const filterArgs = filterResult.args ? filterResult.args : args;
+          this.logger.info(`${fittingFilter.constructor.name} initialized redirect to ${filterResult.state}#${filterResult.intent}`);
           await machine.redirectTo(filterResult.state, filterResult.intent, ...filterArgs);
           return false;
         }
 
         if (filterResult === false) {
+          this.logger.info(`${fittingFilter.constructor.name} returned false, now halting state machine execution`);
           return false;
         }
       } else {
         this.logger.warn(`No matching filter class found for ${prioritizedFilter.name}`);
       }
     }
+
+    this.logger.debug("All filters returned true, will now continue with state machine execution");
     return true;
   };
 

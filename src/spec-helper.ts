@@ -141,7 +141,9 @@ export class SpecHelper {
     additionalRequestContext = {}
   ): Promise<MergedHandler> {
     if (typeof platformSpecHelper === "undefined") {
-      throw new Error("You passed an undefined platformSpecHelper into prepareIntentCall. Have a look at your declaration of this.platforms in your setup.ts and compare it to what you've passed into prepareIntentCall().");
+      throw new Error(
+        "You passed an undefined platformSpecHelper into prepareIntentCall. Have a look at your declaration of this.platforms in your setup.ts and compare it to what you've passed into prepareIntentCall()."
+      );
     }
     return platformSpecHelper.pretendIntentCalled(intentToCall, additionalExtractions, additionalRequestContext);
   }
