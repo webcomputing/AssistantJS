@@ -57,7 +57,7 @@ export interface SpecHelperOptions {
 
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecHelper {
-  constructor(public assistantJs: AssistantJSSetup, public stateMachineSetup: StateMachineSetup) {}
+  constructor(public assistantJs: AssistantJSSetup, public stateMachineSetup: StateMachineSetup = new StateMachineSetup(assistantJs)) {}
 
   /** Interpretes the given SpecHelperOptions and prepares your spec by binding everyhting to container etc. */
   public prepareSpec(givenOptions: Partial<SpecHelperOptions>) {
