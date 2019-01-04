@@ -32,7 +32,13 @@ export class EntityDictionary implements EntityDictionaryInterface {
   }
 
   public getRaw(name: string) {
-    return this.store[name] === null ? undefined : this.store[name];
+    // Cast "null" values to undefined
+    if (this.store[name] === null) {
+      return undefined;
+    }
+
+    // Cast "number" values to string
+    return typeof this.store[name] === "number" ? String(this.store[name]) : this.store[name];
   }
 
   public contains(name: string) {

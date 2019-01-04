@@ -4,13 +4,13 @@ import { LocalesLoaderMock } from "../../support/mocks/unifier/mock-locale-loade
 import { createRequestScope } from "../../support/util/setup";
 import { ThisContext } from "../../this-context";
 
-interface MyThisContext extends ThisContext {
+interface CurrentThisContext extends ThisContext {
   createExtraction(entities: { [name: string]: any });
   getEntityDictionary(): EntityDictionary;
 }
 
 describe("EntityDictionary", function() {
-  beforeAll(function(this: MyThisContext) {
+  beforeAll(function(this: CurrentThisContext) {
     this.createExtraction = function(entities) {
       return {
         entities,
@@ -22,7 +22,7 @@ describe("EntityDictionary", function() {
     };
   });
 
-  beforeEach(async function(this: MyThisContext) {
+  beforeEach(async function(this: CurrentThisContext) {
     this.getEntityDictionary = () => this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
   });
 
@@ -48,7 +48,7 @@ describe("EntityDictionary", function() {
         this.entities.set("myEntity", "myEntity");
       });
 
-      describe("getDistanceSet", function() {
+      describe("#getDistanceSet", function() {
         describe("if entity is not present", function() {
           it("returns undefined", function() {
             expect(this.entities.getDistanceSet("notExisting", this.distanceSet)).toBeUndefined();
@@ -71,7 +71,7 @@ describe("EntityDictionary", function() {
         });
       });
 
-      describe("getClosest", function() {
+      describe("#getClosest", function() {
         describe("if entity is not present", function() {
           it("returns undefined", function() {
             expect(this.entities.getClosest("notExisting", this.distanceSet)).toBeUndefined();
@@ -107,83 +107,132 @@ describe("EntityDictionary", function() {
     });
   });
 
-  describe("get custom entities", function() {
-    beforeEach(function(this: MyThisContext) {
-      this.container.inversifyInstance.unbind(injectionNames.localesLoader);
-      this.container.inversifyInstance.bind(injectionNames.localesLoader).to(LocalesLoaderMock);
-    });
-
-    describe("if custom entity is not present", function() {
-      beforeEach(function(this: MyThisContext) {
-        createRequestScope(this.specHelper);
-      });
-
-      it("returns undefined", function(this: MyThisContext) {
-        expect(this.getEntityDictionary().get("color")).toBeUndefined();
-      });
-    });
-
-    describe("extraction contains exact reference value", function() {
-      beforeEach(function(this: MyThisContext) {
+  describe("#getRaw", function() {
+    describe("for numbers in store", function() {
+      beforeEach(async function(this: CurrentThisContext) {
         createRequestScope(
           this.specHelper,
           this.createExtraction({
-            color: "red",
+            numberKey: 1234,
           })
         );
       });
 
-      it("returns the correct reference value", function(this: MyThisContext) {
-        expect(this.getEntityDictionary().get("color")).toBe("red");
+      it("casts value to string", async function(this: CurrentThisContext) {
+        expect(this.getEntityDictionary().getRaw("numberKey")).toEqual("1234");
       });
     });
 
-    describe("extraction contains exact synonym", function() {
-      beforeEach(function(this: MyThisContext) {
+    describe("for null values in store", function() {
+      beforeEach(async function(this: CurrentThisContext) {
         createRequestScope(
           this.specHelper,
           this.createExtraction({
-            color: "corn",
+            nullValue: null,
           })
         );
       });
 
-      it("returns the correct reference value", function(this: MyThisContext) {
-        expect(this.getEntityDictionary().get("color")).toBe("yellow");
+      it("casts them to undefined", async function(this: CurrentThisContext) {
+        expect(this.getEntityDictionary().getRaw("nullValue")).toBeUndefined();
       });
     });
 
-    describe("extraction contains similar synonym", function() {
-      beforeEach(function(this: MyThisContext) {
+    describe("for everything else", function() {
+      beforeEach(async function(this: CurrentThisContext) {
         createRequestScope(
           this.specHelper,
           this.createExtraction({
-            color: "scarlet",
+            complexObject: ["a", "b"],
           })
         );
       });
 
-      it("returns the correct reference value", function(this: MyThisContext) {
-        expect(this.getEntityDictionary().get("color")).toBe("red");
+      it("returns raw store value", async function(this: CurrentThisContext) {
+        expect(this.getEntityDictionary().getRaw("complexObject")).toEqual(["a", "b"] as any);
       });
     });
+  });
 
-    describe("extraction contains unsupported synonym or entity variation", function() {
-      beforeEach(function(this: MyThisContext) {
-        createRequestScope(
-          this.specHelper,
-          this.createExtraction({
-            color: "ferrari",
-          })
-        );
+  describe("#get", function() {
+    describe("regarding custom entities", function() {
+      beforeEach(function(this: CurrentThisContext) {
+        this.container.inversifyInstance.unbind(injectionNames.localesLoader);
+        this.container.inversifyInstance.bind(injectionNames.localesLoader).to(LocalesLoaderMock);
       });
 
-      it("returns an unexpected value", function(this: MyThisContext) {
-        expect(this.getEntityDictionary().get("color")).toBe("green");
+      describe("if custom entity is not present", function() {
+        beforeEach(function(this: CurrentThisContext) {
+          createRequestScope(this.specHelper);
+        });
+
+        it("returns undefined", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().get("color")).toBeUndefined();
+        });
       });
 
-      it("also gives access to raw entity value", function(this: MyThisContext) {
-        expect(this.getEntityDictionary().getRaw("color")).toBe("ferrari");
+      describe("extraction contains exact reference value", function() {
+        beforeEach(function(this: CurrentThisContext) {
+          createRequestScope(
+            this.specHelper,
+            this.createExtraction({
+              color: "red",
+            })
+          );
+        });
+
+        it("returns the correct reference value", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().get("color")).toBe("red");
+        });
+      });
+
+      describe("extraction contains exact synonym", function() {
+        beforeEach(function(this: CurrentThisContext) {
+          createRequestScope(
+            this.specHelper,
+            this.createExtraction({
+              color: "corn",
+            })
+          );
+        });
+
+        it("returns the correct reference value", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().get("color")).toBe("yellow");
+        });
+      });
+
+      describe("extraction contains similar synonym", function() {
+        beforeEach(function(this: CurrentThisContext) {
+          createRequestScope(
+            this.specHelper,
+            this.createExtraction({
+              color: "scarlet",
+            })
+          );
+        });
+
+        it("returns the correct reference value", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().get("color")).toBe("red");
+        });
+      });
+
+      describe("extraction contains unsupported synonym or entity variation", function() {
+        beforeEach(function(this: CurrentThisContext) {
+          createRequestScope(
+            this.specHelper,
+            this.createExtraction({
+              color: "ferrari",
+            })
+          );
+        });
+
+        it("returns an unexpected value", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().get("color")).toBe("green");
+        });
+
+        it("also gives access to raw entity value", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().getRaw("color")).toBe("ferrari");
+        });
       });
     });
   });

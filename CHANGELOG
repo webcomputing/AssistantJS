@@ -1,5 +1,6 @@
 version 0.4.0
 - changes default behaviour of AssistantJSSetup's constructor to create a new container instead of using a global one. Removes global container.
+- changes get() and getRaw() methods of entity dictionary: Now casting returned numbers to strings, aligning both methods to the already specified return type (string|undefined). Previously, if entities in request/extraction have been numbers, dictionary did not return them as string, resulting in unexpected/untyped behaviour.
 - changes get() method of entity dictionary: If you are getting an assistantjs-configured custom entitiy and user passed a synonym of an entity value, get() automatically resolves to the entity value. Use getRaw() f you want to get the original passed value.
 - changes get() method of entity dictionary: If you are getting an assistantjs-configured custom entitiy, get() now always return the value with the nearest levenshtein distance instead of the original value. If you want the original value, use getRaw() instead. For non-custom-entities, get() returns the regular value.
 - adds listKeys and getSubset to session interface
