@@ -77,7 +77,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     let copyInstructions = [
       ["components.ts", "config/components.ts"],
       ["jasmine.json", "spec/support/jasmine.json"],
-      ["setup.js", "spec/helpers/setup.js"],
+      ["setup.ts", "spec/helpers/setup.ts"],
       ["application.ts", "app/states/application.ts"],
       ["main.ts", "app/states/main.ts"],
       ["example-filter.ts", "app/filters/example-filter.ts"],
