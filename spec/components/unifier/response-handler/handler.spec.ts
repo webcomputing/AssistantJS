@@ -230,10 +230,10 @@ describe("BaseHandler", function() {
     });
 
     describe("with setHttpStatusCode()", function() {
-      beforeEach(async function(this: CurrentThisContext) {      
+      beforeEach(async function(this: CurrentThisContext) {
         this.expectedResult.httpStatusCode = 401;
 
-        spyOn((this.handlerInstance as any), "responseCallback").and.callThrough();
+        spyOn(this.handlerInstance as any, "responseCallback").and.callThrough();
         await this.handlerInstance.setHttpStatusCode(401).send();
       });
 
@@ -327,6 +327,13 @@ describe("BaseHandler", function() {
 
         expectResult();
       });
+    });
+  });
+
+  describe("onUnsupportedFeature", function() {
+    it("adds params to unsupportedFeatureCalls attribute", async function(this: CurrentThisContext) {
+      this.handlerInstance.onUnsupportedFeature("methodName", "arg1", "arg2", 3);
+      expect(this.handlerInstance.unsupportedFeatureCalls).toEqual([{ methodName: "methodName", args: ["arg1", "arg2", 3] }]);
     });
   });
 

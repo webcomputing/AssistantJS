@@ -58,13 +58,8 @@ export class HandlerProxyFactory {
       get(target, propKey, receiver) {
         const propValue = target[propKey];
 
-        const fakeFunction = function() {
-          // "receiver" points to the proxy, is necessary to work with method-chaining
-          return receiver;
-        };
-
-        // return proxy in case there is no function with the specific name, optional properties MUST have the value null to get here ignored.
-        // we have exclude then and catch, so that this handler does not look like a Promise
+        // return proxy in case there is no function with the specific name, optional properties MUST have the value null to get ignored here.
+        // we exclude then and catch, so that this handler does not look like a Promise
         if (
           typeof propValue === "undefined" &&
           propKey.toString() !== "then" &&
@@ -73,14 +68,20 @@ export class HandlerProxyFactory {
           propKey.toString() !== "Symbol(Symbol.iterator)" &&
           propKey.toString() !== "Symbol(Symbol.toStringTag)"
         ) {
-          const message = "Method " + propKey.toString() + "() is not implemented or supported on the current ResponseHandler";
-          logger.debug(message);
+          const message = "Method " + propKey.toString() + "() is not implemented or supported on the current ResponseHandler.";
           if (!failSilentlyOnUnsupportedFeatures) {
-            throw new Error(message);
-          }
+            throw new Error(`${message} Exiting due to configuration of failSilentlyOnUnsupportedFeatures.`);
+          } else {
+            // We return a fake function which enables method chaining by returning this proxy, logs the unsupported feature call and calls responseHandler.onUnsupportedFeature
+            return function() {
+              logger.debug(message);
 
-          // return a fake function, which is automatically called
-          return fakeFunction;
+              // "receiver" points to the proxy, we have to pass it as this context for responseHandler to enable correct method chaining
+              target.onUnsupportedFeature.apply(receiver, [propKey, ...arguments]);
+
+              return receiver;
+            };
+          }
         }
 
         // only intercept method calls, not property access
@@ -89,7 +90,7 @@ export class HandlerProxyFactory {
         }
 
         return function() {
-          // "receiver" points to the proxy, is necessary to work with method-chaining
+          // "receiver" points to the proxy, we have to pass it as this context for responseHandler to enable correct method chaining
           return propValue.apply(receiver, arguments);
         };
       },
