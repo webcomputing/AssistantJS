@@ -21,6 +21,6 @@ export class MainState extends ApplicationState {
    * It is called as soon as the application is launched, e. g. if user says "launch xxxxx".
    */
   public invokeGenericIntent(machine: Transitionable) {
-    
+    this.endSessionWith("Hello World");
   }
 }

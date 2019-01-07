@@ -230,10 +230,10 @@ describe("BaseHandler", function() {
     });
 
     describe("with setHttpStatusCode()", function() {
-      beforeEach(async function(this: CurrentThisContext) {      
+      beforeEach(async function(this: CurrentThisContext) {
         this.expectedResult.httpStatusCode = 401;
 
-        spyOn((this.handlerInstance as any), "responseCallback").and.callThrough();
+        spyOn(this.handlerInstance as any, "responseCallback").and.callThrough();
         await this.handlerInstance.setHttpStatusCode(401).send();
       });
 
@@ -330,6 +330,13 @@ describe("BaseHandler", function() {
     });
   });
 
+  describe("onUnsupportedFeature", function() {
+    it("adds params to unsupportedFeatureCalls attribute", async function(this: CurrentThisContext) {
+      this.handlerInstance.onUnsupportedFeature("methodName", "arg1", "arg2", 3);
+      expect(this.handlerInstance.unsupportedFeatureCalls).toEqual([{ methodName: "methodName", args: ["arg1", "arg2", 3] }]);
+    });
+  });
+
   describe("wasSent()", function() {
     describe("with sending", function() {
       beforeEach(async function(this: CurrentThisContext) {
@@ -350,10 +357,14 @@ describe("BaseHandler", function() {
 
   describe("without sending activly", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.expectedResult = { suggestionChips: this.mockSuggestionChips, table: this.mockTable };
+      this.expectedResult = {
+        suggestionChips: this.mockSuggestionChips,
+        table: this.mockTable,
+        sessionData: '{"__context_states":"[]","__current_state":"MainState"}',
+      };
 
       this.handlerInstance.setSuggestionChips(this.mockSuggestionChips).setMockHandlerATable(this.mockTable);
-      await this.specHelper.runMachine();
+      await this.specHelper.runMachine("MainState");
     });
 
     it("calls getBody() in AfterStateMachine", async function(this: CurrentThisContext) {

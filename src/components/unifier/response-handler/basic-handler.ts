@@ -17,6 +17,9 @@ import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./ha
  */
 @injectable()
 export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements BasicHandable<MergedAnswerTypes> {
+  /** See BasicHandable interface */
+  public unsupportedFeatureCalls: Array<{ methodName: string | number | symbol; args: any[] }> = [];
+
   /**
    * As every call can add a Promise, this property is used to save all Promises
    *
@@ -167,6 +170,10 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     };
 
     return this;
+  }
+
+  public onUnsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
+    this.unsupportedFeatureCalls.push({ methodName, args });
   }
 
   /**

@@ -1,4 +1,8 @@
 version 0.4.0
+- changes default behaviour of AssistantJSSetup's constructor to create a new container instead of using a global one. Removes global container.
+- changes get() and getRaw() methods of entity dictionary: Now casting returned numbers to strings, aligning both methods to the already specified return type (string|undefined). Previously, if entities in request/extraction have been numbers, dictionary did not return them as string, resulting in unexpected/untyped behaviour.
+- changes get() method of entity dictionary: If you are getting an assistantjs-configured custom entitiy and user passed a synonym of an entity value, get() automatically resolves to the entity value. Use getRaw() f you want to get the original passed value.
+- changes get() method of entity dictionary: If you are getting an assistantjs-configured custom entitiy, get() now always return the value with the nearest levenshtein distance instead of the original value. If you want the original value, use getRaw() instead. For non-custom-entities, get() returns the regular value.
 - adds listKeys and getSubset to session interface
 - introduces translateHelper's getAllAlternatives() method which returns all alternatives instead of a sample one. Useful for suggestion chips etc and as an alternative to getTranslationValuesFor.
 - changed the "assistant" binary to load the new application-initializer.js instead of index.js. To migrate, install the new assistant-source version globally.
@@ -8,6 +12,8 @@ version 0.4.0
     - Remember that you need to set up a type mapping in your unifier configuration in config/components/unifier for your custom entities, too.
     - You do not need to set up platform specific mappings (for dialogflow, alexa, ...) for your custom entities. 
     - On the other hand, if you set up a platform specific mapping, our generators will use this platform specific mapping instead of your custom entity. This enables you to use custom entities as a fallback for missing platform specific types. For example, if you use the AMAZON.US_CITY slot type, but don't find a corresponding dialogflow entity for it, you are able to create a custom entity as a dialogflow fallback.
+- changed spec setup and made spec-helper more powerful. To make use of the improved spec setup in your 0.3.x project, create a new assistant js application and have a look at the generated spec setup.
+- renames "specSetup" to "specHelper" and removes autoStart option of pretendIntentCalled() in PlatformSpecHelper interface (unifierInterfaces)
 - removed index.ts and replaced it with application-initializer.ts to make the AssitantJS initialization process more adaptable. To migrate easily, create a new AssistantJS application, copy the created application-initializer.ts, paste it into your application and merge all locally made changes of your index.ts into your new application-initializer.ts
 - renamed SpecSetup to SpecHelper
 - new ResponsHandler: ResponseFactory and old Response-Types are obsolete now. A new ResponseHandler is introduced, which allows you the following:
