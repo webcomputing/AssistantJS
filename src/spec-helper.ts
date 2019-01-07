@@ -14,10 +14,12 @@ import { FilterSetup } from "./components/state-machine/filter-setup";
 import { BasicAnswerTypes } from "./components/unifier/response-handler";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
+import { internalSpecHelpers } from "./shared-spec-helper";
 
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecHelper {
   public setup: AssistantJSSetup;
+  public internalSpecHelpers = internalSpecHelpers;
 
   constructor(originalSetup: AssistantJSSetup = new AssistantJSSetup(new ContainerImpl())) {
     this.setup = originalSetup;
