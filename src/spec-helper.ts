@@ -15,7 +15,6 @@ import { FilterSetup } from "./components/state-machine/filter-setup";
 import { BasicAnswerTypes } from "./components/unifier/response-handler";
 import { injectionNames } from "./injection-names";
 import { AssistantJSSetup } from "./setup";
-import { internalSpecHelpers } from "./shared-spec-helper";
 
 /** Describes available options of prepareSpec() */
 export interface SpecHelperOptions {
@@ -58,8 +57,6 @@ export interface SpecHelperOptions {
 
 /** Helper for specs, which is also useful in other npm modules */
 export class SpecHelper {
-  public internalSpecHelpers = internalSpecHelpers;
-
   constructor(public assistantJs: AssistantJSSetup, public stateMachineSetup: StateMachineSetup = new StateMachineSetup(assistantJs)) {}
   /** Interpretes the given SpecHelperOptions and prepares your spec by binding everyhting to container etc. */
   public prepareSpec(givenOptions: Partial<SpecHelperOptions>) {
