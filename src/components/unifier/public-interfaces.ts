@@ -77,8 +77,19 @@ export interface EntityDictionary {
   /** Checks if the given entity is contained in the store */
   contains(name: string): boolean;
 
-  /** Gets the value of an entity, if the entity is defined */
+  /**
+   * Gets the value of an entity, if the entity is defined.
+   * If entity is a custom entity and extracted value is not equal to the default value, this method
+   * searches for the closest synonym using Levenshtein distance and returns its default value.
+   * If entity is a custom entity and a value present, `get` will never return `undefined`.
+   */
   get(name: string): string | undefined;
+
+  /**
+   * Always returns the original entity value even in `get` doesn't.
+   * @param name Name of the entity
+   */
+  getRaw(name: string): string | undefined;
 
   /** Sets a value of an entity. */
   set(name: string, value: any);
@@ -431,17 +442,16 @@ export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, Sessi
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
 export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
-  /** Link to assistantJS SpecSetup */
-  specSetup: SpecHelper;
+  /** Link to assistantJS SpecHelper */
+  specHelper: SpecHelper;
 
   /**
    * Pretends call of given intent (and entities, ...)
    * @param {intent} intent intent to call
-   * @param {boolean} autoStart if set to true, setup.runMachine() will be called automatically
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled(intent: intent, autoStart?: boolean, additionalExtractions?: any, additionalContext?: any): Promise<MergedHandler>;
+  pretendIntentCalled(intent: intent, additionalExtractions?: any, additionalContext?: any): Promise<MergedHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */
@@ -451,3 +461,11 @@ export interface UnifierConfiguration extends Partial<Configuration.Defaults>, C
  * Combination of normal Type and Promise of Type
  */
 export type OptionallyPromise<T> = T | Promise<T>;
+
+/** Implements logic to load utterances and custom entities from i18n files */
+export interface LocalesLoader {
+  /** Returns all utterance templates for all languages */
+  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  /** Returns all custom entity mappings for all languages */
+  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
+}

@@ -18,12 +18,14 @@ interface CurrentThisContext extends ThisContext {
   mockTable: MockHandlerASpecificTypes["table"];
   mockList: MockHandlerBSpecificTypes["list"];
   result: any;
+  params: { [k: string]: any };
   logger: Logger;
   buildProxiedHandler: () => void;
 }
 
 describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.params = {};
     createRequestScope(this.specHelper);
 
     this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
@@ -122,18 +124,23 @@ describe("HandlerProxyFactory", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.logger = this.container.inversifyInstance.get(injectionNames.logger);
             spyOn(this.logger, "debug").and.callThrough();
+            spyOn(this.handlerInstance, "onUnsupportedFeature").and.callThrough();
             this.container.inversifyInstance.unbind(injectionNames.logger);
             this.container.inversifyInstance.bind(injectionNames.logger).toConstantValue(this.logger);
 
             this.buildProxiedHandler();
-
-            this.result = this.proxiedHandler.setSessionData("current session data to set");
+            this.params.textToSet = "current session data to set";
+            this.result = this.proxiedHandler.setSessionData(this.params.textToSet);
           });
 
           checkProxiedInstance();
 
           it("calls logger", async function(this: CurrentThisContext) {
             expect(this.logger.debug).toHaveBeenCalled();
+          });
+
+          it("call onUnsupportedFeature", async function(this: CurrentThisContext) {
+            expect(this.handlerInstance.onUnsupportedFeature).toHaveBeenCalledWith("setSessionData", this.params.textToSet);
           });
         });
 

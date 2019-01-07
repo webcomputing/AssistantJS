@@ -2,12 +2,9 @@ import { ComponentDescriptor, Container, ContainerImpl, MainApplication } from "
 import * as internalComponents from "./components";
 
 export class AssistantJSSetup {
-  public static globalContainer = new ContainerImpl();
-
-  public container: Container;
   public configuration: { [componentName: string]: any } = {};
 
-  constructor(container: Container = AssistantJSSetup.globalContainer) {
+  constructor(public container: Container = new ContainerImpl()) {
     this.container = container;
   }
 

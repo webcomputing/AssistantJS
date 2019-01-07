@@ -6,6 +6,7 @@ import { AssistantJSSetup } from "../../../src/setup";
 
 import { SpecHelper } from "../../../src/spec-helper";
 
+import { StateMachineSetup } from "../../../src/assistant-source";
 import { TestFilterA } from "../mocks/filters/test-filter-a";
 import { TestFilterB } from "../mocks/filters/test-filter-b";
 import { TestFilterC } from "../mocks/filters/test-filter-c";
@@ -35,8 +36,9 @@ import { MockHandlerA as ResponseHandler } from "../mocks/unifier/response-handl
  * @param autoSetup If set to true, assistantJs.registerInternalComponents() will be called for you
  */
 export function createSpecHelper(useMockStates = true, useChilds = false, autoBind = true, autoSetup = true): SpecHelper {
-  const assistantJs = new SpecHelper(new AssistantJSSetup(new ContainerImpl()));
-  assistantJs.prepare(
+  const assistantJs = new AssistantJSSetup(new ContainerImpl());
+  const specHelper = new SpecHelper(assistantJs, new StateMachineSetup(assistantJs));
+  specHelper.prepare(
     [
       MainState,
       SecondState,
@@ -57,7 +59,7 @@ export function createSpecHelper(useMockStates = true, useChilds = false, autoBi
     useChilds,
     autoSetup
   );
-  return assistantJs;
+  return specHelper;
 }
 
 /**

@@ -51,17 +51,20 @@ export class ExecuteFiltersHook {
 
       /** If there is a matching filter registered, execute it */
       if (fittingFilter) {
+        this.logger.debug(`Executing filter ${fittingFilter.constructor.name}...`);
         const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, params, ...args));
 
         /** If filter returns redirecting object => redirect */
         if (typeof filterResult === "object") {
           const filterArgs = filterResult.args ? filterResult.args : args;
+          this.logger.info(`${fittingFilter.constructor.name} initialized redirect to ${filterResult.state}#${filterResult.intent}`);
           await machine.redirectTo(filterResult.state, filterResult.intent, ...filterArgs);
           return false;
         }
 
         /** If filter returns false => use hook failure to stop planned intent execution (which means that filter handles a response itself) */
         if (filterResult === false) {
+          this.logger.info(`${fittingFilter.constructor.name} returned false, now halting state machine execution`);
           return false;
         }
       } else {
@@ -69,7 +72,7 @@ export class ExecuteFiltersHook {
       }
     }
 
-    /** In every other case just return true (=> no filtering needed, planned intent will be executed) */
+    this.logger.debug("All filters returned true, will now continue with state machine execution");
     return true;
   };
 
