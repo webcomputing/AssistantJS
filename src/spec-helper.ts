@@ -158,7 +158,7 @@ export class SpecHelper {
    * Runs state machine. Needs created request scope!
    * @param stateName Name of state to run.
    */
-  public async runMachine(stateName: string): Promise<void> {
+  public async runMachine(stateName: string, ...args): Promise<void> {
     this.throwIfNoRequestScope();
 
     // Transition to given state
@@ -174,7 +174,7 @@ export class SpecHelper {
     );
     const runner = afterContextExtensions.filter(extensionClass => extensionClass.constructor.name === "Runner")[0];
 
-    return runner.execute();
+    return runner.execute(...args);
   }
 
   /**
