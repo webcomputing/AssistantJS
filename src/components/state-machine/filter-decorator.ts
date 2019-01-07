@@ -3,7 +3,7 @@ import { Filter } from "./public-interfaces";
 
 export const filterMetadataKey = Symbol("metadata-key: filter");
 
-export function filter(...args: Array<Constructor<Filter>>) {
+export function filter(...args: Array<Constructor<Filter> | { filter: Constructor<Filter>; params: { [key: string]: any } }>) {
   const metadata = { filters: args };
 
   return function(targetClass: any, methodName?: string) {

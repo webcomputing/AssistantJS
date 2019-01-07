@@ -19,14 +19,14 @@ export class Runner implements AfterContextExtension {
     private afterStatemachineExtensions: AfterStateMachine[]
   ) {}
 
-  public async execute() {
+  public async execute(...args: any[]) {
     // Only start state machine if there is an extraction result
     if (typeof this.extraction !== "undefined") {
       // call all before state machine extensions
       await Promise.all(this.beforeStatemachineExtensions.map(ex => ex.execute()));
 
       // call state machine
-      await this.machine.handleIntent(this.extraction.intent);
+      await this.machine.handleIntent(this.extraction.intent, ...args);
 
       // call all after state machine extensions
       await Promise.all(this.afterStatemachineExtensions.map(ex => ex.execute()));

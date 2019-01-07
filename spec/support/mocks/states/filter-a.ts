@@ -43,4 +43,9 @@ export class FilterAState extends BaseState<MockHandlerASpecificTypes, MockHandl
   public async filterTestDIntent() {
     await this.responseHandler.endSessionWith(this.t("filter.stateA.intentD")).send();
   }
+
+  @filter({ filter: TestFilterA, params: { exampleParam: "example" } })
+  public async filterTestEIntent() {
+    await this.responseHandler.endSessionWith(this.t("filter.stateA.intentE")).send();
+  }
 }
