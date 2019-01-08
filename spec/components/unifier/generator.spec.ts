@@ -1,6 +1,4 @@
-import { doesNotReject } from "assert";
 import * as fs from "fs";
-import { injectable } from "inversify";
 import { Generator } from "../../../src/components/unifier/generator";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { GenericIntent, PlatformGenerator } from "../../../src/components/unifier/public-interfaces";
@@ -8,6 +6,7 @@ import { injectionNames } from "../../../src/injection-names";
 import { AssistantJSSetup } from "../../../src/setup";
 import { deleteFolderRecursive } from "../../support/mocks/util/fs-utils";
 import { ThisContext } from "../../this-context";
+
 interface CurrentThisContext extends ThisContext {
   assistantJs: AssistantJSSetup;
   generator: Generator;
@@ -17,7 +16,7 @@ interface CurrentThisContext extends ThisContext {
   language: string[];
   intents: Array<string | GenericIntent.Unanswered>;
   expectedUtteranceMapping: { [language: string]: { [key: string]: string[] } };
-  expectedEntities: { [language: string]: { [key: string]: string[] } }; // { [key: string]: string[] };
+  expectedEntities: { [language: string]: { [key: string]: string[] } };
   expectedEntityMapping: { [key: string]: string };
   utterances: { [language: string]: { [key: string]: string[] } };
   entities: { [language: string]: { [key: string]: Array<{ [key: string]: string[] | string | { [key: string]: string[] | string } }> | string[] | string } };
@@ -138,7 +137,7 @@ const itBehaveLikeAGenerator = (singleLanguage: boolean = true) => {
 };
 
 describe("Generator", function() {
-  beforeAll(async function() {
+  beforeAll(function() {
     // Create a mock root folder.
     this.rootDir = __dirname.replace("spec/components/unifier", `tmp`);
     deleteFolderRecursive(this.rootDir);
