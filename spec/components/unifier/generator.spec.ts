@@ -92,7 +92,7 @@ const expectedCallForLanguage = function(this: CurrentThisContext, language: str
   const expectedUtteranceMapping = (intent: string) =>
     this.expectedUtteranceMapping && this.expectedUtteranceMapping[language] && this.expectedUtteranceMapping[language][`${intent}Intent`]
       ? this.expectedUtteranceMapping[language][`${intent}Intent`]
-      : this.utterances && language && this.utterances[language] && this.utterances[language][`${intent}Intent`]
+      : this.utterances && this.utterances[language] && this.utterances[language][`${intent}Intent`]
       ? this.utterances[language][`${intent}Intent`]
       : [];
 
