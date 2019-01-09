@@ -5,6 +5,7 @@ import { GenericRequestHandler } from "./generic-request-handler";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { ComponentSpecificLoggerFactory, Logger, LoggerMiddleware, RequestContext } from "./public-interfaces";
 
+import { injectionNames } from "../../injection-names";
 import { componentInterfaces as temp } from "../unifier/private-interfaces";
 import { EventBusHandler } from "./event-bus";
 
@@ -20,7 +21,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
     root: bindService => {
       bindService.bindLocalServiceToSelf(GenericRequestHandler);
       bindService.bindGlobalService("logger").toDynamicValue(context => {
-        return context.container.get<Component<Configuration.Runtime>>("meta:component//core:root").configuration.bunyanInstance;
+        return context.container.get<Component<Configuration.Runtime>>(injectionNames.rootComponent).configuration.bunyanInstance;
       });
 
       bindService
@@ -36,8 +37,8 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService
         .bindGlobalService("current-logger")
         .toDynamicValue(context => {
-          const rootLogger = context.container.get<Logger>("core:root:logger");
-          const currentRequest = context.container.get<RequestContext>("core:root:current-request-context");
+          const rootLogger = context.container.get<Logger>(injectionNames.logger);
+          const currentRequest = context.container.get<RequestContext>(injectionNames.current.requestContext);
 
           // Create reqeuest specific child logger
           let requestSpecificChildLogger = rootLogger.child({ requestId: currentRequest.id });

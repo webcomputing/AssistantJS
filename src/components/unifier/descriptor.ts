@@ -44,13 +44,13 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return swapHash(context.container.get<Component<Configuration.Runtime>>("meta:component//core:unifier").configuration.entities);
+        return swapHash(context.container.get<Component<Configuration.Runtime>>(injectionNames.unifierComponent).configuration.entities);
       });
 
       // Bind same swapped entity configuration to own extension
       bindService
         .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
-        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>("core:unifier:user-entity-mappings"));
+        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>(injectionNames.userEntityMappings));
 
       // bind HandlerProxyFactory
       bindService
@@ -92,8 +92,8 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Add unifiers logger middleware to current logger
       bindService.bindExtension<LoggerMiddleware>(lookupService.lookup("core:root").getInterface("loggerMiddleware")).toDynamicValue(context => {
-        const currentExtraction = context.container.isBound("core:unifier:current-extraction")
-          ? context.container.get<MinimalRequestExtraction>("core:unifier:current-extraction")
+        const currentExtraction = context.container.isBound(injectionNames.current.extraction)
+          ? context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction)
           : undefined;
         return createUnifierLoggerMiddleware(currentExtraction);
       });

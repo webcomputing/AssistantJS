@@ -5,6 +5,7 @@ export { Express } from "express";
 import * as bodyParser from "body-parser";
 const cuid = require("cuid");
 
+import { injectionNames } from "../../injection-names";
 import { GenericRequestHandler } from "./generic-request-handler";
 import { Logger, RequestContext, ResponseCallback } from "./public-interfaces";
 
@@ -27,10 +28,10 @@ export class ServerApplication implements MainApplication {
   /** Starts express server, calls handleRequest on each request */
   public execute(container: Container) {
     // Set logger
-    this.logger = container.inversifyInstance.get<Logger>("core:root:logger");
+    this.logger = container.inversifyInstance.get<Logger>(injectionNames.logger);
 
     this.log("Preloading i18n instance...");
-    const preloadI18n = container.inversifyInstance.get("core:i18n:wrapper");
+    const preloadI18n = container.inversifyInstance.get(injectionNames.i18nWrapper);
 
     this.log("Registering express catch all route...");
     this.app.all("*", (request, response) => {

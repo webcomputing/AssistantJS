@@ -39,7 +39,7 @@ describe("InterpolationResolver", function() {
 
         this.missingInterpolationExtension = this.container.inversifyInstance.get<MissingInterpolationExtension>(componentInterfaces.missingInterpolation);
         spyOn(this.missingInterpolationExtension, "execute").and.callThrough();
-        this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
+        this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
       });
 
       it("executes MissingInterpolationExtensions if interpolation is missing", async function(this: CurrentThisContext) {
@@ -60,7 +60,7 @@ describe("InterpolationResolver", function() {
 
     describe("with no interpolation extensions present", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
+        this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
       });
 
       it("throws a warning", async function(this: CurrentThisContext) {

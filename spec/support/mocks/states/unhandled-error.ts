@@ -10,7 +10,7 @@ export class UnhandledErrorState implements State.Required {
 
   constructor(
     @inject(injectionNames.current.responseHandler) responsehandler: BasicHandable<any>,
-    @inject("core:unifier:current-extraction") extraction: any,
+    @inject(injectionNames.current.extraction) extraction: any,
     @optional()
     @inject("mocks:states:call-spy")
     spy: (...args: any[]) => void

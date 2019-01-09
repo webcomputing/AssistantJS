@@ -5,6 +5,7 @@
 import { injectable, interfaces as inversifyInterfaces } from "inversify";
 import { Container, ExecutableExtension } from "inversify-components";
 
+import { injectionNames } from "../../injection-names";
 import { AfterContextExtension } from "../state-machine/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 import { ContextDeriver, RequestContext } from "./public-interfaces";
@@ -20,7 +21,7 @@ export class GenericRequestHandler {
 
     // Create child container and append this request context to it
     const scopedRequestContainer = this.createChildContainer(container);
-    this.bindContextToContainer(context, scopedRequestContainer, "core:root:current-request-context");
+    this.bindContextToContainer(context, scopedRequestContainer, injectionNames.current.requestContext);
 
     // Load and execute registered request handlers - including our own handlers.
     // Request handlers have the ability to add something to current di scope.

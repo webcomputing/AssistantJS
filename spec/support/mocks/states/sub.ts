@@ -9,9 +9,9 @@ import { MainState } from "./main";
 export class SubState extends MainState {
   constructor(
     @inject(injectionNames.current.responseHandler) responseHandler: MockHandlerA<MockHandlerASpecificTypes>,
-    @inject("core:unifier:current-extraction") extraction: any,
-    @inject("core:i18n:current-translate-helper") tHelper: any,
-    @inject("core:root:current-logger") logger: Logger,
+    @inject(injectionNames.current.extraction) extraction: any,
+    @inject(injectionNames.current.translateHelper) tHelper: any,
+    @inject(injectionNames.current.logger) logger: Logger,
     @optional()
     @inject("mocks:states:call-spy")
     spy: (...args: any[]) => void

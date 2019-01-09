@@ -1,3 +1,4 @@
+import { injectionNames } from "../../../src/injection-names";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
@@ -5,13 +6,13 @@ describe("TranslateHelper", function() {
   beforeEach(function() {
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
-    this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
+    this.stateMachine = this.container.inversifyInstance.get(injectionNames.current.stateMachine);
 
-    this.context = this.container.inversifyInstance.get("core:i18n:current-context");
+    this.context = this.container.inversifyInstance.get(injectionNames.current.i18nContext);
     this.context.intent = "testIntent";
     this.context.state = "mainState";
 
-    this.translateHelper = this.container.inversifyInstance.get("core:i18n:current-translate-helper");
+    this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
   });
 
   describe("t", function() {

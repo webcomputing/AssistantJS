@@ -1,5 +1,5 @@
 import { Container } from "inversify-components";
-import { AfterContextExtension, AfterStateMachine, BeforeStateMachine } from "../../../src/assistant-source";
+import { AfterContextExtension, AfterStateMachine, BeforeStateMachine, injectionNames } from "../../../src/assistant-source";
 import { componentInterfaces as rootInterfaces } from "../../../src/components/root/private-interfaces";
 import { componentInterfaces as stateMachineInterfaces } from "../../../src/components/state-machine/private-interfaces";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
@@ -35,7 +35,7 @@ describe("Runner", function() {
     spyOn(this.afterStateMachineImpl, "execute");
     this.container.inversifyInstance.bind(stateMachineInterfaces.afterStateMachine).toConstantValue(this.afterStateMachineImpl);
 
-    this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
+    this.stateMachine = this.container.inversifyInstance.get(injectionNames.current.stateMachine);
     spyOn(this.stateMachine, "handleIntent");
 
     this.runner = this.container.inversifyInstance.get(rootInterfaces.afterContextExtension);

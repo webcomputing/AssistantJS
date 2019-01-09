@@ -22,7 +22,7 @@ describe("state context decorators", function() {
 
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
-    this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
+    this.stateMachine = this.container.inversifyInstance.get<StateMachine>(injectionNames.current.stateMachine);
     this.getContextStates = this.container.inversifyInstance.get<() => Promise<Array<{ instance: State.Required; name: string }>>>(
       injectionNames.current.contextStatesProvider
     );

@@ -146,10 +146,10 @@ describe("HandlerProxyFactory", function() {
 
         describe("with forcing to throw exception", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>("meta:component//core:unifier");
+            const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(injectionNames.unifierComponent);
             metaData.configuration.failSilentlyOnUnsupportedFeatures = false;
-            this.container.inversifyInstance.unbind("meta:component//core:unifier");
-            this.container.inversifyInstance.bind<Component<Configuration.Runtime>>("meta:component//core:unifier").toConstantValue(metaData);
+            this.container.inversifyInstance.unbind(injectionNames.unifierComponent);
+            this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(injectionNames.unifierComponent).toConstantValue(metaData);
 
             this.buildProxiedHandler();
           });

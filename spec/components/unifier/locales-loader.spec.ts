@@ -29,10 +29,10 @@ describe("LocalesLoader", function() {
     this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
 
     // Update `utterancePath` in the default unifier configuration
-    const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>("meta:component//core:unifier");
+    const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(injectionNames.i18nComponent);
     this.localePath = metaData.configuration.utterancePath = resolve(__dirname, "../../support/mocks/i18n/locale");
-    this.container.inversifyInstance.unbind("meta:component//core:unifier");
-    this.container.inversifyInstance.bind<Component<Configuration.Runtime>>("meta:component//core:unifier").toConstantValue(metaData);
+    this.container.inversifyInstance.unbind(injectionNames.unifierComponent);
+    this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(injectionNames.unifierComponent).toConstantValue(metaData);
   });
 
   describe("data reading behaviour", function() {

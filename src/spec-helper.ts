@@ -212,11 +212,11 @@ export class SpecHelper {
     const childContainer = requestHandler.createChildContainer(this.assistantJs.container);
 
     // Bind request context
-    requestHandler.bindContextToContainer(requestContext, childContainer, "core:root:current-request-context");
+    requestHandler.bindContextToContainer(requestContext, childContainer, injectionNames.current.requestContext);
 
     // Add minimal extraction if wanted
     if (minimalExtraction !== null) {
-      requestHandler.bindContextToContainer(minimalExtraction, childContainer, "core:unifier:current-extraction", true);
+      requestHandler.bindContextToContainer(minimalExtraction, childContainer, injectionNames.current.extraction, true);
     }
 
     // Add minimal response handler

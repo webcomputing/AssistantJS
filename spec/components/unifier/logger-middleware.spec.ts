@@ -1,8 +1,9 @@
 import { createUnifierLoggerMiddleware } from "../../../src/components/unifier/logger-middleware";
+import { injectionNames } from "../../../src/injection-names";
 
 describe("created function of createUnifierLoggerMiddleware", function() {
   beforeEach(function() {
-    this.logger = this.container.inversifyInstance.get("core:root:logger");
+    this.logger = this.container.inversifyInstance.get(injectionNames.logger);
   });
 
   describe("with no extraction given", function() {

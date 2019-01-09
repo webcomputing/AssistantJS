@@ -14,7 +14,7 @@ export class Generator implements CLIGeneratorExtension {
   private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
 
   constructor(
-    @inject("core:state-machine:used-intents")
+    @inject(injectionNames.usedIntents)
     @optional()
     intents: intent[],
     @multiInject(componentInterfaces.platformGenerator)

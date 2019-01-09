@@ -17,10 +17,10 @@ export class StateMachine implements Transitionable {
   constructor(
     @inject(injectionNames.current.contextStatesProvider) private getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>,
     @inject(injectionNames.current.stateProvider) private getCurrentState: State.CurrentProvider,
-    @inject("core:state-machine:state-names") private stateNames: string[],
+    @inject(injectionNames.stateNames) private stateNames: string[],
     @inject(injectionNames.current.sessionFactory) private currentSessionFactory: CurrentSessionFactory,
-    @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
-    @inject("core:root:current-logger") private logger: Logger
+    @inject(injectionNames.hookPipeFactory) private pipeFactory: Hooks.PipeFactory,
+    @inject(injectionNames.current.logger) private logger: Logger
   ) {}
 
   public async handleIntent(requestedIntent: intent, ...args: any[]) {

@@ -17,9 +17,9 @@ export class ContextDState extends BaseState<MockHandlerASpecificTypes, MockHand
 
   constructor(
     @inject(injectionNames.current.responseHandler) responseHandler: MockHandlerA<MockHandlerASpecificTypes>,
-    @inject("core:unifier:current-extraction") extraction: any,
-    @inject("core:i18n:current-translate-helper") translateHelper: TranslateHelper,
-    @inject("core:root:current-logger") logger: Logger
+    @inject(injectionNames.current.extraction) extraction: any,
+    @inject(injectionNames.current.translateHelper) translateHelper: TranslateHelper,
+    @inject(injectionNames.current.logger) logger: Logger
   ) {
     super(responseHandler, translateHelper, extraction, logger);
     this.extraction = extraction;

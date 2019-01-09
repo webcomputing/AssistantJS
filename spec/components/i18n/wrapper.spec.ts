@@ -4,6 +4,7 @@ import { componentInterfaces } from "../../../src/components/i18n/component-inte
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "../../../src/components/i18n/interpolation-resolver";
 import { arraySplitter } from "../../../src/components/i18n/plugins/array-returns-sample.plugin";
 import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
+import { injectionNames } from "../../../src/injection-names";
 import { SpecHelper } from "../../../src/spec-helper";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 
@@ -24,7 +25,7 @@ describe("I18nWrapper", function() {
 
   describe("with returnOnlySample = true", function() {
     beforeEach(function() {
-      this.wrapper = this.container.inversifyInstance.get("core:i18n:wrapper");
+      this.wrapper = this.container.inversifyInstance.get(injectionNames.i18nWrapper);
     });
 
     describe("translation function", function() {
@@ -53,7 +54,7 @@ describe("I18nWrapper", function() {
   describe("with returnOnlySample = false", function(this: CurrentThisContext) {
     describe("translation function", function() {
       it("returns all available options", function() {
-        this.wrapper = this.container.inversifyInstance.get("core:i18n:spec-wrapper");
+        this.wrapper = this.container.inversifyInstance.get(injectionNames.i18nSpecWrapper);
         expect(this.wrapper.instance.t("templateSyntaxSmall", { name: "my name" })).toEqual(expectedTranslations.join(arraySplitter));
       });
     });

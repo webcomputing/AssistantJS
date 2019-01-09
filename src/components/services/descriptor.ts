@@ -2,6 +2,7 @@ import { interfaces as inversifyInterfaces } from "inversify";
 import { Component, ComponentDescriptor } from "inversify-components";
 
 import { BeforeResponseHandler } from "../../assistant-source";
+import { injectionNames } from "../../injection-names";
 import { KillSessionService } from "./kill-session-service";
 import { componentInterfaces, Configuration } from "./private-interfaces";
 import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
@@ -41,7 +42,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       // Injection to get current session
       bindService.bindGlobalService<CurrentSessionFactory>("current-session-factory").toFactory<Session>(context => {
         return () => {
-          const configuration = context.container.get<Component<Configuration.Runtime>>("meta:component//core:services").configuration;
+          const configuration = context.container.get<Component<Configuration.Runtime>>(injectionNames.servicesComponent).configuration;
 
           // Check if there is a session storage factory bound to this name...
           if (context.container.isBoundNamed(componentInterfaces.currentSessionFactory, configuration.sessionStorage.factoryName)) {

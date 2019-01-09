@@ -23,7 +23,7 @@ describe("EntityDictionary", function() {
   });
 
   beforeEach(async function(this: CurrentThisContext) {
-    this.getEntityDictionary = () => this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
+    this.getEntityDictionary = () => this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
   });
 
   describe("injection in request scope", function() {
@@ -33,10 +33,10 @@ describe("EntityDictionary", function() {
 
     it("lives as singleton", function() {
       // This is important: That way, states (including promptstates) can add entities, which are readable in follow-up-states
-      const instance1 = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
+      const instance1 = this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
       instance1.set("myEntity123", "321");
 
-      const instance2 = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
+      const instance2 = this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
       expect(instance2.get("myEntity123")).toEqual("321");
     });
 
@@ -44,7 +44,7 @@ describe("EntityDictionary", function() {
       beforeEach(function() {
         this.distanceSet = ["yourEntity", "hisEntity"];
         this.upperCaseDistanceSet = ["MyEntity", "YourEntity", "HisEntity"];
-        this.entities = this.container.inversifyInstance.get("core:unifier:current-entity-dictionary");
+        this.entities = this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
         this.entities.set("myEntity", "myEntity");
       });
 
