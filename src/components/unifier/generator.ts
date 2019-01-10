@@ -8,37 +8,20 @@ import { GenericIntent, intent, LocalesLoader, PlatformGenerator } from "./publi
 
 @injectable()
 export class Generator implements CLIGeneratorExtension {
-  private intents: intent[] = [];
-  private entityMappings: PlatformGenerator.EntityMapping[] = [];
-  private platformGenerators: PlatformGenerator.Extension[] = [];
-  private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
-
   constructor(
-    @inject("core:state-machine:used-intents")
-    @optional()
-    intents: intent[],
-    @multiInject(componentInterfaces.platformGenerator)
-    @optional()
-    generators: PlatformGenerator.Extension[],
+    @inject(injectionNames.localesLoader) private localesLoader: LocalesLoader,
+    @inject("core:state-machine:used-intents") @optional() private intents: intent[],
+    @multiInject(componentInterfaces.platformGenerator) @optional() private platformGenerators: PlatformGenerator.Extension[],
     @multiInject(componentInterfaces.utteranceTemplateService)
     @optional()
-    utteranceServices: PlatformGenerator.UtteranceTemplateService[],
-    @multiInject(componentInterfaces.entityMapping)
-    @optional()
-    entityMappings: PlatformGenerator.EntityMapping[],
-    @inject(injectionNames.localesLoader)
-    private localesLoader: LocalesLoader
+    private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[],
+    @multiInject(componentInterfaces.entityMapping) @optional() private entityMappings: PlatformGenerator.EntityMapping[]
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    [intents, generators, utteranceServices, entityMappings].forEach(v => {
+    [this.intents, this.platformGenerators, this.additionalUtteranceTemplatesServices, this.entityMappings].forEach(v => {
       // tslint:disable-next-line:no-parameter-reassignment
       if (typeof v === "undefined") v = [];
     });
-
-    this.intents = intents;
-    this.platformGenerators = generators;
-    this.entityMappings = entityMappings;
-    this.additionalUtteranceTemplatesServices = utteranceServices;
   }
 
   public async execute(buildDir: string): Promise<void> {
