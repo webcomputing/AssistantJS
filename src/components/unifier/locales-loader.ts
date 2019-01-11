@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { inject, injectable } from "inversify";
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 import * as path from "path";
 import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
@@ -15,7 +15,10 @@ export class LocalesLoader implements ILocalesLoader {
   private utterances?: { [language: string]: { [intent: string]: string[] } };
   private entities?: { [language: string]: PlatformGenerator.CustomEntityMapping };
 
-  constructor(@inject(injectionNames.i18nComponent) componentMeta: Component<Configuration.Runtime>, @inject(injectionNames.logger) private logger: Logger) {
+  constructor(
+    @inject(getMetaInjectionName("core:i18n")) componentMeta: Component<Configuration.Runtime>,
+    @inject(injectionNames.logger) private logger: Logger
+  ) {
     this.configuration = componentMeta.configuration;
   }
 

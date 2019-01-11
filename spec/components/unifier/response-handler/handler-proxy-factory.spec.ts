@@ -1,4 +1,4 @@
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 import { Logger } from "../../../../src/components/root/public-interfaces";
 import { Configuration } from "../../../../src/components/unifier/private-interfaces";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
@@ -146,10 +146,10 @@ describe("HandlerProxyFactory", function() {
 
         describe("with forcing to throw exception", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(injectionNames.unifierComponent);
+            const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier"));
             metaData.configuration.failSilentlyOnUnsupportedFeatures = false;
-            this.container.inversifyInstance.unbind(injectionNames.unifierComponent);
-            this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(injectionNames.unifierComponent).toConstantValue(metaData);
+            this.container.inversifyInstance.unbind(getMetaInjectionName("core:unifier"));
+            this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier")).toConstantValue(metaData);
 
             this.buildProxiedHandler();
           });

@@ -1,4 +1,4 @@
-import { Component, ComponentDescriptor } from "inversify-components";
+import { Component, ComponentDescriptor, getMetaInjectionName } from "inversify-components";
 
 import { injectionNames } from "../../injection-names";
 import { CLIGeneratorExtension, ContextDeriver as ContextDeriverI, LoggerMiddleware } from "../root/public-interfaces";
@@ -44,7 +44,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Bind swapped entity configuration
       bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
-        return swapHash(context.container.get<Component<Configuration.Runtime>>(injectionNames.unifierComponent).configuration.entities);
+        return swapHash(context.container.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier")).configuration.entities);
       });
 
       // Bind same swapped entity configuration to own extension

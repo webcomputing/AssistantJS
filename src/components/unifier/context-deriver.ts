@@ -1,5 +1,5 @@
 import { inject, injectable, multiInject, optional } from "inversify";
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 
 import { injectionNames } from "../../injection-names";
 import { ContextDeriver as ContextDeriverI, Logger, RequestContext } from "../root/public-interfaces";
@@ -19,7 +19,7 @@ export class ContextDeriver implements ContextDeriverI {
     @multiInject(componentInterfaces.requestModifier)
     private extractionModifiers: RequestExtractionModifier[] = [],
     @inject(injectionNames.logger) private logger: Logger,
-    @inject(injectionNames.unifierComponent) componentMeta: Component<Configuration.Runtime>
+    @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>
   ) {
     this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }

@@ -33,10 +33,6 @@ export const injectionNames = {
    */
   i18nSpecWrapper: "core:i18n:spec-wrapper",
   /**
-   * Inject an instance of @type {Component<Configuration.Runtime>}
-   */
-  i18nComponent: "meta:component//core:i18n",
-  /**
    * Inject an instance of @type {Logger}
    */
   logger: "core:root:logger",
@@ -49,10 +45,6 @@ export const injectionNames = {
    */
   metaState: "core:state-machine:meta-states",
   /**
-   * Inject an instance of @type {Component<Configuration.Runtime>}
-   */
-  rootComponent: "meta:component//core:root",
-  /**
    * Inject an instance of @type {State.Factory}
    */
   stateFactory: "core:state-machine:state-factory",
@@ -61,17 +53,9 @@ export const injectionNames = {
    */
   stateNames: "core:state-machine:state-names",
   /**
-   * Inject an instance of @type {Component<Configuration.Runtime>}
-   */
-  servicesComponent: "meta:component//core:services",
-  /**
    * Inject an instance of @type {intent[]}
    */
   usedIntents: "core:state-machine:used-intents",
-  /**
-   * Inject an instance of @type {Component<Configuration.Runtime>}
-   */
-  unifierComponent: "meta:component//core:unifier",
   /**
    * Inject an instance of @type {PlatformGenerator.EntityMapping}
    */

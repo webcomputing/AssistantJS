@@ -1,5 +1,5 @@
 import * as i18next from "i18next";
-import { Component, ComponentDescriptor, Hooks } from "inversify-components";
+import { Component, ComponentDescriptor, getMetaInjectionName, Hooks } from "inversify-components";
 import { componentInterfaces } from "./component-interfaces";
 import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 import { Configuration } from "./private-interfaces";
@@ -35,7 +35,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindGlobalService<I18nextWrapper>("spec-wrapper")
         .toDynamicValue(context => {
           return new I18nextWrapper(
-            context.container.get<Component<Configuration.Runtime>>(injectionNames.i18nComponent),
+            context.container.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:i18n")),
             context.container.get<Logger>(injectionNames.logger),
             false
           );

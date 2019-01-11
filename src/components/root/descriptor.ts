@@ -1,4 +1,4 @@
-import { Component, ComponentDescriptor } from "inversify-components";
+import { Component, ComponentDescriptor, getMetaInjectionName } from "inversify-components";
 import { componentSpecificLoggerFactoryByContainer } from "./component-specific-logger-factory";
 import { defaultBunyan } from "./default-bunyan";
 import { GenericRequestHandler } from "./generic-request-handler";
@@ -21,7 +21,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
     root: bindService => {
       bindService.bindLocalServiceToSelf(GenericRequestHandler);
       bindService.bindGlobalService("logger").toDynamicValue(context => {
-        return context.container.get<Component<Configuration.Runtime>>(injectionNames.rootComponent).configuration.bunyanInstance;
+        return context.container.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:root")).configuration.bunyanInstance;
       });
 
       bindService

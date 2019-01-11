@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 import { resolve } from "path";
 import { LocalesLoader } from "../../../src/assistant-source";
 import { Configuration } from "../../../src/components/unifier/private-interfaces";
@@ -29,10 +29,10 @@ describe("LocalesLoader", function() {
     this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
 
     // Update `utterancePath` in the default unifier configuration
-    const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(injectionNames.i18nComponent);
+    const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:i18n"));
     this.localePath = metaData.configuration.utterancePath = resolve(__dirname, "../../support/mocks/i18n/locale");
-    this.container.inversifyInstance.unbind(injectionNames.unifierComponent);
-    this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(injectionNames.unifierComponent).toConstantValue(metaData);
+    this.container.inversifyInstance.unbind(getMetaInjectionName("core:unifier"));
+    this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier")).toConstantValue(metaData);
   });
 
   describe("data reading behaviour", function() {
