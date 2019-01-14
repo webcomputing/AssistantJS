@@ -167,9 +167,9 @@ describe("Generator", function() {
         );
       });
 
-      it("correctly permutates utterances using template syntax", async function(this: CurrentThisContext) {
+      it("correctly permute utterances using template syntax", async function(this: CurrentThisContext) {
         this.mockReturns.utteranceTemplates = { de: { helloWorldIntent: ["{this|that} is {cool|right}"] } };
-        this.params.permutatedUtterances = ["this is cool", "that is cool", "this is right", "that is right"];
+        this.params.permutedUtterances = ["this is cool", "that is cool", "this is right", "that is right"];
 
         await this.getGenerator().execute(this.params.buildDirectory);
 
@@ -177,7 +177,7 @@ describe("Generator", function() {
           ...this.createArgumentsForExecute({
             intentConfigurations: [
               this.createIntentConfiguration({
-                utterances: this.params.permutatedUtterances,
+                utterances: this.params.permutedUtterances,
               }),
             ],
           })
@@ -316,7 +316,7 @@ describe("Generator", function() {
               await this.getGenerator().execute(this.params.buildDirectory);
             });
 
-            it("permutates each utterances with each matching synonym", async function(this: CurrentThisContext) {
+            it("permutes each utterances with each matching synonym", async function(this: CurrentThisContext) {
               expect(this.platformGenerator.execute).toHaveBeenCalledWith(
                 ...this.createArgumentsForExecute({
                   intentConfigurations: [
