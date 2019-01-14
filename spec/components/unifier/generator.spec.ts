@@ -201,11 +201,7 @@ describe("Generator", function() {
     });
 
     describe("with custom entities", function() {
-      beforeEach(async function(this: CurrentThisContext) {
-        this.mockReturns.customEntities = { en: {} };
-      });
-
-      describe("without registered entityMapping", function() {
+      describe("without entityMapping", function() {
         beforeEach(async function(this: CurrentThisContext) {
           this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
         });
@@ -247,7 +243,7 @@ describe("Generator", function() {
         });
       });
 
-      describe("with registered entityMapping", function() {
+      describe("with entityMapping", function() {
         beforeEach(async function(this: CurrentThisContext) {
           this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
           this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE" };
@@ -309,7 +305,7 @@ describe("Generator", function() {
           });
         });
 
-        describe("without entity example", function() {
+        describe("without entity example in utteranceTemplate", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
           });
@@ -350,7 +346,7 @@ describe("Generator", function() {
           });
         });
 
-        describe("with entity example", function() {
+        describe("with entity example in utteranceTemplate", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{world|customEntity1}}"] } };
           });
@@ -363,7 +359,7 @@ describe("Generator", function() {
               await this.getGenerator().execute(this.params.buildDirectory);
             });
 
-            it("extracts slot types from utterance", async function(this: CurrentThisContext) {
+            it("extracts entity (slot types) from utterance", async function(this: CurrentThisContext) {
               expect(this.platformGenerator.execute).toHaveBeenCalledWith(
                 ...this.createArgumentsForExecute({
                   intentConfigurations: [
@@ -555,6 +551,33 @@ describe("Generator", function() {
     describe("with no languages via utterance templates given", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.mockReturns.utteranceTemplates = {};
+      });
+
+      it("throws an type error", async function(this: CurrentThisContext) {
+        try {
+          await this.getGenerator().execute(this.params.buildDirectory);
+          fail("Should throw a type error");
+        } catch (error) {
+          expect(error.message).toEqual("Reduce of empty array with no initial value");
+        }
+      });
+
+      it("loads utterances from localesLoader", async function(this: CurrentThisContext) {
+        try {
+          await this.getGenerator().execute(this.params.buildDirectory);
+          fail("Should throw a type error");
+        } catch (error) {
+          expect(this.localesLoader.getCustomEntities).toHaveBeenCalledTimes(1);
+        }
+      });
+
+      it("loads custom entities from localesLoader", async function(this: CurrentThisContext) {
+        try {
+          await this.getGenerator().execute(this.params.buildDirectory);
+          fail("Should throw a type error");
+        } catch (error) {
+          expect(this.localesLoader.getUtteranceTemplates).toHaveBeenCalledTimes(1);
+        }
       });
     });
   });
