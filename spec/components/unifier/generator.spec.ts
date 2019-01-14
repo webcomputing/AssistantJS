@@ -40,6 +40,9 @@ interface CurrentThisContext extends ThisContext {
   /** Reference to generator instance */
   getGenerator: () => Generator;
 
+  /** Instance of the current generator class used to check constructor manipulations. You should prefer the use of getGenerator function. */
+  generator: any;
+
   /** Creates an intent configuration */
   createIntentConfiguration: (opts: { intent?: intent; utterances?: string[]; entities?: string[] }) => PlatformGenerator.IntentConfiguration;
 
@@ -116,24 +119,302 @@ describe("Generator", function() {
       ] as any;
   });
 
-  fdescribe("#execute", function() {
+  describe("#constructor", function() {
+    describe("without optional injections", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.container.inversifyInstance.unbind(componentInterfaces.utteranceTemplateService);
+        this.container.inversifyInstance.unbind(componentInterfaces.entityMapping);
+        this.container.inversifyInstance.unbind(componentInterfaces.platformGenerator);
+        this.container.inversifyInstance.unbind("core:state-machine:used-intents");
+        this.generator = this.getGenerator();
+      });
+
+      it("sets intents default values to an empty array", async function(this: CurrentThisContext) {
+        expect(this.generator.intents).toEqual([]);
+      });
+
+      it("sets platformGenerators default values to an empty array", async function(this: CurrentThisContext) {
+        expect(this.generator.platformGenerators).toEqual([]);
+      });
+      it("sets additionalUtteranceTemplatesServices default values to an empty array", async function(this: CurrentThisContext) {
+        expect(this.generator.additionalUtteranceTemplatesServices).toEqual([]);
+      });
+      it("sets entityMappings default values to an empty array", async function(this: CurrentThisContext) {
+        expect(this.generator.entityMappings).toEqual([]);
+      });
+    });
+  });
+
+  describe("#execute", function() {
     beforeEach(async function(this: CurrentThisContext) {
       this.params.buildDirectory = "tmp";
       this.mockReturns.customEntities = { de: {}, en: {} };
     });
 
     describe("regarding utterance permutations", function() {
-      beforeEach(async function(this: CurrentThisContext) {
-        this.params.utterancesFromTemplates = {
-          de: { helloWorldIntent: ["without permutation", "{this|that} is {permutated|one of many words i know"] },
-        };
-
+      it("copies utterances without template syntax", async function(this: CurrentThisContext) {
+        this.mockReturns.utteranceTemplates = { de: { helloWorldIntent: ["hallo"] } };
         await this.getGenerator().execute(this.params.buildDirectory);
+
+        expect(this.platformGenerator.execute as jasmine.Spy).toHaveBeenCalledWith(
+          ...this.createArgumentsForExecute({
+            intentConfigurations: [
+              this.createIntentConfiguration({
+                utterances: ["hallo"],
+              }),
+            ],
+          })
+        );
       });
 
-      xit("copies utterances without template syntax", async function(this: CurrentThisContext) {});
+      it("correctly permutates utterances using template syntax", async function(this: CurrentThisContext) {
+        this.mockReturns.utteranceTemplates = { de: { helloWorldIntent: ["{this|that} is {cool|right}"] } };
+        this.params.permutatedUtterances = ["this is cool", "that is cool", "this is right", "that is right"];
 
-      it("correctly permutates utterances using template syntax", async function(this: CurrentThisContext) {});
+        await this.getGenerator().execute(this.params.buildDirectory);
+
+        expect(this.platformGenerator.execute as jasmine.Spy).toHaveBeenCalledWith(
+          ...this.createArgumentsForExecute({
+            intentConfigurations: [
+              this.createIntentConfiguration({
+                utterances: this.params.permutatedUtterances,
+              }),
+            ],
+          })
+        );
+      });
+
+      it("returns an empty array of utterances if the intent could not be found in the utterance templates", async function(this: CurrentThisContext) {
+        this.mockReturns.utteranceTemplates = { de: {} };
+        await this.getGenerator().execute(this.params.buildDirectory);
+
+        expect(this.platformGenerator.execute as jasmine.Spy).toHaveBeenCalledWith(
+          ...this.createArgumentsForExecute({
+            intentConfigurations: [
+              this.createIntentConfiguration({
+                utterances: [],
+              }),
+            ],
+          })
+        );
+      });
+    });
+
+    describe("with custom entities", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.mockReturns.customEntities = { en: {} };
+      });
+
+      describe("without registered entityMapping", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
+        });
+
+        it("throws an unknown entity exception, no entity mappings are registered", async function(this: CurrentThisContext) {
+          try {
+            await this.getGenerator().execute(this.params.buildDirectory);
+            fail("Should throw an unknown entity exception");
+          } catch (e) {
+            expect(e.message).toEqual(
+              `Unknown entity 'customEntity1' found in utterances of intent '${
+                this.mockReturns.usedIntents[0]
+              }'. \nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: []`
+            );
+          }
+        });
+
+        it("throws an unknown entity exception, wrong entity mappings are registered", async function(this: CurrentThisContext) {
+          this.mockReturns.entityMapping = { TYPE_ENTITIES: "customEntity1" };
+          try {
+            await this.getGenerator().execute(this.params.buildDirectory);
+            fail("Should throw an unknown entity exception");
+          } catch (e) {
+            expect(e.message).toEqual(
+              `Unknown entity 'customEntity1' found in utterances of intent '${
+                this.mockReturns.usedIntents[0]
+              }'. \nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: ["${
+                Object.keys(this.mockReturns.entityMapping)[0]
+              }"]`
+            );
+          }
+        });
+      });
+
+      describe("with registered entityMapping", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
+          this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE" };
+          this.mockReturns.customEntities = {
+            en: { ENTITIES_TYPE: [{ value: "customEntity1", synonyms: ["world"] }] },
+          };
+        });
+
+        it("loads custom entities from localesLoader", async function(this: CurrentThisContext) {
+          await this.getGenerator().execute(this.params.buildDirectory);
+          expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+            ...this.createArgumentsForExecute({
+              customEntities: this.mockReturns.customEntities.en,
+            })
+          );
+        });
+
+        it("moves the loaded array of customEntities from localesLoader to an single set of customEntities", async function(this: CurrentThisContext) {
+          this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE", customEntity2: "ENTITIES_TYPE" };
+          await this.getGenerator().execute(this.params.buildDirectory);
+
+          expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+            ...this.createArgumentsForExecute({
+              customEntities: this.mockReturns.customEntities.en,
+            })
+          );
+        });
+
+        describe("without registered customEntities", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.customEntities = { en: { ENTITIES_TYPE: [] } };
+            await this.getGenerator().execute(this.params.buildDirectory);
+          });
+
+          it("transmits single utterance", async function(this: CurrentThisContext) {
+            expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+              ...this.createArgumentsForExecute({
+                customEntities: this.mockReturns.customEntities.en,
+                intentConfigurations: [
+                  this.createIntentConfiguration({
+                    entities: jasmine.any(Array) as any,
+                    utterances: ["hello {{customEntity1}}"],
+                  }),
+                ],
+              })
+            );
+          });
+
+          it("transmits extracted entity", async function(this: CurrentThisContext) {
+            expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+              ...this.createArgumentsForExecute({
+                customEntities: this.mockReturns.customEntities.en,
+                intentConfigurations: [
+                  this.createIntentConfiguration({
+                    entities: ["customEntity1"],
+                    utterances: jasmine.any(Array) as any,
+                  }),
+                ],
+              })
+            );
+          });
+        });
+        describe("without entity example", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
+          });
+
+          describe("with synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: { ENTITIES_TYPE: [{ value: "customEntity1", synonyms: ["world", "earth"] }] },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("permutates each utterances with each matching synonym", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: [
+                    this.createIntentConfiguration({
+                      entities: jasmine.anything() as any,
+                      utterances: ["hello {{world|customEntity1}}", "hello {{earth|customEntity1}}", "hello {{customEntity1|customEntity1}}"],
+                    }),
+                  ],
+                })
+              );
+            });
+
+            it("transmits extracted entities", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: [
+                    this.createIntentConfiguration({
+                      entities: ["customEntity1"],
+                      utterances: jasmine.any(Array) as any,
+                    }),
+                  ],
+                })
+              );
+            });
+          });
+        });
+
+        describe("with entity example", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{world|customEntity1}}"] } };
+          });
+
+          describe("without synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: { ENTITIES_TYPE: [{ value: "customEntity1" }] },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("extracts slot types from utterance", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: [
+                    this.createIntentConfiguration({
+                      entities: ["customEntity1"],
+                      utterances: jasmine.any(Array) as any,
+                    }),
+                  ],
+                })
+              );
+            });
+
+            it("transmits the utterances with given entity example", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: [
+                    this.createIntentConfiguration({
+                      entities: jasmine.any(Array) as any,
+                      utterances: ["hello {{world|customEntity1}}"],
+                    }),
+                  ],
+                })
+              );
+            });
+          });
+
+          describe("with synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: { ENTITIES_TYPE: [{ value: "customEntity1", synonyms: ["earth"] }] },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("transmits the utterance from utteranceTemplate without permutation each synonym", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: [
+                    this.createIntentConfiguration({
+                      entities: jasmine.any(Array) as any,
+                      utterances: ["hello {{world|customEntity1}}"],
+                    }),
+                  ],
+                })
+              );
+            });
+
+            it("transmits synonyms in customEntities", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  customEntities: this.mockReturns.customEntities.en,
+                })
+              );
+            });
+          });
+        });
+      });
     });
 
     describe("with > 0 different languages in locales folder", function() {
