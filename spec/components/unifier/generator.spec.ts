@@ -210,33 +210,40 @@ describe("Generator", function() {
           this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
         });
 
-        it("throws an unknown entity exception, no entity mappings are registered", async function(this: CurrentThisContext) {
-          try {
-            await this.getGenerator().execute(this.params.buildDirectory);
-            fail("Should throw an unknown entity exception");
-          } catch (e) {
-            expect(e.message).toEqual(
-              `Unknown entity 'customEntity1' found in utterances of intent '${
-                this.mockReturns.usedIntents[0]
-              }'. \nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: []`
-            );
-          }
+        describe("no entity mappings are registered", function() {
+          it("throws an unknown entity exception", async function(this: CurrentThisContext) {
+            try {
+              await this.getGenerator().execute(this.params.buildDirectory);
+              fail("Should throw an unknown entity exception");
+            } catch (e) {
+              expect(e.message).toEqual(
+                `Unknown entity 'customEntity1' found in utterances of intent '${
+                  this.mockReturns.usedIntents[0]
+                }'. \nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: []`
+              );
+            }
+          });
         });
 
-        it("throws an unknown entity exception, wrong entity mappings are registered", async function(this: CurrentThisContext) {
-          this.mockReturns.entityMapping = { TYPE_ENTITIES: "customEntity1" };
-          try {
-            await this.getGenerator().execute(this.params.buildDirectory);
-            fail("Should throw an unknown entity exception");
-          } catch (e) {
-            expect(e.message).toEqual(
-              `Unknown entity 'customEntity1' found in utterances of intent '${
-                this.mockReturns.usedIntents[0]
-              }'. \nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: ["${
-                Object.keys(this.mockReturns.entityMapping)[0]
-              }"]`
-            );
-          }
+        describe("wrong entity mapping is registered", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.entityMapping = { TYPE_ENTITIES: "customEntity1" };
+          });
+
+          it("throws an unknown entity exception", async function(this: CurrentThisContext) {
+            try {
+              await this.getGenerator().execute(this.params.buildDirectory);
+              fail("Should throw an unknown entity exception");
+            } catch (e) {
+              expect(e.message).toEqual(
+                `Unknown entity 'customEntity1' found in utterances of intent '${
+                  this.mockReturns.usedIntents[0]
+                }'. \nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: ["${
+                  Object.keys(this.mockReturns.entityMapping)[0]
+                }"]`
+              );
+            }
+          });
         });
       });
 
@@ -278,7 +285,6 @@ describe("Generator", function() {
           it("transmits single utterance", async function(this: CurrentThisContext) {
             expect(this.platformGenerator.execute).toHaveBeenCalledWith(
               ...this.createArgumentsForExecute({
-                customEntities: this.mockReturns.customEntities.en,
                 intentConfigurations: [
                   this.createIntentConfiguration({
                     entities: jasmine.any(Array) as any,
@@ -292,7 +298,6 @@ describe("Generator", function() {
           it("transmits extracted entity", async function(this: CurrentThisContext) {
             expect(this.platformGenerator.execute).toHaveBeenCalledWith(
               ...this.createArgumentsForExecute({
-                customEntities: this.mockReturns.customEntities.en,
                 intentConfigurations: [
                   this.createIntentConfiguration({
                     entities: ["customEntity1"],
@@ -303,6 +308,7 @@ describe("Generator", function() {
             );
           });
         });
+
         describe("without entity example", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };
