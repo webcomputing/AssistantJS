@@ -18,12 +18,11 @@ export class Generator implements CLIGeneratorExtension {
     @multiInject(componentInterfaces.entityMapping) @optional() private entityMappings: PlatformGenerator.EntityMapping[]
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    [this.intents, this.platformGenerators, this.additionalUtteranceTemplatesServices, this.entityMappings].forEach(v => {
-      // tslint:disable-next-line:no-parameter-reassignment
-      if (typeof v === "undefined") v = [];
-    });
+    this.setDefaultValuesFor("intents");
+    this.setDefaultValuesFor("platformGenerators");
+    this.setDefaultValuesFor("additionalUtteranceTemplatesServices");
+    this.setDefaultValuesFor("entityMappings");
   }
-
   public async execute(buildDir: string): Promise<void> {
     // Get the main utterance templates from locales folder
     const utteranceTemplates = this.localesLoader.getUtteranceTemplates();
@@ -136,6 +135,16 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   /**
+   * Set an empty array as default value if the reference variable is undefined.
+   * @param reference: "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings"
+   */
+  private setDefaultValuesFor(reference: "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings") {
+    if (typeof this[reference] === "undefined") {
+      this[reference] = [];
+    }
+  }
+
+  /**
    * Generate permutations of utterances, based on the templates and entities
    * @param templates
    */
@@ -200,7 +209,7 @@ export class Generator implements CLIGeneratorExtension {
    */
   private buildCartesianProduct(template: string, slots: string[][], placeholderExp: RegExp): string[] {
     const result: string[] = [];
-    if (slots.length > 0) {
+    if (slots.length > 0 && slots[0].length > 0) {
       const combinations = combinatorics.cartesianProduct.apply(combinatorics, slots).toArray();
       // Substitute placeholders with combinations
       combinations.forEach(combi => {
