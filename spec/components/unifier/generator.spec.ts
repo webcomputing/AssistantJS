@@ -291,6 +291,14 @@ describe("Generator", function() {
             );
           });
 
+          it("transmits entetyMapping", async function(this: CurrentThisContext) {
+            expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+              ...this.createArgumentsForExecute({
+                entityMapping: this.mockReturns.entityMapping,
+              })
+            );
+          });
+
           it("transmits extracted entity", async function(this: CurrentThisContext) {
             expect(this.platformGenerator.execute).toHaveBeenCalledWith(
               ...this.createArgumentsForExecute({
@@ -340,6 +348,14 @@ describe("Generator", function() {
                       utterances: jasmine.any(Array) as any,
                     }),
                   ],
+                })
+              );
+            });
+
+            it("transmits entetyMapping", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  entityMapping: this.mockReturns.entityMapping,
                 })
               );
             });
