@@ -172,7 +172,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     return this;
   }
 
-  public onUnsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
+  public unsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
     this.unsupportedFeatureCalls.push({ methodName, args });
   }
 

@@ -72,12 +72,12 @@ export class HandlerProxyFactory {
           if (!failSilentlyOnUnsupportedFeatures) {
             throw new Error(`${message} Exiting due to configuration of failSilentlyOnUnsupportedFeatures.`);
           } else {
-            // We return a fake function which enables method chaining by returning this proxy, logs the unsupported feature call and calls responseHandler.onUnsupportedFeature
+            // We return a fake function which enables method chaining by returning this proxy, logs the unsupported feature call and calls responseHandler.unsupportedFeature
             return function() {
               logger.debug(message);
 
               // "receiver" points to the proxy, we have to pass it as this context for responseHandler to enable correct method chaining
-              target.onUnsupportedFeature.apply(receiver, [propKey, ...arguments]);
+              target.unsupportedFeature.apply(receiver, [propKey, ...arguments]);
 
               return receiver;
             };

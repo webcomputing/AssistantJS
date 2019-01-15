@@ -89,8 +89,8 @@ export interface ResponseHandlerExtensions<MergedAnswerType extends BasicAnswerT
  */
 export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
   /**
-   * If failSilentlyOnUnsupportedFeatures is configured to true, onUnsupportedFeature() is called for every unsupported method call.
-   * onUnsupportedFeature() itself will add the call to this unsupportedFeatureCalls array.
+   * If failSilentlyOnUnsupportedFeatures is configured to true, unsupportedFeature() is called for every unsupported method call.
+   * unsupportedFeature() itself will add the call to this unsupportedFeatureCalls array.
    */
   unsupportedFeatureCalls: Array<{ methodName: string | number | symbol; args: any[] }>;
 
@@ -99,7 +99,7 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * @param {string} methodName Name of the called, not-existing method
    * @param {any[]} args All passed arguments to the method call
    */
-  onUnsupportedFeature(methodName: string | number | symbol, ...args: any[]): void;
+  unsupportedFeature(methodName: string | number | symbol, ...args: any[]): void;
 
   /**
    * Sends voice message
