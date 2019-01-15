@@ -17,24 +17,13 @@ export abstract class ConventionalFileLoader<ClassType> {
   public abstract toComponentDescriptor(): ComponentDescriptor;
 
   /**
-   * [Sync!] Adds all classes in a specific directory to this.classes.
+   * [Sync!] Adds all classes in a specific directory to this.classes
    * @param addOnly If set to true, this method only calls "addClass", but not "registerClasses" finally, so does not register the component descriptor
    * @param baseDirectory Base directory to start (process.cwd() + "/js/app")
    * @param dictionary Dictionary which contains the classes to add
    */
   public registerByConvention(addOnly = false, baseDirectory = process.cwd() + "/js/app", dictionary) {
-    fs.readdirSync(baseDirectory + dictionary).forEach(file => {
-      const suffixParts = file.split(".");
-      const suffix = suffixParts[suffixParts.length - 1];
-
-      // Load if file is a JavaScript file
-      if (suffix !== "js") return;
-      const classModule = require(baseDirectory + dictionary + "/" + file);
-
-      Object.keys(classModule).forEach(exportName => {
-        this.addClass(classModule[exportName]);
-      });
-    });
+    this.addByConvention(baseDirectory + dictionary);
 
     if (!addOnly) this.registerClasses();
   }
@@ -55,6 +44,30 @@ export abstract class ConventionalFileLoader<ClassType> {
     const className = typeof name === "undefined" ? ConventionalFileLoader.deriveClassName<ClassType>(classToAdd) : name;
     this.classes[className] = classToAdd;
     return className;
+  }
+
+  /**
+   * [Sync!] Adds all classes (and it's childs) in a specific directory recusrively to this.classes
+   * @param directory directory to start with
+   */
+  private addByConvention(directory) {
+    fs.readdirSync(directory).forEach(file => {
+      const suffixParts = file.split(".");
+      const suffix = suffixParts[suffixParts.length - 1];
+
+      // Load if file is a JavaScript file
+      if (suffix === "js") {
+        const classModule = require(directory + "/" + file);
+
+        Object.keys(classModule).forEach(exportName => {
+          this.addClass(classModule[exportName]);
+        });
+      } else {
+        if (fs.statSync(directory + "/" + file).isDirectory()) {
+          this.addByConvention(directory + "/" + file);
+        } else return;
+      }
+    });
   }
 
   /** Returns a class name based on its constructor */
