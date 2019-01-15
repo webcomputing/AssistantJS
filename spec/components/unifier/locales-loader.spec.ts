@@ -8,7 +8,7 @@ import { ThisContext } from "../../this-context";
 
 // tslint:disable no-var-requires
 const deUtterances = require("../../support/mocks/i18n/locale/de/utterances.json");
-const enUtterances = require("../../support/mocks/i18n/locale/en/utterances.json");
+const enUtterances = require("../../support/mocks/i18n/locale/en/utterances.js");
 const deEntities = require("../../support/mocks/i18n/locale/de/entities.json");
 const enEntities = require("../../support/mocks/i18n/locale/en/entities.js");
 // tslint:enable no-var-requires
@@ -110,6 +110,9 @@ describe("LocalesLoader", function() {
 
       expect(Object.keys(entities.en)).toContain("color");
       expect(Object.keys(entities.en)).not.toContain("this should be shadowed by entities.js");
+
+      expect(Object.keys(utterances.en)).toContain("testIntent");
+      expect(Object.keys(utterances.en)).not.toContain("this should be shadowed by utterances.js");
     });
 
     afterEach(function() {
