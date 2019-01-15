@@ -51,9 +51,9 @@
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.8",
+    "@types/js-combinatorics": "^0.5.29",
     "@types/reflect-metadata": "0.0.5",
     "@types/request-promise": "^4.1.40",
-    "@types/js-combinatorics": "^0.5.29",
     "connect-timeout": "^1.9.0",
     "fakeredis": "^2.0.0",
     "gulp": "^3.9.1",
@@ -65,14 +65,15 @@
     "gulp-watch": "^5.0.0",
     "jasmine-spec-reporter": "^4.2.1",
     "jasmine-ts": "^0.2.1",
+    "lodash": ">=4.17.5",
+    "natives": "^1.1.6",
     "nyc": "^11.9.0",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.9.2",
     "tslint-config-prettier": "^1.13.0",
-    "typescript": "^2.9.2",
-    "lodash": ">=4.17.5"
+    "typescript": "^2.9.2"
   },
   "bin": {
     "assistant": "./bin/assistant"
