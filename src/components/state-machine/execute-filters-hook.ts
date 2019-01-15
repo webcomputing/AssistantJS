@@ -32,12 +32,12 @@ export class ExecuteFiltersHook {
     for (const prioritizedFilter of prioritizedFilters) {
       /** Find the first matching registered filter */
 
-      const fittingFilter = this.filters.find(filter => filter.constructor === prioritizedFilter.filter);
+      const fittingFilter: Filter<undefined | object> | undefined = this.filters.find(filter => filter.constructor === prioritizedFilter.filter);
 
       /** If there is a matching filter registered, execute it */
       if (fittingFilter) {
         this.logger.debug(`Executing filter ${fittingFilter.constructor.name}...`);
-        const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, prioritizedFilter.params || {}, ...args));
+        const filterResult = await Promise.resolve(fittingFilter.execute(state, stateName, intent, prioritizedFilter.params, ...args));
 
         /** If filter returns redirecting object => redirect */
         if (typeof filterResult === "object") {

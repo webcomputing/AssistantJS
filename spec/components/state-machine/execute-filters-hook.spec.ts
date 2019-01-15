@@ -64,7 +64,7 @@ describe("ExecuteFiltersHook", function() {
         expect(typeof this.callSpyResults[0][7]).toEqual("undefined");
       });
 
-      describe("with filter annotation using object format", function() {
+      describe("with filter annotation using parameters", function() {
         it("executes filter", async function(this: CurrentThisContext) {
           await this.stateMachine.handleIntent("filterTestEIntent");
           expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
@@ -73,6 +73,13 @@ describe("ExecuteFiltersHook", function() {
         it("passes params from annotation to execute method of filter", async function(this: CurrentThisContext) {
           await this.stateMachine.handleIntent("filterTestEIntent");
           expect(this.callSpyResults[0][4]).toEqual({ exampleParam: "example" });
+        });
+      });
+
+      describe("with a filter annotation not using parameters", function() {
+        it("passes undefined to execute method of filter", async function(this: CurrentThisContext) {
+          await this.stateMachine.handleIntent("filterTestAIntent");
+          expect(this.callSpyResults[0][4]).toBeUndefined();
         });
       });
 
