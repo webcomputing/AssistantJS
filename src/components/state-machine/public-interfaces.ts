@@ -113,6 +113,21 @@ export interface Transitionable {
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
 
+/** Holds all environment information about the execution of this filter: Which state was it, which intent, ... */
+export interface FilterExecutionContext<IntentArguments = any[]> {
+  /** Instance of state on which the filter was applied */
+  state: State.Required;
+
+  /** Name of the state on which the filter was applied */
+  stateName: string;
+
+  /** Name of intent method this filter was applied to */
+  intentMethod: string;
+
+  /** All additional arguments passed to the intent method */
+  additionalIntentArguments: IntentArguments;
+}
+
 export interface Filter<FilterParams extends object | undefined = never> {
   /**
    * Method of filter that is executed if the referenced filter is used as a decorator
@@ -122,19 +137,7 @@ export interface Filter<FilterParams extends object | undefined = never> {
    */
   execute(
     /** Holds all environment information about the execution of this filter: Which state was it, which intent, ... */
-    executionContext: {
-      /** Instance of state on which the filter was applied */
-      state: State.Required;
-
-      /** Name of the state on which the filter was applied */
-      stateName: string;
-
-      /** Name of intent method this filter was applied to */
-      intentMethod: string;
-
-      /** All additional arguments passed to the intent method */
-      additionalIntentArguments: any[];
-    },
+    executionContext: FilterExecutionContext,
     /** All arguments you passed via @filter() decorator */
     filterArguments: FilterParams
   ): OptionallyPromise<{ state: string; intent: string; args?: any[] } | boolean>;
