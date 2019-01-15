@@ -65,7 +65,7 @@ export abstract class ConventionalFileLoader<ClassType> {
       } else {
         if (fs.statSync(directory + "/" + file).isDirectory()) {
           this.addByConvention(directory + "/" + file);
-        } else return;
+        }
       }
     });
   }
