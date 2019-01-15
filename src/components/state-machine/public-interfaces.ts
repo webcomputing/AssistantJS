@@ -113,7 +113,7 @@ export interface Transitionable {
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
 
-export interface Filter<FilterParams extends object = {}> {
+export interface Filter<FilterParams extends object | undefined = undefined> {
   /**
    * Method of filter that is executed if the referenced filter is used as a decorator
    * @param {State.Required} state Instance of state which occured the execution of this filter

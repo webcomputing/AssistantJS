@@ -1,5 +1,5 @@
 import { inject, injectable, optional } from "inversify";
-import { Filter } from "../../../../src/assistant-source";
+import { Filter, State } from "../../../../src/assistant-source";
 
 @injectable()
 export class TestFilterA implements Filter {
@@ -9,7 +9,7 @@ export class TestFilterA implements Filter {
     private spy?: (...args: any[]) => void
   ) {}
 
-  public execute(...args: any[]) {
+  public execute(a: State.Required, b: string, c: string, d: { a: "string" }) {
     const redirect = {
       state: "FilterAState",
       intent: "filterTestBIntent",
