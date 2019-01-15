@@ -1,6 +1,3 @@
-import { getPackedSettings } from "http2";
-import { TestFilterA } from "../../../spec/support/mocks/filters/test-filter-a";
-import { TestFilterB } from "../../../spec/support/mocks/filters/test-filter-b";
 import { Constructor } from "../../assistant-source";
 import { Filter, State } from "./public-interfaces";
 
@@ -53,10 +50,3 @@ export const filter: FilterDecorator = function<FilterArguments extends object>(
     Reflect.defineMetadata(filterMetadataKey, currentContent, target);
   };
 };
-
-@filter(TestFilterA)
-class MyClass {}
-
-// tslint:disable-next-line:max-classes-per-file
-@filter(TestFilterB)
-class MyClass2 {}

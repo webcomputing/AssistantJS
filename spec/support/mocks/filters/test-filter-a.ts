@@ -9,7 +9,7 @@ export class TestFilterA implements Filter {
     private spy?: (...args: any[]) => void
   ) {}
 
-  public execute(a: State.Required, b: string, c: string, d: { a: "string" }) {
+  public execute(...args: any[]) {
     const redirect = {
       state: "FilterAState",
       intent: "filterTestBIntent",
