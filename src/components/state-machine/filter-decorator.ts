@@ -1,3 +1,5 @@
+import { getPackedSettings } from "http2";
+import { TestFilterA } from "../../../spec/support/mocks/filters/test-filter-a";
 import { Constructor } from "../../assistant-source";
 import { Filter } from "./public-interfaces";
 
@@ -9,7 +11,7 @@ export type FilterDecoratorContent = Array<{
   params: object | undefined;
 }>;
 
-export function filter<FilterArguments extends object>(filterClass: Constructor<Filter>, filterArguments?: FilterArguments) {
+export function filter<FilterArguments extends object>(filterClass: Constructor<Filter<FilterArguments>>, filterArguments?: FilterArguments) {
   return function(targetClass: any, methodName?: string) {
     // Get current metadata content
     const target = typeof methodName === "undefined" ? targetClass : targetClass[methodName];
