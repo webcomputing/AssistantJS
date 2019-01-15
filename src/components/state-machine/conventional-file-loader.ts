@@ -62,10 +62,8 @@ export abstract class ConventionalFileLoader<ClassType> {
         Object.keys(classModule).forEach(exportName => {
           this.addClass(classModule[exportName]);
         });
-      } else {
-        if (fs.statSync(directory + "/" + file).isDirectory()) {
-          this.addByConvention(directory + "/" + file);
-        } else return;
+      } else if (fs.statSync(directory + "/" + file).isDirectory()) {
+        this.addByConvention(directory + "/" + file);
       }
     });
   }
