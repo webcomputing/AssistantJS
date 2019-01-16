@@ -216,9 +216,10 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
   /**
    * This method resolves all promises which were added via the Handler-Functions
-   * It should only be called once at a time, as otherwise the results could interfere
+   * It should only be called once at a time, as otherwise the results could interfere.
+   * In a regular case, you don't need to call this, since it is called automatically during send()
    */
-  private async resolveResults(): Promise<void> {
+  protected async resolveResults(): Promise<void> {
     // first get all keys, these are the properties which are filled
     const promiseKeys: string[] = [];
     for (const key in this.promises) {
