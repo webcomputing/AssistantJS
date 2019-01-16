@@ -71,8 +71,10 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
    *     }
    * }
    * </code></pre>
+   *
+   * On a regular basis, your response handler won't need this - just implement your getBody() method and your fine.
    */
-  private results: Partial<MergedAnswerTypes> = {} as any;
+  protected results: Partial<MergedAnswerTypes> = {} as any;
 
   /**
    * property to save if the answers were sent
