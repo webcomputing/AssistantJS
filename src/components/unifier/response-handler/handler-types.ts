@@ -80,14 +80,10 @@ export interface ResponseHandlerExtensions<MergedAnswerType extends BasicAnswerT
 }
 
 /**
- * This interface defines which methods every handler should have.
- * Types are referenced to the merged handler-specific types, like 'AlexaSpecificTypes & GoogleSpecificType'
- *
- * The Geters returns either the value or null. This is necessary, as every specific handler will only implement a subset of the merged FeatureSet.
- * This means for example, that a GoogleSpecificHandler will not have the Method <caption>setAlexaList()</caption>. To make method-chaining possible it is necessary,
- * that all missing feature-methods get traped and return also the correct this-context. This Proxy is return by the @see {@link HandlerProxyFactory}.
+ * Extends BasicHandable by a method which is called by proxy for every unsupported feature.
+ * We want this in an additional interface since the BasicHandable interface is visible for the end user, but this functionality is framework/extension-only.
  */
-export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
+export interface UnsupportedFeatureSupportForHandables {
   /**
    * If failSilentlyOnUnsupportedFeatures is configured to true, unsupportedFeature() is called for every unsupported method call.
    * unsupportedFeature() itself will add the call to this unsupportedFeatureCalls array.
@@ -100,7 +96,17 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * @param {any[]} args All passed arguments to the method call
    */
   unsupportedFeature(methodName: string | number | symbol, ...args: any[]): void;
+}
 
+/**
+ * This interface defines which methods every handler should have.
+ * Types are referenced to the merged handler-specific types, like 'AlexaSpecificTypes & GoogleSpecificType'
+ *
+ * The Geters returns either the value or null. This is necessary, as every specific handler will only implement a subset of the merged FeatureSet.
+ * This means for example, that a GoogleSpecificHandler will not have the Method <caption>setAlexaList()</caption>. To make method-chaining possible it is necessary,
+ * that all missing feature-methods get traped and return also the correct this-context. This Proxy is return by the @see {@link HandlerProxyFactory}.
+ */
+export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
   /**
    * Sends voice message
    * @param text Text to say to user

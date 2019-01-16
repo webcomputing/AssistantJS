@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
 import { MinimalRequestExtraction } from "../public-interfaces";
-import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./handler-types";
+import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
 /**
  * This Class represents the basic features a ResponseHandler should have. It implements all Basic functions,
@@ -16,7 +16,7 @@ import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./ha
  * For the docs of the Methods see also the implemented interfaces
  */
 @injectable()
-export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements BasicHandable<MergedAnswerTypes> {
+export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements BasicHandable<MergedAnswerTypes>, UnsupportedFeatureSupportForHandables {
   /** See BasicHandable interface */
   public unsupportedFeatureCalls: Array<{ methodName: string | number | symbol; args: any[] }> = [];
 
