@@ -6,41 +6,23 @@ import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 import { GenericIntent, intent, LocalesLoader, PlatformGenerator } from "./public-interfaces";
 
+type DEFAULT_REFERENCES = "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings";
+
 @injectable()
 export class Generator implements CLIGeneratorExtension {
-  private intents: intent[] = [];
-  private entityMappings: PlatformGenerator.EntityMapping[] = [];
-  private platformGenerators: PlatformGenerator.Extension[] = [];
-  private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[] = [];
-
   constructor(
-    @inject("core:state-machine:used-intents")
-    @optional()
-    intents: intent[],
-    @multiInject(componentInterfaces.platformGenerator)
-    @optional()
-    generators: PlatformGenerator.Extension[],
+    @inject(injectionNames.localesLoader) private localesLoader: LocalesLoader,
+    @inject("core:state-machine:used-intents") @optional() private intents: intent[],
+    @multiInject(componentInterfaces.platformGenerator) @optional() private platformGenerators: PlatformGenerator.Extension[],
     @multiInject(componentInterfaces.utteranceTemplateService)
     @optional()
-    utteranceServices: PlatformGenerator.UtteranceTemplateService[],
-    @multiInject(componentInterfaces.entityMapping)
-    @optional()
-    entityMappings: PlatformGenerator.EntityMapping[],
-    @inject(injectionNames.localesLoader)
-    private localesLoader: LocalesLoader
+    private additionalUtteranceTemplatesServices: PlatformGenerator.UtteranceTemplateService[],
+    @multiInject(componentInterfaces.entityMapping) @optional() private entityMappings: PlatformGenerator.EntityMapping[]
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    [intents, generators, utteranceServices, entityMappings].forEach(v => {
-      // tslint:disable-next-line:no-parameter-reassignment
-      if (typeof v === "undefined") v = [];
-    });
-
-    this.intents = intents;
-    this.platformGenerators = generators;
-    this.entityMappings = entityMappings;
-    this.additionalUtteranceTemplatesServices = utteranceServices;
+    const defaultReferences: DEFAULT_REFERENCES[] = ["intents", "platformGenerators", "additionalUtteranceTemplatesServices", "entityMappings"];
+    defaultReferences.forEach((value: DEFAULT_REFERENCES) => this.setDefaultValuesFor(value));
   }
-
   public async execute(buildDir: string): Promise<void> {
     // Get the main utterance templates from locales folder
     const utteranceTemplates = this.localesLoader.getUtteranceTemplates();
@@ -153,6 +135,16 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   /**
+   * Set an empty array as default value if the reference variable is undefined.
+   * @param reference: "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings"
+   */
+  private setDefaultValuesFor(reference: DEFAULT_REFERENCES) {
+    if (typeof this[reference] === "undefined") {
+      this[reference] = [];
+    }
+  }
+
+  /**
    * Generate permutations of utterances, based on the templates and entities
    * @param templates
    */
@@ -217,7 +209,7 @@ export class Generator implements CLIGeneratorExtension {
    */
   private buildCartesianProduct(template: string, slots: string[][], placeholderExp: RegExp): string[] {
     const result: string[] = [];
-    if (slots.length > 0) {
+    if (slots.length > 0 && slots[0].length > 0) {
       const combinations = combinatorics.cartesianProduct.apply(combinatorics, slots).toArray();
       // Substitute placeholders with combinations
       combinations.forEach(combi => {
