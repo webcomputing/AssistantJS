@@ -6,6 +6,8 @@ import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 import { GenericIntent, intent, LocalesLoader, PlatformGenerator } from "./public-interfaces";
 
+type DEFAULT_REFERENCES = "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings";
+
 @injectable()
 export class Generator implements CLIGeneratorExtension {
   constructor(
@@ -18,10 +20,8 @@ export class Generator implements CLIGeneratorExtension {
     @multiInject(componentInterfaces.entityMapping) @optional() private entityMappings: PlatformGenerator.EntityMapping[]
   ) {
     // Set default values. Setting them in the constructor leads to not calling the injections
-    this.setDefaultValuesFor("intents");
-    this.setDefaultValuesFor("platformGenerators");
-    this.setDefaultValuesFor("additionalUtteranceTemplatesServices");
-    this.setDefaultValuesFor("entityMappings");
+    const defaultReferences: DEFAULT_REFERENCES[] = ["intents", "platformGenerators", "additionalUtteranceTemplatesServices", "entityMappings"];
+    defaultReferences.forEach((value: DEFAULT_REFERENCES) => this.setDefaultValuesFor(value));
   }
   public async execute(buildDir: string): Promise<void> {
     // Get the main utterance templates from locales folder
@@ -138,7 +138,7 @@ export class Generator implements CLIGeneratorExtension {
    * Set an empty array as default value if the reference variable is undefined.
    * @param reference: "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings"
    */
-  private setDefaultValuesFor(reference: "intents" | "platformGenerators" | "additionalUtteranceTemplatesServices" | "entityMappings") {
+  private setDefaultValuesFor(reference: DEFAULT_REFERENCES) {
     if (typeof this[reference] === "undefined") {
       this[reference] = [];
     }

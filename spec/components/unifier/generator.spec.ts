@@ -252,24 +252,26 @@ describe("Generator", function() {
           };
         });
 
-        it("loads custom entities from localesLoader", async function(this: CurrentThisContext) {
-          await this.getGenerator().execute(this.params.buildDirectory);
-          expect(this.platformGenerator.execute).toHaveBeenCalledWith(
-            ...this.createArgumentsForExecute({
-              customEntities: this.mockReturns.customEntities.en,
-            })
-          );
-        });
+        describe("with registered custom entities", function() {
+          it("loads custom entities from localesLoader", async function(this: CurrentThisContext) {
+            await this.getGenerator().execute(this.params.buildDirectory);
+            expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+              ...this.createArgumentsForExecute({
+                customEntities: this.mockReturns.customEntities.en,
+              })
+            );
+          });
 
-        it("moves the loaded array of customEntities from localesLoader to an single set of customEntities", async function(this: CurrentThisContext) {
-          this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE", customEntity2: "ENTITIES_TYPE" };
-          await this.getGenerator().execute(this.params.buildDirectory);
+          it("moves the loaded array of customEntities from localesLoader to an single set of customEntities", async function(this: CurrentThisContext) {
+            this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE", customEntity2: "ENTITIES_TYPE" };
+            await this.getGenerator().execute(this.params.buildDirectory);
 
-          expect(this.platformGenerator.execute).toHaveBeenCalledWith(
-            ...this.createArgumentsForExecute({
-              customEntities: this.mockReturns.customEntities.en,
-            })
-          );
+            expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+              ...this.createArgumentsForExecute({
+                customEntities: this.mockReturns.customEntities.en,
+              })
+            );
+          });
         });
 
         describe("without registered customEntities", function() {
@@ -291,7 +293,7 @@ describe("Generator", function() {
             );
           });
 
-          it("transmits entetyMapping", async function(this: CurrentThisContext) {
+          it("transmits entityMapping", async function(this: CurrentThisContext) {
             expect(this.platformGenerator.execute).toHaveBeenCalledWith(
               ...this.createArgumentsForExecute({
                 entityMapping: this.mockReturns.entityMapping,
@@ -352,7 +354,7 @@ describe("Generator", function() {
               );
             });
 
-            it("transmits entetyMapping", async function(this: CurrentThisContext) {
+            it("transmits entityMapping", async function(this: CurrentThisContext) {
               expect(this.platformGenerator.execute).toHaveBeenCalledWith(
                 ...this.createArgumentsForExecute({
                   entityMapping: this.mockReturns.entityMapping,
