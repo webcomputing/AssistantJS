@@ -1,4 +1,4 @@
-import { Component, ExecutableExtension } from "inversify-components";
+import { Component } from "inversify-components";
 import { SpecHelper } from "../../spec-helper";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
@@ -431,9 +431,16 @@ export namespace OptionalHandlerFeatures {
 }
 
 /**
- * Export all interfaces from the response handle specific types
+ * Export all needed interfaces from the response handle specific types
  */
-export { BasicAnswerTypes, BasicHandable, BeforeResponseHandler, AfterResponseHandler, ResponseHandlerExtensions } from "./response-handler/handler-types";
+export {
+  BasicAnswerTypes,
+  BasicHandable,
+  BeforeResponseHandler,
+  AfterResponseHandler,
+  ResponseHandlerExtensions,
+  UnsupportedFeatureSupportForHandables,
+} from "./response-handler/handler-types";
 
 /**
  * Export mixins

@@ -1,5 +1,5 @@
 import { inject, injectable, optional } from "inversify";
-import { Filter } from "../../../../src/assistant-source";
+import { Filter, State } from "../../../../src/assistant-source";
 
 @injectable()
 export class TestFilterB implements Filter {

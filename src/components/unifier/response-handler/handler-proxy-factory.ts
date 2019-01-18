@@ -3,7 +3,7 @@ import { Component } from "inversify-components";
 import { injectionNames } from "../../../injection-names";
 import { Logger } from "../../root/public-interfaces";
 import { Configuration } from "../private-interfaces";
-import { BasicAnswerTypes, BasicHandable } from "./handler-types";
+import { BasicAnswerTypes, BasicHandable, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
 /**
  * This Factory adds a proxy arround the current handler to allow method-chaining with every specific handler,
@@ -34,7 +34,7 @@ export class HandlerProxyFactory {
    * This factory is bound to the root-scope as singleton, so DO NOT add any injections with request-scope here
    * @param handler
    */
-  public createHandlerProxy<K extends BasicAnswerTypes, T extends BasicHandable<K>>(handler: T): T {
+  public createHandlerProxy<K extends BasicAnswerTypes, T extends BasicHandable<K> & UnsupportedFeatureSupportForHandables>(handler: T): T {
     const failSilentlyOnUnsupportedFeatures = this.failSilentlyOnUnsupportedFeatures;
     const logger = this.logger;
 
@@ -72,12 +72,12 @@ export class HandlerProxyFactory {
           if (!failSilentlyOnUnsupportedFeatures) {
             throw new Error(`${message} Exiting due to configuration of failSilentlyOnUnsupportedFeatures.`);
           } else {
-            // We return a fake function which enables method chaining by returning this proxy, logs the unsupported feature call and calls responseHandler.onUnsupportedFeature
+            // We return a fake function which enables method chaining by returning this proxy, logs the unsupported feature call and calls responseHandler.unsupportedFeature
             return function() {
               logger.debug(message);
 
               // "receiver" points to the proxy, we have to pass it as this context for responseHandler to enable correct method chaining
-              target.onUnsupportedFeature.apply(receiver, [propKey, ...arguments]);
+              target.unsupportedFeature.apply(receiver, [propKey, ...arguments]);
 
               return receiver;
             };

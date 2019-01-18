@@ -53,18 +53,17 @@ describe("ExecuteFiltersHook", function() {
         expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateC.intentB"));
       });
 
-      it("passes arguments from handleIntent to execute method of filter", async function(this: CurrentThisContext) {
+      it("passes arguments from handleIntent as executionContext to execute method of filter", async function(this: CurrentThisContext) {
         await this.stateMachine.handleIntent("filterTestAIntent", "arg1", "arg2");
+
         expect(this.callSpyResults[0][0]).toEqual("TestFilterA");
-        expect(this.callSpyResults[0][1].constructor.name).toEqual("FilterAState");
-        expect(this.callSpyResults[0][2]).toEqual("FilterAState");
-        expect(this.callSpyResults[0][3]).toEqual("filterTestAIntent");
-        expect(this.callSpyResults[0][5]).toEqual("arg1");
-        expect(this.callSpyResults[0][6]).toEqual("arg2");
-        expect(typeof this.callSpyResults[0][7]).toEqual("undefined");
+        expect(this.callSpyResults[0][1].state.constructor.name).toEqual("FilterAState");
+        expect(this.callSpyResults[0][1].stateName).toEqual("FilterAState");
+        expect(this.callSpyResults[0][1].intentMethod).toEqual("filterTestAIntent");
+        expect(this.callSpyResults[0][1].additionalIntentArguments).toEqual(["arg1", "arg2"]);
       });
 
-      describe("with filter annotation using object format", function() {
+      describe("with filter annotation using parameters", function() {
         it("executes filter", async function(this: CurrentThisContext) {
           await this.stateMachine.handleIntent("filterTestEIntent");
           expect(this.specHelper.getResponseResults().voiceMessage!.text).toBe(await this.translateHelper.t("filter.stateA.intentB"));
@@ -72,7 +71,14 @@ describe("ExecuteFiltersHook", function() {
 
         it("passes params from annotation to execute method of filter", async function(this: CurrentThisContext) {
           await this.stateMachine.handleIntent("filterTestEIntent");
-          expect(this.callSpyResults[0][4]).toEqual({ exampleParam: "example" });
+          expect(this.callSpyResults[0][2]).toEqual({ exampleParam: "example" });
+        });
+      });
+
+      describe("with a filter annotation not using parameters", function() {
+        it("passes undefined to execute method of filter", async function(this: CurrentThisContext) {
+          await this.stateMachine.handleIntent("filterTestAIntent");
+          expect(this.callSpyResults[0][2]).toBeUndefined();
         });
       });
 

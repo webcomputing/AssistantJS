@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
 import { MinimalRequestExtraction } from "../public-interfaces";
-import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./handler-types";
+import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
 /**
  * This Class represents the basic features a ResponseHandler should have. It implements all Basic functions,
@@ -16,7 +16,7 @@ import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions } from "./ha
  * For the docs of the Methods see also the implemented interfaces
  */
 @injectable()
-export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements BasicHandable<MergedAnswerTypes> {
+export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements BasicHandable<MergedAnswerTypes>, UnsupportedFeatureSupportForHandables {
   /** See BasicHandable interface */
   public unsupportedFeatureCalls: Array<{ methodName: string | number | symbol; args: any[] }> = [];
 
@@ -71,8 +71,10 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
    *     }
    * }
    * </code></pre>
+   *
+   * On a regular basis, your response handler won't need this - just implement your getBody() method and your fine.
    */
-  private results: Partial<MergedAnswerTypes> = {} as any;
+  protected results: Partial<MergedAnswerTypes> = {} as any;
 
   /**
    * property to save if the answers were sent
@@ -172,7 +174,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     return this;
   }
 
-  public onUnsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
+  public unsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
     this.unsupportedFeatureCalls.push({ methodName, args });
   }
 
@@ -216,9 +218,10 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
   /**
    * This method resolves all promises which were added via the Handler-Functions
-   * It should only be called once at a time, as otherwise the results could interfere
+   * It should only be called once at a time, as otherwise the results could interfere.
+   * In a regular case, you don't need to call this, since it is called automatically during send()
    */
-  private async resolveResults(): Promise<void> {
+  protected async resolveResults(): Promise<void> {
     // first get all keys, these are the properties which are filled
     const promiseKeys: string[] = [];
     for (const key in this.promises) {

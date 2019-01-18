@@ -124,7 +124,7 @@ describe("HandlerProxyFactory", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.logger = this.container.inversifyInstance.get(injectionNames.logger);
             spyOn(this.logger, "debug").and.callThrough();
-            spyOn(this.handlerInstance, "onUnsupportedFeature").and.callThrough();
+            spyOn(this.handlerInstance, "unsupportedFeature").and.callThrough();
             this.container.inversifyInstance.unbind(injectionNames.logger);
             this.container.inversifyInstance.bind(injectionNames.logger).toConstantValue(this.logger);
 
@@ -139,8 +139,8 @@ describe("HandlerProxyFactory", function() {
             expect(this.logger.debug).toHaveBeenCalled();
           });
 
-          it("call onUnsupportedFeature", async function(this: CurrentThisContext) {
-            expect(this.handlerInstance.onUnsupportedFeature).toHaveBeenCalledWith("setSessionData", this.params.textToSet);
+          it("calls unsupportedFeature", async function(this: CurrentThisContext) {
+            expect(this.handlerInstance.unsupportedFeature).toHaveBeenCalledWith("setSessionData", this.params.textToSet);
           });
         });
 
