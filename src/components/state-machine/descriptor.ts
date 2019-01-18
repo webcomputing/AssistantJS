@@ -11,7 +11,7 @@ import { Hooks } from "../joined-interfaces";
 import { BasicHandable } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
-import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
+import { ContextState, ContextStateProvider, Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
@@ -60,7 +60,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Returns all intents
       bindService.bindGlobalService<intent[]>("used-intents").toDynamicValue(context => {
-        const meta = context.container.get<State.Meta[]>(injectionNames.metaState);
+        const meta = context.container.get<State.Meta[]>(injectionNames.metaStates);
         return meta
           .map(m => m.intents)
           .reduce((previous, current) => previous.concat(current), [])
@@ -69,7 +69,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Returns all state names
       bindService.bindGlobalService<string[]>("state-names").toDynamicValue(context => {
-        return context.container.get<State.Meta[]>(injectionNames.metaState).map(m => m.name);
+        return context.container.get<State.Meta[]>(injectionNames.metaStates).map(m => m.name);
       });
     },
 
@@ -116,7 +116,7 @@ export const descriptor: ComponentDescriptor = {
       });
 
       // Provider for context states. Returns array of states or empty array if no state is present.
-      bindService.bindGlobalService("current-context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
+      bindService.bindGlobalService<ContextStateProvider>("current-context-states-provider").toProvider(context => {
         return async (): Promise<Array<{ instance: State.Required; name: string }>> => {
           const factory = context.container.get<Function>(injectionNames.stateFactory);
 

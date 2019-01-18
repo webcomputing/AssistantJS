@@ -43,14 +43,14 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .inSingletonScope();
 
       // Bind swapped entity configuration
-      bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mappings").toDynamicValue(context => {
+      bindService.bindGlobalService<PlatformGenerator.EntityMapping>("user-entity-mapping").toDynamicValue(context => {
         return swapHash(context.container.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier")).configuration.entities);
       });
 
       // Bind same swapped entity configuration to own extension
       bindService
         .bindExtension<PlatformGenerator.EntityMapping>(componentInterfaces.entityMapping)
-        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>(injectionNames.userEntityMappings));
+        .toDynamicValue(context => context.container.get<PlatformGenerator.EntityMapping>(injectionNames.userEntityMapping));
 
       // bind HandlerProxyFactory
       bindService

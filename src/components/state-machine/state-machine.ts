@@ -8,14 +8,14 @@ import { injectionNames } from "../../injection-names";
 import { clearContextMetadataKey } from "./decorators/clear-context-decorator";
 import { stayInContextMetadataKey } from "./decorators/stay-in-context-decorator";
 import { componentInterfaces } from "./private-interfaces";
-import { State, Transitionable } from "./public-interfaces";
+import { ContextStateProvider, State, Transitionable } from "./public-interfaces";
 
 @injectable()
 export class StateMachine implements Transitionable {
   public intentHistory: Array<{ stateName: string; intentMethodName: string }> = [];
 
   constructor(
-    @inject(injectionNames.current.contextStatesProvider) private getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>,
+    @inject(injectionNames.current.contextStatesProvider) private getContextStates: ContextStateProvider,
     @inject(injectionNames.current.stateProvider) private getCurrentState: State.CurrentProvider,
     @inject(injectionNames.stateNames) private stateNames: string[],
     @inject(injectionNames.current.sessionFactory) private currentSessionFactory: CurrentSessionFactory,

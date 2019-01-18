@@ -52,6 +52,9 @@ export interface SessionFactory {
   getCurrentSession(currentSessionAttributes?: any): Session;
 }
 
+/** Returns a function which execute the KillService and remove the current session. */
+export type KillSessionPromise = () => Promise<void>;
+
 /** Returns a session object describing the current session */
 export type CurrentSessionFactory = () => Session;
 

@@ -135,9 +135,7 @@ export class ContextDeriver implements ContextDeriverI {
       const mergedObject = whitelist
         .filter(entry => typeof entry === "object")
         .reduce((prev, curr) => {
-          /* tslint:disable */
-          return Object.assign(prev, curr);
-          /* tslint:enable */
+          return { ...(prev as Configuration.LogWhitelistElement), ...(curr as Configuration.LogWhitelistElement) };
         }, {});
 
       /** Check filtering for every key */

@@ -5,7 +5,7 @@ import { BeforeResponseHandler } from "../../assistant-source";
 import { injectionNames } from "../../injection-names";
 import { KillSessionService } from "./kill-session-service";
 import { componentInterfaces, Configuration } from "./private-interfaces";
-import { CurrentSessionFactory, Session, SessionFactory } from "./public-interfaces";
+import { CurrentSessionFactory, KillSessionPromise, Session, SessionFactory } from "./public-interfaces";
 import { CryptedPlatformSessionFactory } from "./session-factories/crypted-platform-session-factory";
 import { PlatformSessionFactory } from "./session-factories/platform-session-factory";
 import { PlatformSessionMirror } from "./session-factories/platform-session-mirror";
@@ -62,7 +62,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       // Bind kill session service
       bindService.bindLocalServiceToSelf(KillSessionService);
-      bindService.bindGlobalService("current-kill-session-promise").toProvider(context => {
+      bindService.bindGlobalService<KillSessionPromise>("current-kill-session-promise").toProvider(context => {
         return () => {
           const killService = context.container.get(KillSessionService);
           return killService.execute();

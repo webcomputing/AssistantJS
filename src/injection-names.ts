@@ -43,7 +43,7 @@ export const injectionNames = {
   /**
    * Inject an instance of @type {State.Meta[]}
    */
-  metaState: "core:state-machine:meta-states",
+  metaStates: "core:state-machine:meta-states",
   /**
    * Inject an instance of @type {State.Factory}
    */
@@ -59,13 +59,13 @@ export const injectionNames = {
   /**
    * Inject an instance of @type {PlatformGenerator.EntityMapping}
    */
-  userEntityMappings: "core:unifier:user-entity-mappings",
+  userEntityMapping: "core:unifier:user-entity-mapping",
   /**
    * Namespace for services which are only available in the request scope.
    */
   current: {
     /**
-     * Inject an instance of @type {Array<{ instance: State.Required; name: string; }>}
+     * Inject an instance of @type {ContextStateProvider}
      */
     contextStatesProvider: "core:state-machine:current-context-states-provider",
     /**
@@ -85,19 +85,20 @@ export const injectionNames = {
      */
     i18nTranslateValuesFor: "core:i18n:current-translate-values-for",
     /**
-     * Inject an instance of @type {() => KillSessionService.execute()}
+     * Inject an instance of @type {KillSessionPromise}
      */
     killSessionService: "core:services:current-kill-session-promise",
     /**
      * Inject an instance of @type {Logger}
+     * Different to logger in root scope, this logger automatically attaches the current unique request id to all your log outputs.
      */
     logger: "core:root:current-logger",
     /**
-     * Inject an instance of @type {BasicHandable<any>}
+     * Injects an instance of the @type {MergedHandler} you defined in your "config/handler.ts"
      */
     responseHandler: "core:unifier:current-response-handler",
     /**
-     * Inject an instance of @type {ResponseHandlerExtensions<any, any>}
+     * Inject an instance of @type {ResponseHandlerExtensions}
      */
     responseHandlerExtensions: "core:unifier:response-handler-extensions",
     /**

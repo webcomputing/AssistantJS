@@ -16,7 +16,7 @@ export class LocalesLoader implements ILocalesLoader {
   private entities?: { [language: string]: PlatformGenerator.CustomEntityMapping };
 
   constructor(
-    @inject(getMetaInjectionName("core:i18n")) componentMeta: Component<Configuration.Runtime>,
+    @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>,
     @inject(injectionNames.logger) private logger: Logger
   ) {
     this.configuration = componentMeta.configuration;
