@@ -164,7 +164,7 @@ export interface BeforeStateMachine {
 export type AfterStateMachine = BeforeStateMachine;
 
 /**
- * Includes the state name and instance, returned by the context state provider
+ * Includes the state name and instance, returned by ContextStatesProvider
  */
 export interface ContextState {
   instance: State.Required;
@@ -173,4 +173,4 @@ export interface ContextState {
 /**
  * Returns a function for retrieving all context states.
  */
-export type ContextStateProvider = () => Promise<ContextState[]>;
+export type ContextStatesProvider = () => Promise<ContextState[]>;

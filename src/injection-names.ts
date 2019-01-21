@@ -65,7 +65,7 @@ export const injectionNames = {
    */
   current: {
     /**
-     * Inject an instance of @type {ContextStateProvider}
+     * Inject an instance of @type {ContextStatesProvider}
      */
     contextStatesProvider: "core:state-machine:current-context-states-provider",
     /**

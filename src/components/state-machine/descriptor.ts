@@ -11,7 +11,7 @@ import { Hooks } from "../joined-interfaces";
 import { BasicHandable } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
-import { ContextState, ContextStateProvider, Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
+import { ContextState, ContextStatesProvider, Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
@@ -116,7 +116,7 @@ export const descriptor: ComponentDescriptor = {
       });
 
       // Provider for context states. Returns array of states or empty array if no state is present.
-      bindService.bindGlobalService<ContextStateProvider>("current-context-states-provider").toProvider(context => {
+      bindService.bindGlobalService<ContextStatesProvider>("current-context-states-provider").toProvider(context => {
         return async (): Promise<Array<{ instance: State.Required; name: string }>> => {
           const factory = context.container.get<Function>(injectionNames.stateFactory);
 
