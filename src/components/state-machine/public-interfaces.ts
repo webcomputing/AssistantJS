@@ -63,9 +63,7 @@ export namespace State {
   }
 
   /** Constructor of state objects */
-  export interface Constructor<S extends Required = Required> {
-    new (...args: any[]): S;
-  }
+  export type Constructor<S extends Required = Required> = new (...args: any[]) => S;
 
   /**
    * Returns a state by name (string).
@@ -164,3 +162,15 @@ export interface BeforeStateMachine {
  * Has same type like interface BeforeStateMachine
  */
 export type AfterStateMachine = BeforeStateMachine;
+
+/**
+ * Includes the state name and instance, returned by the context state provider
+ */
+export interface ContextState {
+  instance: State.Required;
+  name: string;
+}
+/**
+ * Returns a function for retrieving all context states.
+ */
+export type ContextStateProvider = () => Promise<ContextState[]>;

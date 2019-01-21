@@ -1,4 +1,5 @@
 import { inject, injectable, multiInject, optional } from "inversify";
+import { injectionNames } from "../../injection-names";
 import { MinimalRequestExtraction } from "../unifier/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
 import { AfterContextExtension, AfterStateMachine, BeforeStateMachine } from "./public-interfaces";
@@ -7,10 +8,10 @@ import { StateMachine } from "./state-machine";
 @injectable()
 export class Runner implements AfterContextExtension {
   constructor(
-    @inject("core:unifier:current-extraction")
+    @inject(injectionNames.current.extraction)
     @optional()
     public extraction: MinimalRequestExtraction,
-    @inject("core:state-machine:current-state-machine") private machine: StateMachine,
+    @inject(injectionNames.current.stateMachine) private machine: StateMachine,
     @optional()
     @multiInject(componentInterfaces.beforeStateMachine)
     private beforeStatemachineExtensions: BeforeStateMachine[],

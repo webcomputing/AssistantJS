@@ -1,4 +1,5 @@
 import { Container } from "inversify-components";
+import { injectionNames } from "../../../src/injection-names";
 import { createSpyHook, registerHook } from "../../support/mocks/state-machine/hook";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
@@ -7,7 +8,7 @@ describe("StateMachine", function() {
   beforeEach(function() {
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
-    this.stateMachine = this.container.inversifyInstance.get("core:state-machine:current-state-machine");
+    this.stateMachine = this.container.inversifyInstance.get(injectionNames.current.stateMachine);
   });
 
   describe("handleIntent", function() {

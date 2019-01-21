@@ -1,4 +1,5 @@
 import { RequestContext } from "../../../src/components/root/public-interfaces";
+import { injectionNames } from "../../../src/injection-names";
 import { AssistantJSSetup } from "../../../src/setup";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { RequestProxy, withServer } from "../../support/util/requester";
@@ -8,7 +9,6 @@ interface CurrentThisContext extends ThisContext {
   request: RequestProxy;
   stopServer: Function;
   requestContext: RequestContext;
-  diContextName: string;
   assistantJs: AssistantJSSetup;
 }
 
@@ -22,8 +22,6 @@ describe("GenericRequestHelper", function() {
 
   describe("resulting context object", function() {
     beforeEach(async function(this: CurrentThisContext) {
-      this.diContextName = "core:root:current-request-context";
-
       [this.request, this.stopServer] = await withServer(this.assistantJs);
       await this.request.post("/any-given-route", { a: "b" }, { "header-a": "b" });
     });
@@ -34,12 +32,12 @@ describe("GenericRequestHelper", function() {
 
     it("is fetchable via dependency injection", function(this: CurrentThisContext) {
       expect(() => {
-        this.container.inversifyInstance.get<RequestContext>(this.diContextName);
+        this.container.inversifyInstance.get<RequestContext>(injectionNames.current.requestContext);
       }).not.toThrow();
     });
 
     it("contains all request information", function(this: CurrentThisContext) {
-      const requestContext = this.container.inversifyInstance.get<RequestContext>(this.diContextName);
+      const requestContext = this.container.inversifyInstance.get<RequestContext>(injectionNames.current.requestContext);
 
       // Multiple expections for performance reasons
       expect(requestContext.method).toBe("POST");

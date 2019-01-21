@@ -9,8 +9,13 @@ export const componentInterfaces = {
 };
 
 export namespace Configuration {
+  /** A set of key value names which are not masked in logs. e.g.: { entities: ["firstName", "LastName"] } */
+  export interface LogWhitelistElement {
+    [keyName: string]: LogWhitelistSet;
+  }
+
   /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
-  export type LogWhitelistSet = Array<string | { [keyName: string]: LogWhitelistSet }>;
+  export type LogWhitelistSet = Array<string | LogWhitelistElement>;
 
   /** Configuration defaults -> all of these keys are optional for user */
   export interface Defaults {

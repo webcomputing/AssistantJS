@@ -12,7 +12,7 @@ type DEFAULT_REFERENCES = "intents" | "platformGenerators" | "additionalUtteranc
 export class Generator implements CLIGeneratorExtension {
   constructor(
     @inject(injectionNames.localesLoader) private localesLoader: LocalesLoader,
-    @inject("core:state-machine:used-intents") @optional() private intents: intent[],
+    @inject(injectionNames.usedIntents) @optional() private intents: intent[],
     @multiInject(componentInterfaces.platformGenerator) @optional() private platformGenerators: PlatformGenerator.Extension[],
     @multiInject(componentInterfaces.utteranceTemplateService)
     @optional()

@@ -25,7 +25,7 @@ describe("I18nContext", function() {
     it("fills context automatically", async function(this: CurrentThisContext) {
       const expected = { intent: "testIntent", state: "mainState" };
 
-      this.context = this.container.inversifyInstance.get("core:i18n:current-context");
+      this.context = this.container.inversifyInstance.get(injectionNames.current.i18nContext);
       expect(this.context.intent).toEqual(expected.intent);
       expect(this.context.state).toEqual(expected.state);
     });

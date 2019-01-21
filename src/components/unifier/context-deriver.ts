@@ -1,5 +1,5 @@
 import { inject, injectable, multiInject, optional } from "inversify";
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 
 import { injectionNames } from "../../injection-names";
 import { ContextDeriver as ContextDeriverI, Logger, RequestContext } from "../root/public-interfaces";
@@ -19,7 +19,7 @@ export class ContextDeriver implements ContextDeriverI {
     @multiInject(componentInterfaces.requestModifier)
     private extractionModifiers: RequestExtractionModifier[] = [],
     @inject(injectionNames.logger) private logger: Logger,
-    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
+    @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>
   ) {
     this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }
@@ -39,7 +39,7 @@ export class ContextDeriver implements ContextDeriverI {
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
       this.logger.info({ requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
-      return [extractionResult, "core:unifier:current-extraction"];
+      return [extractionResult, injectionNames.current.extraction];
     }
 
     return undefined;
@@ -132,7 +132,11 @@ export class ContextDeriver implements ContextDeriverI {
     /** Sets all entries to "filteredPlaceholder" except the ones in the given whitelist */
     const filterSet = <T>(set: T, whitelist: Configuration.LogWhitelistSet): T => {
       // Get a merged set of all used object keys in whitelist. For example, if whitelist is ["a", {b: ["c"], d: ["e"]}, {f: "g"}], this would be {b: ["c"], d: ["e"], f: ["g"]}
-      const mergedObject = whitelist.filter(entry => typeof entry === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
+      const mergedObject = whitelist
+        .filter(entry => typeof entry === "object")
+        .reduce((prev, curr) => {
+          return { ...(prev as Configuration.LogWhitelistElement), ...(curr as Configuration.LogWhitelistElement) };
+        }, {});
 
       /** Check filtering for every key */
       Object.keys(set).forEach(extractionKey => {

@@ -11,7 +11,7 @@ import { Hooks } from "../joined-interfaces";
 import { BasicHandable } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
-import { Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
+import { ContextState, ContextStateProvider, Filter, MAIN_STATE_NAME, State } from "./public-interfaces";
 import { Runner } from "./runner";
 import { StateMachine as StateMachineImpl } from "./state-machine";
 
@@ -60,7 +60,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Returns all intents
       bindService.bindGlobalService<intent[]>("used-intents").toDynamicValue(context => {
-        const meta = context.container.get<State.Meta[]>("core:state-machine:meta-states");
+        const meta = context.container.get<State.Meta[]>(injectionNames.metaStates);
         return meta
           .map(m => m.intents)
           .reduce((previous, current) => previous.concat(current), [])
@@ -69,7 +69,7 @@ export const descriptor: ComponentDescriptor = {
 
       // Returns all state names
       bindService.bindGlobalService<string[]>("state-names").toDynamicValue(context => {
-        return context.container.get<State.Meta[]>("core:state-machine:meta-states").map(m => m.name);
+        return context.container.get<State.Meta[]>(injectionNames.metaStates).map(m => m.name);
       });
     },
 
@@ -105,10 +105,10 @@ export const descriptor: ComponentDescriptor = {
       // Provider for current state. Returns current state or MAIN STATE if no state is present.
       bindService.bindGlobalService<State.CurrentProvider>("current-state-provider").toProvider<{ instance: State.Required; name: string }>(context => {
         return () => {
-          const factory = context.container.get<State.Factory>("core:state-machine:state-factory");
+          const factory = context.container.get<State.Factory>(injectionNames.stateFactory);
 
           return context.container
-            .get<() => Promise<string>>("core:state-machine:current-state-name-provider")()
+            .get<() => Promise<string>>(injectionNames.current.stateNameProvider)()
             .then(async stateName => {
               return { instance: factory(stateName), name: stateName };
             });
@@ -116,9 +116,9 @@ export const descriptor: ComponentDescriptor = {
       });
 
       // Provider for context states. Returns array of states or empty array if no state is present.
-      bindService.bindGlobalService("current-context-states-provider").toProvider<Array<{ instance: State.Required; name: string }>>(context => {
+      bindService.bindGlobalService<ContextStateProvider>("current-context-states-provider").toProvider(context => {
         return async (): Promise<Array<{ instance: State.Required; name: string }>> => {
-          const factory = context.container.get<Function>("core:state-machine:state-factory");
+          const factory = context.container.get<Function>(injectionNames.stateFactory);
 
           const session = context.container.get<() => Session>(injectionNames.current.sessionFactory)();
           const contextStates = await session.get("__context_states");

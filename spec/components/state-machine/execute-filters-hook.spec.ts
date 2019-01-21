@@ -23,7 +23,7 @@ describe("ExecuteFiltersHook", function() {
     configureI18nLocale(this.container, false);
     createRequestScope(this.specHelper);
 
-    this.stateMachine = this.container.inversifyInstance.get<StateMachine>("core:state-machine:current-state-machine");
+    this.stateMachine = this.container.inversifyInstance.get<StateMachine>(injectionNames.current.stateMachine);
     this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
 
     await this.stateMachine.transitionTo("FilterAState");

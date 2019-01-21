@@ -10,7 +10,7 @@ import { Session } from "./public-interfaces";
 export class KillSessionService {
   constructor(
     @inject(injectionNames.current.sessionFactory) public sessionFactory: () => Session,
-    @inject("core:hook-pipe-factory") public pipeFactory: Hooks.PipeFactory,
+    @inject(injectionNames.hookPipeFactory) public pipeFactory: Hooks.PipeFactory,
     @inject(injectionNames.current.logger) public logger: Logger
   ) {}
 

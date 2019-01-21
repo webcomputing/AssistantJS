@@ -1,5 +1,5 @@
 import { inject, injectable, targetName } from "inversify";
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 import { injectionNames } from "../../../injection-names";
 import { Logger } from "../../root/public-interfaces";
 import { Configuration } from "../private-interfaces";
@@ -24,7 +24,10 @@ export class HandlerProxyFactory {
    * @param logger for logging warnings or errors
    * @param componentMeta with configuration
    */
-  constructor(@inject(injectionNames.logger) private logger: Logger, @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>) {
+  constructor(
+    @inject(injectionNames.logger) private logger: Logger,
+    @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>
+  ) {
     this.failSilentlyOnUnsupportedFeatures = componentMeta.configuration.failSilentlyOnUnsupportedFeatures;
   }
 

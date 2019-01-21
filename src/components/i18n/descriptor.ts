@@ -1,14 +1,14 @@
 import * as i18next from "i18next";
-import { Component, ComponentDescriptor, Hooks } from "inversify-components";
+import { Component, ComponentDescriptor, getMetaInjectionName, Hooks } from "inversify-components";
 import { componentInterfaces } from "./component-interfaces";
 import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 import { Configuration } from "./private-interfaces";
 
 import { injectionNames, Logger } from "../../assistant-source";
 import { I18nContext } from "./context";
-import { MissingInterpolationExtension, TranslateHelper, TranslateValuesFor, InterpolationResolver } from "./public-interfaces";
-import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { InterpolationResolver as InterpolationResolverImpl } from "./interpolation-resolver";
+import { InterpolationResolver, MissingInterpolationExtension, TranslateHelper, TranslateValuesFor } from "./public-interfaces";
+import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nextWrapper } from "./wrapper";
 
 const defaultConfiguration: Configuration.Defaults = {
@@ -35,7 +35,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindGlobalService<I18nextWrapper>("spec-wrapper")
         .toDynamicValue(context => {
           return new I18nextWrapper(
-            context.container.get<Component<Configuration.Runtime>>("meta:component//core:i18n"),
+            context.container.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:i18n")),
             context.container.get<Logger>(injectionNames.logger),
             false
           );
@@ -45,7 +45,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<InterpolationResolver>("interpolation-resolver").to(InterpolationResolverImpl);
 
       bindService.bindGlobalService<i18next.I18n>("instance").toDynamicValue(context => {
-        return context.container.get<I18nextWrapper>("core:i18n:wrapper").instance;
+        return context.container.get<I18nextWrapper>(injectionNames.i18nWrapper).instance;
       });
     },
     request: (bindService, lookupService) => {
@@ -60,7 +60,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       // Since I18nContext is a singleton in request scope, it will be the same context instance for this request.
       bindService.bindExtension<Hooks.Hook>(lookupService.lookup("core:state-machine").getInterface("beforeIntent")).toDynamicValue(context => {
         return (mode, state, stateName, intent) => {
-          const currentI18nContext = context.container.get<I18nContext>("core:i18n:current-context");
+          const currentI18nContext = context.container.get<I18nContext>(injectionNames.current.i18nContext);
           currentI18nContext.intent = intent;
           currentI18nContext.state = stateName.charAt(0).toLowerCase() + stateName.slice(1);
           return { success: true, result: currentI18nContext };
@@ -71,14 +71,14 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
       bindService.bindGlobalService<TranslateValuesFor>("current-translate-values-for").toDynamicValue(context => {
         return async (key: string, options = {}): Promise<string[]> => {
           const translations: string[] = context.container
-            .get<I18nextWrapper>("core:i18n:spec-wrapper")
+            .get<I18nextWrapper>(injectionNames.i18nSpecWrapper)
             .instance.t(key, options)
             .split(arraySplitter);
-          const translateHelper = context.container.get<TranslateHelper>("core:i18n:current-translate-helper");
+          const translateHelper = context.container.get<TranslateHelper>(injectionNames.current.translateHelper);
 
           return Promise.all(
             translations.map(async translation =>
-              context.container.get<InterpolationResolver>("core:i18n:interpolation-resolver").resolveMissingInterpolations(translation, translateHelper)
+              context.container.get<InterpolationResolver>(injectionNames.i18nInterpolationResolver).resolveMissingInterpolations(translation, translateHelper)
             )
           );
         };

@@ -5,6 +5,7 @@ import { Logger } from "../root/public-interfaces";
 import { featureIsAvailable } from "../unifier/feature-checker";
 import { MinimalRequestExtraction, OptionalExtractions } from "../unifier/public-interfaces";
 
+import { injectionNames } from "../../injection-names";
 import { componentInterfaces } from "./component-interfaces";
 import { I18nContext } from "./context";
 import { arraySplitter, optionEnablingArrayReturn, optionsObjectName } from "./plugins/array-returns-sample.plugin";
@@ -13,11 +14,11 @@ import { InterpolationResolver, MissingInterpolationExtension, TranslateHelper a
 @injectable()
 export class TranslateHelper implements TranslateHelperInterface {
   constructor(
-    @inject("core:i18n:instance") public i18n: I18n,
-    @inject("core:i18n:current-context") public context: I18nContext,
-    @inject("core:unifier:current-extraction") public extraction: MinimalRequestExtraction,
-    @inject("core:root:current-logger") public logger: Logger,
-    @inject("core:i18n:interpolation-resolver") public interpolationResolver: InterpolationResolver
+    @inject(injectionNames.i18nInstance) public i18n: I18n,
+    @inject(injectionNames.current.i18nContext) public context: I18nContext,
+    @inject(injectionNames.current.extraction) public extraction: MinimalRequestExtraction,
+    @inject(injectionNames.current.logger) public logger: Logger,
+    @inject(injectionNames.i18nInterpolationResolver) public interpolationResolver: InterpolationResolver
   ) {}
 
   // tslint:disable-next-line:function-name

@@ -1,4 +1,4 @@
-import { Component } from "inversify-components";
+import { Component, getMetaInjectionName } from "inversify-components";
 import { Configuration } from "./private-interfaces";
 
 import * as i18next from "i18next";
@@ -23,7 +23,7 @@ export class I18nextWrapper {
    * @param returnOnlySample If set to true, translation calls return a sample out of many options (for production), if false, you get all options (for specs only)
    */
   constructor(
-    @inject("meta:component//core:i18n") componentMeta: Component<Configuration.Runtime>,
+    @inject(getMetaInjectionName("core:i18n")) componentMeta: Component<Configuration.Runtime>,
     @inject(injectionNames.logger) logger: Logger,
     returnOnlySample = true
   ) {

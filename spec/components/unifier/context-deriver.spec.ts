@@ -4,7 +4,14 @@ import { componentInterfaces } from "../../../src/components/unifier/private-int
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { RequestProxy, withServer } from "../../support/util/requester";
 
-import { AfterContextExtension, AssistantJSSetup, MinimalRequestExtraction, OptionalExtractions, RequestContext } from "../../../src/assistant-source";
+import {
+  AfterContextExtension,
+  AssistantJSSetup,
+  injectionNames,
+  MinimalRequestExtraction,
+  OptionalExtractions,
+  RequestContext,
+} from "../../../src/assistant-source";
 import { createContext } from "../../support/mocks/root/request-context";
 import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
@@ -50,7 +57,7 @@ describe("ContextDeriver", function() {
         });
 
         it("does not set 'core:unifier:current-extraction'", function(this: CurrentThisContext) {
-          expect(this.container.inversifyInstance.isBound("core:unifier:current-extraction")).toBeFalsy();
+          expect(this.container.inversifyInstance.isBound(injectionNames.current.extraction)).toBeFalsy();
         });
       });
 
@@ -64,7 +71,7 @@ describe("ContextDeriver", function() {
         });
 
         it("sets 'core:unifier:current-extraction' to extraction result", function(this: CurrentThisContext) {
-          const currentExtraction = this.container.inversifyInstance.get<any>("core:unifier:current-extraction");
+          const currentExtraction = this.container.inversifyInstance.get<any>(injectionNames.current.extraction);
           expect(currentExtraction).toEqual(extractionData);
         });
       });
@@ -88,7 +95,7 @@ describe("ContextDeriver", function() {
           });
 
           it("uses extractor with more implemented features", async function(this: CurrentThisContext) {
-            const currentExtraction = this.container.inversifyInstance.get<any>("core:unifier:current-extraction");
+            const currentExtraction = this.container.inversifyInstance.get<any>(injectionNames.current.extraction);
             expect(currentExtraction.spokenText).toEqual(SpokenTextExtractor.spokenTextFill());
           });
         });
