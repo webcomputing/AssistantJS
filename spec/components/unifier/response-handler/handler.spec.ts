@@ -330,9 +330,9 @@ describe("BaseHandler", function() {
     });
   });
 
-  describe("onUnsupportedFeature", function() {
+  describe("unsupportedFeature", function() {
     it("adds params to unsupportedFeatureCalls attribute", async function(this: CurrentThisContext) {
-      this.handlerInstance.onUnsupportedFeature("methodName", "arg1", "arg2", 3);
+      this.handlerInstance.unsupportedFeature("methodName", "arg1", "arg2", 3);
       expect(this.handlerInstance.unsupportedFeatureCalls).toEqual([{ methodName: "methodName", args: ["arg1", "arg2", 3] }]);
     });
   });

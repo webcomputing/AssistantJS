@@ -16,7 +16,7 @@ import {
   PlatformGenerator,
   ResponseHandlerExtensions,
 } from "./public-interfaces";
-import { BasicHandable, HandlerProxyFactory } from "./response-handler";
+import { BasicHandable, HandlerProxyFactory, UnsupportedFeatureSupportForHandables } from "./response-handler";
 import { AfterStateResponseSender } from "./response-handler/after-state-handler";
 import { swapHash } from "./swap-hash";
 
@@ -64,7 +64,9 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
         .bindGlobalService<BasicHandable<any>>("current-response-handler")
         .toDynamicValue(context => {
           const currentExtraction = context.container.get<MinimalRequestExtraction>(injectionNames.current.extraction);
-          const platformSpecificHandler = context.container.get<BasicHandable<any>>(currentExtraction.platform + ":current-response-handler");
+          const platformSpecificHandler = context.container.get<BasicHandable<any> & UnsupportedFeatureSupportForHandables>(
+            currentExtraction.platform + ":current-response-handler"
+          );
           const handlerProxyFactory = context.container.get<HandlerProxyFactory>(injectionNames.handlerProxyFactory);
 
           return handlerProxyFactory.createHandlerProxy(platformSpecificHandler);

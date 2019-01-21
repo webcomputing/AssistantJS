@@ -34,17 +34,19 @@ export class FilterAState extends BaseState<MockHandlerASpecificTypes, MockHandl
     await this.responseHandler.endSessionWith(this.t("filter.stateA.intentB")).send();
   }
 
-  @filter(TestFilterD, TestFilterA)
+  @filter(TestFilterD)
+  @filter(TestFilterA)
   public async filterTestCIntent() {
     await this.responseHandler.endSessionWith(this.t("filter.stateA.intentC")).send();
   }
 
-  @filter(TestFilterA, TestFilterB)
+  @filter(TestFilterA)
+  @filter(TestFilterB)
   public async filterTestDIntent() {
     await this.responseHandler.endSessionWith(this.t("filter.stateA.intentD")).send();
   }
 
-  @filter({ filter: TestFilterA, params: { exampleParam: "example" } })
+  @filter<{ exampleParam: string }>(TestFilterA, { exampleParam: "example" })
   public async filterTestEIntent() {
     await this.responseHandler.endSessionWith(this.t("filter.stateA.intentE")).send();
   }
