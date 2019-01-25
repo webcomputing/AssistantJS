@@ -1,4 +1,4 @@
-import { Filter, State } from "assistant-source";
+import { Filter, State, FilterExecutionContext } from "assistant-source";
 import { injectable } from "inversify";
 
 /**
@@ -7,15 +7,7 @@ import { injectable } from "inversify";
  */
 @injectable()
 export class ExampleFilter implements Filter {
-  public execute(
-    state: State.Required,
-    stateName: string,
-    intentMethod: string,
-    ...args: any[]
-  ):
-    | Promise<{ state: string; intent: string; args?: any[] } | boolean>
-    | { state: string; intent: string; args?: any[] }
-    | boolean {
+  public execute(executionContext: FilterExecutionContext) {
     // evaluate criteria
     const redirectNeeded = false;
 
