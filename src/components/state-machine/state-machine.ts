@@ -164,6 +164,10 @@ export class StateMachine implements Transitionable {
     return this.pipeFactory(componentInterfaces.afterIntent);
   }
 
+  /**
+   * Returns either a callback function from a @stayInContext-decorator or undefined
+   * @param currentStateClass State class to check for defined metadata
+   */
   private retrieveStayInContextCallbackFromMetadata(
     currentStateClass: State.Constructor
   ):
@@ -180,6 +184,10 @@ export class StateMachine implements Transitionable {
     return metadata ? metadata.stayInContext : undefined;
   }
 
+  /**
+   * Returns either a callback function from a @clearInContext-decorator or undefined
+   * @param currentStateClass State class to check for defined metadata
+   */
   private retrieveClearContextCallbackFromMetadata(
     currentStateClass: State.Constructor
   ):
