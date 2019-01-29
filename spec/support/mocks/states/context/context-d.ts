@@ -1,5 +1,4 @@
-import { inject, injectable, optional } from "inversify";
-import { BasicHandable } from "../../../../../src/assistant-source";
+import { inject, injectable } from "inversify";
 import { TranslateHelper } from "../../../../../src/components/i18n/public-interfaces";
 import { Logger } from "../../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../../src/components/state-machine/base-state";

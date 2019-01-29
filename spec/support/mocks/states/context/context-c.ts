@@ -1,5 +1,4 @@
-import { inject, injectable, optional } from "inversify";
-import { BasicHandable } from "../../../../../src/assistant-source";
+import { inject, injectable } from "inversify";
 import { TranslateHelper } from "../../../../../src/components/i18n/public-interfaces";
 import { Logger } from "../../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../../src/components/state-machine/base-state";
@@ -7,7 +6,7 @@ import { clearContext } from "../../../../../src/components/state-machine/decora
 import { stayInContext } from "../../../../../src/components/state-machine/decorators/stay-in-context-decorator";
 import { State, Transitionable } from "../../../../../src/components/state-machine/public-interfaces";
 import { injectionNames } from "../../../../../src/injection-names";
-import { testCallback } from "../../../../components/state-machine/context.spec";
+import { testCallback } from "../../../util/context-test-callback";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../unifier/response-handler/mock-handler-a";
 
 @stayInContext()
