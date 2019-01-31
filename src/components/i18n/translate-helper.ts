@@ -159,11 +159,9 @@ export class TranslateHelper implements TranslateHelperInterface {
     }
 
     // Traverse all properties
-    for (const k in obj) {
-      if (obj.hasOwnProperty(k)) {
-        obj[k] = TranslateHelper.resolveTranslatedAndTemplatedResult(obj[k]);
-      }
-    }
+    Object.keys(obj).forEach(k => {
+      obj[k] = TranslateHelper.resolveTranslatedAndTemplatedResult(obj[k]);
+    });
 
     return obj;
   }
