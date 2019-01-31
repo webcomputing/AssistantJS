@@ -108,7 +108,7 @@ export class TranslateHelper implements TranslateHelperInterface {
     return translation.split(arraySplitter);
   }
 
-  public async getObject(key?: string, locals: { [name: string]: string | number | object } = {}): Promise<string | string[] | object> {
+  public async getObject(key?: string, locals: { [name: string]: string | number | object } = {}) {
     // Set internal assistantjs option for array-returns-sample.plugin
     locals[optionsObjectName] = { [optionEnablingArrayReturn]: true };
 

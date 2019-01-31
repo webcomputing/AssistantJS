@@ -50,7 +50,7 @@ export interface TranslateHelper extends ShortT {
    * @param locals Variables to use in reponse
    * @return nested structure with translations
    */
-  getObject(key?: string, locals?: { [name: string]: string | number | object }): Promise<string | string[] | object>;
+  getObject<T = any>(key?: string, locals?: { [name: string]: string | number | object }): Promise<T>;
 }
 
 export interface InterpolationResolver {
