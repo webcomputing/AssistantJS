@@ -108,6 +108,26 @@ export class TranslateHelper implements TranslateHelperInterface {
     return translation.split(arraySplitter);
   }
 
+  public async getObject(key?: string, locals: { [name: string]: string | number | object } = {}): Promise<string | string[] | object> {
+    // Set internal assistantjs option for array-returns-sample.plugin
+    locals[optionsObjectName] = { [optionEnablingArrayReturn]: true };
+
+    // Get regular translation string. Multiple translations are concatenated by arraySplitter per default...
+    const translation = await this.t(key as any, {
+      ...locals,
+      /* Maintain object structure below requested key */
+      returnObjects: true,
+      /* Don't used `arraySplitter` to join keys and maintain structure */
+      joinArrays: false,
+    });
+
+    // Parse JSON objects and arrays to JavaScript literals and keep all other primitives
+    const parsedTranslation = typeof translation === "string" && /^[\[|\{]/.test(translation) ? JSON.parse(translation) : translation;
+
+    // ... so we have to split to return in array format
+    return TranslateHelper.resolveTranslatedAndTemplatedResult(parsedTranslation);
+  }
+
   /**
    * Finds first existing locale or throws exception if none of the lookups exist.
    * i18n.exists() won't work here: it returns true for keys returning an object, even if returnObjectTrees is false. t() then returns undefined.
@@ -116,6 +136,12 @@ export class TranslateHelper implements TranslateHelperInterface {
     for (const lookup of lookups) {
       if (this.i18n.exists(lookup, options)) {
         const translation = this.i18n.t(lookup, options);
+
+        if (typeof translation === "object" && (options as any).returnObjects) {
+          this.logger.debug("I18N: choosing key: " + lookup);
+          return JSON.stringify(translation);
+        }
+
         if (typeof translation === "string") {
           this.logger.debug("I18N: choosing key: " + lookup);
           return translation;
@@ -124,5 +150,19 @@ export class TranslateHelper implements TranslateHelperInterface {
     }
 
     throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
+  }
+
+  private static resolveTranslatedAndTemplatedResult(obj: any) {
+    if (typeof obj === "string") {
+      // Resolve `arraySplitter` for combinations resulting from `{a|b}` templates
+      return obj.indexOf(arraySplitter) !== -1 ? obj.split(arraySplitter) : obj;
+    }
+
+    // Traverse all properties
+    Object.keys(obj).forEach(k => {
+      obj[k] = TranslateHelper.resolveTranslatedAndTemplatedResult(obj[k]);
+    });
+
+    return obj;
   }
 }
