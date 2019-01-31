@@ -121,8 +121,11 @@ export class TranslateHelper implements TranslateHelperInterface {
       joinArrays: false,
     });
 
+    // Parse JSON objects and arrays to JavaScript literals and keep all other primitives
+    const parsedTranslation = typeof translation === "string" && /^[\[|\{]/.test(translation) ? JSON.parse(translation) : translation;
+
     // ... so we have to split to return in array format
-    return TranslateHelper.resolveTranslatedAndTemplatedResult(translation);
+    return TranslateHelper.resolveTranslatedAndTemplatedResult(parsedTranslation);
   }
 
   /**
@@ -149,21 +152,19 @@ export class TranslateHelper implements TranslateHelperInterface {
     throw new Error("I18n key lookup could not be resolved: " + lookups.join(", "));
   }
 
-  private static resolveTranslatedAndTemplatedResult(argRes: any) {
-    // Parse JSON objects and arrays to JavaScript literals and keep all other primitives
-    const res = typeof argRes === "string" && /^[\[|\{]/.test(argRes) ? JSON.parse(argRes) : argRes;
-
-    if (typeof res === "string") {
+  private static resolveTranslatedAndTemplatedResult(obj: any) {
+    if (typeof obj === "string") {
       // Resolve `arraySplitter` for combinations resulting from `{a|b}` templates
-      return res.indexOf(arraySplitter) !== -1 ? res.split(arraySplitter) : res;
+      return obj.indexOf(arraySplitter) !== -1 ? obj.split(arraySplitter) : obj;
     }
 
-    for (const k in res) {
-      if (res.hasOwnProperty(k)) {
-        res[k] = TranslateHelper.resolveTranslatedAndTemplatedResult(res[k]);
+    // Traverse all properties
+    for (const k in obj) {
+      if (obj.hasOwnProperty(k)) {
+        obj[k] = TranslateHelper.resolveTranslatedAndTemplatedResult(obj[k]);
       }
     }
 
-    return res;
+    return obj;
   }
 }
