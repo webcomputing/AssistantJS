@@ -238,4 +238,68 @@ describe("TranslateHelper", function() {
       });
     });
   });
+
+  describe("getObject", () => {
+    describe("with single string", () => {
+      it("returns single translated string", async function() {
+        expect(await this.translateHelper.getObject("getObjectState.relativeIntent.withSingleString")).toEqual("only alternative");
+      });
+
+      it("interpolates variables", async function() {
+        expect(await this.translateHelper.getObject("getObjectState.relativeIntent.withPlaceholder", { number: 4 })).toEqual("alternative 4");
+      });
+
+      it("resolve templates", async function() {
+        expect(await this.translateHelper.getObject("getObjectState.relativeIntent.withTemplate", { number: 4 })).toEqual(["alternative 1", "alternative 2"]);
+      });
+    });
+
+    describe("with array", function() {
+      it("returns array with all translations", async function() {
+        expect(await this.translateHelper.getObject("getObjectState.relativeIntent.withArray")).toEqual(["alternative 1", "alternative 2"]);
+      });
+    });
+
+    describe("nestedWithArrays", function() {
+      it("returns array with all translations", async function() {
+        expect(await this.translateHelper.getObject("getObjectState.relativeIntent.nestedWithArrays")).toEqual({
+          first: ["alternative 1", "alternative 2"],
+          second: ["alternative 3", "alternative 4"],
+        });
+      });
+    });
+
+    describe("nestedWithTemplates", function() {
+      it("returns object tree with all translated alternatives", async function() {
+        expect(await this.translateHelper.getObject("getObjectState.relativeIntent.nestedWithTemplates", { version: 2 })).toEqual({
+          a: {
+            meta: {
+              version: "2",
+            },
+            oneAndTwo: ["alternative 1", "alternative 2"],
+            threeAndFour: ["alternative 3", "alternative 4"],
+          },
+        });
+      });
+    });
+
+    describe("relative resolution", function() {
+      beforeEach(async function() {
+        this.context.intent = "relativeIntent";
+        this.context.state = "getObjectState";
+      });
+
+      it("behaves as above but with relative key", async function() {
+        expect(await this.translateHelper.getObject(".nestedWithTemplates", { version: 2 })).toEqual({
+          a: {
+            meta: {
+              version: "2",
+            },
+            oneAndTwo: ["alternative 1", "alternative 2"],
+            threeAndFour: ["alternative 3", "alternative 4"],
+          },
+        });
+      });
+    });
+  });
 });

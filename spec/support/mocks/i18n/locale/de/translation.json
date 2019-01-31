@@ -112,5 +112,38 @@
       "alternative 1",
       "alternative {2|3}"
     ]
+  },
+  "getObjectState": {
+    "relativeIntent": {
+      "withSingleString": "only alternative",
+      "withPlaceholder": "alternative {{number}}",
+      "withTemplate": "alternative {1|2}",
+      "withArray": [
+        "alternative 1",
+        "alternative 2"
+      ],
+      "nestedWithArrays": {
+        "first": [
+          "alternative 1",
+          "alternative 2"
+        ],
+        "second": [
+          "alternative 3",
+          "alternative 4"
+        ]
+      },
+      "nestedWithTemplates": {
+        "a": {
+          "meta": {
+            "version": "{{version}}"
+          },
+          "oneAndTwo": "alternative {1|2}",
+          "threeAndFour": [
+            "alternative 3",
+            "alternative 4"
+          ]
+        }
+      }
+    }
   }
 }

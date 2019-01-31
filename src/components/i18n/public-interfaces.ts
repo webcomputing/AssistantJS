@@ -39,6 +39,18 @@ export interface TranslateHelper extends ShortT {
    * @param locals If given: variables to use in response
    */
   getAllAlternatives(locals?: { [name: string]: string | number | object }): Promise<string[]>;
+
+  /**
+   * Works the same as the regular t(), but returns any structure below the given key. The exact structure is returned, regardless
+   * if the key points to a string, array or object, except for combinational template strings which are resolved to arrays.
+   *
+   * @param key String of the key to look for. If you pass a relative key (beginning with '.'),
+   * this method will apply several conventions, first looking for a translation for "currentState.currentIntent.KEY.platform.device".
+   * If you pass an absolute key (without "." at beginning), this method will look at given absolute key.
+   * @param locals Variables to use in reponse
+   * @return nested structure with translations
+   */
+  getObject(key?: string, locals?: { [name: string]: string | number | object }): Promise<string | string[] | object>;
 }
 
 export interface InterpolationResolver {
