@@ -44,6 +44,10 @@ export function cli(argv, resolvedApplicationInitializer) {
     fs.writeFileSync(destination, contents.replace(/\{\{__NAME__\}\}/g, name));
   };
 
+  const deployConfiguration = function() {
+    grabInitializer().runProviderDeployment();
+  };
+
   /** Initializes new assistantjs project (prototyped currently) */
   const createProject = function(name: string) {
     // Path to new project
@@ -190,6 +194,18 @@ export function cli(argv, resolvedApplicationInitializer) {
     .description("Lists all installed components")
     .action(() => {
       listComponents();
+      process.exit(0);
+    });
+
+  // Register new command
+  commander
+    .command("deploy")
+    .alias("d")
+    .description("Deploy current intent configuration to all provider")
+    .action(() => {
+      commander.emit("generate");
+      console.log("Deploy configuration...");
+      deployConfiguration();
       process.exit(0);
     });
 

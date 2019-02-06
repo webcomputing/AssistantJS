@@ -34,6 +34,9 @@ export interface AssistantJSApplicationInitializer {
 
   /** Creates a ready-to-use AssistantJSSetup instance */
   createAssistantJsSetup(): AssistantJSSetup;
+
+  /** Called via cli command "assistant deploy" */
+  runProviderDeployment(): AssistantJSSetup;
 }
 
 /** Common component-independent AssistantJS namespace for hooks */
