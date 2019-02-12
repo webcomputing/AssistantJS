@@ -12,6 +12,7 @@ interface CurrentThisContext extends ThisContext {
 
 describe("I18nContext", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     configureI18nLocale(this.assistantJs.container, false);
     createRequestScope(this.specHelper);
     this.stateMachine = this.inversify.get(injectionNames.current.stateMachine);
