@@ -5,8 +5,7 @@ import { CurrentSessionFactory } from "../services/public-interfaces";
 import { GenericIntent, intent } from "../unifier/public-interfaces";
 
 import { injectionNames } from "../../injection-names";
-import { clearContextMetadataKey } from "./decorators/clear-context-decorator";
-import { stayInContextMetadataKey } from "./decorators/stay-in-context-decorator";
+import { clearContextMetadataKey, stayInContextMetadataKey } from "./decorators/context";
 import { componentInterfaces } from "./private-interfaces";
 import { ClearContextCallback, ContextStatesProvider, State, StayInContextCallback, Transitionable } from "./public-interfaces";
 
@@ -170,9 +169,7 @@ export class StateMachine implements Transitionable {
    * @param currentStateClass State class to check for defined metadata
    */
   private retrieveStayInContextCallbackFromMetadata(currentStateClass: State.Constructor): StayInContextCallback | undefined {
-    const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
-
-    return metadata ? metadata.stayInContext : undefined;
+    return this.retrieveContextCallbackFromMetadata(currentStateClass, stayInContextMetadataKey) as StayInContextCallback | undefined;
   }
 
   /**
@@ -180,9 +177,18 @@ export class StateMachine implements Transitionable {
    * @param currentStateClass State class to check for defined metadata
    */
   private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ClearContextCallback | undefined {
-    const metadata = Reflect.getMetadata(clearContextMetadataKey, currentStateClass);
+    return this.retrieveContextCallbackFromMetadata(currentStateClass, clearContextMetadataKey) as ClearContextCallback | undefined;
+  }
 
-    return metadata ? metadata.clearContext : undefined;
+  /**
+   * Returns defined Metadata for given key or undefined if not existent
+   * @param currentStateClass State class to check for defined metadata
+   * @param metaDataKey Key to check for
+   */
+  private retrieveContextCallbackFromMetadata(currentStateClass: State.Constructor, metaDataKey: symbol): () => boolean | undefined {
+    const metadata = Reflect.getMetadata(metaDataKey, currentStateClass);
+
+    return metadata ? metadata.callback : undefined;
   }
 
   /** Type Guards */

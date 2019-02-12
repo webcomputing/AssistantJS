@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { TranslateHelper } from "../../../../../src/components/i18n/public-interfaces";
 import { Logger } from "../../../../../src/components/root/public-interfaces";
 import { BaseState } from "../../../../../src/components/state-machine/base-state";
-import { stayInContext } from "../../../../../src/components/state-machine/decorators/stay-in-context-decorator";
+import { stayInContext } from "../../../../../src/components/state-machine/decorators/context";
 import { State, Transitionable } from "../../../../../src/components/state-machine/public-interfaces";
 import { injectionNames } from "../../../../../src/injection-names";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../unifier/response-handler/mock-handler-a";
