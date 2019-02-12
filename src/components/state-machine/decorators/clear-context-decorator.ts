@@ -1,15 +1,8 @@
-import { State } from "../public-interfaces";
+import { ClearContextCallback } from "../public-interfaces";
 
 export const clearContextMetadataKey = Symbol("metadata-key: clearContext");
 
-export function clearContext(
-  needsClear?: (
-    currentStateName?: string,
-    currentStateInstance?: State.Required,
-    contextStateNames?: string[],
-    intentHistory?: Array<{ stateName: string; intentMethodName: string }>
-  ) => boolean
-) {
+export function clearContext(needsClear?: ClearContextCallback) {
   const metadata = needsClear ? { clearContext: needsClear } : { clearContext: () => true };
 
   return function(targetClass: any) {

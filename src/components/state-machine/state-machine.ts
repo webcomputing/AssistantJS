@@ -8,7 +8,7 @@ import { injectionNames } from "../../injection-names";
 import { clearContextMetadataKey } from "./decorators/clear-context-decorator";
 import { stayInContextMetadataKey } from "./decorators/stay-in-context-decorator";
 import { componentInterfaces } from "./private-interfaces";
-import { ContextStatesProvider, State, Transitionable } from "./public-interfaces";
+import { ClearContextCallback, ContextStatesProvider, State, StayInContextCallback, Transitionable } from "./public-interfaces";
 
 @injectable()
 export class StateMachine implements Transitionable {
@@ -27,7 +27,7 @@ export class StateMachine implements Transitionable {
     const [currentState, contextStates] = await Promise.all([this.getCurrentState(), this.getContextStates()]);
     const intentMethod = this.deriveIntentMethod(requestedIntent);
     this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
-    this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
+    this.logger.info(`Handling intent '${intentMethod}' on state ${currentState.name}`);
 
     /* Execute clearContext callback if decorator is present */
     const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
@@ -99,7 +99,7 @@ export class StateMachine implements Transitionable {
   }
 
   public async transitionTo(state: string) {
-    if (this.stateNames.indexOf(state) === -1) throw Error("Cannot transition to " + state + ": State does not exist!");
+    if (this.stateNames.indexOf(state) === -1) throw Error(`Cannot transition to ${state}: State does not exist!`);
     const resolvedPromise = await Promise.all([this.getContextStates(), this.getCurrentState()]);
     let contextStates = resolvedPromise[0];
     const currentState = resolvedPromise[1];
@@ -114,13 +114,13 @@ export class StateMachine implements Transitionable {
 
     /* Execute callbacks of context states and filter by result */
     contextStates = contextStates.filter(contextState =>
-      (this.retrieveStayInContextCallbackFromMetadata(contextState.instance.constructor as State.Constructor) as ((
-        currentStateName?: string,
-        currentStateInstance?: State.Required,
-        contextStateNames?: string[],
-        intentHistory?: Array<{ stateName: string; intentMethodName: string }>,
-        stateNameToTransitionTo?: string
-      ) => boolean))(currentState.name, currentState.instance, contextStates.map(cState => cState.name), this.intentHistory, state)
+      (this.retrieveStayInContextCallbackFromMetadata(contextState.instance.constructor as State.Constructor) as StayInContextCallback)(
+        currentState.name,
+        currentState.instance,
+        contextStates.map(cState => cState.name),
+        this.intentHistory,
+        state
+      )
     );
     /* Set remaining context states as new context */
     await this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
@@ -152,7 +152,8 @@ export class StateMachine implements Transitionable {
   private deriveIntentMethod(requestedIntent: intent): string {
     if (typeof requestedIntent === "string" && requestedIntent.endsWith("Intent")) return requestedIntent;
 
-    const baseString = (typeof requestedIntent === "string" ? requestedIntent : GenericIntent[requestedIntent].toLowerCase() + "Generic") + "Intent";
+    // tslint:disable-next-line:prefer-template
+    const baseString = `${typeof requestedIntent === "string" ? requestedIntent : GenericIntent[requestedIntent].toLowerCase() + "Generic"}Intent`;
     return baseString.charAt(0).toLowerCase() + baseString.slice(1);
   }
 
@@ -168,17 +169,7 @@ export class StateMachine implements Transitionable {
    * Returns either a callback function from a @stayInContext-decorator or undefined
    * @param currentStateClass State class to check for defined metadata
    */
-  private retrieveStayInContextCallbackFromMetadata(
-    currentStateClass: State.Constructor
-  ):
-    | ((
-        currentStateName?: string,
-        currentStateInstance?: State.Required,
-        contextStateNames?: string[],
-        intentHistory?: Array<{ stateName: string; intentMethodName: string }>,
-        stateNameToTransitionTo?: string
-      ) => boolean)
-    | undefined {
+  private retrieveStayInContextCallbackFromMetadata(currentStateClass: State.Constructor): StayInContextCallback | undefined {
     const metadata = Reflect.getMetadata(stayInContextMetadataKey, currentStateClass);
 
     return metadata ? metadata.stayInContext : undefined;
@@ -188,16 +179,7 @@ export class StateMachine implements Transitionable {
    * Returns either a callback function from a @clearInContext-decorator or undefined
    * @param currentStateClass State class to check for defined metadata
    */
-  private retrieveClearContextCallbackFromMetadata(
-    currentStateClass: State.Constructor
-  ):
-    | ((
-        currentStateName?: string,
-        currentStateInstance?: State.Required,
-        contextStateNames?: string[],
-        intentHistory?: Array<{ stateName: string; intentMethodName: string }>
-      ) => boolean)
-    | undefined {
+  private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ClearContextCallback | undefined {
     const metadata = Reflect.getMetadata(clearContextMetadataKey, currentStateClass);
 
     return metadata ? metadata.clearContext : undefined;
