@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { ComponentDescriptor } from "inversify-components";
+import { ComponentBinder, ComponentDescriptor } from "inversify-components";
 
 import { State } from "./public-interfaces";
 

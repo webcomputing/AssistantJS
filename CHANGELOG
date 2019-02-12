@@ -24,6 +24,8 @@ version 0.4.0
     - removed createAndSendEmptyResponse(), use endSessionWith("") instead.
     - as of https://github.com/Microsoft/TypeScript/issues/17113 projects need to use `"skipLibCheck": true` in tsconfig.json
     - add SelectedGenericIntent for selection of items, e.g. a list on a smart display
+- introduces @stayInContext and @clearContext decorators, which enables you to have multiple states active at the same time
+- introduces @filter decorator, which works like a beforeIntentHook, but is made specifically for state redirections (which should be the most common use case for hooks)
 - minor changes and improvements    
 
 version 0.3.2

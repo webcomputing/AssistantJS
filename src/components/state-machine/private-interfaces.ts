@@ -1,3 +1,5 @@
+import { State } from "./public-interfaces";
+
 export const componentInterfaces = {
   state: Symbol("state"),
   metaState: Symbol("meta state"),
