@@ -29,7 +29,7 @@ export class StateMachine implements Transitionable {
     this.logger.info(`Handling intent '${intentMethod}' on state ${currentState.name}`);
 
     /* Execute clearContext callback if decorator is present */
-    const clearContextCallbackFn = this.retrieveClearContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
+    const clearContextCallbackFn = this.retrieveClearContextCallback(currentState.instance.constructor as State.Constructor);
 
     if (
       clearContextCallbackFn &&
@@ -103,24 +103,23 @@ export class StateMachine implements Transitionable {
     let contextStates = resolvedPromise[0];
     const currentState = resolvedPromise[1];
 
-    const stayInContextCallbackFn = this.retrieveStayInContextCallbackFromMetadata(currentState.instance.constructor as State.Constructor);
-
     /* Add current state to context if context meta data is present and remove previous context entry of current state */
+    const stayInContextCallbackFn = this.retrieveStayInContextCallback(currentState.instance.constructor as State.Constructor);
     if (stayInContextCallbackFn) {
       contextStates = contextStates.filter(contextState => contextState.name !== currentState.name);
       contextStates.push(currentState);
     }
 
     /* Execute callbacks of context states and filter by result */
-    contextStates = contextStates.filter(contextState =>
-      (this.retrieveStayInContextCallbackFromMetadata(contextState.instance.constructor as State.Constructor) as StayInContextCallback)(
-        currentState.name,
-        currentState.instance,
-        contextStates.map(cState => cState.name),
-        this.intentHistory,
-        state
-      )
-    );
+    contextStates = contextStates.filter(contextState => {
+      const currentStayInContextCallback = this.retrieveStayInContextCallback(contextState.instance.constructor as State.Constructor);
+
+      if (typeof currentStayInContextCallback === "undefined") {
+        throw new Error(`Missing @stayInContext decorator for contextState = ${contextState}`);
+      }
+
+      return currentStayInContextCallback(currentState.name, currentState.instance, contextStates.map(cState => cState.name), this.intentHistory, state);
+    });
     /* Set remaining context states as new context */
     await this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
 
@@ -168,16 +167,16 @@ export class StateMachine implements Transitionable {
    * Returns either a callback function from a @stayInContext-decorator or undefined
    * @param currentStateClass State class to check for defined metadata
    */
-  private retrieveStayInContextCallbackFromMetadata(currentStateClass: State.Constructor): StayInContextCallback | undefined {
-    return this.retrieveContextCallbackFromMetadata(currentStateClass, stayInContextMetadataKey) as StayInContextCallback | undefined;
+  private retrieveStayInContextCallback(currentStateClass: State.Constructor): StayInContextCallback | undefined {
+    return this.retrieveContextCallback<StayInContextCallback>(currentStateClass, stayInContextMetadataKey);
   }
 
   /**
    * Returns either a callback function from a @clearInContext-decorator or undefined
    * @param currentStateClass State class to check for defined metadata
    */
-  private retrieveClearContextCallbackFromMetadata(currentStateClass: State.Constructor): ClearContextCallback | undefined {
-    return this.retrieveContextCallbackFromMetadata(currentStateClass, clearContextMetadataKey) as ClearContextCallback | undefined;
+  private retrieveClearContextCallback(currentStateClass: State.Constructor): ClearContextCallback | undefined {
+    return this.retrieveContextCallback<ClearContextCallback>(currentStateClass, clearContextMetadataKey);
   }
 
   /**
@@ -185,7 +184,10 @@ export class StateMachine implements Transitionable {
    * @param currentStateClass State class to check for defined metadata
    * @param metaDataKey Key to check for
    */
-  private retrieveContextCallbackFromMetadata(currentStateClass: State.Constructor, metaDataKey: symbol): () => boolean | undefined {
+  private retrieveContextCallback<ContextCallback extends () => boolean | undefined>(
+    currentStateClass: State.Constructor,
+    metaDataKey: symbol
+  ): ContextCallback | undefined {
     const metadata = Reflect.getMetadata(metaDataKey, currentStateClass);
 
     return metadata ? metadata.callback : undefined;
