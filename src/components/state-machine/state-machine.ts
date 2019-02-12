@@ -5,6 +5,7 @@ import { CurrentSessionFactory } from "../services/public-interfaces";
 import { GenericIntent, intent } from "../unifier/public-interfaces";
 
 import { injectionNames } from "../../injection-names";
+import { sessionKeys } from "../joined-interfaces";
 import { clearContextMetadataKey, stayInContextMetadataKey } from "./decorators/context";
 import { componentInterfaces } from "./private-interfaces";
 import { ClearContextCallback, ContextStatesProvider, State, StayInContextCallback, Transitionable } from "./public-interfaces";
@@ -35,7 +36,7 @@ export class StateMachine implements Transitionable {
       clearContextCallbackFn &&
       clearContextCallbackFn(currentState.name, currentState.instance, contextStates.map(cState => cState.name), this.intentHistory)
     ) {
-      this.currentSessionFactory().set("__context_states", JSON.stringify([]));
+      this.currentSessionFactory().set(sessionKeys.contextStates, JSON.stringify([]));
     }
 
     try {
@@ -121,9 +122,9 @@ export class StateMachine implements Transitionable {
       return currentStayInContextCallback(currentState.name, currentState.instance, contextStates.map(cState => cState.name), this.intentHistory, state);
     });
     /* Set remaining context states as new context */
-    await this.currentSessionFactory().set("__context_states", JSON.stringify(contextStates.map(contextState => contextState.name)));
+    await this.currentSessionFactory().set(sessionKeys.contextStates, JSON.stringify(contextStates.map(contextState => contextState.name)));
 
-    return this.currentSessionFactory().set("__current_state", state);
+    return this.currentSessionFactory().set(sessionKeys.currentState, state);
   }
 
   public async redirectTo(state: string, requestedIntent: intent, ...args: any[]) {
