@@ -7,17 +7,17 @@ import { ThisContext } from "../../this-context";
 
 interface CurrentThisContext extends ThisContext {
   request: RequestProxy;
-  stopServer: Function;
+  stopServer: () => void;
   requestContext: RequestContext;
   assistantJs: AssistantJSSetup;
 }
 
 describe("GenericRequestHelper", function() {
-  beforeEach(async function() {
+  beforeEach(async function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     // Remove emitting of warnings
     this.specHelper.bindSpecLogger("error");
-
-    configureI18nLocale(this.container);
+    configureI18nLocale(this.assistantJs.container);
   });
 
   describe("resulting context object", function() {
@@ -32,12 +32,12 @@ describe("GenericRequestHelper", function() {
 
     it("is fetchable via dependency injection", function(this: CurrentThisContext) {
       expect(() => {
-        this.container.inversifyInstance.get<RequestContext>(injectionNames.current.requestContext);
+        this.inversify.get<RequestContext>(injectionNames.current.requestContext);
       }).not.toThrow();
     });
 
     it("contains all request information", function(this: CurrentThisContext) {
-      const requestContext = this.container.inversifyInstance.get<RequestContext>(injectionNames.current.requestContext);
+      const requestContext = this.inversify.get<RequestContext>(injectionNames.current.requestContext);
 
       // Multiple expections for performance reasons
       expect(requestContext.method).toBe("POST");
