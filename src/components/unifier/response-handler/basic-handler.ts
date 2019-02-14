@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
-import { MinimalRequestExtraction } from "../public-interfaces";
+import { MinimalRequestExtraction, OptionallyPromise } from "../public-interfaces";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
 /**
@@ -48,12 +48,12 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
        * 3.) Promise of intermediate Object which is given to the thenMap-function
        * 4.) intermediate Object which is given to the thenMap-function
        */
-      resolver: Promise<MergedAnswerTypes[key]> | MergedAnswerTypes[key] | Promise<any> | any;
+      resolver: OptionallyPromise<MergedAnswerTypes[key] | any>;
 
       /**
        * function to build the final object from an intermediate object
        */
-      thenMap?: (value: any) => MergedAnswerTypes[key] | Promise<MergedAnswerTypes[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
+      thenMap?: (value: any) => OptionallyPromise<MergedAnswerTypes[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
     }
   } = {} as any;
 
@@ -240,7 +240,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
         const currentValue = await Promise.resolve(resolver.resolver);
         // remap the intermediate Results, when an thenMap function is present
         if (resolver.thenMap) {
-          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
+          const finalResult = await Promise.resolve<any>(resolver.thenMap.bind(this)(currentValue));
           this.results[currentKey] = finalResult;
         } else {
           // here are only final results
