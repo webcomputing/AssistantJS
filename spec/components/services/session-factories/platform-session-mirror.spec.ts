@@ -3,9 +3,9 @@ import { componentInterfaces } from "../../../../src/components/unifier/private-
 import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
 import { BasicHandable, BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
+import { createRequestScope } from "../../../helpers/scope";
 import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { MockHandlerB } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
-import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
@@ -13,17 +13,18 @@ interface CurrentThisContext extends ThisContext {
   handler: BasicSessionHandable<any>;
   mirror: PlatformSessionMirror;
   getSessionDataSpy: jasmine.Spy;
-  prepareSetup(handleConstructor?: { new (...args: any[]): BasicHandable<any> }): void;
+  prepareSetup(handleConstructor?: new (...args: any[]) => BasicHandable<any>): void;
   buildMirror(): PlatformSessionMirror;
   createGetSessionDataSpy(): void;
 }
 
 describe("PlatformSessionMirror", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.prepareSetup = (handleConstructor: { new (...args: any[]): BasicHandable<any> } = MockHandlerA) => {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+    this.prepareSetup = (handleConstructor: new (...args: any[]) => BasicHandable<any> = MockHandlerA) => {
       createRequestScope(this.specHelper, undefined, undefined, handleConstructor);
-      this.extraction = this.container.inversifyInstance.get(injectionNames.current.extraction);
-      this.handler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+      this.extraction = this.inversify.get(injectionNames.current.extraction);
+      this.handler = this.inversify.get(injectionNames.current.responseHandler);
       // Make extraction compatible per default
       this.extraction.sessionData = null;
       this.buildMirror = () => new PlatformSessionMirror(this.extraction);
@@ -44,7 +45,7 @@ describe("PlatformSessionMirror", function() {
 
     it("is bound to responseHandler's beforeSendResponse extension", async function(this: CurrentThisContext) {
       expect(
-        this.container.inversifyInstance
+        this.inversify
           .getAll<BeforeResponseHandler<any, any>>(componentInterfaces.beforeSendResponse)
           .filter(object => object.constructor.name === PlatformSessionMirror.name).length
       ).toEqual(1);
