@@ -3,10 +3,10 @@ import { Logger } from "../../../../src/components/root/public-interfaces";
 import { Configuration } from "../../../../src/components/unifier/private-interfaces";
 import { HandlerProxyFactory } from "../../../../src/components/unifier/response-handler/handler-proxy-factory";
 import { injectionNames } from "../../../../src/injection-names";
+import { createRequestScope } from "../../../helpers/scope";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { MockHandlerB, MockHandlerBSpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
-import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 type MixedTypes = MockHandlerASpecificTypes & MockHandlerBSpecificTypes;
@@ -25,15 +25,16 @@ interface CurrentThisContext extends ThisContext {
 
 describe("HandlerProxyFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     this.params = {};
     createRequestScope(this.specHelper);
 
-    this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
+    this.handlerInstance = this.inversify.get(`${PLATFORM}:current-response-handler`);
 
     spyOn(this.handlerInstance, "setMockHandlerATable").and.callThrough();
 
     this.buildProxiedHandler = () => {
-      const handlerProxyFactory = this.container.inversifyInstance.get<HandlerProxyFactory>(injectionNames.handlerProxyFactory);
+      const handlerProxyFactory = this.inversify.get<HandlerProxyFactory>(injectionNames.handlerProxyFactory);
       this.proxiedHandler = handlerProxyFactory.createHandlerProxy(this.handlerInstance);
     };
 
@@ -111,22 +112,22 @@ describe("HandlerProxyFactory", function() {
     describe("without supporting the function", function() {
       describe("setSessionData()", function() {
         beforeEach(async function(this: CurrentThisContext) {
-          this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
-          this.container.inversifyInstance
-            .bind(PLATFORM + ":current-response-handler")
+          this.inversify.unbind(`${PLATFORM}:current-response-handler`);
+          this.inversify
+            .bind(`${PLATFORM}:current-response-handler`)
             .to(MockHandlerB)
             .inSingletonScope();
 
-          this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
+          this.handlerInstance = this.inversify.get(`${PLATFORM}:current-response-handler`);
         });
 
         describe("with logging only", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            this.logger = this.container.inversifyInstance.get(injectionNames.logger);
+            this.logger = this.inversify.get(injectionNames.logger);
             spyOn(this.logger, "debug").and.callThrough();
             spyOn(this.handlerInstance, "unsupportedFeature").and.callThrough();
-            this.container.inversifyInstance.unbind(injectionNames.logger);
-            this.container.inversifyInstance.bind(injectionNames.logger).toConstantValue(this.logger);
+            this.inversify.unbind(injectionNames.logger);
+            this.inversify.bind(injectionNames.logger).toConstantValue(this.logger);
 
             this.buildProxiedHandler();
             this.params.textToSet = "current session data to set";
@@ -146,10 +147,10 @@ describe("HandlerProxyFactory", function() {
 
         describe("with forcing to throw exception", function() {
           beforeEach(async function(this: CurrentThisContext) {
-            const metaData = this.container.inversifyInstance.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier"));
+            const metaData = this.inversify.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier"));
             metaData.configuration.failSilentlyOnUnsupportedFeatures = false;
-            this.container.inversifyInstance.unbind(getMetaInjectionName("core:unifier"));
-            this.container.inversifyInstance.bind<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier")).toConstantValue(metaData);
+            this.inversify.unbind(getMetaInjectionName("core:unifier"));
+            this.inversify.bind<Component<Configuration.Runtime>>(getMetaInjectionName("core:unifier")).toConstantValue(metaData);
 
             this.buildProxiedHandler();
           });

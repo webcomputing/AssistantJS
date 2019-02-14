@@ -1,7 +1,7 @@
 import { ResponseCallback } from "../../../../src/components/root/public-interfaces";
+import { createRequestScope } from "../../../helpers/scope";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA, MockHandlerASpecificTypes } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
-import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 type MergedHandler = MockHandlerA<MockHandlerASpecificTypes>;
@@ -28,14 +28,15 @@ interface CurrentThisContext extends ThisContext {
 
 describe("BaseHandler", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     createRequestScope(this.specHelper);
 
-    this.handlerInstance = this.container.inversifyInstance.get(PLATFORM + ":current-response-handler");
-    this.container.inversifyInstance.unbind(PLATFORM + ":current-response-handler");
+    this.handlerInstance = this.inversify.get(`${PLATFORM}:current-response-handler`);
+    this.inversify.unbind(`${PLATFORM}:current-response-handler`);
 
     spyOn(this.handlerInstance, "getBody");
 
-    this.container.inversifyInstance.bind(PLATFORM + ":current-response-handler").toConstantValue(this.handlerInstance);
+    this.inversify.bind(`${PLATFORM}:current-response-handler`).toConstantValue(this.handlerInstance);
 
     this.mockTable = { header: ["A", "B"], elements: [["A1", "A2"], ["B1", "B2"]] };
     this.mockCard = { description: "desc", title: "title" };
