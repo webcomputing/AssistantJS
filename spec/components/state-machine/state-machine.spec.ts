@@ -1,45 +1,50 @@
 import { Container } from "inversify-components";
+import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { injectionNames } from "../../../src/injection-names";
+import { createRequestScope } from "../../helpers/scope";
 import { createSpyHook, registerHook } from "../../support/mocks/state-machine/hook";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
+
+interface CurrentThisContext extends ThisContext {
+  stateMachine: StateMachine;
+  stateSpyResult: any[];
+  stateSpy: (...args: any[]) => void;
+}
 
 describe("StateMachine", function() {
-  beforeEach(function() {
-    configureI18nLocale(this.container, false);
+  beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+    configureI18nLocale(this.assistantJs.container, false);
     createRequestScope(this.specHelper);
-    this.stateMachine = this.container.inversifyInstance.get(injectionNames.current.stateMachine);
+    this.stateMachine = this.inversify.get(injectionNames.current.stateMachine);
   });
 
   describe("handleIntent", function() {
-    beforeEach(function() {
+    beforeEach(function(this: CurrentThisContext) {
       this.stateSpyResult = [];
       this.stateSpy = (...args: any[]) => (this.stateSpyResult = args);
-      (this.container as Container).inversifyInstance.bind("mocks:states:call-spy").toFunction(this.stateSpy);
+      this.inversify.bind("mocks:states:call-spy").toFunction(this.stateSpy);
     });
 
-    it("always operates on current intent", async function(done) {
+    it("always operates on current intent", async function() {
       await this.stateMachine.handleIntent("test");
       expect(this.stateSpyResult[0].constructor.name).toEqual("MainState");
 
       await this.stateMachine.transitionTo("SecondState");
       await this.stateMachine.handleIntent("test");
       expect(this.stateSpyResult[0].constructor.name).toEqual("SecondState");
-
-      done();
     });
 
-    it("adds state/intent combination to history", async function(done) {
+    it("adds state/intent combination to history", async function() {
       await this.stateMachine.handleIntent("test");
       expect(this.stateMachine.intentHistory).toEqual([{ stateName: "MainState", intentMethodName: "testIntent" }]);
-      done();
     });
 
     describe("when given intent exists in state class", function() {
       describe("when given intent does not throw an error", function() {
-        beforeEach(async function(done) {
+        beforeEach(async function() {
           await this.stateMachine.handleIntent("test", "param1");
-          done();
         });
 
         it("calls the given intent", function() {
@@ -57,9 +62,8 @@ describe("StateMachine", function() {
 
       describe("when given intent throws an exception", function() {
         describe("when there is an errorFallback method defined", function() {
-          beforeEach(async function(done) {
+          beforeEach(async function() {
             await this.stateMachine.handleIntent("error");
-            done();
           });
 
           it("calls the fallback method", function() {
@@ -76,29 +80,24 @@ describe("StateMachine", function() {
         });
 
         describe("when there is no errorFallback method defined", function() {
-          beforeEach(async function(done) {
+          beforeEach(async function() {
             await this.stateMachine.transitionTo("SecondState");
-            done();
           });
 
-          it("throws an exception", async function(done) {
+          it("throws an exception", async function() {
             try {
               await this.stateMachine.handleIntent("error");
-              fail();
             } catch (e) {
-              expect(true).toBeTruthy();
+              expect(e).toBeDefined();
             }
-
-            done();
           });
         });
       });
     });
 
     describe("when given intent does not exist in state class", function() {
-      beforeEach(async function(done) {
+      beforeEach(async function() {
         await this.stateMachine.handleIntent("notExisting", "param1");
-        done();
       });
 
       it("calls unhandled intent", function() {
@@ -119,10 +118,9 @@ describe("StateMachine", function() {
 
       describe("when unhandledGenericIntent throws an exception", function() {
         describe("when there is an errorFallback method defined", function() {
-          beforeEach(async function(done) {
+          beforeEach(async function() {
             await this.stateMachine.transitionTo("UnhandledErrorWithFallbackState");
             await this.stateMachine.handleIntent("notExisting");
-            done();
           });
 
           it("calls the fallback method", function() {
@@ -140,20 +138,16 @@ describe("StateMachine", function() {
         });
 
         describe("when there is no errorFallback method defined", function() {
-          beforeEach(async function(done) {
+          beforeEach(async function() {
             await this.stateMachine.transitionTo("UnhandledErrorState");
-            done();
           });
 
-          it("throws an exception", async function(done) {
+          it("throws an exception", async function() {
             try {
               await this.stateMachine.handleIntent("notExisting");
-              fail();
             } catch (e) {
-              expect(true).toBeTruthy();
+              expect(e).toBeDefined();
             }
-
-            done();
           });
         });
       });
@@ -162,13 +156,12 @@ describe("StateMachine", function() {
     describe("with afterIntent hook given", function() {
       beforeEach(function() {
         this.spyResult = [];
-        registerHook(this.container, false, createSpyHook(intent => this.spyResult.push(intent)));
+        registerHook(this.assistantJs.container, false, createSpyHook(intent => this.spyResult.push(intent)));
       });
 
       describe("when given intent does not exist on state class", function() {
-        beforeEach(async function(done) {
+        beforeEach(async function() {
           await this.stateMachine.handleIntent("notExisting");
-          done();
         });
 
         it("calls hook only once", function() {
@@ -180,22 +173,20 @@ describe("StateMachine", function() {
         });
       });
 
-      it("calls hook", async function(done) {
+      it("calls hook", async function() {
         await this.stateMachine.handleIntent("test");
         expect(this.spyResult[0]).toEqual("testIntent");
-        done();
       });
 
       describe("with additional arguments", function() {
         beforeEach(function() {
           this.argsResult = [];
-          registerHook(this.container, false, createSpyHook((intent, stateName, state, mode, machine, ...args) => this.argsResult.push(args)));
+          registerHook(this.assistantJs.container, false, createSpyHook((intent, stateName, state, mode, machine, ...args) => this.argsResult.push(args)));
         });
 
-        it("passes arguments to hook function", async function(done) {
+        it("passes arguments to hook function", async function() {
           await this.stateMachine.handleIntent("test", "myFirstArgument", "mySecondArgument");
           expect(this.argsResult).toEqual([["myFirstArgument", "mySecondArgument"]]);
-          done();
         });
       });
     });
@@ -203,40 +194,36 @@ describe("StateMachine", function() {
     describe("with beforeIntent hooks given", function() {
       beforeEach(function() {
         this.spyResult = [];
-        registerHook(this.container, true, createSpyHook(intent => this.spyResult.push(intent)));
+        registerHook(this.assistantJs.container, true, createSpyHook(intent => this.spyResult.push(intent)));
 
-        registerHook(this.container);
+        registerHook(this.assistantJs.container);
       });
 
-      it("calls hook", async function(done) {
+      it("calls hook", async function() {
         await this.stateMachine.handleIntent("other");
         expect(this.spyResult[0]).toEqual("otherIntent");
-        done();
       });
 
-      it("allows hook to intercept execution of intent", async function(done) {
+      it("allows hook to intercept execution of intent", async function() {
         await this.stateMachine.handleIntent("test");
         expect(this.stateSpyResult).toEqual([]);
-        done();
       });
 
       describe("with additional arguments", function() {
         beforeEach(function() {
           this.argsResult = [];
-          registerHook(this.container, true, createSpyHook((intent, stateName, state, mode, machine, ...args) => this.argsResult.push(args)));
+          registerHook(this.assistantJs.container, true, createSpyHook((intent, stateName, state, mode, machine, ...args) => this.argsResult.push(args)));
         });
 
-        it("passes arguments to hook function", async function(done) {
+        it("passes arguments to hook function", async function() {
           await this.stateMachine.handleIntent("other", "myFirstArgument", "mySecondArgument");
           expect(this.argsResult).toEqual([["myFirstArgument", "mySecondArgument"]]);
-          done();
         });
       });
 
       describe("when given intent does not exist", function() {
-        beforeEach(async function(done) {
+        beforeEach(async function() {
           await this.stateMachine.handleIntent("notExisting");
-          done();
         });
 
         it("calls hook two times", function() {
@@ -258,40 +245,36 @@ describe("StateMachine", function() {
         this.intentSpyResult = [];
         this.intentSpy = (...args: any[]) => this.intentSpyResult.push(args.slice(1));
 
-        (this.container as Container).inversifyInstance.unbind("mocks:states:call-spy");
-        (this.container as Container).inversifyInstance.bind("mocks:states:call-spy").toFunction(this.intentSpy);
+        this.inversify.unbind("mocks:states:call-spy");
+        this.inversify.bind("mocks:states:call-spy").toFunction(this.intentSpy);
       });
 
       describe("with beforeIntent_ method given", function() {
-        beforeEach(async function(done) {
+        beforeEach(async function() {
           await this.stateMachine.transitionTo("IntentCallbackState");
-          done();
         });
 
-        it("is called with given parameters", async function(done) {
+        it("is called with given parameters", async function() {
           await this.stateMachine.handleIntent("okay", "param1");
           expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
           expect(this.intentSpyResult[0][1]).toEqual("okayIntent");
           expect(this.intentSpyResult[0][2]).toEqual(this.stateMachine);
           expect(this.intentSpyResult[0][3]).toEqual("param1");
-          done();
         });
 
         describe("when beforeIntent method returns false", function() {
-          it("does not call intent", async function(done) {
+          it("does not call intent", async function() {
             await this.stateMachine.handleIntent("notOkay");
             expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
             expect(this.intentSpyResult.length).toBe(1);
-            done();
           });
         });
 
         describe("when beforeIntent method returns true", function() {
-          it("calls intent after beforeIntent_ call", async function(done) {
+          it("calls intent after beforeIntent_ call", async function() {
             await this.stateMachine.handleIntent("okay");
             expect(this.intentSpyResult[0][0]).toEqual("beforeIntent_");
             expect(this.intentSpyResult[1][0]).toEqual("okayIntent");
-            done();
           });
         });
 
@@ -306,10 +289,9 @@ describe("StateMachine", function() {
       });
 
       describe("with afterIntent_ method given", function() {
-        beforeEach(async function(done) {
+        beforeEach(async function() {
           await this.stateMachine.transitionTo("IntentCallbackState");
           await this.stateMachine.handleIntent("okayIntent", "param1");
-          done();
         });
 
         it("is called in a row with all arguments", function() {
@@ -325,27 +307,25 @@ describe("StateMachine", function() {
   });
 
   describe("transitionTo", function() {
-    it("transitions to given state", async function(done) {
+    it("transitions to given state", async function() {
       await this.stateMachine.transitionTo("SecondState");
       const currentState = await this.stateMachine.getCurrentState();
       expect(currentState.name).toEqual("SecondState");
-      done();
     });
 
     describe("when given state is not registered in state machine", function() {
       it("throws an exception", function() {
-        expect(() => this.currentState.transitionTo("SubState")).toThrowError();
+        expect(() => this.currentState.transitionTo("SubState")).toThrowError;
       });
     });
   });
 
   describe("redirectTo", function() {
-    beforeEach(async function(done) {
+    beforeEach(async function() {
       spyOn(this.stateMachine, "transitionTo");
       spyOn(this.stateMachine, "handleIntent");
 
       await this.stateMachine.redirectTo("SecondState", "test", "param1", "param2");
-      done();
     });
 
     it("calls transitionTo with given state", function() {
@@ -359,11 +339,11 @@ describe("StateMachine", function() {
 
   describe("stateExists", function() {
     it("returns true for registered states", function() {
-      expect(this.stateMachine.stateExists("MainState")).toBeTruthy();
+      expect(this.stateMachine.stateExists("MainState")).toBeTruthy;
     });
 
     it("returns false for not existing states", function() {
-      expect(this.stateMachine.stateExists("NotExistingState")).toBeFalsy();
+      expect(this.stateMachine.stateExists("NotExistingState")).toBeFalsy;
     });
   });
 });

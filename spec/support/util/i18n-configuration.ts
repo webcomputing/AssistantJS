@@ -5,7 +5,7 @@ import { I18nConfiguration } from "../../../src/components/i18n/public-interface
 export function configureI18nLocale(
   container: Container,
   debug = false,
-  localePath = __dirname + "/../mocks/i18n/locale/{{lng}}/{{ns}}.json",
+  localePath = `${__dirname}/../mocks/i18n/locale/{{lng}}/{{ns}}.json`,
   instance = i18next.createInstance()
 ) {
   const config: I18nConfiguration = {

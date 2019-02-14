@@ -1,32 +1,37 @@
-import { createRequestScope, createSpecHelper } from "../../support/util/setup";
+import { createRequestScope } from "../../helpers/scope";
 
-import { FilterSetup } from "../../../src/assistant-source";
+import { AssistantJSSetup, FilterSetup, SpecHelper } from "../../../src/assistant-source";
 import { TestFilterA } from "../../support/mocks/filters/test-filter-a";
-import { TestFilterB } from "../../support/mocks/filters/test-filter-b";
+import { ThisContext } from "../../this-context";
 
 describe("FilterSetup", function() {
   const explicitName = "MySecondFilter";
 
-  beforeEach(function() {
-    this.specHelper = createSpecHelper(false);
-    this.assistantJs = this.specHelper.assistantJs;
-    this.container = this.assistantJs.container;
-
-    createRequestScope(this.specHelper);
-    this.setup = new FilterSetup(this.assistantJs);
+  beforeEach(function(this: ThisContext) {
+    this.assistantJs = new AssistantJSSetup();
+    this.filterSetup = new FilterSetup(this.assistantJs);
+    this.specHelper = new SpecHelper(this.assistantJs, this.stateMachineSetup);
   });
 
   describe("addFilter", function() {
-    beforeEach(function() {
-      this.setup.addFilter(TestFilterA);
+    beforeEach(function(this: ThisContext) {
+      // Add and register filters
+      this.filterSetup.addFilter(TestFilterA);
+      this.filterSetup.registerFilters();
+
+      // Register internal components
+      this.assistantJs.registerInternalComponents();
+
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
+      createRequestScope(this.specHelper);
     });
 
     it("adds filter to internal filterClasses", function() {
-      expect(Object.keys(this.setup.classes).length).toBe(1);
+      expect(Object.keys(this.filterSetup.classes).length).toBe(1);
     });
 
     it("adds filter to filterClasses by name of constructor", function() {
-      expect(this.setup.classes.TestFilterA).toEqual(TestFilterA);
+      expect(this.filterSetup.classes.TestFilterA).toEqual(TestFilterA);
     });
   });
 });

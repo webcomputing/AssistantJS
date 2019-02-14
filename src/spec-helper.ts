@@ -98,37 +98,6 @@ export class SpecHelper {
   }
 
   /**
-   * Prepares assistant js setup
-   * @param states States to add to container
-   * @param autobind If true, calls setup.autobind()
-   * @param useChilds If set to false, does not set child containers
-   * @param autoSetup If set to true, registers internal components
-   * @param minimumLogLevel If you do not enable logging in specs explicitly using SPEC_LOGS=true, this is the minimum level applied to logger.
-   */
-  public prepare(
-    states: State.Constructor[] = [],
-    filters: Array<Constructor<Filter>> = [],
-    autoBind = true,
-    useChilds = false,
-    autoSetup = true,
-    minimumLogLevel: Logger.LogLevel = "warn"
-  ) {
-    // tslint:disable-next-line:no-console
-    console.warn("[DEPRECATION] using prepare() is deprecated. Please use prepareSpec() instead!");
-
-    if (autoSetup) this.assistantJs.registerInternalComponents();
-    if (states.length > 0) this.registerStates(states);
-    if (filters.length > 0) this.registerFilters(filters);
-
-    if (autoBind) this.assistantJs.autobind();
-    if (!useChilds) this.bindChildlessRequestHandlerMock();
-
-    // Change logger unless env variable is set
-    const specLogging = process.env.SPEC_LOGS || process.env.SPECS_LOG || process.env.SPECS_LOGS || process.env.LOG_SPECS;
-    if (!(specLogging === "true")) this.bindSpecLogger(minimumLogLevel);
-  }
-
-  /**
    * Prepares an intent call and creates request scope. Use this first in your specs, then call runMachineAndGetResults() to execute the intent method.
    * @param {PlatformSpecHelper<MergedAnswerTypes, MergedHandler>} platformSpecHelper The platform to use to execute this intent
    * @param {intent} intentToCall The intent you want to execute when calling runMachine() afterwards
@@ -205,7 +174,7 @@ export class SpecHelper {
   public createRequestScope(
     minimalExtraction: MinimalRequestExtraction | null,
     requestContext: RequestContext,
-    responseHandler?: { new (...args: any[]): BasicHandable<any> }
+    responseHandler?: new (...args: any[]) => BasicHandable<any>
   ) {
     // Get request handle instance and create child container of it
     const requestHandler = this.assistantJs.container.inversifyInstance.get(GenericRequestHandler);
@@ -293,7 +262,7 @@ export class SpecHelper {
    *
    * @return Promise<Function> stopFunction If you call this function, server will be stopped.
    */
-  public withServer(expressApp: express.Express = express()): Promise<(() => void)> {
+  public withServer(expressApp: express.Express = express()): Promise<() => void> {
     return new Promise(resolve => {
       this.assistantJs.run(
         new ServerApplication(
