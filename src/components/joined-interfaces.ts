@@ -30,13 +30,13 @@ export interface AssistantJSApplicationInitializer {
   runServer(port?: number): AssistantJSSetup;
 
   /** Called via cli command "assistant generate" */
-  runGenerator(): AssistantJSSetup;
+  runGenerator(buildTimeStamp?: number): Promise<AssistantJSSetup>;
 
   /** Creates a ready-to-use AssistantJSSetup instance */
   createAssistantJsSetup(): AssistantJSSetup;
 
   /** Called via cli command "assistant deploy" */
-  runProviderDeployment(): AssistantJSSetup;
+  runProviderDeployment(buildTimeStamp: number): Promise<AssistantJSSetup>;
 }
 
 /** Common component-independent AssistantJS namespace for hooks */
