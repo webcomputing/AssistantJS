@@ -6,25 +6,16 @@ import * as fs from "fs";
 
 // This class is the main application thread. Therefore it acts like a singleton!
 export class GeneratorApplication implements MainApplication {
-  private baseDir: string;
-  private buildNr!: number;
-  private buildDir!: string;
-  private container!: Container;
-
-  constructor(baseDir: string) {
-    this.baseDir = baseDir;
-  }
+  constructor(private baseDir: string, private buildTimeStamp: number) {}
 
   public async execute(container: Container): Promise<void> {
-    this.container = container;
-    this.buildNr = Date.now();
-    this.buildDir = this.baseDir + "/" + this.buildNr;
+    const buildDir = `${this.baseDir}/${this.buildTimeStamp}`;
 
     // Create directory for current build
-    fs.mkdirSync(this.buildDir);
+    fs.mkdirSync(buildDir);
 
     // Get and execute all builders
-    const builders = this.container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator);
-    await Promise.all(builders.map(builder => Promise.resolve(builder.execute(this.buildDir))));
+    const builders = container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator);
+    await Promise.all(builders.map(builder => Promise.resolve(builder.execute(buildDir))));
   }
 }
