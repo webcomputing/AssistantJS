@@ -44,8 +44,8 @@ export function cli(argv, resolvedApplicationInitializer) {
     fs.writeFileSync(destination, contents.replace(/\{\{__NAME__\}\}/g, name));
   };
 
-  const deployConfiguration = function() {
-    grabInitializer().runProviderDeployment();
+  const deployConfiguration = async function(buildTimeStamp: number) {
+    return grabInitializer().runProviderDeployment(buildTimeStamp);
   };
 
   /** Initializes new assistantjs project (prototyped currently) */
@@ -173,7 +173,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     .command("generate")
     .alias("g")
     .description("Generates all platform configurations")
-    .action(() => grabInitializer().runGenerator());
+    .action(async () => grabInitializer().runGenerator());
 
   // Register new command
   commander
@@ -202,10 +202,14 @@ export function cli(argv, resolvedApplicationInitializer) {
     .command("deploy")
     .alias("d")
     .description("Deploy current intent configuration to all provider")
-    .action(() => {
-      commander.emit("generate");
+    .action(async () => {
+      // Create an timestamp witch will be
+      const timestamp = Date.now();
+      // Execute generator
+      await grabInitializer().runGenerator(timestamp);
       console.log("Deploy configuration...");
-      deployConfiguration();
+      // Execute deploy generated schemas
+      await deployConfiguration(timestamp);
       process.exit(0);
     });
 
