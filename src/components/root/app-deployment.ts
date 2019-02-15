@@ -5,7 +5,7 @@ import { CLIDeploymentExtension } from "./public-interfaces";
 
 export class DeploymentApplication {
   constructor(private buildDir: string, private buildTimeStamp: number = Date.now()) {
-    if (!fs.existsSync(buildDir)) throw new Error("Missing build directory. Maybe the generator has be executed first");
+    if (!fs.existsSync(buildDir)) throw new Error("Missing build directory. Previously you have to execute the generator.");
   }
 
   public async execute(container: Container): Promise<void> {
