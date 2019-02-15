@@ -7,6 +7,7 @@ import { ThisContext } from "../../this-context";
 interface CurrentThisContext extends ThisContext {
   deploymentSpy: jasmine.Spy;
   deploymentApplication: DeploymentApplication;
+  buildTimeStamp: number;
 }
 
 const { existsSync } = fs;
@@ -45,7 +46,8 @@ describe("DeploymentApplication", function() {
     });
     describe("execute", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.deploymentApplication = new DeploymentApplication("root");
+        this.buildTimeStamp = Date.now();
+        this.deploymentApplication = new DeploymentApplication("root", this.buildTimeStamp);
         this.deploymentApplication.execute(this.container);
       });
 
@@ -54,7 +56,7 @@ describe("DeploymentApplication", function() {
       });
 
       it("transmit the build directory", async function(this: CurrentThisContext) {
-        expect(this.deploymentSpy).toHaveBeenCalledWith("root");
+        expect(this.deploymentSpy).toHaveBeenCalledWith(`root/${this.buildTimeStamp}`);
       });
     });
   });
