@@ -8,9 +8,9 @@ export class AssistantJSSetup {
     this.container = container;
   }
 
-  public run(app: MainApplication) {
+  public async run(app: MainApplication) {
     this.container.setMainApplication(app);
-    this.container.runMain();
+    return this.container.runMain();
   }
 
   /** Returns true if internal components have already been registered */
