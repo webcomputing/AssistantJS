@@ -39,6 +39,15 @@ export interface AssistantJSApplicationInitializer {
   runProviderDeployment(buildTimeStamp: number): Promise<AssistantJSSetup>;
 }
 
+/** Session keys used by AssistantJS for internal purposes */
+export const sessionKeys = {
+  /** Key holding states staying in context */
+  contextStates: "__context_states",
+
+  /** Key holding the currently stored state */
+  currentState: "__current_state",
+};
+
 /** Common component-independent AssistantJS namespace for hooks */
 export namespace Hooks {
   /**

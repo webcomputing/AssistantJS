@@ -174,3 +174,29 @@ export interface ContextState {
  * Returns a function for retrieving all context states.
  */
 export type ContextStatesProvider = () => Promise<ContextState[]>;
+
+/** Callback that is executed to determine whether or not a state remains in context */
+export type StayInContextCallback = (
+  /** Name of current state */
+  currentStateName?: string,
+  /** Instance of current state */
+  currentStateInstance?: State.Required,
+  /** Names of states currently in context */
+  contextStateNames?: string[],
+  /** History of called intents for this request */
+  intentHistory?: Array<{ stateName: string; intentMethodName: string }>,
+  /** Target state we want to transition to */
+  stateNameToTransitionTo?: string
+) => boolean;
+
+/** Callback that is executed to determine whether or not the state context gets cleared */
+export type ClearContextCallback = (
+  /** Name of current state */
+  currentStateName?: string,
+  /** Instance of current state */
+  currentStateInstance?: State.Required,
+  /** Names of states currently in context */
+  contextStateNames?: string[],
+  /** History of called intents for this request */
+  intentHistory?: Array<{ stateName: string; intentMethodName: string }>
+) => boolean;

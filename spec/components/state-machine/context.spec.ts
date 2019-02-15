@@ -1,6 +1,9 @@
 import { Container } from "inversify-components";
-import { GenericIntent, injectionNames, SpecHelper, State } from "../../../src/assistant-source";
+import { ContextState, GenericIntent, injectionNames, SpecHelper, State } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
+import { ContextAState } from "../../support/mocks/states/context/context-a";
+import { ContextCState } from "../../support/mocks/states/context/context-c";
+import { contextStateNames, currentStateInstance, currentStateName, intentHistory, stateNameToTransitionTo } from "../../support/util/context-test-callback";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { createRequestScope } from "../../support/util/setup";
 
@@ -100,10 +103,11 @@ describe("state context decorators", function() {
       });
 
       it("gets called with the correct parameters", async function(this: CurrentThisContext) {
-        expect(current).toEqual("ContextAState");
-        expect(next).toEqual("ContextBState");
-        expect(context).toEqual(["ContextAState"]);
-        expect(history).toEqual([]);
+        expect(currentStateName).toEqual("ContextAState");
+        expect(currentStateInstance instanceof ContextAState).toBe(true);
+        expect(contextStateNames).toEqual(["ContextAState"]);
+        expect(intentHistory).toEqual([]);
+        expect(stateNameToTransitionTo).toEqual("ContextBState");
       });
     });
   });
@@ -141,23 +145,11 @@ describe("state context decorators", function() {
       });
 
       it("gets called with the correct parameters", async function(this: CurrentThisContext) {
-        expect(current).toEqual("ContextCState");
-        expect(context).toEqual([]);
-        expect(history).toEqual([{ stateName: "ContextCState", intentMethodName: "exampleCIntent" }]);
+        expect(currentStateName).toEqual("ContextCState");
+        expect(currentStateInstance instanceof ContextCState).toBe(true);
+        expect(contextStateNames).toEqual([]);
+        expect(intentHistory).toEqual([{ stateName: "ContextCState", intentMethodName: "exampleCIntent" }]);
       });
     });
   });
 });
-
-let current;
-let next;
-let context;
-let history;
-
-export function testCallback(currentParam, contextParam, historyParam, nextParam) {
-  current = currentParam;
-  next = nextParam;
-  context = contextParam;
-  history = historyParam;
-  return true;
-}

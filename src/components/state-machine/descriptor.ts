@@ -7,7 +7,7 @@ import { Logger } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
 import { intent, MinimalRequestExtraction } from "../unifier/public-interfaces";
 
-import { Hooks } from "../joined-interfaces";
+import { Hooks, sessionKeys } from "../joined-interfaces";
 import { BasicHandable } from "../unifier/response-handler";
 import { ExecuteFiltersHook } from "./execute-filters-hook";
 import { componentInterfaces } from "./private-interfaces";
@@ -95,7 +95,7 @@ export const descriptor: ComponentDescriptor = {
         return () => {
           return context.container
             .get<() => Session>(injectionNames.current.sessionFactory)()
-            .get("__current_state")
+            .get(sessionKeys.currentState)
             .then(sessionValue => {
               return sessionValue ? sessionValue : MAIN_STATE_NAME;
             });
@@ -121,7 +121,7 @@ export const descriptor: ComponentDescriptor = {
           const factory = context.container.get<Function>(injectionNames.stateFactory);
 
           const session = context.container.get<() => Session>(injectionNames.current.sessionFactory)();
-          const contextStates = await session.get("__context_states");
+          const contextStates = await session.get(sessionKeys.contextStates);
 
           if (contextStates) {
             const contextStatesArr: string[] = JSON.parse(contextStates);
