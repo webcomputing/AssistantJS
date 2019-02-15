@@ -24,7 +24,9 @@ version 0.4.0
     - removed createAndSendEmptyResponse(), use endSessionWith("") instead.
     - as of https://github.com/Microsoft/TypeScript/issues/17113 projects need to use `"skipLibCheck": true` in tsconfig.json
     - add SelectedGenericIntent for selection of items, e.g. a list on a smart display
-- minor changes and improvements    
+- minor changes and improvements 
+- add CLI command 'assistant deploy'. Allows you to publish your voice application configuration to all registered platforms.
+
 
 version 0.3.2
 - fixes intent configuration in generator. Entities will be mapped with utterances only once. (@denselmann)
