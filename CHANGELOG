@@ -25,6 +25,15 @@ version 0.4.0
     - as of https://github.com/Microsoft/TypeScript/issues/17113 projects need to use `"skipLibCheck": true` in tsconfig.json
     - add SelectedGenericIntent for selection of items, e.g. a list on a smart display
 - introduces @stayInContext and @clearContext decorators, which enables you to have multiple states active at the same time
+- adds specs to scaffolding process
+- adds status for accountlinking as optional extraction
+- substitutes alexa-utterance dependency with own implementation
+- allows integration of missing interpolation handlers to use fallback / default translations
+- makes translateHelper's t() method async
+- removes redis and fakeredis dependencies
+- introduces platform session, crypted platform session and redis based session storage
+- adds BeforeStateMachine and AfterStateMachine extension points
+- adds possibility to use platform sessions, for example session system of alexa or google assistant, and makes platform sessions the default session storage
 - introduces @filter decorator, which works like a beforeIntentHook, but is made specifically for state redirections (which should be the most common use case for hooks)
 - minor changes and improvements    
 
