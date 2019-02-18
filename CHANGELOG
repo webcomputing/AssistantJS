@@ -8,22 +8,22 @@ version 0.4.0
 - changed the "assistant" binary to load the new application-initializer.js instead of index.js. To migrate, install the new assistant-source version globally.
 - the entry files for utterances/translations/entities now may be either .json, .js or .ts files
 - now supports generation of custom entities
-    - You are now able to define custom entities in a config/locales/en/entities.ts file (or .json, or .js). If you wonder how, just generate a new assistantjs application and have a look at the used interface in the generates entities.ts file.
-    - Remember that you need to set up a type mapping in your unifier configuration in config/components/unifier for your custom entities, too.
-    - You do not need to set up platform specific mappings (for dialogflow, alexa, ...) for your custom entities. 
-    - On the other hand, if you set up a platform specific mapping, our generators will use this platform specific mapping instead of your custom entity. This enables you to use custom entities as a fallback for missing platform specific types. For example, if you use the AMAZON.US_CITY slot type, but don't find a corresponding dialogflow entity for it, you are able to create a custom entity as a dialogflow fallback.
+	- You are now able to define custom entities in a config/locales/en/entities.ts file (or .json, or .js). If you wonder how, just generate a new assistantjs application and have a look at the used interface in the generates entities.ts file.
+	- Remember that you need to set up a type mapping in your unifier configuration in config/components/unifier for your custom entities, too.
+	- You do not need to set up platform specific mappings (for dialogflow, alexa, ...) for your custom entities. 
+	- On the other hand, if you set up a platform specific mapping, our generators will use this platform specific mapping instead of your custom entity. This enables you to use custom entities as a fallback for missing platform specific types. For example, if you use the AMAZON.US_CITY slot type, but don't find a corresponding dialogflow entity for it, you are able to create a custom entity as a dialogflow fallback.
 - changed spec setup and made spec-helper more powerful. To make use of the improved spec setup in your 0.3.x project, create a new assistant js application and have a look at the generated spec setup.
 - renames "specSetup" to "specHelper" and removes autoStart option of pretendIntentCalled() in PlatformSpecHelper interface (unifierInterfaces)
 - removed index.ts and replaced it with application-initializer.ts to make the AssitantJS initialization process more adaptable. To migrate easily, create a new AssistantJS application, copy the created application-initializer.ts, paste it into your application and merge all locally made changes of your index.ts into your new application-initializer.ts
 - renamed SpecSetup to SpecHelper
-- new ResponsHandler: ResponseFactory and old Response-Types are obsolete now. A new ResponseHandler is introduced, which allows you the following:
-    - Method-Chaining `this.handler.prompt(...).setCard(...).setSuggestionChips(...)`
-    - dynamic types and methods based on the installed and used platforms `this.handler.addGoogleTable(...).addAlexaList(...)`. To Work you have to specif a intersection-type like `type MixedTypes = GoogleSpecificTypes & AlexaSpecificTypes; type MixedHandler = GoogleHandler<MixedTypes> & AlexaHandler<MixedTypes>;`
-    - every Method can be used either with plain objects or with promises
-    - for every common feature like SuggestionChips, Authentication or Cards there is a mixin which can be used and extended by specific ResponseHandler
-    - removed createAndSendEmptyResponse(), use endSessionWith("") instead.
-    - as of https://github.com/Microsoft/TypeScript/issues/17113 projects need to use `"skipLibCheck": true` in tsconfig.json
-    - add SelectedGenericIntent for selection of items, e.g. a list on a smart display
+- new ResponseHandler: ResponseFactory and old Response-Types are obsolete now. A new ResponseHandler is introduced, which allows you the following:
+	- Method-Chaining `this.handler.prompt(...).setCard(...).setSuggestionChips(...)`
+	- dynamic types and methods based on the installed and used platforms `this.handler.addGoogleTable(...).addAlexaList(...)`. To Work you have to specif a intersection-type like `type MixedTypes = GoogleSpecificTypes & AlexaSpecificTypes; type MixedHandler = GoogleHandler<MixedTypes> & AlexaHandler<MixedTypes>;`
+	- every Method can be used either with plain objects or with promises
+	- for every common feature like SuggestionChips, Authentication or Cards there is a mixin which can be used and extended by specific ResponseHandler
+	- removes createAndSendEmptyResponse(), use endSessionWith("") instead.
+	- as of https://github.com/Microsoft/TypeScript/issues/17113 projects need to use `"skipLibCheck": true` in tsconfig.json
+	- adds SelectedGenericIntent for selection of items, e.g. a list on a smart display
 - introduces @stayInContext and @clearContext decorators, which enables you to have multiple states active at the same time
 - adds specs to scaffolding process
 - adds status for accountlinking as optional extraction
