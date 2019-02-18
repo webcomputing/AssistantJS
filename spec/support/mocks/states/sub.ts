@@ -1,24 +1,25 @@
-import { State } from "../../../../src/components/state-machine/public-interfaces";
+import { inject, injectable, optional } from "inversify";
 import { Logger } from "../../../../src/components/root/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
-import { optional, inject, injectable } from "inversify";
-
+import { BasicHandable } from "../../../../src/components/unifier/response-handler";
+import { injectionNames } from "../../../../src/injection-names";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../unifier/response-handler/mock-handler-a";
 import { MainState } from "./main";
 
 @injectable()
 export class SubState extends MainState {
-
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
-    @inject("core:unifier:current-extraction") extraction: any,
-    @inject("core:i18n:current-translate-helper") tHelper: any,
-    @inject("core:root:current-logger") logger: Logger,
-    @optional() @inject("mocks:states:call-spy") spy: Function
+    @inject(injectionNames.current.responseHandler) responseHandler: MockHandlerA<MockHandlerASpecificTypes>,
+    @inject(injectionNames.current.extraction) extraction: any,
+    @inject(injectionNames.current.translateHelper) tHelper: any,
+    @inject(injectionNames.current.logger) logger: Logger,
+    @optional()
+    @inject("mocks:states:call-spy")
+    spy: (...args: any[]) => void
   ) {
-    super(responseFactory, extraction, tHelper, logger, spy);
+    super(responseHandler, extraction, tHelper, logger, spy);
   }
 
-  helpGenericIntent(...args: any[]) {
+  public helpGenericIntent(...args: any[]) {
     this.spyIfExistent("help", ...args);
   }
 }

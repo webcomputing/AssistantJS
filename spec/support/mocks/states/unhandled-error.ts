@@ -1,30 +1,30 @@
+import { inject, injectable, optional } from "inversify";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { ResponseFactory } from "../../../../src/components/unifier/public-interfaces";
-import { injectable, inject, optional } from "inversify";
-
+import { BasicHandable } from "../../../../src/components/unifier/response-handler";
+import { injectionNames } from "../../../../src/injection-names";
 
 @injectable()
 export class UnhandledErrorState implements State.Required {
-  responseFactory: ResponseFactory;
-  extraction: any;
-  spy?: Function;
+  public extraction: any;
+  public spy?: (...args: any[]) => void;
 
   constructor(
-    @inject("core:unifier:current-response-factory") responseFactory: ResponseFactory,
-    @inject("core:unifier:current-extraction") extraction: any,
-    @optional() @inject("mocks:states:call-spy") spy: Function
+    @inject(injectionNames.current.responseHandler) responsehandler: BasicHandable<any>,
+    @inject(injectionNames.current.extraction) extraction: any,
+    @optional()
+    @inject("mocks:states:call-spy")
+    spy: (...args: any[]) => void
   ) {
     this.extraction = extraction;
     this.spy = spy;
-    this.responseFactory = responseFactory;
   }
 
-  unhandledGenericIntent(...args: any[]) {
+  public async unhandledGenericIntent(...args: any[]) {
     this.spyIfExistent("unhandled", ...args);
     throw new Error("Error");
   }
 
-  unansweredGenericIntent(...args: any[]) {
+  public unansweredGenericIntent(...args: any[]) {
     this.spyIfExistent("unanswered", ...args);
   }
 

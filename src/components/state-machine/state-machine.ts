@@ -1,47 +1,64 @@
-import { injectable, inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { Hooks } from "inversify-components";
-import { GenericIntent, intent } from "../unifier/public-interfaces";
-import { Session } from "../services/public-interfaces";
 import { Logger } from "../root/public-interfaces";
+import { CurrentSessionFactory } from "../services/public-interfaces";
+import { GenericIntent, intent } from "../unifier/public-interfaces";
 
-import { State, Transitionable } from "./public-interfaces";
+import { injectionNames } from "../../injection-names";
+import { sessionKeys } from "../joined-interfaces";
+import { clearContextMetadataKey, stayInContextMetadataKey } from "./decorators/context";
 import { componentInterfaces } from "./private-interfaces";
+import { ClearContextCallback, ContextStatesProvider, State, StayInContextCallback, Transitionable } from "./public-interfaces";
 
 @injectable()
 export class StateMachine implements Transitionable {
-  intentHistory: { stateName: string; intentMethodName: string }[] = [];
-  
+  public intentHistory: Array<{ stateName: string; intentMethodName: string }> = [];
+
   constructor(
-    @inject("core:state-machine:current-state-provider") private getCurrentState: () => Promise<{instance: State.Required, name: string}>,
-    @inject("core:state-machine:state-names") private stateNames: string[],
-    @inject("core:unifier:current-session-factory") private currentSessionFactory: () => Session,
-    @inject("core:hook-pipe-factory") private pipeFactory: Hooks.PipeFactory,
-    @inject("core:root:current-logger") private logger: Logger
-  ) { }
+    @inject(injectionNames.current.contextStatesProvider) private getContextStates: ContextStatesProvider,
+    @inject(injectionNames.current.stateProvider) private getCurrentState: State.CurrentProvider,
+    @inject(injectionNames.stateNames) private stateNames: string[],
+    @inject(injectionNames.current.sessionFactory) private currentSessionFactory: CurrentSessionFactory,
+    @inject(injectionNames.hookPipeFactory) private pipeFactory: Hooks.PipeFactory,
+    @inject(injectionNames.current.logger) private logger: Logger
+  ) {}
 
-  async handleIntent(intent: intent, ...args: any[]) {
-    let currentState = await this.getCurrentState();
+  public async handleIntent(requestedIntent: intent, ...args: any[]) {
+    const [currentState, contextStates] = await Promise.all([this.getCurrentState(), this.getContextStates()]);
+    const intentMethod = this.deriveIntentMethod(requestedIntent);
+    this.intentHistory.push({ stateName: currentState.name, intentMethodName: intentMethod });
+    this.logger.info(`Handling intent '${intentMethod}' on state ${currentState.name}`);
 
-    let intentMethod = this.deriveIntentMethod(intent);
-    this.intentHistory.push({stateName: currentState.name, intentMethodName: intentMethod});
-    this.logger.info("Handling intent '" + intentMethod + "' on state " + currentState.name);
+    /* Execute clearContext callback if decorator is present */
+    const clearContextCallbackFn = this.retrieveClearContextCallback(currentState.instance.constructor as State.Constructor);
+
+    if (
+      clearContextCallbackFn &&
+      clearContextCallbackFn(currentState.name, currentState.instance, contextStates.map(cState => cState.name), this.intentHistory)
+    ) {
+      this.currentSessionFactory().set(sessionKeys.contextStates, JSON.stringify([]));
+    }
 
     try {
-      // Run beforeIntent-hooks as filter
-      const hookResults = await this.getBeforeIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runAsFilter();
+      /* Run beforeIntent-hooks as filter */
+      const hookResults = await this.getBeforeIntentCallbacks()
+        .withArguments(currentState.instance, currentState.name, intentMethod, this, ...args)
+        .runAsFilter();
 
-      // Abort if not all hooks returned a "success" result
+      /* Abort if not all hooks returned a "success" result */
       if (!hookResults.success) {
         this.logger.info("One of your hooks did not return a successful result. Aborting planned state machine execution.");
         return;
       }
 
-      // Check if there is a "beforeIntent_" method available
-      if (typeof(currentState.instance["beforeIntent_"]) === "function") {
-        const callbackResult = await Promise.resolve(((currentState.instance as any) as State.BeforeIntent).beforeIntent_(intentMethod, this, ...args));
+      /* Check if there is a "beforeIntent_" method available */
+      if (this.isStateWithBeforeIntent(currentState.instance)) {
+        const callbackResult = await Promise.resolve(currentState.instance.beforeIntent_(intentMethod, this, ...args));
 
         if (typeof callbackResult !== "boolean") {
-          throw new Error(`You have to return either true or false in your beforeIntent_ callback. Called beforeIntent_ for ${currentState.name}#${intentMethod}. `);
+          throw new Error(
+            `You have to return either true or false in your beforeIntent_ callback. Called beforeIntent_ for ${currentState.name}#${intentMethod}. `
+          );
         }
 
         if (!callbackResult) {
@@ -50,60 +67,92 @@ export class StateMachine implements Transitionable {
         }
       }
 
-      // Check if intentMethod is available in currentState
-      if (typeof(currentState.instance[intentMethod]) === "function") {
-        // Call given intent
+      /* Check if intentMethod is available in currentState */
+      if (typeof currentState.instance[intentMethod] === "function") {
+        /* Call given intent */
         await Promise.resolve(currentState.instance[intentMethod](this, ...args));
 
-        // Call afterIntent_ method if present
-        if (typeof currentState.instance["afterIntent_"] === "function") {
-          ((currentState.instance as any) as State.AfterIntent).afterIntent_(intentMethod, this, ...args);
+        /* Call afterIntent_ method if present */
+        if (this.isStateWithAfterIntent(currentState.instance)) {
+          currentState.instance.afterIntent_(intentMethod, this, ...args);
         }
 
-        // Run afterIntent hooks
-        await this.getAfterIntentCallbacks().withArguments(currentState.instance, currentState.name, intentMethod, this, ...args).runWithResultset();
+        /* Run afterIntent hooks */
+        await this.getAfterIntentCallbacks()
+          .withArguments(currentState.instance, currentState.name, intentMethod, this, ...args)
+          .runWithResultset();
       } else {
-        // -> Intent does not exist on state class, so call unhandledGenericIntent instead
-        await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);
+        const fittingState = contextStates.find(state => typeof state.instance[intentMethod] === "function");
+
+        if (typeof fittingState !== "undefined") {
+          await this.transitionTo(fittingState.name);
+          await this.handleIntent(intentMethod, ...args);
+        } else {
+          /* -> Intent does not exist on state class nor any context state classes, so call unhandledGenericIntent instead */
+          await this.handleIntent(GenericIntent.Unhandled, intentMethod, ...args);
+        }
       }
-    } catch(e) {
-      // Handle exception by error handler
+    } catch (e) {
+      /* Handle exception by error handler */
       await this.handleOrReject(e, currentState.instance, currentState.name, intentMethod, ...args);
     }
   }
 
-  async transitionTo(state: string) {
-    if (this.stateNames.indexOf(state) === -1)
-      throw Error("Cannot transition to " + state + ": State does not exist!");
+  public async transitionTo(state: string) {
+    if (this.stateNames.indexOf(state) === -1) throw Error(`Cannot transition to ${state}: State does not exist!`);
+    const resolvedPromise = await Promise.all([this.getContextStates(), this.getCurrentState()]);
+    let contextStates = resolvedPromise[0];
+    const currentState = resolvedPromise[1];
 
-    return this.currentSessionFactory().set("__current_state", state);
+    /* Add current state to context if context meta data is present and remove previous context entry of current state */
+    const stayInContextCallbackFn = this.retrieveStayInContextCallback(currentState.instance.constructor as State.Constructor);
+    if (stayInContextCallbackFn) {
+      contextStates = contextStates.filter(contextState => contextState.name !== currentState.name);
+      contextStates.push(currentState);
+    }
+
+    /* Execute callbacks of context states and filter by result */
+    contextStates = contextStates.filter(contextState => {
+      const currentStayInContextCallback = this.retrieveStayInContextCallback(contextState.instance.constructor as State.Constructor);
+
+      if (typeof currentStayInContextCallback === "undefined") {
+        throw new Error(`Missing @stayInContext decorator for contextState = ${contextState}`);
+      }
+
+      return currentStayInContextCallback(currentState.name, currentState.instance, contextStates.map(cState => cState.name), this.intentHistory, state);
+    });
+    /* Set remaining context states as new context */
+    await this.currentSessionFactory().set(sessionKeys.contextStates, JSON.stringify(contextStates.map(contextState => contextState.name)));
+
+    return this.currentSessionFactory().set(sessionKeys.currentState, state);
   }
 
-  async redirectTo(state: string, intent: intent, ...args: any[]) {
+  public async redirectTo(state: string, requestedIntent: intent, ...args: any[]) {
     await this.transitionTo(state);
-    return this.handleIntent(intent, ...args);
+    return this.handleIntent(requestedIntent, ...args);
   }
 
-  stateExists(state: string) {
+  public stateExists(state: string) {
     return this.stateNames.indexOf(state) !== -1;
   }
 
   /* Private helper methods */
 
-  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again.*/
+  /** Checks if the current state is able to handle an error (=> if it has an 'errorFallback' method). If not, throws the error again. */
   private async handleOrReject(error: Error, state: State.Required, stateName: string, intentMethod: string, ...args): Promise<void> {
-    if (typeof state["errorFallback"] === "function") {
-      await Promise.resolve(state["errorFallback"](error, state, stateName, intentMethod, this, ...args));
-    } else {
-      throw error;
+    if (this.isStateWithErrorFallback(state)) {
+      return Promise.resolve(state.errorFallback(error, state, stateName, intentMethod, this, ...args));
     }
+
+    throw error;
   }
 
   /** If you change this: Have a look at registering of states / automatic intent recognition, too! */
-  private deriveIntentMethod(intent: intent): string {
-    if (typeof(intent) === "string" && intent.endsWith("Intent")) return intent;
+  private deriveIntentMethod(requestedIntent: intent): string {
+    if (typeof requestedIntent === "string" && requestedIntent.endsWith("Intent")) return requestedIntent;
 
-    let baseString = (typeof(intent) === "string" ? intent : GenericIntent[intent].toLowerCase() + "Generic") + "Intent";
+    // tslint:disable-next-line:prefer-template
+    const baseString = `${typeof requestedIntent === "string" ? requestedIntent : GenericIntent[requestedIntent].toLowerCase() + "Generic"}Intent`;
     return baseString.charAt(0).toLowerCase() + baseString.slice(1);
   }
 
@@ -113,5 +162,48 @@ export class StateMachine implements Transitionable {
 
   private getAfterIntentCallbacks() {
     return this.pipeFactory(componentInterfaces.afterIntent);
+  }
+
+  /**
+   * Returns either a callback function from a @stayInContext-decorator or undefined
+   * @param currentStateClass State class to check for defined metadata
+   */
+  private retrieveStayInContextCallback(currentStateClass: State.Constructor): StayInContextCallback | undefined {
+    return this.retrieveContextCallback<StayInContextCallback>(currentStateClass, stayInContextMetadataKey);
+  }
+
+  /**
+   * Returns either a callback function from a @clearInContext-decorator or undefined
+   * @param currentStateClass State class to check for defined metadata
+   */
+  private retrieveClearContextCallback(currentStateClass: State.Constructor): ClearContextCallback | undefined {
+    return this.retrieveContextCallback<ClearContextCallback>(currentStateClass, clearContextMetadataKey);
+  }
+
+  /**
+   * Returns defined Metadata for given key or undefined if not existent
+   * @param currentStateClass State class to check for defined metadata
+   * @param metaDataKey Key to check for
+   */
+  private retrieveContextCallback<ContextCallback extends () => boolean | undefined>(
+    currentStateClass: State.Constructor,
+    metaDataKey: symbol
+  ): ContextCallback | undefined {
+    const metadata = Reflect.getMetadata(metaDataKey, currentStateClass);
+
+    return metadata ? metadata.callback : undefined;
+  }
+
+  /** Type Guards */
+  private isStateWithBeforeIntent(state: State.Required | State.Required & State.BeforeIntent): state is State.Required & State.BeforeIntent {
+    return "beforeIntent_" in state;
+  }
+
+  private isStateWithAfterIntent(state: State.Required | State.Required & State.AfterIntent): state is State.Required & State.AfterIntent {
+    return "afterIntent_" in state;
+  }
+
+  private isStateWithErrorFallback(state: State.Required | State.Required & State.ErrorHandler): state is State.Required & State.ErrorHandler {
+    return "errorFallback" in state;
   }
 }

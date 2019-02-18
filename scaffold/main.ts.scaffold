@@ -1,7 +1,8 @@
-import { State, Transitionable, injectionNames } from "assistant-source";
-import { injectable, inject } from "inversify";
+import { injectionNames, Transitionable } from "assistant-source";
+import { inject, injectable } from "inversify";
 
 import { ApplicationState } from "./application";
+import { MergedSetupSet } from "../../config/handler";
 
 /**
  * This is your MainState.
@@ -11,9 +12,7 @@ import { ApplicationState } from "./application";
 
 @injectable()
 export class MainState extends ApplicationState {
-  constructor(
-    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet
-  ) {
+  constructor(@inject(injectionNames.current.stateSetupSet) stateSetupSet: MergedSetupSet) {
     super(stateSetupSet);
   }
 
@@ -21,7 +20,7 @@ export class MainState extends ApplicationState {
    * The invokeGenericIntent method (GenericIntent.invoke) is your "main entrance" into your application. 
    * It is called as soon as the application is launched, e. g. if user says "launch xxxxx".
    */
-  invokeGenericIntent(machine: Transitionable) {
-
+  public invokeGenericIntent(machine: Transitionable) {
+    this.endSessionWith("Hello World");
   }
 }

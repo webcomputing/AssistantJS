@@ -2,15 +2,12 @@ import { Configuration } from "./private-interfaces";
 
 /** Object describing an AssistantJS session */
 export interface Session {
-  /** Id of session */
-  id: string;
-
-  /** 
+  /**
    * Gets the value of a given session field
    * @param {string} field name of field to get the value of
-   * @return {Promise<string>} value of field
+   * @return {Promise<string | undefined>} value of field or undefined if field is not present
    */
-  get(field: string): Promise<string>;
+  get(field: string): Promise<string | undefined>;
 
   /**
    * Sets the value of a given session field
@@ -29,26 +26,37 @@ export interface Session {
 
   /** Deletes the whole session object */
   deleteAllFields(): Promise<void>;
-}
 
-/** Factory function which returns a session for a given session id */
-export interface SessionFactory {
+  /** Checks if any fields to this session are set */
+  exists(): Promise<boolean>;
+
   /**
-   * Returns a session object for a given id
-   * @param {string} id  Id of the session to return
-   * @return {Session}
+   * Get a key value list of stored session data which match the given field substring
+   * @param {string?} searchName - Search for searchName in all data store keys and returns the data. If searchName is not given or includes an empty string, all session date will be returned.
    */
-  (id: string): Session;
+  getSubset(searchName?: string): Promise<{ [name: string]: string }>;
+
+  /**
+   * Get an array of all keys in the redis session store which match to the given field substring
+   * @param {string?} searchName - List all session data key identifier which match with the given searchName. If searchName is not given or includes an empty string, all keys will be returned.
+   */
+  listKeys(searchName?: string): Promise<string[]>;
 }
 
-/** Factory function which returns the current session (based on extraction result) */
-export interface CurrentSessionFactory {
+/** Implement this factory if you want to create your own session storage */
+export interface SessionFactory {
   /**
    * Returns a session object based on the current extraction result
    * @return {Session}
    */
-  (): Session;
+  getCurrentSession(currentSessionAttributes?: any): Session;
 }
+
+/** Returns a function which evolves to a promise; if fulfilled, the current session has been destroyed. Needed in response handlers. */
+export type KillSessionPromise = () => Promise<void>;
+
+/** Returns a session object describing the current session */
+export type CurrentSessionFactory = () => Session;
 
 /** Configuration object for AssistantJS user for services component */
 export interface ServicesConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}

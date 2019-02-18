@@ -1,15 +1,15 @@
-import { MainApplication, Container } from "inversify-components";
-import { CLIGeneratorExtension } from "./public-interfaces";
+import { Container, MainApplication } from "inversify-components";
 import { componentInterfaces } from "./private-interfaces";
+import { CLIGeneratorExtension } from "./public-interfaces";
 
 import * as fs from "fs";
 
 // This class is the main application thread. Therefore it acts like a singleton!
 export class GeneratorApplication implements MainApplication {
   private baseDir: string;
-  private buildNr: number;
-  private buildDir: string;
-  private container: Container;
+  private buildNr!: number;
+  private buildDir!: string;
+  private container!: Container;
 
   constructor(baseDir: string) {
     this.baseDir = baseDir;
@@ -24,7 +24,7 @@ export class GeneratorApplication implements MainApplication {
     fs.mkdirSync(this.buildDir);
 
     // Get and execute all builders
-    let builders = this.container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator);
+    const builders = this.container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator);
     await Promise.all(builders.map(builder => Promise.resolve(builder.execute(this.buildDir))));
   }
 }

@@ -2,13 +2,13 @@
   "name": "{{__NAME__}}",
   "version": "0.1.0",
   "description": "AssistantJS implementation of {{__NAME__}}",
-  "main": "js/index.js",
+  "main": "js/application-initializer.js",
   "scripts": {
     "test": "jasmine-ts spec/**/*.spec.ts"
   },
   "dependencies": {
-    "assistant-source": "^0.3.0",
-    "inversify-components": "^0.4.0",
+    "assistant-source": "^0.4.0",
+    "inversify-components": "^0.4.4",
     "inversify": "4.1.1",
     "reflect-metadata": "^0.1.12",
     "express": "^4.16.2",
@@ -18,7 +18,9 @@
   "devDependencies": {
     "@types/jasmine": "^2.8.4",
     "jasmine-ts": "^0.2.1",
-    "tslint": "^5.8.0",
-    "typescript": "^2.6.2"
+    "tslint": "^5.9.1",
+    "tslint-config-airbnb": "^5.7.0",
+    "tslint-config-prettier": "^1.8.0",
+    "typescript": "^2.9.2"
   }
 }

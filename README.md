@@ -1,3 +1,4 @@
+<p align="right"><a href="https://travis-ci.org/webcomputing/AssistantJS"><img src="https://travis-ci.org/webcomputing/AssistantJS.svg?branch=develop"></a></p>
 <p align="center"><img src="http://www.antonius-ostermann.de/assets/images/assistantjs.png"></p>
 AssistantJS enables you to develop ambitious platform-agnostic voice applications with ease. Don't write duplicate code - use the generic AssistantJS
 state machine to implement your voice application and it runs on amazon alexa, google assistant and dialogflow (formerly known as api.ai) simultaneously. To fasten development,
@@ -14,7 +15,7 @@ of currently implemented AssistantJS components.
 - **Testable**: AssistantJS allows you to write voice applications which are fully testable, even across multiple voice assistants. To make testing even easier, AssistantJS gives you some nice test and mock helpers.
 - **I18n integration**: Thanks to [i18next][5], AssistantJS gives you full multi language support. In addition, it applies some really nice [convention-over-configuration][6] rulesets to speed up your development and
 help you to build better user interfaces using response text variation out of the box.
-- **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language (as known from [alexa-utterances][7]) to generate utterances efficiently. You are tired of maintaining your intents and utterances in dialogflow *and* in alexa? AssistantJS generates a fitting configuration for alexa and a zip file for dialogflow *based you the code you write*!
+- **Utterance generation**: AssistantJS recognizes the intents you are using and enables you to use a template language to generate utterances efficiently. You are tired of maintaining your intents and utterances in dialogflow *and* in alexa? AssistantJS generates a fitting configuration for alexa and a zip file for dialogflow *based you the code you write*!
 - **Logging**: AssistantJS uses the awesome [bunyan][4] module to give you production-ready and request-specific logging options.
 - **CLI**: AssistantJS gives you a simple command line interface you can use to start your AssistantJS server (`assistant s`, backend by [express][8]) or generate nlu configurations (`assistant g`).
 - **Entity validation**: Don't check for presence of entities, let AssistantJS do this job for you. *(Optional dependency)*
@@ -88,23 +89,28 @@ As you can see, AssistantJS supports you in building more varied voice applicati
 This is what a test (yes, you can test all assistantjs applications without hassle) for the MainState's `invokeGenericIntent` could look like:
 ```typescript
 describe("MainState", function () {
+  beforeEach(function(this: ThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+  });
+
   describe("on platform = alexa", function() {
     beforeEach(function() {
-      this.currentPlatformHelper = this.platforms.alexa;
+      this.platforms.current = this.platforms.alexa;
     });
 
     describe("invokeGenericIntent", function() {
-      beforeEach(async function(done) {
-        this.responseHandler = await this.currentPlatformHelper.pretendIntentCalled(GenericIntent.Invoke);
-        done();
+      beforeEach(async function() {
+        await this.specHelper.prepareIntentCall(this.platforms.current, "invokeGenericIntent");
+
+        this.responseResults = await this.specHelper.runMachineAndGetResults("MainState");
       });
 
       it("greets the user", function() {
-        expect(this.responseHandler.voiceMessage).toEqual("Welcome, Alexa user!");
+        expect(this.responseResults.voiceMessage!.text).toEqual("Welcome, Alexa user!")
       });
 
       it("waits for an answer", function() {
-        expect(this.responseHandler.endSession).toBeFalsy();
+        expect(this.responseResults.shouldSessionEnd).toBeFalsy();
       });
     });
   });
@@ -117,7 +123,6 @@ describe("MainState", function () {
 [4]: https://github.com/trentm/node-bunyan
 [5]: https://www.i18next.com/
 [6]: https://en.wikipedia.org/wiki/Convention_over_configuration
-[7]: https://github.com/alexa-js/alexa-utterances
 [8]: http://expressjs.com
 [9]: https://redis.io/
 [10]: https://github.com/webcomputing/assistant-bootstrap

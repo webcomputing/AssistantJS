@@ -1,76 +1,119 @@
-import { injectable, inject, multiInject, optional } from "inversify";
-import { Component } from "inversify-components";
+import { inject, injectable, multiInject, optional } from "inversify";
+import { Component, getMetaInjectionName } from "inversify-components";
 
+import { injectionNames } from "../../injection-names";
+import { ContextDeriver as ContextDeriverI, Logger, RequestContext } from "../root/public-interfaces";
 import { featureIsAvailable } from "./feature-checker";
-import { injectionNames } from '../../injection-names';
-import { RequestContext, ContextDeriver as ContextDeriverI, Logger } from "../root/public-interfaces";
-import { RequestExtractor, OptionalExtractions, MinimalRequestExtraction } from "./public-interfaces";
-import { Configuration, componentInterfaces } from "./private-interfaces";
+import { componentInterfaces, Configuration } from "./private-interfaces";
+import { MinimalRequestExtraction, OptionalExtractions, RequestExtractionModifier, RequestExtractor } from "./public-interfaces";
 
 @injectable()
 export class ContextDeriver implements ContextDeriverI {
-  loggingWhitelist: Configuration.LogWhitelistSet;
+  public loggingWhitelist: Configuration.LogWhitelistSet;
 
   constructor(
-    @optional() @multiInject(componentInterfaces.requestProcessor) private extractors: RequestExtractor[] = [],
+    @optional()
+    @multiInject(componentInterfaces.requestProcessor)
+    private extractors: RequestExtractor[] = [],
+    @optional()
+    @multiInject(componentInterfaces.requestModifier)
+    private extractionModifiers: RequestExtractionModifier[] = [],
     @inject(injectionNames.logger) private logger: Logger,
-    @inject("meta:component//core:unifier") componentMeta: Component<Configuration.Runtime>
+    @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>
   ) {
     this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }
 
-  async derive(context: RequestContext): Promise<[any, string] | undefined> {
+  public async derive(context: RequestContext): Promise<[any, string] | undefined> {
     const extractor = await this.findExtractor(context);
 
     if (extractor !== null) {
-      const extractionResult = await extractor.extract(context);
+      let extractionResult = await extractor.extract(context);
+
+      // change sessionId
+      extractionResult = this.unifySession(extractionResult);
+
+      // allow changing extractions from extension
+      extractionResult = await this.changeExtraction(extractionResult);
+
       const logableExtractionResult = this.prepareExtractionResultForLogging(extractionResult);
 
-      this.logger.info( { requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
-      return [extractionResult, "core:unifier:current-extraction"];
-    } else {
-      return undefined;
+      this.logger.info({ requestId: context.id, extraction: logableExtractionResult }, "Resolved current extraction by platform.");
+      return [extractionResult, injectionNames.current.extraction];
     }
+
+    return undefined;
   }
 
-  async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
-    const isRunable = (await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context))));
+  public async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
+    const isRunable = await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context)));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
-    
+
     runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
-    if (runnableExtensions.length > 1) throw new Error("Multiple extractors fit to this request. "+ 
-      "Please check your registerend platforms for duplicate extractors.");
+    if (runnableExtensions.length > 1) {
+      throw new Error("Multiple extractors fit to this request. " + "Please check your registerend platforms for duplicate extractors.");
+    }
 
     if (runnableExtensions.length !== 1) {
       this.respondWithNoExtractor(context);
       return null;
     }
-    if (typeof(runnableExtensions[0]) === "undefined") throw new TypeError("Single found extractor was undefined!");
+    if (typeof runnableExtensions[0] === "undefined") throw new TypeError("Single found extractor was undefined!");
 
     return runnableExtensions[0];
-  } 
+  }
 
-  respondWithNoExtractor(context: RequestContext) {
-    this.logger.warn({ requestId: context.id }, "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404.");
+  public respondWithNoExtractor(context: RequestContext) {
+    this.logger.warn(
+      { requestId: context.id },
+      "None of the registered extractors respond to this request. You possibly need to install platforms. Sending 404."
+    );
     context.responseCallback("", {}, 404);
   }
 
   /** Returns list of extractors which implement most of all available optional extractor interfaces */
-  async selectExtractorsWithMostOptionalExtractions(extractors: RequestExtractor[], context: RequestContext): Promise<RequestExtractor[]> {
+  public async selectExtractorsWithMostOptionalExtractions(extractors: RequestExtractor[], context: RequestContext): Promise<RequestExtractor[]> {
     if (extractors.length <= 1) return extractors; // Performance reasons
 
     // Build all extractions
-    let extractions = await Promise.all(extractors.map(e => e.extract(context)));
+    const extractions = await Promise.all(extractors.map(e => e.extract(context)));
 
     // Count supported features per extractor / extraction
-    let featureSupportings = extractions.map(e => {
+    const featureSupportings = extractions.map(e => {
       return Object.keys(OptionalExtractions.FeatureChecker).reduce((prev, curr) => {
         return this.extractorSupportsFeature(e, OptionalExtractions.FeatureChecker[curr]) ? prev + 1 : prev;
       }, 0);
     });
 
-    let maximumFeatureSupport = Math.max(...featureSupportings);
+    const maximumFeatureSupport = Math.max(...featureSupportings);
     return extractors.filter((extractor, index) => featureSupportings[index] === maximumFeatureSupport);
+  }
+
+  /**
+   * this method allows the Extensions with the interface RequestExtractionModifier at the extensionpoint 'requestModifier' to
+   * change the RequestExtraction after the requestProcessor has set them
+   */
+  private async changeExtraction(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction> {
+    let result: MinimalRequestExtraction = extraction;
+
+    if (this.extractionModifiers) {
+      for (const extractionModifier of this.extractionModifiers) {
+        result = await extractionModifier.modify(result);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Adds plattform as prefix for every session
+   * @param extractionResult exractionResult with session and platform
+   */
+  private unifySession(extractionResult: MinimalRequestExtraction): MinimalRequestExtraction {
+    if (extractionResult.sessionID) {
+      extractionResult.sessionID = extractionResult.platform + "-" + extractionResult.sessionID;
+    }
+    return extractionResult;
   }
 
   /** Returns true if given extractor supports given feature (see FeatureChecker) */
@@ -89,7 +132,11 @@ export class ContextDeriver implements ContextDeriverI {
     /** Sets all entries to "filteredPlaceholder" except the ones in the given whitelist */
     const filterSet = <T>(set: T, whitelist: Configuration.LogWhitelistSet): T => {
       // Get a merged set of all used object keys in whitelist. For example, if whitelist is ["a", {b: ["c"], d: ["e"]}, {f: "g"}], this would be {b: ["c"], d: ["e"], f: ["g"]}
-      const mergedObject = whitelist.filter(entry => typeof(entry) === "object").reduce((prev, curr) => Object.assign(prev, curr), {});
+      const mergedObject = whitelist
+        .filter(entry => typeof entry === "object")
+        .reduce((prev, curr) => {
+          return { ...(prev as Configuration.LogWhitelistElement), ...(curr as Configuration.LogWhitelistElement) };
+        }, {});
 
       /** Check filtering for every key */
       Object.keys(set).forEach(extractionKey => {

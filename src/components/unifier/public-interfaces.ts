@@ -1,61 +1,26 @@
-import { ExecutableExtension, Component } from "inversify-components";
+import { Component } from "inversify-components";
+import { SpecHelper } from "../../spec-helper";
 import { RequestContext } from "../root/public-interfaces";
 import { Session } from "../services/public-interfaces";
-import { SpecSetup } from "../../spec-setup";
-import { CardResponse } from "./responses/card-response";
-import { ChatResponse } from "./responses/chat-response";
-import { SuggestionChipsResponse } from "./responses/suggestion-chips-response";
 import { Configuration } from "./private-interfaces";
+import { BasicAnswerTypes, BasicHandable } from "./response-handler";
 
 /** Intent type - intents are either strings or type of GenericIntent */
 export declare type intent = string | GenericIntent;
-
-/** Main AssistantJS class to send responses to the user. */
-export interface ResponseFactory {
-  /** If set to false, created response objects will throw an exception if an unsupported feature if used */
-  failSilentlyOnUnsupportedFeatures: boolean;
-
-  /** Creates a Voiceable response object which decides wheter or wheter not to use SSML based on input and platform features */
-  createVoiceResponse(): Voiceable;
-
-  /** Creates a Voiceable response object without SSML availability */
-  createSimpleVoiceResponse(): Voiceable;
-
-  /** Creates a Voiceable response object with SSML enabled. Throws an exception of SSML is not possible on platform. */
-  createSSMLResponse(): Voiceable;
-
-  /** Creates a response object for adding suggestion chips to the current response */
-  createSuggestionChipsResponse(): SuggestionChipsResponse;
-
-  /** Creates a response object for adding text/chat messsages (for displaying) to the current response */
-  createChatResponse(): ChatResponse;
-
-  /** Creates and sends an empty response */
-  createAndSendEmptyResponse(): {};
-
-  /** 
-   * Sends a authentication prompt if available on current platform (else throws exception), possibly allows to add a message to it
-   * @param text String to add say in authentication prompt
-   */
-  createAndSendUnauthenticatedResponse(text?: string): {};
-
-  /** Creates a card response for adding simple graphical elements to your response */
-  createCardResponse(): CardResponse;
-}
 
 export interface Voiceable {
   /**
    * Sends voice message and ends session
    * @param {string} text Text to say to user
    */
-  endSessionWith(text: string): void;
+  endSessionWith(text: string | Promise<string>): void;
 
   /**
    * Sends voice message but does not end session, so the user is able to respond
    * @param {string} text Text to say to user
    * @param {string[]} [reprompts] If the user does not answer in a given time, these reprompt messages will be used.
    */
-  prompt(text: string, ...reprompts: string[]): void;
+  prompt(inputText: string | Promise<string>, ...inputReprompts: Array<string | Promise<string>>): void;
 }
 
 // Currently, we are not allowed to use camelCase here! So try to just use a single word!
@@ -84,7 +49,10 @@ export enum GenericIntent {
   Cancel,
 
   /** Say: "Stop" */
-  Stop
+  Stop,
+
+  /** Called when Element is selected, eg. on a display */
+  Selected,
 }
 
 /** Intents which are not specific to a given platform. */
@@ -94,60 +62,73 @@ export namespace GenericIntent {
    * are only callable implicitly, for example GenericIntent.Invoke if the voice app is launched.
    * @param platform intent to check
    */
-  export function isSpeakable(intent: GenericIntent) {
-    let unspeakableIntents: GenericIntent[] = [
-      GenericIntent.Invoke,
-      GenericIntent.Unanswered,
-      GenericIntent.Unhandled
-    ];
+  export function isSpeakable(currIntent: GenericIntent) {
+    const unspeakableIntents: GenericIntent[] = [GenericIntent.Invoke, GenericIntent.Unanswered, GenericIntent.Unhandled, GenericIntent.Selected];
 
-    return unspeakableIntents.indexOf(intent) === -1;
+    return unspeakableIntents.indexOf(currIntent) === -1;
   }
 }
 
 /** Manages access to entities */
 export interface EntityDictionary {
   /** Object containing all current entities */
-  store: {[name: string]: any};
+  store: { [name: string]: any };
 
   /** Checks if the given entity is contained in the store */
   contains(name: string): boolean;
 
-  /** Gets the value of an entity, if the entity is defined */
+  /**
+   * Gets the value of an entity, if the entity is defined.
+   * If entity is a custom entity and extracted value is not equal to the default value, this method
+   * searches for the closest synonym using Levenshtein distance and returns its default value.
+   * If entity is a custom entity and a value present, `get` will never return `undefined`.
+   */
   get(name: string): string | undefined;
+
+  /**
+   * Always returns the original entity value even in `get` doesn't.
+   * @param name Name of the entity
+   */
+  getRaw(name: string): string | undefined;
 
   /** Sets a value of an entity. */
   set(name: string, value: any);
 
-  /** 
+  /**
    * Returns the element in validValues which is as close as possible to the entity value for name.
    * Returns undefined if there is no entity for name. Calculates a Levenshtein distance to find out the closest valid value.
    * @param name Name of the entity
    * @param validValues List of all valid values
-   * @param maxDistance If given, returns undefined if the closest match's Levenshtein distance is > than this value 
-  */
+   * @param maxDistance If given, returns undefined if the closest match's Levenshtein distance is > than this value
+   */
   getClosest(name: string, validValues: string[], maxDistance?: number): string | undefined;
 
-  /** 
+  /**
    * Returns a list containing all values from validValues and their distances to the entity value.
    * Returns undefined if there is no entity for name. Calculates a Levenshtein distance to find out the distance values.
    * @param name Name of the entity
    * @param validValues List of all valid values
-  */
-  getDistanceSet(name: string, validValues: string[]): undefined | {
-    value: string;
-    distance: number;
-  }[];
+   */
+  getDistanceSet(
+    name: string,
+    validValues: string[]
+  ):
+    | undefined
+    // tslint:disable-next-line:prefer-array-literal
+    | Array<{
+        value: string;
+        distance: number;
+      }>;
 
-  /** 
+  /**
    * Stores current entity dictionary to a given session to allow restoring all contained entities later.
    * @param session The session to store into
    * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
    */
   storeToSession(session: Session, storeKey?: string): Promise<void>;
 
-  /** 
-   * Reads current entity dictionary from given session and merges with entities in this request. 
+  /**
+   * Reads current entity dictionary from given session and merges with entities in this request.
    * @param session The session to read from (same as in storeToSession)
    * @param preferCurrentStore If set to true (default), entities in this request overwrite stored ones (in case of same names). Else it's the other way around.
    * @param storeKey The key to use to store the entities. You possibly don't want to change this, except you are using multiple entitiy stores.
@@ -176,7 +157,7 @@ export namespace PlatformGenerator {
      * @param {string} langauge Language to get intent-specific utterances for
      * @return {[intent: string]: string[]} Hash having intent as key and utterances as values
      */
-    getUtterancesFor(language: string): {[intent: string]: string[]};
+    getUtterancesFor(language: string): { [intent: string]: string[] };
   }
 
   /** Extension interface to implement a platform generator */
@@ -186,24 +167,42 @@ export namespace PlatformGenerator {
      * @param {string} langauge langauge to build in
      * @param {string} buildDir path of the build directory
      * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
-     * @param {EntityMapping} entityMapping Mapping of entity types and names 
+     * @param {EntityMapping} entityMapping Mapping of entity types and names
+     * @param {CustomEntity} entityMapping Mapping of entity types and names
      * @return {void|Promise<void>}
      */
-    execute(language: string, buildDir: string, intentConfigurations: IntentConfiguration[], entityMapping: EntityMapping): void | Promise<void>;
+    execute(
+      language: string,
+      buildDir: string,
+      intentConfigurations: IntentConfiguration[],
+      entityMapping: EntityMapping,
+      customEntities: CustomEntityMapping
+    ): void | Promise<void>;
   }
 
   /** Mapping of entity types and names */
   export interface EntityMapping {
     [type: string]: string;
   }
+
+  /** Represents an user specified entity */
+  export interface CustomEntityMapping {
+    /** Allowed values of this entity set */
+    [type: string]: Array<{
+      /** Reference value for the custom entity */
+      value: string;
+      /** Synonyms that map to the reference value */
+      synonyms?: string[];
+    }>;
+  }
 }
 
 /** Extension interface for request extractors */
-export interface RequestExtractor<Configuration={}> {
+export interface RequestExtractor<ComponentConfiguration = {}> {
   /** Link to component metadata */
-  component: Component<Configuration>;
+  component: Component<ComponentConfiguration>;
 
-  /** 
+  /**
    * Checks if given context can be processed by this extractor
    * @param {RequestContext} context Given request context
    * @return {Promise<boolean>} True if current context can be processed by this extractor
@@ -213,185 +212,267 @@ export interface RequestExtractor<Configuration={}> {
   /**
    * Extracts information out of request. The minimum set of information to extract is described by MinimalRequestExtraction.
    * @param {RequestContext} context Request context to extract information from
-   * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information. 
+   * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information.
    *   See also OptionalExtration interface for more information.
    */
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
 
+/**
+ * Extension interface to modify extractions after the Extractor has made them
+ */
+export interface RequestExtractionModifier {
+  /**
+   * Modifies the RequestExtraction
+   * @param extraction the original or previous extraction
+   */
+  modify(extraction: MinimalRequestExtraction): Promise<MinimalRequestExtraction>;
+}
+
 /** Common fields between PlatformRequestExtraction and MinimalRequestExtraction */
 export interface CommonRequestExtraction {
   /** Set of entities */
-  entities?: { [name: string]: any; };
+  entities?: { [name: string]: any };
 
   /** Intent to call */
-  readonly intent: intent;
+  intent: intent;
 
   /** Given session id */
-  readonly sessionID: string;
+  sessionID: string;
 
   /** Language of this request */
-  readonly language: string;
+  language: string;
 }
 
 /** Result of extractors (platform-view). As a user, you should always use MinimalRequestExtraction. */
-export interface PlatformRequestExtraction<Configuration={}> extends CommonRequestExtraction {
-  component: Component<Configuration>;
+export interface PlatformRequestExtraction<ComponentConfiguration = {}> extends CommonRequestExtraction {
+  component: Component<ComponentConfiguration>;
 }
 
 /** The minimum set of information a RequestExtractor has to extract from a request */
 export interface MinimalRequestExtraction extends CommonRequestExtraction {
   /** Name of platform responsible for this extraction (equals to component.name) */
-  readonly platform: string;
+  platform: string;
+}
+
+/**
+ * All status of AccountLinking
+ */
+export enum AccountLinkingStatus {
+  /**
+   * When AccountLinking was successful
+   */
+  OK,
+
+  /**
+   * When AccountLinking was cancelled by user
+   */
+  CANCELLED,
 }
 
 /** Optional, additional informations which extractors may extract from a request */
 export namespace OptionalExtractions {
   /** Interface for extraction of oauth key */
-  export interface OAuthExtraction extends MinimalRequestExtraction {
+  export interface OAuth {
     /** The oauth token, or null, if not present in current extraction */
     oAuthToken: string | null;
   }
 
+  /** Interface for AccountLinkingStatus */
+  export interface AccountLinking {
+    /** The current status, or null, if not present in current extraction */
+    accountLinkingStatus: AccountLinkingStatus | null;
+  }
+
   /** Interface for extraction of platform-specific temporal auth */
-  export interface TemporalAuthExtraction extends MinimalRequestExtraction {
+  export interface TemporalAuth {
     /** The temporal auth token, or null, if not present in current extraction */
     temporalAuthToken: string | null;
   }
 
   /** Interface for extraction of spoken text */
-  export interface SpokenTextExtraction extends MinimalRequestExtraction {
+  export interface SpokenText {
     /** The spoken text. NULL values are not allowed here: If a platform supports spoken-text-extraxtion, it has to return to spoken text. */
     spokenText: string;
   }
 
-  export interface DeviceExtraction extends MinimalRequestExtraction {
-    /** 
+  export interface Device {
+    /**
      * Name of platform-specific device, name is given and filled by platform.
-     * NULLL values are not allowed here: If a platform supports devices, it has to return the used one.
-    */
+     * NULL values are not allowed here: If a platform supports devices, it has to return the used one.
+     */
     device: string;
   }
 
+  export interface Timestamp {
+    /**
+     * Timestamp of the platform-specific request.
+     * NULL values are not allowed here: If a platform supports Timestamp, it has to return this.
+     */
+    requestTimestamp: string;
+  }
+
+  export interface SessionData {
+    /**
+     * Blob of all session data or NULL, if current request doesn't contain any session data.
+     */
+    sessionData: string | null;
+  }
+
+  /** Interface for additional domainspecific Paramters */
+  export interface AdditionalParameters {
+    /**
+     * Key-Value Store for any additional paramters
+     */
+    additionalParameters: { [paramter: string]: any };
+  }
+
   /** For internal feature checking since TypeScript does not emit interfaces */
+  // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
     /** Are OAuth tokens available? */
-    OAuthExtraction: ["oAuthToken"],
-
-    /** Is the spoken text available? */
-    SpokenTextExtraction: ["spokenText"],
-
-    /** Is a platform-specific temporal auth token available? */
-    TemporalAuthExtraction: ["temporalAuthToken"],
-
-    /** Are information about the used device available? */
-    DeviceExtraction: ["device"]
-  }
-}
-/** Minimum interface a response handler has to fulfill */
-export interface MinimalResponseHandler {
-  /** If set to false, the session should go on after sending the response */
-  endSession: boolean;
-  /** Voice message to speak to the user */
-  voiceMessage: string | null;
-  /** Called automatically if the response should be sent */
-  sendResponse(): void;
+    OAuthExtraction: ["oAuthToken"] /** Is the spoken text available? */,
+    SpokenTextExtraction: ["spokenText"] /** Is a platform-specific temporal auth token available? */,
+    TemporalAuthExtraction: ["temporalAuthToken"] /** Are information about the used device available? */,
+    DeviceExtraction: ["device"],
+    TimestampExtraction: ["requestTimestamp"],
+    AdditionalParameters: ["additionalParameters"],
+    SessionData: ["sessionData"],
+  };
 }
 
-/** 
- * In addition to the basic features every response handler has to support (see MinimalResponseHandler), 
- * every response handler may also support a subset of these features
-*/
+/**
+ * optional features a custom handler can use
+ */
 export namespace OptionalHandlerFeatures {
-  /** If implemented, a response handler is able to inform the assistant about a missing oauth token */
-  export interface AuthenticationHandler extends MinimalResponseHandler {
-    /** If set to true, the assistant will be informed about a missing oauth token */
-    forceAuthenticated: boolean;
+  /**
+   * This interface defines which methodes are necessary for ResponseHandler to handle Sessions
+   */
+  export interface SessionData<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Adds Data to session
+     *
+     * Most of the time it is better to use the @see {@link Session}-Implementation, as the Session-Implemention will set it automatically to the handler
+     * or use another SessionStorage like Redis. And it has some more features.
+     */
+    setSessionData(sessionData: MergedAnswerTypes["sessionData"] | Promise<MergedAnswerTypes["sessionData"]>): this;
+
+    /**
+     * gets the current SessionData as Promise or undefined if no session is set
+     */
+    getSessionData(): Promise<MergedAnswerTypes["sessionData"]> | undefined;
   }
 
-  /** If implemented, a response handler is able to parse SSML voice message */
-  export interface SSMLHandler extends MinimalResponseHandler {
-    /** If set to true, this voice message is in SSML format */
-    isSSML: boolean;
+  /**
+   * Adds SuggestionChips to Handler
+   */
+  export interface SuggestionChips<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Add some sugestions for Devices with a Display after the response is shown and/or read to the user
+     * @param suggestionChips Texts to show (mostly) under the previous responses (prompts)
+     */
+    setSuggestionChips(suggestionChips: MergedAnswerTypes["suggestionChips"] | Promise<MergedAnswerTypes["suggestionChips"]>): this;
   }
 
-  /** If implemented, the response handler's platform supports reprompts */
-  export interface Reprompt extends MinimalResponseHandler {
-    /** Reprompts for the current voice message */
-    reprompts: string[] | null;
+  export interface Reprompts<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Sends voice message
+     * @param text Text to say to user
+     * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
+     */
+    prompt(
+      inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>,
+      ...reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+    ): this; // cannot set type via B["reprompts"] as typescript thinks this type is not an array
+
+    /**
+     * Adds voice messages when the User does not answer in a given time
+     * @param reprompts {optional} If the user does not answer in a given time, these reprompt messages will be used.
+     */
+    setReprompts(
+      reprompts:
+        | Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+        | Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>
+    ): this;
   }
 
-  export namespace GUI {
-    export namespace Card {
-      /** If implemented, the response handler's platform supports simple cards, containing text title and body */
-      export interface Simple extends MinimalResponseHandler {
-        /** The card's title */
-        cardTitle: string | null;
-
-        /** The card's body */
-        cardBody: string | null;
-      }
-
-      /* If implemented, the response handler's platform supports simple cards containing an image */
-      export interface Image extends Simple {
-        /** The image to display in the card */
-        cardImage: string | null;
-      }
-    }
-
-    /** If implemented, the response handler's platform supports suggestion chips */
-    export interface SuggestionChip extends MinimalResponseHandler {
-      /** The suggestion chips to show */
-      suggestionChips: string[] | null;
-    }
-
-    /** If implemented, the response handler's platform supports chat messages, which may differ to the given voice message */
-    export interface ChatBubble extends MinimalResponseHandler {
-      /** An array containing all chat messages / chat bubbles to display */
-      chatBubbles: string[] | null;
-    }
+  export interface Card<MergedAnswerTypespe extends BasicAnswerTypes> {
+    /**
+     * Adds a common Card to all Handlers
+     * @param card Card which should be shown
+     */
+    setCard(card: MergedAnswerTypespe["card"] | Promise<MergedAnswerTypespe["card"]>): this;
   }
 
+  export interface ChatBubbles<MergedAnswerTypes extends BasicAnswerTypes> {
+    /**
+     * Add multiple texts as seperate text-bubbles
+     * @param chatBubbles Array of texts to shown as Bubbles
+     */
+    setChatBubbles(chatBubbles: MergedAnswerTypes["chatBubbles"] | Promise<MergedAnswerTypes["chatBubbles"]>): this;
+  }
 
-  /** For internal feature checking since TypeScript does not emit interfaces */
+  export interface Authentication {
+    /**
+     * Sets the current Session as Unauthenticated.
+     */
+    setUnauthenticated(): this;
+  }
+
+  // tslint:disable-next-line:variable-name
   export const FeatureChecker = {
-    /** Can we force the existance of OAuth tokens? */
-    AuthenticationHandler: ["forceAuthenticated"],
-
-    /** Are chat messages / chat bubbles available? */
-    ChatBubble: ["chatBubbles"],
-
-    /** Does this response handler support reprompts? */
-    Reprompt: ["reprompts"],
-
-    /** Does this response handler support SSML? */
-    SSMLHandler: ["isSSML"],
-
-    /** Does this response handler support cards containing a textual title and body? */
-    SimpleCard: ["cardBody", "cardTitle"],
-
-    /** Are cards containing a textual title, body and an image available? */
-    ImageCard: ["cardBody", "cardTitle", "cardImage"],
-
-    /** Does this response handler support suggestion chips? */
-    SuggestionChip: ["suggestionChips"]
-  }
+    Authentication: ["setUnauthenticated"],
+    Card: ["setCard"],
+    ChatBubbles: ["setChatBubbles"],
+    Reprompt: ["setReprompts"],
+    SessionData: ["getSessionData", "setSessionData"],
+    SuggestionChips: ["setSuggestionChips"],
+  };
 }
+
+/**
+ * Export all needed interfaces from the response handle specific types
+ */
+export {
+  BasicAnswerTypes,
+  BasicHandable,
+  BeforeResponseHandler,
+  AfterResponseHandler,
+  ResponseHandlerExtensions,
+  UnsupportedFeatureSupportForHandables,
+} from "./response-handler/handler-types";
+
+/**
+ * Export mixins
+ */
+export { AuthenticationMixin, CardMixin, ChatBubblesMixin, RepromptsMixin, SessionDataMixin, SuggestionChipsMixin } from "./response-handler/mixins";
 
 /** Interface to implement if you want to offer a platform-specific spec helper */
-export interface PlatformSpecHelper {
-  /** Link to assistantJS SpecSetup */
-  specSetup: SpecSetup;
+export interface PlatformSpecHelper<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
+  /** Link to assistantJS SpecHelper */
+  specHelper: SpecHelper;
 
-  /** 
+  /**
    * Pretends call of given intent (and entities, ...)
    * @param {intent} intent intent to call
-   * @param {boolean} autoStart if set to true, setup.runMachine() will be called automatically
    * @param {object} additionalExtractions Extractions (entities, oauth, ...) in addition to intent
    * @param {object} additionalContext additional context info (in addition to default mock) to add to request context
    */
-  pretendIntentCalled(intent: intent, autoStart?:boolean, additionalExtractions?: any, additionalContext?: any): Promise<MinimalResponseHandler>;
+  pretendIntentCalled(intent: intent, additionalExtractions?: any, additionalContext?: any): Promise<MergedHandler>;
 }
 
 /** Configuration object for AssistantJS user for unifier component */
 export interface UnifierConfiguration extends Partial<Configuration.Defaults>, Configuration.Required {}
+
+/**
+ * Combination of normal Type and Promise of Type
+ */
+export type OptionallyPromise<T> = T | Promise<T>;
+
+/** Implements logic to load utterances and custom entities from i18n files */
+export interface LocalesLoader {
+  /** Returns all utterance templates for all languages */
+  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  /** Returns all custom entity mappings for all languages */
+  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
+}

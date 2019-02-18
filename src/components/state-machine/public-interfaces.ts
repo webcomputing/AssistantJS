@@ -1,12 +1,7 @@
-import { Session } from "../services/public-interfaces";
-import { RequestContext, Logger } from "../root/public-interfaces";
+import { ExecutableExtension } from "inversify-components";
 import { TranslateHelper } from "../i18n/translate-helper";
-import { ResponseFactory } from "../unifier/response-factory";
-import {
-  MinimalRequestExtraction,
-  GenericIntent,
-  intent
-} from "../unifier/public-interfaces";
+import { Logger } from "../root/public-interfaces";
+import { BasicAnswerTypes, BasicHandable, intent, MinimalRequestExtraction, OptionallyPromise } from "../unifier/public-interfaces";
 
 /** Name of the main state */
 export const MAIN_STATE_NAME = "MainState";
@@ -20,17 +15,13 @@ export namespace State {
      * @param machine Current transitionable interface
      * @param originalIntentMethod Name of intent the state machine tried to call
      */
-    unhandledGenericIntent(
-      machine: Transitionable,
-      originalIntentMethod: string,
-      ...args: any[]
-    ): any;
+    unhandledGenericIntent(machine: Transitionable, originalIntentMethod: string, ...args: any[]): any | Promise<any>;
 
     /**
      * If an assistant fires and "endSession" intent, for example if a user does not answer anything, this method is called
      * @param machine Current transitionable interface
      */
-    unansweredGenericIntent(machine: Transitionable, ...args: any[]): any;
+    unansweredGenericIntent(machine: Transitionable, ...args: any[]): any | Promise<any>;
   }
 
   /** Implement this interface in your state if you need an error handler */
@@ -44,14 +35,7 @@ export namespace State {
      * @param transitionable machine
      * @return {void}
      */
-    errorFallback(
-      error: any,
-      state: Required,
-      stateName: string,
-      intentMethod: string,
-      transitionable: Transitionable,
-      ...args: any[]
-    );
+    errorFallback(error: any, state: Required, stateName: string, intentMethod: string, transitionable: Transitionable, ...args: any[]);
   }
 
   /** Implement this interface to have a method called before every intent call */
@@ -63,11 +47,7 @@ export namespace State {
      * @param {Transitionable} machine Reference to state machine
      * @return {boolean|Promise<boolean>} If you return false instead of true, the intent method will not be called.
      */
-    beforeIntent_(
-      intentMethod: string,
-      machine: Transitionable,
-      ...args: any[]
-    ): Promise<boolean> | boolean;
+    beforeIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): Promise<boolean> | boolean;
   }
 
   /** Implement this interface to have a method called after every intent call. */
@@ -79,30 +59,22 @@ export namespace State {
      * @param {Transitionable} machine Reference to state machine
      * @return {void}
      */
-    afterIntent_(
-      intentMethod: string,
-      machine: Transitionable,
-      ...args: any[]
-    ): void;
+    afterIntent_(intentMethod: string, machine: Transitionable, ...args: any[]): void;
   }
 
   /** Constructor of state objects */
-  export interface Constructor<S extends Required = Required> {
-    new (...args: any[]): S;
-  }
+  export type Constructor<S extends Required = Required> = new (...args: any[]) => S;
 
-  /** (Injectable) factory to create state instances */
-  export interface Factory {
-    /** Returns a state by name (string).
-     * @param {string} stateName Name of state. If you leave out this parameter, the main state is returned.
-     * @return {State extends State.Required}
-     */
-    <T extends State.Required = State.Required>(stateName?: string): T;
-  }
+  /**
+   * Returns a state by name (string).
+   * @param {string} stateName Name of state. If you leave out this parameter, the main state is returned.
+   * @return {State extends State.Required}
+   */
+  export type Factory = <T extends State.Required = State.Required>(stateName?: string) => T;
 
   /** Set containing all objects needed to setup a BaseState. */
-  export interface SetupSet {
-    responseFactory: ResponseFactory;
+  export interface SetupSet<MergedAnswerTypes extends BasicAnswerTypes, MergedHandler extends BasicHandable<MergedAnswerTypes>> {
+    responseHandler: MergedHandler;
     translateHelper: TranslateHelper;
     extraction: MinimalRequestExtraction;
     logger: Logger;
@@ -113,12 +85,18 @@ export namespace State {
     readonly name: string;
     readonly intents: intent[];
   }
+
+  /** Returns name of current state name. If nothing is stored in session, uses MainState */
+  export type CurrentNameProvider = () => Promise<string>;
+
+  /** Returns name and instance of current state */
+  export type CurrentProvider = () => Promise<{ instance: State.Required; name: string }>;
 }
 
 /** Interface which is implemented by AssistantJS's state machine. Describes transitions, redirects, ... */
 export interface Transitionable {
   /** History of all called intent methods */
-  intentHistory: { stateName: string; intentMethodName: string }[];
+  intentHistory: Array<{ stateName: string; intentMethodName: string }>;
 
   /** Checks if given state exists */
   stateExists(state: string): boolean;
@@ -132,3 +110,93 @@ export interface Transitionable {
   /** Jumps to given intent in current state */
   handleIntent(intent: intent, ...args: any[]): Promise<void>;
 }
+
+/** Holds all environment information about the execution of this filter: Which state was it, which intent, ... */
+export interface FilterExecutionContext<IntentArguments = any[]> {
+  /** Instance of state on which the filter was applied */
+  state: State.Required;
+
+  /** Name of the state on which the filter was applied */
+  stateName: string;
+
+  /** Name of intent method this filter was applied to */
+  intentMethod: string;
+
+  /** All additional arguments passed to the intent method */
+  additionalIntentArguments: IntentArguments;
+}
+
+export interface Filter<FilterParams extends object | undefined = never> {
+  /**
+   * Method of filter that is executed if the referenced filter is used as a decorator
+   * @param ExecutionContext Holds all environment information about the execution of this filter (current state, intent, ...)
+   * @param {FilterParams} filterArguments All arguments you passed via @filter() decorator
+   * @returns An object containing a state/intent to be used instead of the intially called intent or a boolean (both as promises, if filter does some async operations); If it returns true the filter gets ignored; If it's false the filter handles an intent execution by itself.
+   */
+  execute(
+    /** Holds all environment information about the execution of this filter: Which state was it, which intent, ... */
+    executionContext: FilterExecutionContext,
+    /** All arguments you passed via @filter() decorator */
+    filterArguments: FilterParams
+  ): OptionallyPromise<{ state: string; intent: string; args?: any[] } | boolean>;
+}
+/**
+ * This interface represents extensions which are used after the context is set. e.g the StateMachine
+ */
+export interface AfterContextExtension extends ExecutableExtension {
+  execute(...args: any[]): any | Promise<any>;
+}
+
+/**
+ * Extensions of this type can are executed before the statemachine is executed
+ */
+export interface BeforeStateMachine {
+  /**
+   * Method which gets executed automatically, can be either sync with return tpye void or async with return type Promise<void>
+   */
+  execute(): void | Promise<void>;
+}
+
+/**
+ * Extensions of this type are executed after the statemachine is executed.
+ * Has same type like interface BeforeStateMachine
+ */
+export type AfterStateMachine = BeforeStateMachine;
+
+/**
+ * Includes the state name and instance, returned by ContextStatesProvider
+ */
+export interface ContextState {
+  instance: State.Required;
+  name: string;
+}
+/**
+ * Returns a function for retrieving all context states.
+ */
+export type ContextStatesProvider = () => Promise<ContextState[]>;
+
+/** Callback that is executed to determine whether or not a state remains in context */
+export type StayInContextCallback = (
+  /** Name of current state */
+  currentStateName?: string,
+  /** Instance of current state */
+  currentStateInstance?: State.Required,
+  /** Names of states currently in context */
+  contextStateNames?: string[],
+  /** History of called intents for this request */
+  intentHistory?: Array<{ stateName: string; intentMethodName: string }>,
+  /** Target state we want to transition to */
+  stateNameToTransitionTo?: string
+) => boolean;
+
+/** Callback that is executed to determine whether or not the state context gets cleared */
+export type ClearContextCallback = (
+  /** Name of current state */
+  currentStateName?: string,
+  /** Instance of current state */
+  currentStateInstance?: State.Required,
+  /** Names of states currently in context */
+  contextStateNames?: string[],
+  /** History of called intents for this request */
+  intentHistory?: Array<{ stateName: string; intentMethodName: string }>
+) => boolean;

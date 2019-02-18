@@ -1,20 +1,24 @@
-import { injectionNames } from '../../../../src/injection-names';
-import { BaseState } from '../../../../src/components/state-machine/base-state';
-import { injectable, inject, optional } from "inversify";
+import { inject, injectable, optional } from "inversify";
+import { BaseState } from "../../../../src/components/state-machine/base-state";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
+import { injectionNames } from "../../../../src/injection-names";
+import { MockHandlerA, MockHandlerASpecificTypes } from "../unifier/response-handler/mock-handler-a";
 
 /** Just a plain state to test the BaseState easily */
 
 @injectable()
-export class IntentCallbackState extends BaseState implements State.AfterIntent, State.BeforeIntent  {
+export class IntentCallbackState extends BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>
+  implements State.AfterIntent, State.BeforeIntent {
   constructor(
-    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet,
-    @optional() @inject("mocks:states:call-spy") private spy: Function
+    @inject(injectionNames.current.stateSetupSet) stateSetupSet: State.SetupSet<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>,
+    @optional()
+    @inject("mocks:states:call-spy")
+    private spy: (...args: any[]) => void
   ) {
     super(stateSetupSet);
   }
 
-  beforeIntent_(intent, machine, ...args) {
+  public beforeIntent_(intent, machine, ...args) {
     this.spyIfExistent("beforeIntent_", intent, machine, ...args);
 
     // beforeIntents are only allowed to return boolean values
@@ -24,19 +28,19 @@ export class IntentCallbackState extends BaseState implements State.AfterIntent,
     return intent === "okayIntent";
   }
 
-  illegalIntent() {
+  public illegalIntent() {
     this.spyIfExistent("illegalIntent");
   }
 
-  okayIntent() {
+  public okayIntent() {
     this.spyIfExistent("okayIntent");
   }
 
-  notOkayIntent() {
+  public notOkayIntent() {
     this.spyIfExistent("notOkayIntent");
   }
 
-  afterIntent_(intent, machine, ...args) {
+  public afterIntent_(intent, machine, ...args) {
     this.spyIfExistent("afterIntent_", intent, machine, ...args);
   }
 

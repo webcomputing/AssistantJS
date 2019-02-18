@@ -1,10 +1,11 @@
 import { Logger } from "./public-interfaces";
 
 export const componentInterfaces = {
-  "contextDeriver": Symbol("request-handler"),
-  "afterContextExtension": Symbol("after-context-extension"),
-  "generator": Symbol("generator"),
-  "loggerMiddleware": Symbol("logger-middleware"),
+  contextDeriver: Symbol("request-handler"),
+  afterContextExtension: Symbol("after-context-extension"),
+  generator: Symbol("generator"),
+  loggerMiddleware: Symbol("logger-middleware"),
+  eventHandler: Symbol("event-handler"),
 };
 
 export namespace Configuration {
@@ -15,12 +16,12 @@ export namespace Configuration {
      * If you want to use your own bunyan logger as root logger, pass it here.
      * You will have access to request-dependent child instances of this logger in your states.
      */
-    bunyanInstance: Logger
+    bunyanInstance: Logger;
   }
 
   /** Required configuration options, no defaults are used here */
   export interface Required {}
 
   /** Available configuration settings in a runtime application */
-  export interface Runtime extends Defaults, Required {};
+  export interface Runtime extends Defaults, Required {}
 }

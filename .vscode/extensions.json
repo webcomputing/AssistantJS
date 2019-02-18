@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "eg2.tslint",
+        "rebornix.project-snippets",
+        "esbenp.prettier-vscode",
+        "eg2.vscode-npm-script"
+    ]
+}
