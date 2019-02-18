@@ -30,9 +30,9 @@ version 0.4.0
 - substitutes alexa-utterance dependency with own implementation
 - allows integration of missing interpolation handlers to use fallback / default translations
 - makes translateHelper's t() method async
-- adds generic intent for selection on smart displays
 - removes redis and fakeredis dependencies
 - introduces platform session, crypted platform session and redis based session storage
+- adds BeforeStateMachine and AfterStateMachine extension points
 - adds possibility to use platform sessions, for example session system of alexa or google assistant, and makes platform sessions the default session storage
 - introduces @filter decorator, which works like a beforeIntentHook, but is made specifically for state redirections (which should be the most common use case for hooks)
 - minor changes and improvements    

@@ -89,23 +89,28 @@ As you can see, AssistantJS supports you in building more varied voice applicati
 This is what a test (yes, you can test all assistantjs applications without hassle) for the MainState's `invokeGenericIntent` could look like:
 ```typescript
 describe("MainState", function () {
+  beforeEach(function(this: ThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+  });
+
   describe("on platform = alexa", function() {
     beforeEach(function() {
-      this.currentPlatformHelper = this.platforms.alexa;
+      this.platforms.current = this.platforms.alexa;
     });
 
     describe("invokeGenericIntent", function() {
-      beforeEach(async function(done) {
-        this.responseHandler = await this.currentPlatformHelper.pretendIntentCalled(GenericIntent.Invoke);
-        done();
+      beforeEach(async function() {
+        await this.specHelper.prepareIntentCall(this.platforms.current, "invokeGenericIntent");
+
+        this.responseResults = await this.specHelper.runMachineAndGetResults("MainState");
       });
 
       it("greets the user", function() {
-        expect(this.responseHandler.voiceMessage).toEqual("Welcome, Alexa user!");
+        expect(this.responseResults.voiceMessage!.text).toEqual("Welcome, Alexa user!")
       });
 
       it("waits for an answer", function() {
-        expect(this.responseHandler.endSession).toBeFalsy();
+        expect(this.responseResults.shouldSessionEnd).toBeFalsy();
       });
     });
   });
