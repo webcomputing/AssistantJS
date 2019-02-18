@@ -41,10 +41,7 @@ export interface BasicAnswerTypes {
   /** if true the session should get authenticated */
   shouldAuthenticate: boolean;
 
-  /**
-   * If used, a response handler is able to inform the assistant about a missing oauth token
-   * If set to true, the assistant will be informed about a missing oauth token
-   */
+  /** If set to true, we don't expect the user to answer anything. Else, we activate the microphone after emitting the response to catch the users input. */
   shouldSessionEnd: boolean;
 
   /**
