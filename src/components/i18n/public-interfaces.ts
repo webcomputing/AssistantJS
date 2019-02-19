@@ -61,7 +61,9 @@ export interface InterpolationResolver {
   resolveMissingInterpolations(translatedValue: string, translateHelper: TranslateHelper): Promise<string>;
 }
 
+/** Create custom `TranslateHelper` that resolves in the given context. */
 export type TranslateHelperFactory = (state: string, intent: string) => TranslateHelper;
+
 export type TranslateValuesFor = (key: string, options?: any) => Promise<string[]>;
 
 /** Configuration object for AssistantJS user for i18n component */
