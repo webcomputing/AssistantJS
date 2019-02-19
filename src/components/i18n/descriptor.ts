@@ -7,7 +7,7 @@ import { Configuration } from "./private-interfaces";
 import { injectionNames, Logger } from "../../assistant-source";
 import { I18nContext } from "./context";
 import { InterpolationResolver as InterpolationResolverImpl } from "./interpolation-resolver";
-import { InterpolationResolver, MissingInterpolationExtension, TranslateHelper, TranslateValuesFor } from "./public-interfaces";
+import { InterpolationResolver, TranslateHelper, TranslateHelperFactory, TranslateValuesFor } from "./public-interfaces";
 import { TranslateHelper as TranslateHelperImpl } from "./translate-helper";
 import { I18nextWrapper } from "./wrapper";
 
@@ -44,7 +44,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
 
       bindService.bindGlobalService<InterpolationResolver>("interpolation-resolver").to(InterpolationResolverImpl);
 
-      bindService.bindGlobalService<i18next.I18n>("instance").toDynamicValue(context => {
+      bindService.bindGlobalService<typeof i18next>("instance").toDynamicValue(context => {
         return context.container.get<I18nextWrapper>(injectionNames.i18nWrapper).instance;
       });
     },
@@ -83,6 +83,20 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           );
         };
       });
+
+      // Registers a service which provides a translate helper for other context than the default one
+      bindService.bindGlobalService<TranslateHelperFactory>("current-translate-helper-factory").toFactory(context => (state: string, intent: string) =>
+        new TranslateHelperImpl(
+          context.container.get(injectionNames.i18nInstance),
+          {
+            intent,
+            state: state.replace(/^[A-Z]/, m => m.toLocaleLowerCase()),
+          },
+          context.container.get(injectionNames.current.extraction),
+          context.container.get(injectionNames.current.logger),
+          context.container.get(injectionNames.i18nInterpolationResolver)
+        )
+      );
     },
   },
 };
