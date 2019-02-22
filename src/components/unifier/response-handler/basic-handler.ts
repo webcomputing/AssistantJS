@@ -156,7 +156,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     return this;
   }
 
-  public endSessionWith(text: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
+  public endSessionWith(text: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
     this.failIfInactive();
 
     this.promises.shouldSessionEnd = { resolver: true };
@@ -165,7 +165,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     return this;
   }
 
-  public setHttpStatusCode(httpStatusCode: MergedAnswerTypes["httpStatusCode"] | Promise<MergedAnswerTypes["httpStatusCode"]>): this {
+  public setHttpStatusCode(httpStatusCode: OptionallyPromise<MergedAnswerTypes["httpStatusCode"]>): this {
     this.failIfInactive();
 
     this.promises.httpStatusCode = { resolver: httpStatusCode };
@@ -173,7 +173,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     return this;
   }
 
-  public prompt(inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
+  public prompt(inputText: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
     this.failIfInactive();
 
     // add a thenMap function to build the correct object from the simple strings

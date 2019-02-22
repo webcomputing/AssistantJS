@@ -114,7 +114,7 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * Sends voice message
    * @param text Text to say to user
    */
-  prompt(inputText: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>): this;
+  prompt(inputText: OptionallyPromise<AnswerType["voiceMessage"]["text"]>): this;
 
   /**
    * End the current session, so the user cannot respond anymore
@@ -126,13 +126,13 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * allows to set a last message before the session ends
    * @param text
    */
-  endSessionWith(text: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>): this;
+  endSessionWith(text: OptionallyPromise<AnswerType["voiceMessage"]["text"]>): this;
 
   /**
    * Sets a custom http status code. If not set the default is 200
    * @param httpStatusCode eg. 200 or 401
    */
-  setHttpStatusCode(httpStatusCode: AnswerType["httpStatusCode"] | Promise<AnswerType["httpStatusCode"]>): this;
+  setHttpStatusCode(httpStatusCode: OptionallyPromise<AnswerType["httpStatusCode"]>): this;
 
   /**
    * Sets json to merge automatically with resulting json before the response is send.
