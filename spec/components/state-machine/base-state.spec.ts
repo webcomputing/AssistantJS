@@ -1,6 +1,6 @@
 import { BaseState } from "../../../src/components/state-machine/base-state";
 import { State } from "../../../src/components/state-machine/public-interfaces";
-import { BasicHandable } from "../../../src/components/unifier/public-interfaces";
+import { BasicAnswerTypes, BasicHandable } from "../../../src/components/unifier/public-interfaces";
 import { injectionNames } from "../../../src/injection-names";
 import { SpecHelper } from "../../../src/spec-helper";
 import { PLATFORM } from "../../support/mocks/unifier/extraction";
@@ -12,7 +12,7 @@ import { ThisContext } from "../../this-context";
 interface CurrentThisContext extends ThisContext {
   state: BaseState<MockHandlerASpecificTypes, MockHandlerA<MockHandlerASpecificTypes>>;
   specHelper: SpecHelper;
-  handler: BasicHandable<any>;
+  handler: BasicHandable<BasicAnswerTypes>;
 }
 
 describe("BaseState", function() {

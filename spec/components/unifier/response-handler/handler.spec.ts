@@ -330,7 +330,45 @@ describe("BaseHandler", function() {
     });
   });
 
-  describe("unsupportedFeature", function() {
+  describe("#resolveAnswerField", function() {
+    describe("with a value in this field", function() {
+      beforeEach(async function(this: CurrentThisContext) {
+        this.handlerInstance.setSuggestionChips(["a", "b"]);
+      });
+
+      describe("with a registered thenMap", function() {
+        beforeEach(async function(this: CurrentThisContext) {
+          (this.handlerInstance as any).promises.suggestionChips.thenMap = () => ["c"];
+        });
+
+        it("executes thenMap", async function(this: CurrentThisContext) {
+          expect(await this.handlerInstance.resolveAnswerField("suggestionChips")).toEqual(["c"]);
+        });
+      });
+
+      describe("with no registered thenMap", function() {
+        it("resolves regular value without using thenMap", async function(this: CurrentThisContext) {
+          expect(await this.handlerInstance.resolveAnswerField("suggestionChips")).toEqual(["a", "b"]);
+        });
+      });
+    });
+
+    describe("with no value in this field", function() {
+      it("returns a promise resolving to undefined", async function(this: CurrentThisContext) {
+        expect(await this.handlerInstance.resolveAnswerField("suggestionChips")).toEqual(undefined);
+      });
+    });
+
+    it("enables appending of values", async function(this: CurrentThisContext) {
+      this.handlerInstance.setSuggestionChips(Promise.resolve(["a", "b"]));
+      const suggestionChips = (await this.handlerInstance.resolveAnswerField("suggestionChips")) as string[];
+      this.handlerInstance.setSuggestionChips([...suggestionChips, "c"]);
+
+      expect(await this.handlerInstance.resolveAnswerField("suggestionChips")).toEqual(["a", "b", "c"]);
+    });
+  });
+
+  describe("#unsupportedFeature", function() {
     it("adds params to unsupportedFeatureCalls attribute", async function(this: CurrentThisContext) {
       this.handlerInstance.unsupportedFeature("methodName", "arg1", "arg2", 3);
       expect(this.handlerInstance.unsupportedFeatureCalls).toEqual([{ methodName: "methodName", args: ["arg1", "arg2", 3] }]);

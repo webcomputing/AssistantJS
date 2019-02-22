@@ -205,7 +205,7 @@ export class SpecHelper {
   public createRequestScope(
     minimalExtraction: MinimalRequestExtraction | null,
     requestContext: RequestContext,
-    responseHandler?: { new (...args: any[]): BasicHandable<any> }
+    responseHandler?: new (...args: any[]) => BasicHandable<BasicAnswerTypes>
   ) {
     // Get request handle instance and create child container of it
     const requestHandler = this.assistantJs.container.inversifyInstance.get(GenericRequestHandler);
@@ -222,7 +222,7 @@ export class SpecHelper {
     // Add minimal response handler
     if (typeof responseHandler !== "undefined") {
       if (minimalExtraction !== null) {
-        childContainer.bind<BasicHandable<any>>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
+        childContainer.bind<BasicHandable<BasicAnswerTypes>>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
       } else {
         throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");
       }
@@ -293,7 +293,7 @@ export class SpecHelper {
    *
    * @return Promise<Function> stopFunction If you call this function, server will be stopped.
    */
-  public withServer(expressApp: express.Express = express()): Promise<(() => void)> {
+  public withServer(expressApp: express.Express = express()): Promise<() => void> {
     return new Promise(resolve => {
       this.assistantJs.run(
         new ServerApplication(

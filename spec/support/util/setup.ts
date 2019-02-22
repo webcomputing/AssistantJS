@@ -6,7 +6,7 @@ import { AssistantJSSetup } from "../../../src/setup";
 
 import { SpecHelper } from "../../../src/spec-helper";
 
-import { StateMachineSetup } from "../../../src/assistant-source";
+import { BasicAnswerTypes, BasicHandler, StateMachineSetup } from "../../../src/assistant-source";
 import { TestFilterA } from "../mocks/filters/test-filter-a";
 import { TestFilterB } from "../mocks/filters/test-filter-b";
 import { TestFilterC } from "../mocks/filters/test-filter-c";
@@ -73,7 +73,7 @@ export function createRequestScope(
   specSetup: SpecHelper,
   minimalExtraction: MinimalRequestExtraction | null = JSON.parse(JSON.stringify(extraction)),
   requestContext: RequestContext = context,
-  responseHandler: { new (...args: any[]): BasicHandable<any> } = ResponseHandler
+  responseHandler: new (...args: any[]) => BasicHandable<BasicAnswerTypes> = ResponseHandler
 ) {
   specSetup.createRequestScope(minimalExtraction, requestContext, responseHandler);
 }
