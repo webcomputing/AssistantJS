@@ -1,6 +1,8 @@
 import { inject, injectable } from "inversify";
+import { merge } from "lodash";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
+import { KillSessionPromise } from "../../services/public-interfaces";
 import { MinimalRequestExtraction, OptionallyPromise } from "../public-interfaces";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
@@ -86,7 +88,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   constructor(
     @inject(injectionNames.current.requestContext) private requestContext: RequestContext,
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
-    @inject(injectionNames.current.killSessionService) private killSession: () => Promise<void>,
+    @inject(injectionNames.current.killSessionService) private killSession: KillSessionPromise,
     @inject(injectionNames.current.responseHandlerExtensions)
     private responseHandlerExtensions: ResponseHandlerExtensions<MergedAnswerTypes, BasicHandable<MergedAnswerTypes>>
   ) {
@@ -112,14 +114,21 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
     await this.resolveResults();
 
-    // everything was sent successfully
-    this.isSent = true;
-
     // default http status code 200 or resolved status code
     const httpStatusCode = this.results.httpStatusCode ? this.results.httpStatusCode : 200;
 
-    // give results to the specific handler
-    this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders(), httpStatusCode);
+    // give results to the specific handler and resolve json
+    const handlerJSON = this.getBody(this.results);
+
+    // append handler json with possible custom attributes
+    const responseJSON = merge({ ...handlerJSON }, this.results.appendedJSON ? this.results.appendedJSON : {});
+
+    // Send using assistantjs response callbacḱ
+    this.responseCallback(JSON.stringify(responseJSON), this.getHeaders(), httpStatusCode);
+
+    // everything was sent successfully
+    this.isSent = true;
+
     if (this.results.shouldSessionEnd) {
       await this.killSession();
     }
@@ -157,6 +166,8 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   }
 
   public setHttpStatusCode(httpStatusCode: MergedAnswerTypes["httpStatusCode"] | Promise<MergedAnswerTypes["httpStatusCode"]>): this {
+    this.failIfInactive();
+
     this.promises.httpStatusCode = { resolver: httpStatusCode };
 
     return this;
@@ -170,6 +181,14 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
       resolver: Promise.resolve(inputText),
       thenMap: this.createPromptAnswer,
     };
+
+    return this;
+  }
+
+  public setAppendedJSON(appendedJSON: OptionallyPromise<MergedAnswerTypes["appendedJSON"]>): this {
+    this.failIfInactive();
+
+    this.promises.appendedJSON = { resolver: appendedJSON };
 
     return this;
   }
