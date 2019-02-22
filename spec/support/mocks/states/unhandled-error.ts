@@ -1,6 +1,6 @@
 import { inject, injectable, optional } from "inversify";
 import { State } from "../../../../src/components/state-machine/public-interfaces";
-import { BasicHandable } from "../../../../src/components/unifier/response-handler";
+import { BasicAnswerTypes, BasicHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
 
 @injectable()
@@ -9,7 +9,7 @@ export class UnhandledErrorState implements State.Required {
   public spy?: (...args: any[]) => void;
 
   constructor(
-    @inject(injectionNames.current.responseHandler) responsehandler: BasicHandable<any>,
+    @inject(injectionNames.current.responseHandler) responsehandler: BasicHandable<BasicAnswerTypes>,
     @inject(injectionNames.current.extraction) extraction: any,
     @optional()
     @inject("mocks:states:call-spy")
