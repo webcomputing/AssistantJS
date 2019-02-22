@@ -150,47 +150,24 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   }
 
   public setEndSession(): this {
-    this.failIfInactive();
-
-    this.promises.shouldSessionEnd = { resolver: true };
-    return this;
+    return this.setResolverAndReturnThis("shouldSessionEnd", true);
   }
 
   public endSessionWith(text: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
-    this.failIfInactive();
-
-    this.promises.shouldSessionEnd = { resolver: true };
-    this.prompt(text);
-
-    return this;
+    this.setEndSession();
+    return this.prompt(text);
   }
 
   public setHttpStatusCode(httpStatusCode: OptionallyPromise<MergedAnswerTypes["httpStatusCode"]>): this {
-    this.failIfInactive();
-
-    this.promises.httpStatusCode = { resolver: httpStatusCode };
-
-    return this;
+    return this.setResolverAndReturnThis("httpStatusCode", httpStatusCode);
   }
 
   public prompt(inputText: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
-    this.failIfInactive();
-
-    // add a thenMap function to build the correct object from the simple strings
-    this.promises.voiceMessage = {
-      resolver: Promise.resolve(inputText),
-      thenMap: this.createPromptAnswer,
-    };
-
-    return this;
+    return this.setResolverAndReturnThis("voiceMessage", inputText, this.createPromptAnswer);
   }
 
   public setAppendedJSON(appendedJSON: OptionallyPromise<MergedAnswerTypes["appendedJSON"]>): this {
-    this.failIfInactive();
-
-    this.promises.appendedJSON = { resolver: appendedJSON };
-
-    return this;
+    return this.setResolverAndReturnThis("appendedJSON", appendedJSON);
   }
 
   public async resolveAnswerField<AnswerTypeKey extends keyof MergedAnswerTypes>(
@@ -275,6 +252,19 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
     // wait for all Prmises at once, after this
     await Promise.all(concurrentProcesses);
+  }
+
+  /** Sets resolver to given value and return this. Checks if response handler is still active using failIfInactive(). */
+  protected setResolverAndReturnThis<AnswerKey extends keyof MergedAnswerTypes>(
+    answerKey: AnswerKey,
+    resolver: OptionallyPromise<MergedAnswerTypes[AnswerKey] | any>,
+    thenMap?: (value: any) => OptionallyPromise<MergedAnswerTypes[AnswerKey]>
+  ) {
+    this.failIfInactive();
+
+    this.promises[answerKey] = { resolver, thenMap };
+
+    return this;
   }
 
   /**
