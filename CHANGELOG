@@ -1,4 +1,5 @@
 version 0.5.0
+- adds setAppendedJSON() method to response handler, enabling you to set some json which will be appended to / merged with the resulting json of the response handler
 - adds resolveAnswerField() to basic response handler: This allows you to get the currently stored value of any response handler field 
 
 version 0.4.0

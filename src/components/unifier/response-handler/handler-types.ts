@@ -1,4 +1,4 @@
-import { OptionalHandlerFeatures } from "../public-interfaces";
+import { OptionalHandlerFeatures, OptionallyPromise } from "../public-interfaces";
 
 /**
  * This interface defines the types which can be used on all Handlers
@@ -46,10 +46,16 @@ export interface BasicAnswerTypes {
 
   /**
    * HTTP-Status-Code for Response.
-   * Warning: Use only if you know, what you are doing.
+   * Warning: Use only if you know what you are doing.
    * Default: 200 --> OK
    */
   httpStatusCode: number;
+
+  /**
+   * Any JSON structure supplied here is appended directly to the resulting json of your platform handler.
+   * @see {@link BasicHandable#setAppendedJSON} for more info
+   */
+  appendedJSON: any;
 }
 
 /**
@@ -108,7 +114,7 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * Sends voice message
    * @param text Text to say to user
    */
-  prompt(inputText: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>): this;
+  prompt(inputText: OptionallyPromise<AnswerType["voiceMessage"]["text"]>): this;
 
   /**
    * End the current session, so the user cannot respond anymore
@@ -120,14 +126,25 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
    * allows to set a last message before the session ends
    * @param text
    */
-  endSessionWith(text: AnswerType["voiceMessage"]["text"] | Promise<AnswerType["voiceMessage"]["text"]>): this;
+  endSessionWith(text: OptionallyPromise<AnswerType["voiceMessage"]["text"]>): this;
 
   /**
-   * Allows to set a custom httpStatusCode
-   * if not set the default is 200
+   * Sets a custom http status code. If not set the default is 200
    * @param httpStatusCode eg. 200 or 401
    */
-  setHttpStatusCode(httpStatusCode: AnswerType["httpStatusCode"] | Promise<AnswerType["httpStatusCode"]>): this;
+  setHttpStatusCode(httpStatusCode: OptionallyPromise<AnswerType["httpStatusCode"]>): this;
+
+  /**
+   * Sets json to merge automatically with resulting json before the response is send.
+   *
+   * Any JSON structure supplied here is appended directly to the resulting json of your platform handler.
+   * This uses lodash's merge functionality: If you supply fields which exists already in the the resulting json of the current platform handler, those fields will be merged recursively (instead of simply replaced).
+   * Be sure to be very platform specific when using this field - your given json will always be appended to the platform handler's result, no matter what response handler currently is active.
+   * So you possibly want to check for the correct platform before using this.
+   *
+   * @param json The json to append to the resultset of the current response handler's getBody() method
+   */
+  setAppendedJSON(json: OptionallyPromise<AnswerType["appendedJSON"]>): this;
 
   /**
    * Returns current value for any given answer type, for example suggestion chips, voice message, etc as a promise.
