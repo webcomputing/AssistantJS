@@ -193,6 +193,25 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     return this;
   }
 
+  public async resolveAnswerField<AnswerTypeKey extends keyof MergedAnswerTypes>(
+    answerType: AnswerTypeKey
+  ): Promise<MergedAnswerTypes[AnswerTypeKey] | undefined> {
+    // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
+    const resolver = this.promises[answerType];
+
+    if (resolver) {
+      // resolve the final or intermediate result
+      const currentValue = await Promise.resolve(resolver.resolver);
+
+      // remap the intermediate Results, when an thenMap function is present
+      if (resolver.thenMap) {
+        return Promise.resolve<any>(resolver.thenMap.bind(this)(currentValue));
+      }
+
+      return currentValue;
+    }
+  }
+
   public unsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
     this.unsupportedFeatureCalls.push({ methodName, args });
   }
@@ -250,23 +269,10 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     }
     // resolve all intermediate and final results from the Promises and build an Array of new Promises
     // and fill the results array
-    const concurrentProcesses = promiseKeys.map(async (key: string) => {
-      const currentKey = key as keyof BasicAnswerTypes; // we have to set the type here to 'BasicAnswerTypes', as if we set the type to 'B' the type of the const resolver is wrong
-      // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
-      const resolver = this.promises[currentKey];
-      if (resolver) {
-        // resolve the final or intermediate result
-        const currentValue = await Promise.resolve(resolver.resolver);
-        // remap the intermediate Results, when an thenMap function is present
-        if (resolver.thenMap) {
-          const finalResult = await Promise.resolve<any>(resolver.thenMap.bind(this)(currentValue));
-          this.results[currentKey] = finalResult;
-        } else {
-          // here are only final results
-          this.results[currentKey] = currentValue;
-        }
-      }
+    const concurrentProcesses = promiseKeys.map(async key => {
+      this.results[key] = await this.resolveAnswerField(key as keyof MergedAnswerTypes);
     });
+
     // wait for all Prmises at once, after this
     await Promise.all(concurrentProcesses);
   }

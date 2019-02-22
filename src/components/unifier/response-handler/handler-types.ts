@@ -147,6 +147,16 @@ export interface BasicHandable<AnswerType extends BasicAnswerTypes> {
   setAppendedJSON(json: OptionallyPromise<AnswerType["appendedJSON"]>): this;
 
   /**
+   * Returns current value for any given answer type, for example suggestion chips, voice message, etc as a promise.
+   * By getting an answer value and resetting it, you are also able to append suggestion chips, reprompts, etc.
+   * Will also execute thenMap if there is one present for this answer field.
+   * This method is also used internally to get the results for each field.
+   * @param answerType Any key of your MergedTypes, which are dependent on the set of response handlers you use.
+   * @return Promise resolving to the currently stored answer value or undefined if no value is currently stored
+   */
+  resolveAnswerField<AnswerTypeKey extends keyof AnswerType>(answerType: AnswerTypeKey): Promise<AnswerType[AnswerTypeKey] | undefined>;
+
+  /**
    * Sends all messages as answer. After sending it is not possible anymore to set or change the answer.
    */
   send(): Promise<void>;
