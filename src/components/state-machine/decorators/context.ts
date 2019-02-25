@@ -5,18 +5,18 @@ export const clearContextMetadataKey = Symbol("metadata-key: clearContext");
 
 /**
  * Adds given Function to Metadata of target class
- * @param addToContext Function to add
+ * @param [addToContext] Function to add
  */
 export function stayInContext(addToContext?: StayInContextCallback) {
-  return defineMetatdataCallback(stayInContextMetadataKey, addToContext ? addToContext : () => true);
+  return defineMetatdataCallback(stayInContextMetadataKey, addToContext || (() => true));
 }
 
 /**
  * Adds given Function to Metadata of target class
- * @param needsClear Function to add
+ * @param [needsClear] Function to add
  */
 export function clearContext(needsClear?: ClearContextCallback) {
-  return defineMetatdataCallback(clearContextMetadataKey, needsClear ? needsClear : () => true);
+  return defineMetatdataCallback(clearContextMetadataKey, needsClear || (() => true));
 }
 
 /**
