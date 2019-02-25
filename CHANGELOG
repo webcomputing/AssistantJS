@@ -2,6 +2,10 @@ version 0.5.0
 - adds setAppendedJSON() method to response handler, enabling you to set some json which will be appended to / merged with the resulting json of the response handler
 - adds resolveAnswerField() to basic response handler: This allows you to get the currently stored value of any response handler field 
 
+version 0.4.1
+- fixes typing of StayInContextCallback and ClearContextCallback
+- fixes two scaffolding errors
+
 version 0.4.0
 - changes default behaviour of AssistantJSSetup's constructor to create a new container instead of using a global one. Removes global container.
 - changes get() and getRaw() methods of entity dictionary: Now casting returned numbers to strings, aligning both methods to the already specified return type (string|undefined). Previously, if entities in request/extraction have been numbers, dictionary did not return them as string, resulting in unexpected/untyped behaviour.

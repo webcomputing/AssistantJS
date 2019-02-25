@@ -185,9 +185,10 @@ export class StateMachine implements Transitionable {
    * @param currentStateClass State class to check for defined metadata
    * @param metaDataKey Key to check for
    */
-  private retrieveContextCallback<
-    ContextCallback extends (currentStateName, currentStateInstance, contextStateNames, intentHistory, stateNameToTransitionTo) => boolean | undefined
-  >(currentStateClass: State.Constructor, metaDataKey: symbol): ContextCallback | undefined {
+  private retrieveContextCallback<ContextCallback extends StayInContextCallback | ClearContextCallback>(
+    currentStateClass: State.Constructor,
+    metaDataKey: symbol
+  ): ContextCallback | undefined {
     const metadata = Reflect.getMetadata(metaDataKey, currentStateClass);
 
     return metadata ? metadata.callback : undefined;

@@ -192,11 +192,11 @@ export type StayInContextCallback = (
 /** Callback that is executed to determine whether or not the state context gets cleared */
 export type ClearContextCallback = (
   /** Name of current state */
-  currentStateName?: string,
+  currentStateName: string,
   /** Instance of current state */
-  currentStateInstance?: State.Required,
+  currentStateInstance: State.Required,
   /** Names of states currently in context */
-  contextStateNames?: string[],
+  contextStateNames: string[],
   /** History of called intents for this request */
-  intentHistory?: Array<{ stateName: string; intentMethodName: string }>
+  intentHistory: Array<{ stateName: string; intentMethodName: string }>
 ) => boolean;

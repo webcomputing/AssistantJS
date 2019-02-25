@@ -24,10 +24,7 @@ export function clearContext(needsClear?: ClearContextCallback) {
  * @param metaDataKey Key
  * @param callback Function to define as Metadata
  */
-function defineMetatdataCallback(
-  metaDataKey: symbol,
-  callback: (currentStateName, currentStateInstance, contextStateNames, intentHistory, stateNameToTransitionTo) => boolean
-) {
+function defineMetatdataCallback(metaDataKey: symbol, callback?: StayInContextCallback | ClearContextCallback) {
   const metadata = callback ? { callback } : { callback: () => true };
 
   return function(targetClass: any) {
