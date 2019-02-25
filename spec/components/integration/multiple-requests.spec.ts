@@ -53,7 +53,7 @@ describe("with child containers enabled", function() {
 
       const fulfilledPromises = await Promise.all(requests);
       for (const i in fulfilledPromises) {
-        expect(fulfilledPromises[i].body).toEqual(extractions[i].message);
+        expect(fulfilledPromises[i].body.message).toEqual(extractions[i].message);
       }
 
       done();

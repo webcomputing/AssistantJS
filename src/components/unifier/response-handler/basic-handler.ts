@@ -1,6 +1,8 @@
 import { inject, injectable } from "inversify";
+import { merge } from "lodash";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
+import { KillSessionPromise } from "../../services/public-interfaces";
 import { MinimalRequestExtraction, OptionallyPromise } from "../public-interfaces";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
@@ -86,7 +88,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   constructor(
     @inject(injectionNames.current.requestContext) private requestContext: RequestContext,
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
-    @inject(injectionNames.current.killSessionService) private killSession: () => Promise<void>,
+    @inject(injectionNames.current.killSessionService) private killSession: KillSessionPromise,
     @inject(injectionNames.current.responseHandlerExtensions)
     private responseHandlerExtensions: ResponseHandlerExtensions<MergedAnswerTypes, BasicHandable<MergedAnswerTypes>>
   ) {
@@ -112,14 +114,21 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
     await this.resolveResults();
 
-    // everything was sent successfully
-    this.isSent = true;
-
     // default http status code 200 or resolved status code
     const httpStatusCode = this.results.httpStatusCode ? this.results.httpStatusCode : 200;
 
-    // give results to the specific handler
-    this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders(), httpStatusCode);
+    // give results to the specific handler and resolve json
+    const handlerJSON = this.getBody(this.results);
+
+    // append handler json with possible custom attributes
+    const responseJSON = merge({ ...handlerJSON }, this.results.appendedJSON ? this.results.appendedJSON : {});
+
+    // Send using assistantjs response callbacḱ
+    this.responseCallback(JSON.stringify(responseJSON), this.getHeaders(), httpStatusCode);
+
+    // everything was sent successfully
+    this.isSent = true;
+
     if (this.results.shouldSessionEnd) {
       await this.killSession();
     }
@@ -141,37 +150,24 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   }
 
   public setEndSession(): this {
-    this.failIfInactive();
-
-    this.promises.shouldSessionEnd = { resolver: true };
-    return this;
+    return this.setResolverAndReturnThis("shouldSessionEnd", true);
   }
 
-  public endSessionWith(text: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
-    this.failIfInactive();
-
-    this.promises.shouldSessionEnd = { resolver: true };
-    this.prompt(text);
-
-    return this;
+  public endSessionWith(text: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
+    this.setEndSession();
+    return this.prompt(text);
   }
 
-  public setHttpStatusCode(httpStatusCode: MergedAnswerTypes["httpStatusCode"] | Promise<MergedAnswerTypes["httpStatusCode"]>): this {
-    this.promises.httpStatusCode = { resolver: httpStatusCode };
-
-    return this;
+  public setHttpStatusCode(httpStatusCode: OptionallyPromise<MergedAnswerTypes["httpStatusCode"]>): this {
+    return this.setResolverAndReturnThis("httpStatusCode", httpStatusCode);
   }
 
-  public prompt(inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
-    this.failIfInactive();
+  public prompt(inputText: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
+    return this.setResolverAndReturnThis("voiceMessage", inputText, this.createPromptAnswer);
+  }
 
-    // add a thenMap function to build the correct object from the simple strings
-    this.promises.voiceMessage = {
-      resolver: Promise.resolve(inputText),
-      thenMap: this.createPromptAnswer,
-    };
-
-    return this;
+  public setAppendedJSON(appendedJSON: OptionallyPromise<MergedAnswerTypes["appendedJSON"]>): this {
+    return this.setResolverAndReturnThis("appendedJSON", appendedJSON);
   }
 
   public async resolveAnswerField<AnswerTypeKey extends keyof MergedAnswerTypes>(
@@ -256,6 +252,19 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
     // wait for all Prmises at once, after this
     await Promise.all(concurrentProcesses);
+  }
+
+  /** Sets resolver to given value and return this. Checks if response handler is still active using failIfInactive(). */
+  protected setResolverAndReturnThis<AnswerKey extends keyof MergedAnswerTypes>(
+    answerKey: AnswerKey,
+    resolver: OptionallyPromise<MergedAnswerTypes[AnswerKey] | any>,
+    thenMap?: (value: any) => OptionallyPromise<MergedAnswerTypes[AnswerKey]>
+  ) {
+    this.failIfInactive();
+
+    this.promises[answerKey] = { resolver, thenMap };
+
+    return this;
   }
 
   /**

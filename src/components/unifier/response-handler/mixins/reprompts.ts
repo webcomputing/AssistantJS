@@ -1,4 +1,4 @@
-import { Constructor, Mixin } from "../../../../assistant-source";
+import { Constructor, Mixin, OptionallyPromise } from "../../../../assistant-source";
 import { OptionalHandlerFeatures } from "../../public-interfaces";
 import { BasicHandler } from "../basic-handler";
 import { BasicAnswerTypes } from "../handler-types";
@@ -12,36 +12,27 @@ export class RepromptsMixin<MergedAnswerTypes extends BasicAnswerTypes> extends 
    * implementation of prompt with reprompts
    */
   public prompt(
-    inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>,
-    ...reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+    inputText: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>,
+    ...reprompts: Array<OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>>
   ): this {
-    this.failIfInactive();
-
     // add reprompts with remapper function
     if (reprompts && reprompts.length > 0) {
-      this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
+      this.addRepromptsArray(reprompts);
     }
 
     return super.prompt(inputText);
   }
 
   public setReprompts(
-    reprompts:
-      | Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
-      | Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>
+    reprompts: Array<OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>> | Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>
   ): this {
-    this.failIfInactive();
-
     // check wether it is an Arry or an Promise
     if (Array.isArray(reprompts)) {
       // add reprompts as Array with remapper function
-      this.promises.reprompts = this.getRepromptArrayRemapper(reprompts);
+      this.addRepromptsArray(reprompts);
     } else {
       // Add Promise and thenMap function
-      this.promises.reprompts = {
-        resolver: reprompts,
-        thenMap: this.createRepromptAnswerArray,
-      };
+      this.setResolverAndReturnThis("reprompts", reprompts, this.createRepromptAnswerArray);
     }
 
     return this;
@@ -53,7 +44,7 @@ export class RepromptsMixin<MergedAnswerTypes extends BasicAnswerTypes> extends 
    * @param reprompts
    */
   public getRepromptArrayRemapper(
-    reprompts: Array<MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>>
+    reprompts: Array<OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>>
   ): {
     resolver: Promise<Array<MergedAnswerTypes["voiceMessage"]["text"]>>;
     thenMap: (finaleReprompts: Array<MergedAnswerTypes["voiceMessage"]["text"]>) => MergedAnswerTypes["reprompts"];
@@ -70,5 +61,11 @@ export class RepromptsMixin<MergedAnswerTypes extends BasicAnswerTypes> extends 
    */
   public createRepromptAnswerArray(reprompts: string[]) {
     return reprompts.map(this.createPromptAnswer);
+  }
+
+  /** Adds array of reprompts using setResolverAndReturnThis */
+  private addRepromptsArray(reprompts: Array<OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>>) {
+    const repromptArrayMapper = this.getRepromptArrayRemapper(reprompts);
+    this.setResolverAndReturnThis("reprompts", repromptArrayMapper.resolver, repromptArrayMapper.thenMap);
   }
 }
