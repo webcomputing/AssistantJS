@@ -8,7 +8,7 @@ export const clearContextMetadataKey = Symbol("metadata-key: clearContext");
  * @param addToContext Function to add
  */
 export function stayInContext(addToContext?: StayInContextCallback) {
-  return defineMetatdataCallback(stayInContextMetadataKey, addToContext);
+  return defineMetatdataCallback(stayInContextMetadataKey, addToContext ? addToContext : () => true);
 }
 
 /**
@@ -16,7 +16,7 @@ export function stayInContext(addToContext?: StayInContextCallback) {
  * @param needsClear Function to add
  */
 export function clearContext(needsClear?: ClearContextCallback) {
-  return defineMetatdataCallback(clearContextMetadataKey, needsClear);
+  return defineMetatdataCallback(clearContextMetadataKey, needsClear ? needsClear : () => true);
 }
 
 /**
@@ -24,7 +24,10 @@ export function clearContext(needsClear?: ClearContextCallback) {
  * @param metaDataKey Key
  * @param callback Function to define as Metadata
  */
-function defineMetatdataCallback(metaDataKey: symbol, callback?: () => boolean) {
+function defineMetatdataCallback(
+  metaDataKey: symbol,
+  callback: (currentStateName, currentStateInstance, contextStateNames, intentHistory, stateNameToTransitionTo) => boolean
+) {
   const metadata = callback ? { callback } : { callback: () => true };
 
   return function(targetClass: any) {
