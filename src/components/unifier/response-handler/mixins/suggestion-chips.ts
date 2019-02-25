@@ -8,9 +8,6 @@ import { BasicAnswerTypes } from "../handler-types";
 export class SuggestionChipsMixin<MergedAnswerTypes extends BasicAnswerTypes> extends BasicHandler<MergedAnswerTypes>
   implements OptionalHandlerFeatures.SuggestionChips<MergedAnswerTypes> {
   public setSuggestionChips(suggestionChips: MergedAnswerTypes["suggestionChips"] | Promise<MergedAnswerTypes["suggestionChips"]>): this {
-    this.failIfInactive();
-
-    this.promises.suggestionChips = { resolver: suggestionChips };
-    return this;
+    return this.setResolverAndReturnThis("suggestionChips", suggestionChips);
   }
 }
