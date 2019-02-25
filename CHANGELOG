@@ -1,3 +1,6 @@
+version 0.4.1
+- fixes two scaffolding errors
+
 version 0.4.0
 - changes default behaviour of AssistantJSSetup's constructor to create a new container instead of using a global one. Removes global container.
 - changes get() and getRaw() methods of entity dictionary: Now casting returned numbers to strings, aligning both methods to the already specified return type (string|undefined). Previously, if entities in request/extraction have been numbers, dictionary did not return them as string, resulting in unexpected/untyped behaviour.
