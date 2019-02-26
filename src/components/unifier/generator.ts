@@ -26,109 +26,110 @@ export class Generator implements CLIGeneratorExtension {
   public async execute(buildDir: string): Promise<void> {
     // Get the main utterance templates from locales folder
     const utteranceTemplates = this.localesLoader.getUtteranceTemplates();
+
     // Get the entities from locales folder
     const customEntities = this.localesLoader.getCustomEntities();
 
+    // Get all configured language keys from utterance templates
+    const configuredLanguages = Object.keys(utteranceTemplates);
+
+    // Throws an missing utterances exception because no utterances will be configured.
+    if (configuredLanguages.length === 0) throw new Error("Currently no utterances are configured.");
+
+    // Mappings of the registered entities
+    const entityMappings = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
+
+    /** Utterances for each language  */
+    const utterances: PlatformGenerator.Multilingual<{ [intent: string]: string[] }> = {};
+
+    // Configuration for PlatformGenerator
+    const buildIntentConfigs: PlatformGenerator.Multilingual<PlatformGenerator.IntentConfiguration[]> = {};
+
+    // Prepare language specific configuration
+    configuredLanguages.forEach(language => {
+      // Add utterances from extensions to current template
+      utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
+        const source = curr.getUtterancesFor(language);
+        Object.keys(source).forEach(currIntent => {
+          // Merge arrays of utterances or add intent to target
+          target[currIntent] = target.hasOwnProperty(currIntent) ? target[currIntent].concat(source[currIntent]) : source[currIntent];
+        });
+        return target;
+      }, utteranceTemplates[language]); // Initial value
+
+      // Build utterances from templates
+      Object.keys(utteranceTemplates[language]).forEach(currIntent => {
+        if (!utterances[language]) utterances[language] = {};
+        utterances[language][currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], customEntities[language], entityMappings);
+      });
+
+      // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
+      this.intents.forEach(currIntent => {
+        let intentUtterances: string[] = [];
+
+        // If no utterance for the current language will be given we have to set a default value.
+        if (!utterances[language]) utterances[language] = {};
+
+        // Associate utterances to intent
+        if (typeof currIntent === "string") {
+          intentUtterances = utterances[language][currIntent + "Intent"];
+        } else {
+          const baseName = GenericIntent[currIntent] + "GenericIntent";
+          intentUtterances = utterances[language][baseName.charAt(0).toLowerCase() + baseName.slice(1)];
+        }
+
+        // When utterances are "undefined", assign empty array
+        if (typeof intentUtterances === "undefined") intentUtterances = [];
+        // Extract entities from utterances
+        const entities: string[] = [
+          ...new Set(
+            intentUtterances
+              // Match all entities
+              .map(utterance => utterance.match(/(?<=\{\{.*)(\w)+(?=\}\})/g))
+              // Flatten array
+              .reduce((prev, curr) => {
+                if (curr !== null) {
+                  curr.forEach(parameter => (prev as string[]).push(parameter));
+                }
+                return prev;
+              }, []) || []
+          ),
+        ];
+
+        // Check for unmapped entities
+        const unmatchedEntity = entities.find(name => typeof entityMappings[name] === "undefined");
+        if (typeof unmatchedEntity === "string") {
+          throw Error(
+            `Unknown entity '${unmatchedEntity}' found in utterances of intent '${currIntent}'.\nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: ${JSON.stringify(
+              Object.keys(entityMappings).map(name => {
+                return name;
+              })
+            )}`
+          );
+        }
+
+        if (!buildIntentConfigs[language]) buildIntentConfigs[language] = [];
+        buildIntentConfigs[language].push({
+          entities,
+          intent: currIntent,
+          utterances: intentUtterances,
+        });
+      });
+    });
+
     // Iterate through each found language and build the utterance corresponding to the users entities
-    const generatorPromises = Object.keys(utteranceTemplates)
-      .map(language => {
-        // Language specific build directory
-        const localeBuildDirectory = buildDir + "/" + language;
-        // Contains the utterances generated from the utterance templates
-        const utterances: { [intent: string]: string[] } = {};
-        // Mappings of the registered entities
-        const entityMappings = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
-        // Configuration for PlatformGenerator
-        const buildIntentConfigs: PlatformGenerator.IntentConfiguration[] = [];
-
-        // Create build dir
-        fs.mkdirSync(localeBuildDirectory);
-
-        // Add utterances from extensions to current template
-        utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
-          const source = curr.getUtterancesFor(language);
-          Object.keys(source).forEach(currIntent => {
-            // Merge arrays of utterances or add intent to target
-            target[currIntent] = target.hasOwnProperty(currIntent) ? target[currIntent].concat(source[currIntent]) : source[currIntent];
-          });
-          return target;
-        }, utteranceTemplates[language]); // Initial value
-
-        // Build utterances from templates
-        Object.keys(utteranceTemplates[language]).forEach(currIntent => {
-          utterances[currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], customEntities[language], entityMappings);
-        });
-
-        // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
-        this.intents.forEach(currIntent => {
-          let intentUtterances: string[] = [];
-
-          // Associate utterances to intent
-          if (typeof currIntent === "string") {
-            intentUtterances = utterances[currIntent + "Intent"];
-          } else {
-            const baseName = GenericIntent[currIntent] + "GenericIntent";
-            intentUtterances = utterances[baseName.charAt(0).toLowerCase() + baseName.slice(1)];
-          }
-
-          // When utterances are "undefined", assign empty array
-          if (typeof intentUtterances === "undefined") intentUtterances = [];
-          // Extract entities from utterances
-          const entities: string[] = [
-            ...new Set(
-              intentUtterances
-                // Match all entities
-                .map(utterance => utterance.match(/(?<=\{\{.*)(\w)+(?=\}\})/g))
-                // Flatten array
-                .reduce((prev, curr) => {
-                  if (curr !== null) {
-                    curr.forEach(parameter => (prev as string[]).push(parameter));
-                  }
-                  return prev;
-                }, []) || []
-            ),
-          ];
-
-          // Check for unmapped entities
-          const unmatchedEntity = entities.find(name => typeof entityMappings[name] === "undefined");
-          if (typeof unmatchedEntity === "string") {
-            throw Error(
-              "Unknown entity '" +
-                unmatchedEntity +
-                "' found in utterances of intent '" +
-                currIntent +
-                "'. \n" +
-                "Either you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. " +
-                "Your configured entity mappings are: " +
-                JSON.stringify(
-                  Object.keys(entityMappings).map(name => {
-                    return name;
-                  })
-                )
-            );
-          }
-
-          buildIntentConfigs.push({
-            entities,
-            intent: currIntent,
-            utterances: intentUtterances,
-          });
-        });
-
-        // Call all platform generators
-        return this.platformGenerators.map(generator =>
-          Promise.resolve(
-            generator.execute(
-              language,
-              localeBuildDirectory,
-              buildIntentConfigs.map(config => JSON.parse(JSON.stringify(config))),
-              JSON.parse(JSON.stringify(entityMappings)),
-              JSON.parse(JSON.stringify(customEntities[language]))
-            )
-          )
-        );
-      })
-      .reduce((prev, curr) => prev.concat(curr));
+    // Call all platform generators
+    const generatorPromises = this.platformGenerators.map(generator =>
+      Promise.resolve(
+        generator.execute(
+          configuredLanguages,
+          buildDir,
+          buildIntentConfigs,
+          JSON.parse(JSON.stringify(entityMappings)),
+          JSON.parse(JSON.stringify(customEntities))
+        )
+      )
+    );
 
     // Wait for all platform generators to finish
     await Promise.all(generatorPromises);

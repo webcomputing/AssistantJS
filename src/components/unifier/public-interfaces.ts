@@ -160,23 +160,29 @@ export namespace PlatformGenerator {
     getUtterancesFor(language: string): { [intent: string]: string[] };
   }
 
+  /** Generic interface for multi lingual instances */
+  export interface Multilingual<T> {
+    /** Contains instance of T for each language */
+    [language: string]: T;
+  }
+
   /** Extension interface to implement a platform generator */
   export interface Extension {
     /**
      * Is called if user wants to generate build on your platform (can be async, see return value)
-     * @param {string} langauge langauge to build in
+     * @param {string} languages all languages which should be build
      * @param {string} buildDir path of the build directory
-     * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
-     * @param {EntityMapping} entityMapping Mapping of entity types and names
-     * @param {CustomEntity} entityMapping Mapping of entity types and names
+     * @param {Multilingual<IntentConfiguration[]>} intentConfiguration Mapping of intent, utterances and entities for each language
+     * @param {Multilingual<EntityMapping>} entityMapping Mapping of entity types and names for each language
+     * @param {Multilingual<CustomEntity>} entityMapping Mapping of entity types and names for each language
      * @return {void|Promise<void>}
      */
     execute(
-      language: string,
+      languages: string[],
       buildDir: string,
-      intentConfigurations: IntentConfiguration[],
-      entityMapping: EntityMapping,
-      customEntities: CustomEntityMapping
+      intentConfigurations: Multilingual<IntentConfiguration[]>,
+      entityMapping: Multilingual<EntityMapping>,
+      customEntities: Multilingual<CustomEntityMapping>
     ): void | Promise<void>;
   }
 
