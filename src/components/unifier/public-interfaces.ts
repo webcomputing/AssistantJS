@@ -219,7 +219,7 @@ export interface RequestExtractor<ComponentConfiguration = {}> {
    * Extracts information out of request. The minimum set of information to extract is described by MinimalRequestExtraction.
    * @param {RequestContext} context Request context to extract information from
    * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information.
-   *   See also OptionalExtration interface for more information.
+   *   See also OptionalExtraction interface for more information.
    */
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
