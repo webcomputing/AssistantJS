@@ -173,7 +173,7 @@ export namespace PlatformGenerator {
      * @param {string} languages all languages which should be build
      * @param {string} buildDir path of the build directory
      * @param {Multilingual<IntentConfiguration[]>} intentConfiguration Mapping of intent, utterances and entities for each language
-     * @param {Multilingual<EntityMapping>} entityMapping Mapping of entity types and names for each language
+     * @param {EntityMapping} entityMapping Mapping of entity types and names for each language
      * @param {Multilingual<CustomEntity>} entityMapping Mapping of entity types and names for each language
      * @return {void|Promise<void>}
      */
@@ -181,7 +181,7 @@ export namespace PlatformGenerator {
       languages: string[],
       buildDir: string,
       intentConfigurations: Multilingual<IntentConfiguration[]>,
-      entityMapping: Multilingual<EntityMapping>,
+      entityMapping: EntityMapping,
       customEntities: Multilingual<CustomEntityMapping>
     ): void | Promise<void>;
   }
