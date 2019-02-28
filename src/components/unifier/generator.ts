@@ -33,7 +33,7 @@ export class Generator implements CLIGeneratorExtension {
     // Get all configured language keys from utterance templates
     const configuredLanguages = Object.keys(utteranceTemplates);
 
-    // Throws an missing utterances exception because no utterances will be configured.
+    // Throws an missing utterances exception because no utterances are configured.
     if (configuredLanguages.length === 0) throw new Error("Currently no utterances are configured.");
 
     // Mappings of the registered entities
