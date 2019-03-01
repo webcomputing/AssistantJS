@@ -109,9 +109,11 @@ describe("EntityDictionary", function() {
   });
 
   describe("#getRaw", function() {
+    beforeEach(async function() {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
+    });
     describe("for numbers in store", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.specHelper.prepareSpec(this.defaultSpecOptions);
         createRequestScope(
           this.specHelper,
           this.createExtraction({
@@ -127,7 +129,6 @@ describe("EntityDictionary", function() {
 
     describe("for null values in store", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.specHelper.prepareSpec(this.defaultSpecOptions);
         createRequestScope(
           this.specHelper,
           this.createExtraction({
@@ -143,7 +144,6 @@ describe("EntityDictionary", function() {
 
     describe("for everything else", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.specHelper.prepareSpec(this.defaultSpecOptions);
         createRequestScope(
           this.specHelper,
           this.createExtraction({

@@ -315,7 +315,7 @@ describe("StateMachine", function() {
 
     describe("when given state is not registered in state machine", function() {
       it("throws an exception", function() {
-        expect(() => this.currentState.transitionTo("SubState")).toThrowError;
+        expect(() => this.currentState.transitionTo("SubState")).toThrowError();
       });
     });
   });
@@ -339,11 +339,11 @@ describe("StateMachine", function() {
 
   describe("stateExists", function() {
     it("returns true for registered states", function() {
-      expect(this.stateMachine.stateExists("MainState")).toBeTruthy;
+      expect(this.stateMachine.stateExists("MainState")).toBeTruthy();
     });
 
     it("returns false for not existing states", function() {
-      expect(this.stateMachine.stateExists("NotExistingState")).toBeFalsy;
+      expect(this.stateMachine.stateExists("NotExistingState")).toBeFalsy();
     });
   });
 });
