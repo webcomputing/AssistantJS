@@ -83,7 +83,7 @@ describe("ContextDeriver", function() {
       });
     });
 
-    describe("with two valid extractors registered", function() {
+    fdescribe("with two valid extractors registered", function() {
       describe("with some support equal number of features", function() {
         function rebindUniferConfigWith(this: CurrentThisContext, conf: UnifierConfiguration) {
           const unifier = this.assistantJs.container.componentRegistry.lookup<UnifierConfiguration>("core:unifier");
@@ -104,7 +104,25 @@ describe("ContextDeriver", function() {
           }
         });
 
-        describe("but there's a priority list", function() {
+        describe("with false parameter `disableMostFeaturesWin`", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            rebindUniferConfigWith.call(this, {
+              contextDeriver: {
+                disableMostFeaturesWin: true,
+              },
+            });
+          });
+
+          it("throws an error", async function(this: CurrentThisContext) {
+            try {
+              await this.inversify.get<ContextDeriver>(rootComponentInterfaces.contextDeriver).findExtractor(createContext());
+            } catch (error) {
+              expect(error.message).toMatch(/cannot set disableMostFeaturesWin without requestExtractorPriority/);
+            }
+          });
+        });
+
+        describe("with a priority list", function() {
           beforeEach(async function(this: CurrentThisContext) {
             rebindUniferConfigWith.call(this, {
               contextDeriver: {
@@ -118,7 +136,7 @@ describe("ContextDeriver", function() {
             expect((extractor as RequestExtractor).component.name).toEqual("MockB");
           });
 
-          describe("and `most features win` is disabled", function() {
+          describe("with `most features win` being disabled", function() {
             beforeEach(async function(this: CurrentThisContext) {
               rebindUniferConfigWith.call(this, {
                 contextDeriver: {
@@ -127,7 +145,7 @@ describe("ContextDeriver", function() {
               });
             });
 
-            it("selects by priority only when `most features win` is disabled", async function(this: CurrentThisContext) {
+            it("selects by priority only", async function(this: CurrentThisContext) {
               const extractor = await this.inversify.get<ContextDeriver>(rootComponentInterfaces.contextDeriver).findExtractor(createContext());
               expect((extractor as RequestExtractor).component.name).toEqual("MockC");
             });

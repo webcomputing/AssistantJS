@@ -50,8 +50,12 @@ export class ContextDeriver implements ContextDeriverI {
     const isRunable = await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context)));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
 
+    if (disableMostFeaturesWin && !requestExtractorPriority) {
+      throw new Error("You cannot set disableMostFeaturesWin without requestExtractorPriority");
+    }
+
     // Don't filter by most supported features if diabled and a priority list is given
-    if (!(disableMostFeaturesWin && requestExtractorPriority)) {
+    if (!disableMostFeaturesWin) {
       runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
     }
 
