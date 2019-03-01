@@ -42,13 +42,13 @@
     "i18next": "^11.5.0",
     "i18next-sync-fs-backend": "^1.0.0",
     "inversify": "4.1.1",
-    "inversify-components": "^0.4.4",
+    "inversify-components": "^0.4.5",
     "js-combinatorics": "^0.5.3",
+    "lodash": "^4.17.11",
     "redis": "2.8.0",
     "reflect-metadata": "^0.1.12",
     "resolve": "^1.8.1",
-    "rxjs": "^5.5.11",
-    "lodash": "^4.17.11"
+    "rxjs": "^5.5.11"
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.8",
