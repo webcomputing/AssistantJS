@@ -84,7 +84,7 @@ describe("ContextDeriver", function() {
     });
 
     describe("with two valid extractors registered", function() {
-      fdescribe("with some support equal number of features", function() {
+      describe("with some support equal number of features", function() {
         function rebindUniferConfigWith(this: CurrentThisContext, conf: UnifierConfiguration) {
           const unifier = this.inversify.get<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier"));
           this.inversify.rebind<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier")).toConstantValue({
