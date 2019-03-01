@@ -12,11 +12,7 @@ interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
   sessionHandler: BasicSessionHandable<any>;
   sessionFactory: PlatformSessionFactory;
-<<<<<<< HEAD
-  prepareCurrentSpecSetup: (responseHandler?: new (...args: any[]) => BasicHandable<any>) => void;
-=======
   prepareCurrentSpecSetup: (responseHandler?: new (...args: any[]) => BasicHandable<BasicAnswerTypes>) => void;
->>>>>>> develop
 }
 
 describe("PlatformSessionFactory", function() {

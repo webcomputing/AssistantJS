@@ -1,4 +1,3 @@
-import { Container } from "inversify-components";
 import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
 import { extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
@@ -48,17 +47,9 @@ describe("with child containers enabled", function() {
       }
 
       const fulfilledPromises = await Promise.all(requests);
-<<<<<<< HEAD
       fulfilledPromises.forEach((promise, index) => {
-        expect(promise.body).toEqual(extractions[index].message);
+        expect(promise.body.message).toEqual(extractions[index].message);
       });
-=======
-      for (const i in fulfilledPromises) {
-        expect(fulfilledPromises[i].body.message).toEqual(extractions[i].message);
-      }
-
-      done();
->>>>>>> develop
     });
 
     afterEach(function() {

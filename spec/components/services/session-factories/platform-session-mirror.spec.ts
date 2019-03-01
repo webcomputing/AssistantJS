@@ -13,23 +13,15 @@ interface CurrentThisContext extends ThisContext {
   handler: BasicSessionHandable<any>;
   mirror: PlatformSessionMirror;
   getSessionDataSpy: jasmine.Spy;
-<<<<<<< HEAD
-  prepareSetup(handleConstructor?: new (...args: any[]) => BasicHandable<any>): void;
-=======
   prepareSetup(handleConstructor?: new (...args: any[]) => BasicHandable<BasicAnswerTypes>): void;
->>>>>>> develop
   buildMirror(): PlatformSessionMirror;
   createGetSessionDataSpy(): void;
 }
 
 describe("PlatformSessionMirror", function() {
   beforeEach(async function(this: CurrentThisContext) {
-<<<<<<< HEAD
     this.specHelper.prepareSpec(this.defaultSpecOptions);
-    this.prepareSetup = (handleConstructor: new (...args: any[]) => BasicHandable<any> = MockHandlerA) => {
-=======
     this.prepareSetup = (handleConstructor: new (...args: any[]) => BasicHandable<BasicAnswerTypes> = MockHandlerA) => {
->>>>>>> develop
       createRequestScope(this.specHelper, undefined, undefined, handleConstructor);
       this.extraction = this.inversify.get(injectionNames.current.extraction);
       this.handler = this.inversify.get(injectionNames.current.responseHandler);

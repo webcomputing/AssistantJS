@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-var-requires
 require("reflect-metadata");
 import { RequestContext } from "../../src/components/root/public-interfaces";
-import { BasicHandable, MinimalRequestExtraction } from "../../src/components/unifier/public-interfaces";
+import { BasicAnswerTypes, BasicHandable, MinimalRequestExtraction } from "../../src/components/unifier/public-interfaces";
 import { SpecHelper } from "../../src/spec-helper";
 import { context } from "../support/mocks/root/request-context";
 import { extraction } from "../support/mocks/unifier/extraction";
@@ -18,7 +18,7 @@ export function createRequestScope(
   specSetup: SpecHelper,
   minimalExtraction: MinimalRequestExtraction | null = JSON.parse(JSON.stringify(extraction)),
   requestContext: RequestContext = context,
-  responseHandler: new (...args: any[]) => BasicHandable<any> = ResponseHandler
+  responseHandler: new (...args: any[]) => BasicHandable<BasicAnswerTypes> = ResponseHandler
 ) {
   specSetup.createRequestScope(minimalExtraction, requestContext, responseHandler);
 }

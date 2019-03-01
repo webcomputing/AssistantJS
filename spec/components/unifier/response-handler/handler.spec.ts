@@ -31,11 +31,8 @@ interface CurrentThisContext extends ThisContext {
 
 describe("BaseHandler", function() {
   beforeEach(async function(this: CurrentThisContext) {
-<<<<<<< HEAD
     this.specHelper.prepareSpec(this.defaultSpecOptions);
-=======
     this.params = {};
->>>>>>> develop
     createRequestScope(this.specHelper);
 
     this.handlerInstance = this.inversify.get(`${PLATFORM}:current-response-handler`);
