@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "TypeScript framework to build cross-platform voice applications (alexa, google home, ...). Write once, run anywhere!",
   "keywords": [
     "alexa",
@@ -26,7 +26,7 @@
   "author": "Antonius Ostermann <ostermann.antonius@gmail.com> (http://www.antonius-ostermann.de)",
   "license": "SEE LICENSE IN <LICENSE>",
   "peerDependencies": {
-    "inversify-components": "^0.4.0",
+    "inversify-components": "^0.4.4",
     "express": "^4.16.2"
   },
   "dependencies": {
@@ -42,16 +42,18 @@
     "i18next": "^11.5.0",
     "i18next-sync-fs-backend": "^1.0.0",
     "inversify": "4.1.1",
-    "inversify-components": "^0.4.0",
+    "inversify-components": "^0.4.4",
     "js-combinatorics": "^0.5.3",
     "redis": "2.8.0",
     "reflect-metadata": "^0.1.12",
     "resolve": "^1.8.1",
-    "rxjs": "^5.5.11"
+    "rxjs": "^5.5.11",
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.8",
     "@types/js-combinatorics": "^0.5.29",
+    "@types/lodash": "^4.14.121",
     "@types/reflect-metadata": "0.0.5",
     "@types/request-promise": "^4.1.40",
     "connect-timeout": "^1.9.0",
@@ -65,7 +67,6 @@
     "gulp-watch": "^5.0.0",
     "jasmine-spec-reporter": "^4.2.1",
     "jasmine-ts": "^0.2.1",
-    "lodash": ">=4.17.5",
     "natives": "^1.1.6",
     "nyc": "^11.9.0",
     "request": "^2.87.0",
@@ -73,7 +74,7 @@
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.9.2",
     "tslint-config-prettier": "^1.13.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.3.3"
   },
   "bin": {
     "assistant": "./bin/assistant"

@@ -8,9 +8,6 @@ import { BasicAnswerTypes } from "../handler-types";
 export class ChatBubblesMixin<MergedAnswerTypes extends BasicAnswerTypes> extends BasicHandler<MergedAnswerTypes>
   implements OptionalHandlerFeatures.ChatBubbles<MergedAnswerTypes> {
   public setChatBubbles(chatBubbles: MergedAnswerTypes["chatBubbles"] | Promise<MergedAnswerTypes["chatBubbles"]>): this {
-    this.failIfInactive();
-
-    this.promises.chatBubbles = { resolver: chatBubbles };
-    return this;
+    return this.setResolverAndReturnThis("chatBubbles", chatBubbles);
   }
 }

@@ -1,7 +1,7 @@
 import { PlatformSessionMirror } from "../../../../src/components/services/session-factories/platform-session-mirror";
 import { componentInterfaces } from "../../../../src/components/unifier/private-interfaces";
 import { BeforeResponseHandler, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
-import { BasicHandable, BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
+import { BasicAnswerTypes, BasicHandable, BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
 import { injectionNames } from "../../../../src/injection-names";
 import { createRequestScope } from "../../../helpers/scope";
 import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
@@ -13,15 +13,23 @@ interface CurrentThisContext extends ThisContext {
   handler: BasicSessionHandable<any>;
   mirror: PlatformSessionMirror;
   getSessionDataSpy: jasmine.Spy;
+<<<<<<< HEAD
   prepareSetup(handleConstructor?: new (...args: any[]) => BasicHandable<any>): void;
+=======
+  prepareSetup(handleConstructor?: new (...args: any[]) => BasicHandable<BasicAnswerTypes>): void;
+>>>>>>> develop
   buildMirror(): PlatformSessionMirror;
   createGetSessionDataSpy(): void;
 }
 
 describe("PlatformSessionMirror", function() {
   beforeEach(async function(this: CurrentThisContext) {
+<<<<<<< HEAD
     this.specHelper.prepareSpec(this.defaultSpecOptions);
     this.prepareSetup = (handleConstructor: new (...args: any[]) => BasicHandable<any> = MockHandlerA) => {
+=======
+    this.prepareSetup = (handleConstructor: new (...args: any[]) => BasicHandable<BasicAnswerTypes> = MockHandlerA) => {
+>>>>>>> develop
       createRequestScope(this.specHelper, undefined, undefined, handleConstructor);
       this.extraction = this.inversify.get(injectionNames.current.extraction);
       this.handler = this.inversify.get(injectionNames.current.responseHandler);

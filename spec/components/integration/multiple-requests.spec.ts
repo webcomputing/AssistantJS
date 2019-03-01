@@ -48,9 +48,17 @@ describe("with child containers enabled", function() {
       }
 
       const fulfilledPromises = await Promise.all(requests);
+<<<<<<< HEAD
       fulfilledPromises.forEach((promise, index) => {
         expect(promise.body).toEqual(extractions[index].message);
       });
+=======
+      for (const i in fulfilledPromises) {
+        expect(fulfilledPromises[i].body.message).toEqual(extractions[i].message);
+      }
+
+      done();
+>>>>>>> develop
     });
 
     afterEach(function() {

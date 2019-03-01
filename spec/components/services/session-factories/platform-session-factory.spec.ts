@@ -1,4 +1,4 @@
-import { BasicHandable, BasicHandler, injectionNames, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/assistant-source";
+import { BasicAnswerTypes, BasicHandable, BasicHandler, injectionNames, MinimalRequestExtraction, OptionalExtractions } from "../../../../src/assistant-source";
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
 import { PlatformSessionFactory } from "../../../../src/components/services/session-factories/platform-session-factory";
 import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
@@ -12,13 +12,17 @@ interface CurrentThisContext extends ThisContext {
   extraction: MinimalRequestExtraction & OptionalExtractions.SessionData;
   sessionHandler: BasicSessionHandable<any>;
   sessionFactory: PlatformSessionFactory;
+<<<<<<< HEAD
   prepareCurrentSpecSetup: (responseHandler?: new (...args: any[]) => BasicHandable<any>) => void;
+=======
+  prepareCurrentSpecSetup: (responseHandler?: new (...args: any[]) => BasicHandable<BasicAnswerTypes>) => void;
+>>>>>>> develop
 }
 
 describe("PlatformSessionFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    this.specHelper.prepareSpec(this.defaultSpecOptions);
-    this.prepareCurrentSpecSetup = (responseHandler: new (...args: any[]) => BasicHandable<any> = MockHandlerA) => {
+    this.prepareCurrentSpecSetup = (responseHandler: new (...args: any[]) => BasicHandable<BasicAnswerTypes> = MockHandlerA) => {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
       createRequestScope(this.specHelper, undefined, undefined, responseHandler);
 
       this.extraction = this.inversify.get(injectionNames.current.extraction);
