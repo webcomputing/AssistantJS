@@ -1,14 +1,12 @@
-import { Container } from "inversify-components";
 import { AfterContextExtension, AfterStateMachine, BeforeStateMachine, injectionNames } from "../../../src/assistant-source";
 import { componentInterfaces as rootInterfaces } from "../../../src/components/root/private-interfaces";
 import { componentInterfaces as stateMachineInterfaces } from "../../../src/components/state-machine/private-interfaces";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
+import { createRequestScope } from "../../helpers/scope";
 import { extraction } from "../../support/mocks/unifier/extraction";
-import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
 
-interface CurrentThisContext {
-  container: Container;
-  specHelper: any;
+interface CurrentThisContext extends ThisContext {
   stateMachine: StateMachine;
   beforeStateMachineImpl: BeforeStateMachine;
   afterStateMachineImpl: AfterStateMachine;
@@ -17,6 +15,7 @@ interface CurrentThisContext {
 
 describe("Runner", function() {
   beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     createRequestScope(this.specHelper);
 
     this.beforeStateMachineImpl = {
@@ -25,7 +24,7 @@ describe("Runner", function() {
       },
     };
     spyOn(this.beforeStateMachineImpl, "execute");
-    this.container.inversifyInstance.bind(stateMachineInterfaces.beforeStateMachine).toConstantValue(this.beforeStateMachineImpl);
+    this.inversify.bind(stateMachineInterfaces.beforeStateMachine).toConstantValue(this.beforeStateMachineImpl);
 
     this.afterStateMachineImpl = {
       execute: () => {
@@ -33,12 +32,12 @@ describe("Runner", function() {
       },
     };
     spyOn(this.afterStateMachineImpl, "execute");
-    this.container.inversifyInstance.bind(stateMachineInterfaces.afterStateMachine).toConstantValue(this.afterStateMachineImpl);
+    this.inversify.bind(stateMachineInterfaces.afterStateMachine).toConstantValue(this.afterStateMachineImpl);
 
-    this.stateMachine = this.container.inversifyInstance.get(injectionNames.current.stateMachine);
+    this.stateMachine = this.inversify.get(injectionNames.current.stateMachine);
     spyOn(this.stateMachine, "handleIntent");
 
-    this.runner = this.container.inversifyInstance.get(rootInterfaces.afterContextExtension);
+    this.runner = this.inversify.get(rootInterfaces.afterContextExtension);
   });
 
   describe("when there is an extraction result", function() {

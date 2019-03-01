@@ -1,16 +1,20 @@
 import { injectionNames } from "../../../src/injection-names";
-import { createRequestScope } from "../../support/util/setup";
+import { createRequestScope } from "../../helpers/scope";
+import { ThisContext } from "../../this-context";
 
 describe("injectionNames", function() {
   const currentScopeKeys = Object.keys(injectionNames.current);
   const rootScopeKeys = Object.keys(injectionNames).filter(k => k !== "current");
 
   describe("in root scope", function() {
+    beforeEach(function(this: ThisContext) {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
+    });
     rootScopeKeys.forEach(injection => {
       describe(injection, function() {
         it("is injectable", function() {
           expect(() => {
-            this.container.inversifyInstance.get(injectionNames[injection]);
+            this.inversify.get(injectionNames[injection]);
           }).not.toThrow();
         });
       });
@@ -18,7 +22,8 @@ describe("injectionNames", function() {
   });
 
   describe("in current scope", function() {
-    beforeEach(function() {
+    beforeEach(function(this: ThisContext) {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
       createRequestScope(this.specHelper);
     });
 
@@ -26,7 +31,7 @@ describe("injectionNames", function() {
       describe(injection, function() {
         it("is injectable", function() {
           expect(() => {
-            this.container.inversifyInstance.get(injectionNames.current[injection]);
+            this.inversify.get(injectionNames.current[injection]);
           }).not.toThrow();
         });
       });

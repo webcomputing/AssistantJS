@@ -1,24 +1,22 @@
 import { injectable } from "inversify";
-import { Container } from "inversify-components";
 import { injectionNames, MissingInterpolationExtension, SpecHelper } from "../../../src/assistant-source";
 import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
 import { TranslateHelper } from "../../../src/components/i18n/translate-helper";
+import { createRequestScope } from "../../helpers/scope";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
 
-interface CurrentThisContext {
-  container: Container;
+interface CurrentThisContext extends ThisContext {
   missingInterpolationExtension: MissingInterpolationExtension;
   translateHelper: TranslateHelper;
-  specHelper: SpecHelper;
 }
 
 describe("InterpolationResolver", function() {
   beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     // Remove emitting of warnings
     this.specHelper.bindSpecLogger("error");
-
-    configureI18nLocale(this.container, false);
+    configureI18nLocale(this.assistantJs.container, false);
     createRequestScope(this.specHelper);
   });
 
@@ -32,14 +30,14 @@ describe("InterpolationResolver", function() {
           }
         }
 
-        this.container.inversifyInstance
+        this.inversify
           .bind(componentInterfaces.missingInterpolation)
           .to(MockMissingInterpolationExtension)
           .inSingletonScope();
 
-        this.missingInterpolationExtension = this.container.inversifyInstance.get<MissingInterpolationExtension>(componentInterfaces.missingInterpolation);
+        this.missingInterpolationExtension = this.inversify.get<MissingInterpolationExtension>(componentInterfaces.missingInterpolation);
         spyOn(this.missingInterpolationExtension, "execute").and.callThrough();
-        this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
+        this.translateHelper = this.inversify.get(injectionNames.current.translateHelper);
       });
 
       it("executes MissingInterpolationExtensions if interpolation is missing", async function(this: CurrentThisContext) {
@@ -60,7 +58,7 @@ describe("InterpolationResolver", function() {
 
     describe("with no interpolation extensions present", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
+        this.translateHelper = this.inversify.get(injectionNames.current.translateHelper);
       });
 
       it("throws a warning", async function(this: CurrentThisContext) {

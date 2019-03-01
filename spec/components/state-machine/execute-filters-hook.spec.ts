@@ -1,10 +1,11 @@
 import { Container } from "inversify-components";
 import { injectionNames, SpecHelper, TranslateHelper } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
+import { createRequestScope } from "../../helpers/scope";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
 
-interface CurrentThisContext {
+interface CurrentThisContext extends ThisContext {
   specHelper: SpecHelper;
   stateMachine: StateMachine;
   container: Container;
@@ -16,15 +17,16 @@ describe("ExecuteFiltersHook", function() {
   beforeEach(async function(this: CurrentThisContext) {
     // Bind call filter spy -> adds sth to callSpyResults if called from filters
     this.callSpyResults = [];
-    this.container.inversifyInstance.bind("mocks:filters:call-spy").toFunction((...args: any[]) => {
+    this.inversify.bind("mocks:filters:call-spy").toFunction((...args: any[]) => {
       this.callSpyResults.push(args);
     });
 
-    configureI18nLocale(this.container, false);
+    configureI18nLocale(this.assistantJs.container, false);
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     createRequestScope(this.specHelper);
 
-    this.stateMachine = this.container.inversifyInstance.get<StateMachine>(injectionNames.current.stateMachine);
-    this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
+    this.stateMachine = this.inversify.get<StateMachine>(injectionNames.current.stateMachine);
+    this.translateHelper = this.inversify.get(injectionNames.current.translateHelper);
 
     await this.stateMachine.transitionTo("FilterAState");
   });

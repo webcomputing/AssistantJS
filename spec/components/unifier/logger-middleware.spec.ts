@@ -1,9 +1,17 @@
+import { Logger } from "../../../src/assistant-source";
 import { createUnifierLoggerMiddleware } from "../../../src/components/unifier/logger-middleware";
 import { injectionNames } from "../../../src/injection-names";
+import { ThisContext } from "../../this-context";
+
+interface CurrentThisContext extends ThisContext {
+  params: {};
+  logger: Logger;
+}
 
 describe("created function of createUnifierLoggerMiddleware", function() {
-  beforeEach(function() {
-    this.logger = this.container.inversifyInstance.get(injectionNames.logger);
+  beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+    this.logger = this.inversify.get(injectionNames.logger);
   });
 
   describe("with no extraction given", function() {
@@ -19,7 +27,8 @@ describe("created function of createUnifierLoggerMiddleware", function() {
   });
 
   describe("with a valid extraction given", function() {
-    beforeEach(function() {
+    beforeEach(function(this: CurrentThisContext) {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
       this.params = { sessionID: "mySessionID", platform: "myPlatform" };
     });
 
