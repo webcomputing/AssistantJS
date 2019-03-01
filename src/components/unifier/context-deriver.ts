@@ -19,7 +19,7 @@ export class ContextDeriver implements ContextDeriverI {
     @multiInject(componentInterfaces.requestModifier)
     private extractionModifiers: RequestExtractionModifier[] = [],
     @inject(injectionNames.logger) private logger: Logger,
-    @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>
+    @inject(getMetaInjectionName("core:unifier")) private componentMeta: Component<Configuration.Runtime>
   ) {
     this.loggingWhitelist = componentMeta.configuration.logExtractionWhitelist;
   }
@@ -46,10 +46,20 @@ export class ContextDeriver implements ContextDeriverI {
   }
 
   public async findExtractor(context: RequestContext): Promise<RequestExtractor | null> {
+    const { requestExtractorPriority = false, disableMostFeaturesWin = false } = this.componentMeta.configuration.contextDeriver || {};
     const isRunable = await Promise.all(this.extractors.map(extensionPoint => extensionPoint.fits(context)));
     let runnableExtensions = this.extractors.filter((extractor, index) => isRunable[index]);
 
-    runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
+    // Don't filter by most supported features if diabled and a priority list is given
+    if (!(disableMostFeaturesWin && requestExtractorPriority)) {
+      runnableExtensions = await this.selectExtractorsWithMostOptionalExtractions(runnableExtensions, context);
+    }
+
+    // Get extractors sorted by priority and select the one with the highest.
+    if (runnableExtensions.length > 1 && requestExtractorPriority) {
+      runnableExtensions = this.getExtractorsByPriority(runnableExtensions, requestExtractorPriority).slice(0, 1);
+    }
+
     if (runnableExtensions.length > 1) {
       throw new Error("Multiple extractors fit to this request. " + "Please check your registerend platforms for duplicate extractors.");
     }
@@ -87,6 +97,16 @@ export class ContextDeriver implements ContextDeriverI {
 
     const maximumFeatureSupport = Math.max(...featureSupportings);
     return extractors.filter((extractor, index) => featureSupportings[index] === maximumFeatureSupport);
+  }
+
+  /** Returns extractor with highest priority */
+  private getExtractorsByPriority(
+    extractors: RequestExtractor[],
+    priorityList: Required<Configuration.Runtime>["contextDeriver"]["requestExtractorPriority"] = []
+  ): RequestExtractor[] {
+    return priorityList
+      .map(name => extractors.find(ext => name === ext.component.name))
+      .filter<RequestExtractor>((ext): ext is RequestExtractor => ext !== undefined);
   }
 
   /**

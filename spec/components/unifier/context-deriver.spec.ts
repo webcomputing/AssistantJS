@@ -1,10 +1,20 @@
-import { Container } from "inversify-components";
+import { Component, Container, getMetaInjectionName } from "inversify-components";
+import * as _ from "lodash";
 import { componentInterfaces as rootComponentInterfaces } from "../../../src/components/root/private-interfaces";
-import { componentInterfaces } from "../../../src/components/unifier/private-interfaces";
+import { componentInterfaces, Configuration } from "../../../src/components/unifier/private-interfaces";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
 import { RequestProxy, withServer } from "../../support/util/requester";
 
-import { AssistantJSSetup, ContextDeriver, injectionNames, MinimalRequestExtraction, OptionalExtractions, RequestContext } from "../../../src/assistant-source";
+import {
+  AssistantJSSetup,
+  injectionNames,
+  MinimalRequestExtraction,
+  OptionalExtractions,
+  RequestContext,
+  RequestExtractor,
+  UnifierConfiguration,
+} from "../../../src/assistant-source";
+import { ContextDeriver } from "../../../src/components/unifier/context-deriver";
 import { createContext } from "../../support/mocks/root/request-context";
 import { createExtraction, extraction } from "../../support/mocks/unifier/extraction";
 import { MockExtractor } from "../../support/mocks/unifier/mock-extractor";
@@ -74,6 +84,60 @@ describe("ContextDeriver", function() {
     });
 
     describe("with two valid extractors registered", function() {
+      fdescribe("with some support equal number of features", function() {
+        function rebindUniferConfigWith(this: CurrentThisContext, conf: UnifierConfiguration) {
+          const unifier = this.inversify.get<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier"));
+          this.inversify.rebind<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier")).toConstantValue({
+            ...unifier,
+            configuration: _.merge(unifier.configuration, conf),
+          });
+        }
+
+        beforeEach(async function(this: CurrentThisContext) {
+          this.inversify.bind(componentInterfaces.requestProcessor).toDynamicValue(() => new SpokenTextExtractor("MockA"));
+          this.inversify.bind(componentInterfaces.requestProcessor).toDynamicValue(() => new SpokenTextExtractor("MockB"));
+          this.inversify.bind(componentInterfaces.requestProcessor).toDynamicValue(() => new MockExtractor("MockC"));
+        });
+
+        it("throws on deriving current extraction", async function(this: CurrentThisContext) {
+          try {
+            await this.inversify.get<ContextDeriver>(rootComponentInterfaces.contextDeriver).derive(createContext());
+          } catch (e) {
+            expect(e.message).toMatch(/Multiple extractors fit to this request/);
+          }
+        });
+
+        describe("but there's a priority list", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            rebindUniferConfigWith.call(this, {
+              contextDeriver: {
+                requestExtractorPriority: ["MockC", "MockB", "MockA"],
+              },
+            });
+          });
+
+          it("selects suitable extractor by using priority list.", async function(this: CurrentThisContext) {
+            const extractor = await this.inversify.get<ContextDeriver>(rootComponentInterfaces.contextDeriver).findExtractor(createContext());
+            expect((extractor as RequestExtractor).component.name).toEqual("MockB");
+          });
+
+          describe("and `most features win` is disabled", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              rebindUniferConfigWith.call(this, {
+                contextDeriver: {
+                  disableMostFeaturesWin: true,
+                },
+              });
+            });
+
+            it("selects by priority only when `most features win` is disabled", async function(this: CurrentThisContext) {
+              const extractor = await this.inversify.get<ContextDeriver>(rootComponentInterfaces.contextDeriver).findExtractor(createContext());
+              expect((extractor as RequestExtractor).component.name).toEqual("MockC");
+            });
+          });
+        });
+      });
+
       describe("with one of them supporting more interfaces", function() {
         beforeEach(function(this: CurrentThisContext) {
           this.inversify.bind(componentInterfaces.requestProcessor).to(MockExtractor);

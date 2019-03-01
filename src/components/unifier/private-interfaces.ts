@@ -17,6 +17,14 @@ export namespace Configuration {
   /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
   export type LogWhitelistSet = Array<string | LogWhitelistElement>;
 
+  /** Configuration object for context deriver */
+  export interface ContextDeriverOptions {
+    /** Priority list of request extractors (give their component names). When context deriver finds more than one suitable extractor, it decides by using this list. */
+    requestExtractorPriority?: string[];
+    /** Disables choosing suitable request extractor by most supported features. Only applies if also using `requestExtractorPriority`. */
+    disableMostFeaturesWin?: boolean;
+  }
+
   /** Configuration defaults -> all of these keys are optional for user */
   export interface Defaults {
     /** Path to your utterances. Regularly, you shouldn't need to change this. */
@@ -30,6 +38,9 @@ export namespace Configuration {
 
     /** A set of key names which are not masked in logs. For example: ["intent", { entities: ["firstName", "LastName"] }]. Defaults to ["platform", "device", "intent", "language"] */
     logExtractionWhitelist: LogWhitelistSet;
+
+    /** Context deriver options */
+    contextDeriver?: ContextDeriverOptions;
   }
 
   /** Required configuration options, no defaults are used here */
