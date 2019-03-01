@@ -2,10 +2,10 @@ import { BasicAnswerTypes, BasicHandable, BasicHandler, injectionNames, MinimalR
 import { PlatformSession } from "../../../../src/components/services/session-factories/platform-session";
 import { PlatformSessionFactory } from "../../../../src/components/services/session-factories/platform-session-factory";
 import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
+import { createRequestScope } from "../../../helpers/scope";
 import { PLATFORM } from "../../../support/mocks/unifier/extraction";
 import { MockHandlerA } from "../../../support/mocks/unifier/response-handler/mock-handler-a";
 import { MockHandlerB } from "../../../support/mocks/unifier/response-handler/mock-handler-b";
-import { createRequestScope } from "../../../support/util/setup";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
@@ -18,10 +18,11 @@ interface CurrentThisContext extends ThisContext {
 describe("PlatformSessionFactory", function() {
   beforeEach(async function(this: CurrentThisContext) {
     this.prepareCurrentSpecSetup = (responseHandler: new (...args: any[]) => BasicHandable<BasicAnswerTypes> = MockHandlerA) => {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
       createRequestScope(this.specHelper, undefined, undefined, responseHandler);
 
-      this.extraction = this.container.inversifyInstance.get(injectionNames.current.extraction);
-      this.sessionHandler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+      this.extraction = this.inversify.get(injectionNames.current.extraction);
+      this.sessionHandler = this.inversify.get(injectionNames.current.responseHandler);
 
       this.sessionFactory = new PlatformSessionFactory(this.extraction, this.sessionHandler);
     };

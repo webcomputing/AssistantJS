@@ -1,4 +1,4 @@
-import { AssistantJSSetup } from "../../../src/setup";
+import { ThisContext } from "../../this-context";
 
 describe("AssistantJSSetup", function() {
   describe("allInternalComponentsAreRegistered", function() {
@@ -9,8 +9,8 @@ describe("AssistantJSSetup", function() {
     });
 
     describe("when there are missing internal components", function() {
-      beforeEach(function() {
-        delete (this.assistantJs as AssistantJSSetup).container.componentRegistry.registeredComponents["core:root"];
+      beforeEach(function(this: ThisContext) {
+        delete this.assistantJs.container.componentRegistry.registeredComponents["core:root"];
       });
 
       it("returns false", function() {

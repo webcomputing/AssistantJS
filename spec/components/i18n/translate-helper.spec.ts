@@ -1,18 +1,29 @@
+import { I18nContext } from "../../../src/components/i18n/context";
+import { TranslateHelper } from "../../../src/components/i18n/translate-helper";
+import { StateMachine } from "../../../src/components/state-machine/state-machine";
 import { injectionNames } from "../../../src/injection-names";
+import { createRequestScope } from "../../helpers/scope";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
+
+interface CurrentThisContext extends ThisContext {
+  stateMachine: StateMachine;
+  context: I18nContext;
+  translateHelper: TranslateHelper;
+}
 
 describe("TranslateHelper", function() {
-  beforeEach(function() {
-    configureI18nLocale(this.container, false);
+  beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+    configureI18nLocale(this.assistantJs.container, false);
     createRequestScope(this.specHelper);
-    this.stateMachine = this.container.inversifyInstance.get(injectionNames.current.stateMachine);
+    this.stateMachine = this.inversify.get(injectionNames.current.stateMachine);
 
-    this.context = this.container.inversifyInstance.get(injectionNames.current.i18nContext);
+    this.context = this.inversify.get(injectionNames.current.i18nContext);
     this.context.intent = "testIntent";
     this.context.state = "mainState";
 
-    this.translateHelper = this.container.inversifyInstance.get(injectionNames.current.translateHelper);
+    this.translateHelper = this.inversify.get(injectionNames.current.translateHelper);
   });
 
   describe("t", function() {
@@ -64,7 +75,7 @@ describe("TranslateHelper", function() {
             });
 
             describe("when extraction contains device", function() {
-              beforeEach(function() {
+              beforeEach(function(this: CurrentThisContext) {
                 this.context.intent = "deviceDependentIntent";
                 Object.assign(this.translateHelper.extraction, { device: "device1" });
               });
@@ -100,7 +111,7 @@ describe("TranslateHelper", function() {
       });
 
       describe("without intent namespace", function() {
-        beforeEach(function() {
+        beforeEach(function(this: CurrentThisContext) {
           this.context.intent = "notExisting";
         });
 
@@ -122,7 +133,7 @@ describe("TranslateHelper", function() {
             });
 
             describe("when extraction data contains device", function() {
-              beforeEach(function() {
+              beforeEach(function(this: CurrentThisContext) {
                 this.context.state = "deviceDependentState";
                 Object.assign(this.translateHelper.extraction, { device: "device1" });
               });
@@ -151,7 +162,7 @@ describe("TranslateHelper", function() {
     });
 
     describe("when state namespace does not eixst", function() {
-      beforeEach(function() {
+      beforeEach(function(this: CurrentThisContext) {
         this.context.state = "notExisting";
       });
 
@@ -163,7 +174,7 @@ describe("TranslateHelper", function() {
             });
 
             describe("when device exists in extraction result", function() {
-              beforeEach(function() {
+              beforeEach(function(this: CurrentThisContext) {
                 Object.assign(this.translateHelper.extraction, { device: "device1" });
               });
 
@@ -284,7 +295,7 @@ describe("TranslateHelper", function() {
     });
 
     describe("relative resolution", function() {
-      beforeEach(async function() {
+      beforeEach(async function(this: CurrentThisContext) {
         this.context.intent = "relativeIntent";
         this.context.state = "getObjectState";
       });
