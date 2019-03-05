@@ -190,12 +190,10 @@ export class Generator implements CLIGeneratorExtension {
         intentUtterances
           // Match all entities
           .map(utterance => utterance.match(/(?<=\{\{.*)(\w)+(?=\}\})/g))
-          // Flatten array
-          .reduce((prev, curr) => {
-            if (curr !== null) {
-              curr.forEach(parameter => (prev as string[]).push(parameter));
-            }
-            return prev;
+          .filter(utterance => typeof utterance !== undefined && utterance !== null)
+          // Flatting the given array
+          .reduce((previousValue, currentValue) => {
+            return [...previousValue!, ...currentValue!];
           }, []) || []
       ),
     ];
@@ -207,10 +205,10 @@ export class Generator implements CLIGeneratorExtension {
    */
   private extractSlots(utterance: string) {
     const slots: string[][] = [];
-    // Extract all matches from the given string and save these in a own variable. The Matches will replaces with the position in the variable.
+    // Extract all matches from the given string and save these in an own variable.
     const utteranceTemplate = utterance.replace(/\{([^}]+)\}(?!\})/g, (match: string, param: string) => {
       slots.push(param.split("|"));
-      // "This is a {test|test}" will replaced by "This is a {0}"
+      // "This is a {test|test}" will be replaced by "This is a {0}"
       return `{${slots.length - 1}}`;
     });
     return { slots, utteranceTemplate };
