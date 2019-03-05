@@ -320,6 +320,148 @@ describe("Generator", function() {
           });
         });
 
+        describe("with multiple entities from the same entity mapping", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}} {{customEntity2}}"] } };
+            this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE", customEntity2: "ENTITIES_TYPE" };
+          });
+          describe("with synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: { ENTITIES_TYPE: [{ value: "customEntity1", synonyms: ["world", "earth"] }, { value: "customEntity2", synonyms: ["hallo"] }] },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("permutes each utterances with each matching synonym", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: {
+                    en: [
+                      this.createIntentConfiguration({
+                        entities: jasmine.anything() as any,
+                        utterances: [
+                          "hello {{world|customEntity1}} {{hallo|customEntity2}}",
+                          "hello {{earth|customEntity1}} {{hallo|customEntity2}}",
+                          "hello {{customEntity1|customEntity1}} {{hallo|customEntity2}}",
+                          "hello {{world|customEntity1}} {{customEntity2|customEntity2}}",
+                          "hello {{earth|customEntity1}} {{customEntity2|customEntity2}}",
+                          "hello {{customEntity1|customEntity1}} {{customEntity2|customEntity2}}",
+                        ],
+                      }),
+                    ],
+                  },
+                })
+              );
+            });
+          });
+
+          describe("without synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: { ENTITIES_TYPE: [{ value: "customEntity1" }, { value: "customEntity2" }] },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("will not permutes any custom entities", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: {
+                    en: [
+                      this.createIntentConfiguration({
+                        entities: jasmine.anything() as any,
+                        utterances: ["hello {{customEntity1}} {{customEntity2}}"],
+                      }),
+                    ],
+                  },
+                })
+              );
+            });
+          });
+        });
+
+        describe("with two custom entities form the same type", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}} {{customEntity1}}"] } };
+            this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE" };
+          });
+
+          describe("with synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: { ENTITIES_TYPE: [{ value: "customEntity1", synonyms: ["world", "earth"] }] },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("permutes each utterances with each matching synonym", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: {
+                    en: [
+                      this.createIntentConfiguration({
+                        entities: jasmine.anything() as any,
+                        utterances: [
+                          "hello {{world|customEntity1}} {{world|customEntity1}}",
+                          "hello {{earth|customEntity1}} {{world|customEntity1}}",
+                          "hello {{customEntity1|customEntity1}} {{world|customEntity1}}",
+                          "hello {{world|customEntity1}} {{earth|customEntity1}}",
+                          "hello {{earth|customEntity1}} {{earth|customEntity1}}",
+                          "hello {{customEntity1|customEntity1}} {{earth|customEntity1}}",
+                          "hello {{world|customEntity1}} {{customEntity1|customEntity1}}",
+                          "hello {{earth|customEntity1}} {{customEntity1|customEntity1}}",
+                          "hello {{customEntity1|customEntity1}} {{customEntity1|customEntity1}}",
+                        ],
+                      }),
+                    ],
+                  },
+                })
+              );
+            });
+          });
+        });
+
+        describe("with multiple entities from different entity mappings", function() {
+          beforeEach(async function(this: CurrentThisContext) {
+            this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}} {{customEntity2}}"] } };
+            this.mockReturns.entityMapping = { customEntity1: "ENTITIES_TYPE", customEntity2: "ENTITIES_TYPE2" };
+          });
+          describe("with synonyms", function() {
+            beforeEach(async function(this: CurrentThisContext) {
+              this.mockReturns.customEntities = {
+                en: {
+                  ENTITIES_TYPE: [{ value: "customEntity1", synonyms: ["world", "earth"] }],
+                  ENTITIES_TYPE2: [{ value: "customEntity2", synonyms: ["hallo"] }],
+                },
+              };
+              await this.getGenerator().execute(this.params.buildDirectory);
+            });
+
+            it("permutes each utterances with each matching synonym", async function(this: CurrentThisContext) {
+              expect(this.platformGenerator.execute).toHaveBeenCalledWith(
+                ...this.createArgumentsForExecute({
+                  intentConfigurations: {
+                    en: [
+                      this.createIntentConfiguration({
+                        entities: jasmine.anything() as any,
+                        utterances: [
+                          "hello {{world|customEntity1}} {{hallo|customEntity2}}",
+                          "hello {{earth|customEntity1}} {{hallo|customEntity2}}",
+                          "hello {{customEntity1|customEntity1}} {{hallo|customEntity2}}",
+                          "hello {{world|customEntity1}} {{customEntity2|customEntity2}}",
+                          "hello {{earth|customEntity1}} {{customEntity2|customEntity2}}",
+                          "hello {{customEntity1|customEntity1}} {{customEntity2|customEntity2}}",
+                        ],
+                      }),
+                    ],
+                  },
+                })
+              );
+            });
+          });
+        });
+
         describe("without entity example in utteranceTemplate", function() {
           beforeEach(async function(this: CurrentThisContext) {
             this.mockReturns.utteranceTemplates = { en: { helloWorldIntent: ["hello {{customEntity1}}"] } };

@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { inject, injectable, multiInject, optional } from "inversify";
-import * as combinatorics from "js-combinatorics";
+import { cartesianProduct } from "js-combinatorics";
 import { injectionNames } from "../../injection-names";
 import { CLIGeneratorExtension } from "../root/public-interfaces";
 import { componentInterfaces } from "./private-interfaces";
@@ -23,6 +23,7 @@ export class Generator implements CLIGeneratorExtension {
     const defaultReferences: DEFAULT_REFERENCES[] = ["intents", "platformGenerators", "additionalUtteranceTemplatesServices", "entityMappings"];
     defaultReferences.forEach((value: DEFAULT_REFERENCES) => this.setDefaultValuesFor(value));
   }
+
   public async execute(buildDir: string): Promise<void> {
     // Get the main utterance templates from locales folder
     const utteranceTemplates = this.localesLoader.getUtteranceTemplates();
@@ -47,78 +48,31 @@ export class Generator implements CLIGeneratorExtension {
 
     // Prepare language specific configuration
     configuredLanguages.forEach(language => {
-      // Add utterances from extensions to current template
-      utteranceTemplates[language] = this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
-        const source = curr.getUtterancesFor(language);
-        Object.keys(source).forEach(currIntent => {
-          // Merge arrays of utterances or add intent to target
-          target[currIntent] = target.hasOwnProperty(currIntent) ? target[currIntent].concat(source[currIntent]) : source[currIntent];
-        });
-        return target;
-      }, utteranceTemplates[language]); // Initial value
+      // Add utterances from extensions to current template and get the merged instance for the given language
+      const mergedAdditionalUtteranceTemplatesServices = this.mergeAdditionalUtteranceTemplatesServices(language, utteranceTemplates);
+
+      // Extract the intent names from the utterance template
+      const intentNames = Object.keys(utteranceTemplates[language]);
 
       // Build utterances from templates
-      Object.keys(utteranceTemplates[language]).forEach(currIntent => {
-        if (!utterances[language]) utterances[language] = {};
-        utterances[language][currIntent] = this.generateUtterances(utteranceTemplates[language][currIntent], customEntities[language], entityMappings);
-      });
-
-      // Build GenerateIntentConfiguration[] array based on these utterances and the found intents
-      this.intents.forEach(currIntent => {
-        let intentUtterances: string[] = [];
-
-        // If no utterance for the current language will be given we have to set a default value.
+      intentNames.forEach(currIntent => {
         if (!utterances[language]) utterances[language] = {};
 
-        // Associate utterances to intent
-        if (typeof currIntent === "string") {
-          intentUtterances = utterances[language][currIntent + "Intent"];
-        } else {
-          const baseName = GenericIntent[currIntent] + "GenericIntent";
-          intentUtterances = utterances[language][baseName.charAt(0).toLowerCase() + baseName.slice(1)];
-        }
-
-        // When utterances are "undefined", assign empty array
-        if (typeof intentUtterances === "undefined") intentUtterances = [];
-        // Extract entities from utterances
-        const entities: string[] = [
-          ...new Set(
-            intentUtterances
-              // Match all entities
-              .map(utterance => utterance.match(/(?<=\{\{.*)(\w)+(?=\}\})/g))
-              // Flatten array
-              .reduce((prev, curr) => {
-                if (curr !== null) {
-                  curr.forEach(parameter => (prev as string[]).push(parameter));
-                }
-                return prev;
-              }, []) || []
-          ),
-        ];
-
-        // Check for unmapped entities
-        const unmatchedEntity = entities.find(name => typeof entityMappings[name] === "undefined");
-        if (typeof unmatchedEntity === "string") {
-          throw Error(
-            `Unknown entity '${unmatchedEntity}' found in utterances of intent '${currIntent}'.\nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: ${JSON.stringify(
-              Object.keys(entityMappings).map(name => {
-                return name;
-              })
-            )}`
-          );
-        }
-
-        if (!buildIntentConfigs[language]) buildIntentConfigs[language] = [];
-        buildIntentConfigs[language].push({
-          entities,
-          intent: currIntent,
-          utterances: intentUtterances,
-        });
+        utterances[language][currIntent] = this.generateUtterances(
+          mergedAdditionalUtteranceTemplatesServices[currIntent],
+          customEntities[language],
+          entityMappings
+        );
       });
+
+      if (!buildIntentConfigs[language]) buildIntentConfigs[language] = [];
+      // Build the intent configuration for each intent
+      buildIntentConfigs[language].push(...this.intents.map(currIntent => this.buildIntentConfiguration(entityMappings, utterances, language, currIntent)));
     });
 
-    // Iterate through each found language and build the utterance corresponding to the users entities
-    // Call all platform generators
+    /**
+     * Iterate through each found language and build the utterance corresponding to the users entities. (Call all platform generators)
+     */
     const generatorPromises = this.platformGenerators.map(generator =>
       Promise.resolve(
         generator.execute(
@@ -146,81 +100,243 @@ export class Generator implements CLIGeneratorExtension {
   }
 
   /**
-   * Generate permutations of utterances, based on the templates and entities
-   * @param templates
+   * Build the current intent configuration
+   * @param {PlatformGenerator.EntityMapping} entityMappings The global configured entity mapping
+   * @param {PlatformGenerator.Multilingual<{ [intent: string]: string[] }>} utterances All utterances for all intents in each language
+   * @param {string} language Name of the current language
+   * @param {intent} intent Name of the current intent
+   * @returns { Object({ entities: string[], intent: intent, utterances: string[] })>} Intent configuration for the given intent with entities and utterances
    */
-  private generateUtterances(templates: string[], entities: PlatformGenerator.CustomEntityMapping, entityMappings: PlatformGenerator.EntityMapping): string[] {
-    const utterances: string[] = [];
-    const preUtterances: string[] = [];
+  private buildIntentConfiguration(
+    entityMappings: PlatformGenerator.EntityMapping,
+    utterances: PlatformGenerator.Multilingual<{ [intent: string]: string[] }>,
+    language: string,
+    intent: intent
+  ) {
+    /** Extract the utterances from the current intent */
+    const intentUtterances: string[] = this.generateIntentUtterances(utterances, language, intent);
 
-    // Extract all slots and substitute them with a placeholder
-    templates.map(template => {
-      const slots: string[][] = [];
-      const repTemplate = template.replace(/\{([^}]+)\}(?!\})/g, (match: string, param: string) => {
-        slots.push(param.split("|"));
-        return `{${slots.length - 1}}`;
+    // Extract entities from utterances
+    const entities: string[] = this.generateEntities(intentUtterances);
+
+    // Check for unmapped entities
+    this.checkUnmatchedEntity(entities, entityMappings, intent);
+
+    return { entities, intent, utterances: intentUtterances };
+  }
+
+  /**
+   * Add utterances from extensions to current template
+   * @param {string} language Current language
+   * @param {PlatformGenerator.Multilingual<{ [intent: string]: string[] }>} utteranceTemplates All utterance templates for each intent in each language
+   */
+  private mergeAdditionalUtteranceTemplatesServices(language: string, utteranceTemplates: PlatformGenerator.Multilingual<{ [intent: string]: string[] }>) {
+    return this.additionalUtteranceTemplatesServices.reduce((target, curr) => {
+      const source = curr.getUtterancesFor(language);
+      Object.keys(source).forEach(currIntent => {
+        // Merge arrays of utterances or add intent to target
+        target[currIntent] = target.hasOwnProperty(currIntent) ? target[currIntent].concat(source[currIntent]) : source[currIntent];
       });
+      return target;
+    }, utteranceTemplates[language]); // Initial value
+  }
 
-      // Auto-expand the template to build utterance permutations
-      const result = this.buildCartesianProduct(repTemplate, slots, /\{(\d+)\}/g);
-      if (result.length > 0) {
-        preUtterances.push(...result);
-      } else {
-        preUtterances.push(template);
-      }
+  /**
+   * Check all entities for unmatched once and throw an exception if some unmatched entities are found
+   * @param {string[]} entities List of all entities
+   * @param {PlatformGenerator.EntityMapping} entityMappings List of all entity mappings
+   * @param {intent} currentIntent The current intent
+   * @throws Unknown entity error if unmatched entities are found
+   */
+  private checkUnmatchedEntity(entities: string[], entityMappings: PlatformGenerator.EntityMapping, currentIntent: intent) {
+    const unmatchedEntity = entities.find(name => typeof entityMappings[name] === "undefined");
+    if (typeof unmatchedEntity === "string") {
+      throw Error(
+        `Unknown entity '${unmatchedEntity}' found in utterances of intent '${currentIntent}'.\nEither you misspelled your entity in one of the intents utterances or you did not define a type mapping for it. Your configured entity mappings are: ${JSON.stringify(
+          Object.keys(entityMappings)
+        )}`
+      );
+    }
+  }
+
+  /**
+   * Generate the utterances for a given intent and language
+   * @param utterances List of multilingual utterances for all intents
+   * @param language Current language
+   * @param currentIntent Current intent
+   */
+  private generateIntentUtterances(utterances: PlatformGenerator.Multilingual<{ [intent: string]: string[] }>, language: string, currentIntent: intent) {
+    let intentUtterances: string[];
+    // If no utterance for the current language will be given we have to set a default value.
+    if (!utterances[language]) utterances[language] = {};
+
+    // Associate utterances to intent
+    if (typeof currentIntent === "string") {
+      intentUtterances = utterances[language][`${currentIntent}Intent`];
+    } else {
+      const baseName = `${GenericIntent[currentIntent]}GenericIntent`;
+      intentUtterances = utterances[language][baseName.charAt(0).toLowerCase() + baseName.slice(1)];
+    }
+    return intentUtterances || [];
+  }
+
+  /**
+   * Extract the entities from the intent utterances
+   * @param intentUtterances List of intent intent utterances
+   */
+  private generateEntities(intentUtterances: string[]): string[] {
+    return [
+      ...new Set(
+        intentUtterances
+          // Match all entities
+          .map(utterance => utterance.match(/(?<=\{\{.*)(\w)+(?=\}\})/g))
+          // Flatten array
+          .reduce((prev, curr) => {
+            if (curr !== null) {
+              curr.forEach(parameter => (prev as string[]).push(parameter));
+            }
+            return prev;
+          }, []) || []
+      ),
+    ];
+  }
+
+  /**
+   * Extract the entity slots and replace them with in placeholder
+   * @param {string} utterance
+   */
+  private extractSlots(utterance: string) {
+    const slots: string[][] = [];
+    // Extract all matches from the given string and save these in a own variable. The Matches will replaces with the position in the variable.
+    const utteranceTemplate = utterance.replace(/\{([^}]+)\}(?!\})/g, (match: string, param: string) => {
+      slots.push(param.split("|"));
+      // "This is a {test|test}" will replaced by "This is a {0}"
+      return `{${slots.length - 1}}`;
     });
-    // Extract entities and expland utterances with entity combinations
-    preUtterances.map(utterance => {
-      const slots: string[][] = [];
+    return { slots, utteranceTemplate };
+  }
 
-      const repUtterance = utterance.replace(/(?<=\{\{)(.+)\|?(\w+)*(?=\}\})/g, (match: string, entityValue: string) => {
-        const entityName = match.split("|").pop();
+  /**
+   * Generate permutations of utterances, based on the templates and entities
+   * @param utteranceTemplates
+   */
+  private generateUtterances(
+    utteranceTemplates: string[],
+    entities: PlatformGenerator.CustomEntityMapping,
+    entityMappings: PlatformGenerator.EntityMapping
+  ): string[] {
+    // Extract all slots and replace them with placeholder
+    const preparedUtterancesWithPlaceholders: string[] = utteranceTemplates
+      .map(template => this.prepareUtterances(template))
+      .reduce((previousValue, currentValue) => previousValue.concat(currentValue));
 
-        // Iterate through values when no example like {{example|entity}} is given
-        if (entityValue === entityName) {
-          const entityType = entities[entityMappings[entityName]];
-          if (typeof entityType !== "undefined") {
-            const tmp: string[] = [];
-            entityType.map(param => {
-              tmp.push(...(param.synonyms || []), param.value);
-            });
-            slots.push(tmp);
-            return `{${slots.length - 1}}|${entityName}`;
+    // Extract entities and extends utterances with each entity combination
+    const prepareUtterancesInEachPermutation: string[] = preparedUtterancesWithPlaceholders
+      .map(utterance => this.prepareUtterancesWithEntities(utterance, entities, entityMappings))
+      .reduce((previousValue, currentValue) => previousValue.concat(currentValue));
+
+    return prepareUtterancesInEachPermutation;
+  }
+
+  /**
+   * Prepare the utterances. Extract entities and build the utterances for each given synonym.
+   * @param utterance
+   */
+  private prepareUtterancesWithEntities(
+    utterance: string,
+    customEntityMapping: PlatformGenerator.CustomEntityMapping,
+    entityMappings: PlatformGenerator.EntityMapping
+  ) {
+    const { utteranceTemplate, entitySlots } = this.extractUtteranceTemplateAndEntitySlots(utterance, customEntityMapping, entityMappings);
+    // Auto-expand the utterance to build permutations
+    const preparedUtterances = this.buildCartesianProduct(utteranceTemplate, entitySlots, /\{(\d+)\}/g);
+
+    return preparedUtterances.length > 0 ? preparedUtterances : [utterance];
+  }
+
+  /**
+   * Extract the utteranceTemplate and entitySlots with all given synonyms
+   * @param {string} utterance The original given utterance
+   * @param {PlatformGenerator.CustomEntityMapping} customEntityMapping All configured custom entity mappings
+   * @param {PlatformGenerator.EntityMapping} entityMappings All configured entity mappings
+   */
+  private extractUtteranceTemplateAndEntitySlots(
+    utterance: string,
+    customEntityMapping: PlatformGenerator.CustomEntityMapping,
+    entityMappings: PlatformGenerator.EntityMapping
+  ) {
+    const entitySlots: string[][] = [];
+
+    /**
+     * Replace all entity placeholder with an uniq id and store the entity value an an global variable.
+     * e.g. "This is {{a}} test" -> "This is {{{0}}} test"
+     */
+    const utteranceTemplate = utterance.replace(/((?<=\{\{)(\w+)\|?(\w+)*(?=\}\}))/g, (match: string, entityExample: string) => {
+      // Extract the entity name form the given match.
+      const entityName = match.split("|").pop();
+
+      /**
+       * Check whether the current match is an single entity template e.g. {{entity}}.
+       * Go forward if it's and entity with an example e.g. {{example|entity}}
+       */
+      if (entityExample === entityName) {
+        const entityValues = customEntityMapping[entityMappings[entityName]];
+
+        if (typeof entityValues !== "undefined" && entityValues.length > 0) {
+          const currentEntityValue = entityValues.find(customEntity => customEntity.value === entityName);
+          if (currentEntityValue && currentEntityValue.synonyms) {
+            /**
+             * We have to replace the current match with an uniq index (placeholder).
+             * Its needed because we want to replace this placeholder with each matching synonym.
+             */
+            entitySlots.push([...currentEntityValue.synonyms, currentEntityValue.value]);
+            return `{${entitySlots.length - 1}}|${entityName}`;
           }
         }
-        return match;
-      });
-
-      // Auto-expand the utterance to build permutations
-      const result = this.buildCartesianProduct(repUtterance, slots, /\{(\d+)\}/g);
-      if (result.length > 0) {
-        utterances.push(...result);
-      } else {
-        utterances.push(utterance);
       }
+      /**
+       * Returning the original text if it's not a single entity template
+       */
+      return match;
     });
-    return utterances;
+
+    return { utteranceTemplate, entitySlots };
+  }
+
+  /**
+   * Prepare the given utterance template. Replace all template literals and replace them with the correct values
+   * @param utterance
+   */
+  private prepareUtterances(utterance: string) {
+    const { slots, utteranceTemplate } = this.extractSlots(utterance);
+    // Auto-expand the template to build utterance permutations
+    const utterancePermutations = this.buildCartesianProduct(utteranceTemplate, slots, /\{(\d+)\}/g);
+
+    /** If the utterance permutations contains any values these once will be used otherwise the original utterance template will be selected */
+    return utterancePermutations.length > 0 ? utterancePermutations : [utterance];
   }
 
   /**
    * Return the set of all ordered pair of elements
    * @param template
-   * @param slots
+   * @param synonyms
    * @param repRegExp
    */
-  private buildCartesianProduct(template: string, slots: string[][], placeholderExp: RegExp): string[] {
-    const result: string[] = [];
-    if (slots.length > 0 && slots[0].length > 0) {
-      const combinations = combinatorics.cartesianProduct.apply(combinatorics, slots).toArray();
-      // Substitute placeholders with combinations
-      combinations.forEach(combi => {
-        result.push(
-          template.replace(placeholderExp, (match, param) => {
-            return combi[param];
-          })
-        );
+  private buildCartesianProduct(template: string, synonyms: string[][], placeholderExp: RegExp): string[] {
+    const utterancesCombinations: string[] = [];
+
+    if (synonyms.length > 0) {
+      const combinations = cartesianProduct(...synonyms).toArray();
+
+      combinations.forEach(combination => {
+        let currentTemplate = template;
+        combination.forEach((synonym, index) => {
+          currentTemplate = currentTemplate.replace(`{${index}}`, synonym);
+        });
+        utterancesCombinations.push(currentTemplate);
       });
     }
-    return result;
+
+    return utterancesCombinations;
   }
 }
