@@ -478,7 +478,7 @@ export type OptionallyPromise<T> = T | Promise<T>;
 /** Implements logic to load utterances and custom entities from i18n files */
 export interface LocalesLoader {
   /** Returns all utterance templates for all languages */
-  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  getUtteranceTemplates(): PlatformGenerator.Multilingual<{ [intent: string]: string[] }>;
   /** Returns all custom entity mappings for all languages */
-  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
+  getCustomEntities(): PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping>;
 }
