@@ -36,7 +36,7 @@ export class Generator implements CLIGeneratorExtension {
     // Throws an missing utterances exception because no utterances are configured.
     if (configuredLanguages.length === 0) throw new Error("Currently no utterances are configured.");
 
-    // Mappings of the registered entities
+    // Mapping of the registered entities
     const entityMappings = this.entityMappings.reduce((prev, curr) => ({ ...prev, ...curr }), {});
 
     // Configuration for PlatformGenerator
@@ -47,7 +47,7 @@ export class Generator implements CLIGeneratorExtension {
       entityMappings
     );
     /**
-     * Iterate through each found language and build the utterance corresponding to the users entities. (Call all platform generators)
+     * Iterate through each founded languages and build the utterance corresponding to the users entities. (Call all platform generators)
      */
     const generatorPromises = this.platformGenerators.map(generator =>
       Promise.resolve(
@@ -65,6 +65,13 @@ export class Generator implements CLIGeneratorExtension {
     await Promise.all(generatorPromises);
   }
 
+  /**
+   * Prepare the configuration for each language
+   * @param {string[]} configuredLanguages All used languages
+   * @param {PlatformGenerator.Multilingual<{ [intent: string]: string[] }>} utteranceTemplates All utterances for all intents in each language
+   * @param {PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping>} customEntities All custom entity mappings in each language
+   * @param {PlatformGenerator.EntityMapping} entityMappings All entity mappings
+   */
   private prepareLanguageSpecificConfiguration(
     configuredLanguages: string[],
     utteranceTemplates: PlatformGenerator.Multilingual<{ [intent: string]: string[] }>,
@@ -253,7 +260,9 @@ export class Generator implements CLIGeneratorExtension {
 
   /**
    * Prepare the utterances. Extract entities and build the utterances for each given synonym.
-   * @param utterance
+   * @param {string} utterance The original given utterance
+   * @param {PlatformGenerator.CustomEntityMapping} customEntityMapping All configured custom entity mappings
+   * @param {PlatformGenerator.EntityMapping} entityMappings All configured entity mappings
    */
   private prepareUtterancesWithEntities(
     utterance: string,
@@ -286,7 +295,9 @@ export class Generator implements CLIGeneratorExtension {
      */
     const utteranceTemplate = utterance.replace(/((?<=\{\{)(\w+)\|?(\w+)*(?=\}\}))/g, (match: string, entityExample: string) => {
       const { slots, template } = this.prepareUtteranceTemplateWithEntities(match, entityExample, customEntityMapping, entityMappings, entitySlots.length);
+
       if (slots.length > 0) entitySlots.push(slots);
+
       return template;
     });
 
@@ -353,7 +364,7 @@ export class Generator implements CLIGeneratorExtension {
 
   /**
    * Check if the entity values are not undefined and not empty
-   * @param entityValues
+   * @param {Array<{ value: string; synonyms?: string[] | undefined }>} entityValues Array of all entities
    */
   private entityValuesIsNotEmpty(entityValues: undefined | Array<{ value: string; synonyms?: string[] }>) {
     return typeof entityValues !== "undefined" && entityValues.length > 0;
@@ -361,7 +372,7 @@ export class Generator implements CLIGeneratorExtension {
 
   /**
    * Prepare the given utterance template. Replace all template literals and replace them with the correct values
-   * @param utterance
+   * @param {string} utterance Current utterance definition
    */
   private prepareUtterances(utterance: string) {
     const { slots, utteranceTemplate } = this.extractSlots(utterance);
@@ -382,9 +393,7 @@ export class Generator implements CLIGeneratorExtension {
     let utterancesCombinations: string[] = [];
 
     if (synonyms.length > 0) {
-      /**
-       * Creates the cartesian product of all given synonyms
-       */
+      // Creates the cartesian product of all given synonyms
       const combinations = cartesianProduct(...synonyms).toArray();
 
       utterancesCombinations = combinations.map(combination => {
