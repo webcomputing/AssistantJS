@@ -68,7 +68,7 @@ describe("DeploymentApplication", function() {
       });
 
       it("transmit the build directory", async function(this: CurrentThisContext) {
-        expect(this.deploymentSpy).toHaveBeenCalledWith(path.join("root", this.buildTimeStamp));
+        expect(this.deploymentSpy).toHaveBeenCalledWith(path.join("root", this.buildTimeStamp.toString()));
       });
     });
   });
