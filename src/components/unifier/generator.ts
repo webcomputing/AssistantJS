@@ -317,25 +317,46 @@ export class Generator implements CLIGeneratorExtension {
     if (entityExample === entityName) {
       const entityValues = customEntityMapping[entityMappings[entityName]];
 
-      if (typeof entityValues !== "undefined" && entityValues.length > 0) {
-        const currentEntityValue = entityValues.find(customEntity => customEntity.value === entityName);
-
-        if (currentEntityValue && currentEntityValue.synonyms) {
-          /**
-           * We have to replace the current match with an uniq index (placeholder).
-           * Its needed because we want to replace this placeholder with each matching synonym.
-           */
-          return {
-            slots: [...currentEntityValue.synonyms, currentEntityValue.value],
-            template: `{${index}}|${entityName}`,
-          };
-        }
+      const extraction = this.extractingSlotsAndReplaceTemplateByIndex(entityValues, entityName, index);
+      if (extraction) {
+        return extraction;
       }
     }
     /**
      * Returning the original text if it's not a single entity template
      */
     return { slots: [], template: match };
+  }
+
+  /**
+   * Check whether the entityValues is not empty has synonyms and match the synonyms to the current index.
+   * @param {Array<{ value: string; synonyms?: string[] | undefined }>} entityValues Array of all entities
+   * @param {string} entityName Name of the current entity
+   * @param {number} index Index for the current entity
+   */
+  private extractingSlotsAndReplaceTemplateByIndex(entityValues: Array<{ value: string; synonyms?: string[] | undefined }>, entityName: string, index: number) {
+    if (this.entityValuesIsNotEmpty(entityValues)) {
+      const currentEntityValue = entityValues.find(customEntity => customEntity.value === entityName);
+
+      if (currentEntityValue && currentEntityValue.synonyms) {
+        /**
+         * We have to replace the current match with an uniq index (placeholder).
+         * Its needed because we want to replace this placeholder with each matching synonym.
+         */
+        return {
+          slots: [...currentEntityValue.synonyms, currentEntityValue.value],
+          template: `{${index}}|${entityName}`,
+        };
+      }
+    }
+  }
+
+  /**
+   * Check if the entity values are not undefined and not empty
+   * @param entityValues
+   */
+  private entityValuesIsNotEmpty(entityValues: undefined | Array<{ value: string; synonyms?: string[] }>) {
+    return typeof entityValues !== "undefined" && entityValues.length > 0;
   }
 
   /**
