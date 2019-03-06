@@ -28,6 +28,7 @@ interface CurrentThisContext extends ThisContext {
 
 describe("GeneratorApplication", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec({});
     /** Mock the build timestamp used by the GeneratorApplication to create a build number */
     jasmine.clock().install();
     this.buildTimestamp = new Date();
@@ -47,10 +48,10 @@ describe("GeneratorApplication", function() {
     this.generatorApplication = new GeneratorApplication(this.baseDir);
 
     /** Create a spy on the used CLIGeneratorExtension */
-    this.generatorExtension = this.container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator)[0];
+    this.generatorExtension = this.assistantJs.container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator)[0];
     this.spy.execute = jasmine.createSpy("execute");
     (this.generatorExtension as any).execute = this.spy.execute;
-    this.container.inversifyInstance.rebind(componentInterfaces.generator).toConstantValue(this.generatorExtension);
+    this.assistantJs.container.inversifyInstance.rebind(componentInterfaces.generator).toConstantValue(this.generatorExtension);
   });
 
   afterEach(function() {
@@ -62,7 +63,7 @@ describe("GeneratorApplication", function() {
     describe("with existing base directory", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.spy.existsSync!.and.returnValue(true);
-        this.generatorApplication.execute(this.container);
+        this.generatorApplication.execute(this.assistantJs.container);
       });
 
       it("will not create the base directory", async function(this: CurrentThisContext) {
@@ -73,7 +74,7 @@ describe("GeneratorApplication", function() {
     describe("without existing base directory", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.spy.existsSync!.and.returnValue(false);
-        this.generatorApplication.execute(this.container);
+        this.generatorApplication.execute(this.assistantJs.container);
       });
 
       it("creates the base directory", async function(this: CurrentThisContext) {
@@ -83,7 +84,7 @@ describe("GeneratorApplication", function() {
 
     describe("regarding general behavior", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.generatorApplication.execute(this.container);
+        this.generatorApplication.execute(this.assistantJs.container);
         this.buildDir = path.join(this.baseDir, this.buildTimestamp.getTime().toString());
       });
 

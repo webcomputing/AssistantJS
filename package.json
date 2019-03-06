@@ -26,7 +26,7 @@
   "author": "Antonius Ostermann <ostermann.antonius@gmail.com> (http://www.antonius-ostermann.de)",
   "license": "SEE LICENSE IN <LICENSE>",
   "peerDependencies": {
-    "inversify-components": "^0.4.4",
+    "inversify-components": "^0.4.6",
     "express": "^4.16.2"
   },
   "dependencies": {
