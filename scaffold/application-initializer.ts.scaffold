@@ -2,13 +2,12 @@ import {
   AssistantJSApplicationInitializer,
   AssistantJSSetup,
   FilterSetup,
-  GeneratorApplication,
   ServerApplication,
-  StateMachineSetup,
-  DeploymentApplication
+  StateMachineSetup
 } from "assistant-source";
 import componentConfiguration from "./config/components";
-
+import { MainApplication } from "inversify-components";
+import * as path from "path"
 /**
  * This is AssistantJS's main entrance into your application. With the help of this ApplicationInitializer class, you help AssistantJS
  * to initialize your application for starting the server, generating configuration files or running specs.
@@ -60,6 +59,8 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
+
+    // Register all bindings of all registered AssistantJS component
     setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
@@ -84,11 +85,11 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
    * Execute Application within the AssistantJS container scope
    * @param ApplicationClass Class of @type {DeploymentApplication} or @type {GeneratorApplication}
    * @param buildTimeStamp Path to the global build directory like '{rootDir}/builds'
+   * @returns A current AssistantJS instance 
    */
   public async runApplication(
-    ApplicationClass:
-      | (new (...args: any[]) => DeploymentApplication)
-      | (new (...args: any[]) => GeneratorApplication),
+    ApplicationClass: (new (...args: any[]) => MainApplication)
+      
     buildTimeStamp: number
   ) {
     ApplicationInitializer.printUnhandledRejections();
@@ -96,11 +97,12 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
 
+    // Register all bindings of all registered AssistantJS component
     setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
     const serverApplication = new ApplicationClass(
-      `${process.cwd()}/builds`,
+      path.join(process.cwd(), "builds"),
       buildTimeStamp
     );
 

@@ -45,6 +45,7 @@
     "inversify-components": "^0.4.6",
     "js-combinatorics": "^0.5.3",
     "lodash": "^4.17.11",
+    "path": "^0.12.7",
     "redis": "2.8.0",
     "reflect-metadata": "^0.1.12",
     "resolve": "^1.8.1",

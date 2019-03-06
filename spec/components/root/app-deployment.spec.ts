@@ -1,12 +1,24 @@
 import * as fs from "fs";
+import * as path from "path";
 import { CLIDeploymentExtension } from "../../../src/assistant-source";
 import { DeploymentApplication } from "../../../src/components/root/app-deployment";
 import { componentInterfaces } from "../../../src/components/root/private-interfaces";
 import { ThisContext } from "../../this-context";
 
 interface CurrentThisContext extends ThisContext {
+  /**
+   * Spy object for the CLIDeploymentExtension execute method. Injected by componentInterfaces.deployments
+   */
   deploymentSpy: jasmine.Spy;
+
+  /**
+   * Current instance of the DeploymentApplication
+   */
   deploymentApplication: DeploymentApplication;
+
+  /**
+   * A global mock timestamp
+   */
   buildTimeStamp: number;
 }
 
@@ -16,7 +28,7 @@ describe("DeploymentApplication", function() {
   beforeEach(async function(this: CurrentThisContext) {
     this.deploymentSpy = jasmine.createSpy("execute");
 
-    this.container.inversifyInstance.bind<CLIDeploymentExtension>(componentInterfaces.deployments).toDynamicValue(() => {
+    this.inversify.bind<CLIDeploymentExtension>(componentInterfaces.deployments).toDynamicValue(() => {
       return {
         execute: this.deploymentSpy,
       };
@@ -48,7 +60,7 @@ describe("DeploymentApplication", function() {
       beforeEach(async function(this: CurrentThisContext) {
         this.buildTimeStamp = Date.now();
         this.deploymentApplication = new DeploymentApplication("root", this.buildTimeStamp);
-        this.deploymentApplication.execute(this.container);
+        this.deploymentApplication.execute(this.assistantJs.container);
       });
 
       it("executes all bound platform deployments", async function(this: CurrentThisContext) {
@@ -56,7 +68,7 @@ describe("DeploymentApplication", function() {
       });
 
       it("transmit the build directory", async function(this: CurrentThisContext) {
-        expect(this.deploymentSpy).toHaveBeenCalledWith(`root/${this.buildTimeStamp}`);
+        expect(this.deploymentSpy).toHaveBeenCalledWith(path.join("root", this.buildTimeStamp));
       });
     });
   });

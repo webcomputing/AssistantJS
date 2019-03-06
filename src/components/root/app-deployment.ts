@@ -3,6 +3,9 @@ import { Container } from "inversify-components";
 import { componentInterfaces } from "./private-interfaces";
 import { CLIDeploymentExtension } from "./public-interfaces";
 
+/**
+ * Application class which execute all platform specific deployments
+ */
 export class DeploymentApplication {
   constructor(private buildDir: string, private buildTimeStamp: number = Date.now()) {
     if (!fs.existsSync(buildDir)) throw new Error("Missing build directory. Previously you have to execute the generator.");
