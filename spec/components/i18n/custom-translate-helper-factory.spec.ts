@@ -11,15 +11,14 @@ interface CurrentThisContext extends ThisContext {
 
 describe("TranslateHelperFactory", function() {
   beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     // Remove emitting of warnings
     this.specHelper.bindSpecLogger("error");
 
-    configureI18nLocale(this.container, false);
+    configureI18nLocale(this.assistantJs.container, false);
     createRequestScope(this.specHelper);
 
-    this.currentTranslateHelperFactory = (this.container.inversifyInstance as Container).get<TranslateHelperFactory>(
-      injectionNames.current.translateHelperFactory
-    );
+    this.currentTranslateHelperFactory = this.inversify.get<TranslateHelperFactory>(injectionNames.current.translateHelperFactory);
   });
 
   it("translates for custom contexts", async function(this: CurrentThisContext) {

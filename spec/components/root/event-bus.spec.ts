@@ -1,11 +1,19 @@
 import { injectable } from "inversify";
 import { Subscriber } from "rxjs";
+import { EventBusHandler } from "../../../src/components/root/event-bus";
 import { componentInterfaces } from "../../../src/components/root/private-interfaces";
 import { AssistantJSEvent, EventHandler } from "../../../src/components/root/public-interfaces";
 import { injectionNames } from "../../../src/injection-names";
+import { ThisContext } from "../../this-context";
 
 const mySymbol = Symbol();
 const myString = "myEvent";
+
+interface CurrentThisContext extends ThisContext {
+  handlerA: EventHandlerA;
+  handlerB: EventHandlerB;
+  eventBus: EventBusHandler;
+}
 
 /** Splits up subscribed events into two different queues */
 @injectable()
@@ -42,23 +50,24 @@ class EventHandlerB implements EventHandler {
 }
 
 describe("EventBus", function() {
-  beforeEach(function() {
+  beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     // Bind some event handlers
-    this.container.inversifyInstance
+    this.inversify
       .bind(componentInterfaces.eventHandler)
       .to(EventHandlerA)
       .inSingletonScope();
-    this.container.inversifyInstance
+    this.inversify
       .bind(componentInterfaces.eventHandler)
       .to(EventHandlerB)
       .inSingletonScope();
 
     // Get event handler instances
-    const allHandlers = this.container.inversifyInstance.getAll(componentInterfaces.eventHandler);
+    const allHandlers: [EventHandlerA, EventHandlerB] = this.inversify.getAll(componentInterfaces.eventHandler) as any;
     this.handlerA = allHandlers[0];
     this.handlerB = allHandlers[1];
 
-    this.eventBus = this.container.inversifyInstance.get(injectionNames.eventBus);
+    this.eventBus = this.inversify.get(injectionNames.eventBus);
   });
 
   it("is injectable", function() {

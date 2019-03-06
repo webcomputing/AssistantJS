@@ -98,6 +98,7 @@ export class SpecHelper {
   }
 
   /**
+   * @deprecated since version 0.3.2
    * Prepares assistant js setup
    * @param states States to add to container
    * @param autobind If true, calls setup.autobind()
@@ -105,6 +106,7 @@ export class SpecHelper {
    * @param autoSetup If set to true, registers internal components
    * @param minimumLogLevel If you do not enable logging in specs explicitly using SPEC_LOGS=true, this is the minimum level applied to logger.
    */
+
   public prepare(
     states: State.Constructor[] = [],
     filters: Array<Constructor<Filter>> = [],
@@ -222,7 +224,7 @@ export class SpecHelper {
     // Add minimal response handler
     if (typeof responseHandler !== "undefined") {
       if (minimalExtraction !== null) {
-        childContainer.bind<BasicHandable<BasicAnswerTypes>>(minimalExtraction.platform + ":current-response-handler").to(responseHandler);
+        childContainer.bind<BasicHandable<BasicAnswerTypes>>(`${minimalExtraction.platform}:current-response-handler`).to(responseHandler);
       } else {
         throw new Error("You cannot pass a null value for minimalExtraction but expecting a responseHandler to bind");
       }

@@ -68,11 +68,11 @@ describe("Generator", function() {
     this.mockReturns = {} as any;
     this.params = {};
 
-    /** Preparing mocks */
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
 
     // Get locales loader and switch real instance with fixed object
-    this.localesLoader = this.container.inversifyInstance.get<LocalesLoader>(injectionNames.localesLoader);
-    this.container.inversifyInstance.rebind(injectionNames.localesLoader).toDynamicValue(() => this.localesLoader);
+    this.localesLoader = this.inversify.get<LocalesLoader>(injectionNames.localesLoader);
+    this.inversify.rebind(injectionNames.localesLoader).toDynamicValue(() => this.localesLoader);
 
     // Register spies on localesloader
     this.mockReturns.utteranceTemplates = {};
@@ -82,23 +82,23 @@ describe("Generator", function() {
 
     // Always use mocked usedIntents
     this.mockReturns.usedIntents = ["helloWorld"];
-    this.container.inversifyInstance.rebind("core:state-machine:used-intents").toDynamicValue(() => this.mockReturns.usedIntents);
+    this.inversify.rebind("core:state-machine:used-intents").toDynamicValue(() => this.mockReturns.usedIntents);
 
     // tslint:disable-next-line:no-empty
     this.platformGenerator = { execute: () => {} };
-    this.container.inversifyInstance.bind(componentInterfaces.platformGenerator).toDynamicValue(() => this.platformGenerator);
+    this.inversify.bind(componentInterfaces.platformGenerator).toDynamicValue(() => this.platformGenerator);
     spyOn(this.platformGenerator, "execute").and.callThrough();
 
     // Re-register additional utterance templates
     this.mockReturns.additionalTemplates = { de: {}, en: {} };
     this.additionalUtteranceTemplateService = { getUtterancesFor: locale => this.mockReturns.additionalTemplates[locale] };
-    this.container.inversifyInstance.bind(componentInterfaces.utteranceTemplateService).toDynamicValue(() => this.additionalUtteranceTemplateService);
+    this.inversify.bind(componentInterfaces.utteranceTemplateService).toDynamicValue(() => this.additionalUtteranceTemplateService);
 
     // Always use mocked entityMappings
     this.mockReturns.entityMapping = {};
-    this.container.inversifyInstance.rebind(componentInterfaces.entityMapping).toDynamicValue(() => this.mockReturns.entityMapping);
+    this.inversify.rebind(componentInterfaces.entityMapping).toDynamicValue(() => this.mockReturns.entityMapping);
 
-    this.getGenerator = () => this.container.inversifyInstance.get(rootCmponentInterfaces.generator);
+    this.getGenerator = () => this.inversify.get(rootCmponentInterfaces.generator);
     this.createIntentConfiguration = opts => ({ intent: opts.intent || "helloWorld", entities: opts.entities || [], utterances: opts.utterances || [] });
     this.createArgumentsForExecute = opts =>
       [
@@ -113,10 +113,10 @@ describe("Generator", function() {
   describe("#constructor", function() {
     describe("without optional injections", function() {
       beforeEach(async function(this: CurrentThisContext) {
-        this.container.inversifyInstance.unbind(componentInterfaces.utteranceTemplateService);
-        this.container.inversifyInstance.unbind(componentInterfaces.entityMapping);
-        this.container.inversifyInstance.unbind(componentInterfaces.platformGenerator);
-        this.container.inversifyInstance.unbind("core:state-machine:used-intents");
+        this.inversify.unbind(componentInterfaces.utteranceTemplateService);
+        this.inversify.unbind(componentInterfaces.entityMapping);
+        this.inversify.unbind(componentInterfaces.platformGenerator);
+        this.inversify.unbind("core:state-machine:used-intents");
         this.generator = this.getGenerator();
       });
 

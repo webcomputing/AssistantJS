@@ -30,7 +30,7 @@ const configuration: Configuration.Defaults = {
 export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
   name: "core:unifier",
   interfaces: componentInterfaces,
-  defaultConfiguration: configuration,
+  defaultConfiguration: () => ({ ...configuration }),
   bindings: {
     root: (bindService, lookupService) => {
       bindService.bindExtension<ContextDeriverI>(lookupService.lookup("core:root").getInterface("contextDeriver")).to(ContextDeriver);
