@@ -129,5 +129,9 @@ export const injectionNames = {
      * Inject an instance of @type {TranslateHelper}
      */
     translateHelper: "core:i18n:current-translate-helper",
+    /**
+     * Inject an instance of @type {TranslateHelperFactory}
+     */
+    translateHelperFactory: "core:i18n:current-translate-helper-factory",
   },
 };

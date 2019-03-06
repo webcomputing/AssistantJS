@@ -1,7 +1,7 @@
 import { EntityDictionary } from "../../../src/components/unifier/public-interfaces";
 import { injectionNames } from "../../../src/injection-names";
+import { createRequestScope } from "../../helpers/scope";
 import { LocalesLoaderMock } from "../../support/mocks/unifier/mock-locale-loader";
-import { createRequestScope } from "../../support/util/setup";
 import { ThisContext } from "../../this-context";
 
 interface CurrentThisContext extends ThisContext {
@@ -23,20 +23,21 @@ describe("EntityDictionary", function() {
   });
 
   beforeEach(async function(this: CurrentThisContext) {
-    this.getEntityDictionary = () => this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
+    this.getEntityDictionary = () => this.inversify.get(injectionNames.current.entityDictionary);
   });
 
   describe("injection in request scope", function() {
-    beforeEach(function() {
+    beforeEach(function(this: CurrentThisContext) {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
       createRequestScope(this.specHelper);
     });
 
     it("lives as singleton", function() {
       // This is important: That way, states (including promptstates) can add entities, which are readable in follow-up-states
-      const instance1 = this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
+      const instance1 = this.inversify.get(injectionNames.current.entityDictionary);
       instance1.set("myEntity123", "321");
 
-      const instance2 = this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
+      const instance2 = this.inversify.get(injectionNames.current.entityDictionary);
       expect(instance2.get("myEntity123")).toEqual("321");
     });
 
@@ -44,7 +45,7 @@ describe("EntityDictionary", function() {
       beforeEach(function() {
         this.distanceSet = ["yourEntity", "hisEntity"];
         this.upperCaseDistanceSet = ["MyEntity", "YourEntity", "HisEntity"];
-        this.entities = this.container.inversifyInstance.get(injectionNames.current.entityDictionary);
+        this.entities = this.inversify.get(injectionNames.current.entityDictionary);
         this.entities.set("myEntity", "myEntity");
       });
 
@@ -108,6 +109,9 @@ describe("EntityDictionary", function() {
   });
 
   describe("#getRaw", function() {
+    beforeEach(async function() {
+      this.specHelper.prepareSpec(this.defaultSpecOptions);
+    });
     describe("for numbers in store", function() {
       beforeEach(async function(this: CurrentThisContext) {
         createRequestScope(
@@ -157,8 +161,9 @@ describe("EntityDictionary", function() {
   describe("#get", function() {
     describe("regarding custom entities", function() {
       beforeEach(function(this: CurrentThisContext) {
-        this.container.inversifyInstance.unbind(injectionNames.localesLoader);
-        this.container.inversifyInstance.bind(injectionNames.localesLoader).to(LocalesLoaderMock);
+        this.specHelper.prepareSpec(this.defaultSpecOptions);
+        this.inversify.unbind(injectionNames.localesLoader);
+        this.inversify.bind(injectionNames.localesLoader).to(LocalesLoaderMock);
       });
 
       describe("if custom entity is not present", function() {

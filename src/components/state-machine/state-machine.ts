@@ -185,7 +185,7 @@ export class StateMachine implements Transitionable {
    * @param currentStateClass State class to check for defined metadata
    * @param metaDataKey Key to check for
    */
-  private retrieveContextCallback<ContextCallback extends () => boolean | undefined>(
+  private retrieveContextCallback<ContextCallback extends StayInContextCallback | ClearContextCallback>(
     currentStateClass: State.Constructor,
     metaDataKey: symbol
   ): ContextCallback | undefined {

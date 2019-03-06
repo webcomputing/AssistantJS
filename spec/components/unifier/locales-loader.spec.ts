@@ -26,13 +26,14 @@ const { existsSync } = fs;
 
 describe("LocalesLoader", function() {
   beforeEach(function(this: CurrentThisContext) {
-    this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+    this.localesLoader = this.inversify.get(injectionNames.localesLoader);
 
     // Update `utterancePath` in the default unifier configuration
-    const metaData = this.container.inversifyInstance.get<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier"));
+    const metaData = this.inversify.get<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier"));
     this.localePath = metaData.configuration.utterancePath = resolve(__dirname, "../../support/mocks/i18n/locale");
-    this.container.inversifyInstance.unbind(getMetaInjectionName("core:unifier"));
-    this.container.inversifyInstance.bind<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier")).toConstantValue(metaData);
+    this.inversify.unbind(getMetaInjectionName("core:unifier"));
+    this.inversify.bind<Component<UnifierConfiguration>>(getMetaInjectionName("core:unifier")).toConstantValue(metaData);
   });
 
   describe("data reading behaviour", function() {
@@ -64,7 +65,7 @@ describe("LocalesLoader", function() {
 
       describe("regarding multiple injections", function() {
         beforeEach(async function(this: CurrentThisContext) {
-          this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
+          this.localesLoader = this.inversify.get(injectionNames.localesLoader);
         });
 
         it("still reads only once from file system", async function(this: CurrentThisContext) {
@@ -90,7 +91,7 @@ describe("LocalesLoader", function() {
 
       describe("regarding multiple injections", function() {
         beforeEach(async function(this: CurrentThisContext) {
-          this.localesLoader = this.container.inversifyInstance.get(injectionNames.localesLoader);
+          this.localesLoader = this.inversify.get(injectionNames.localesLoader);
         });
 
         it("still reads only once from file system", async function(this: CurrentThisContext) {

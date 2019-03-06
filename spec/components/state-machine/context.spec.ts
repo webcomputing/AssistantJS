@@ -1,34 +1,33 @@
-import { Container } from "inversify-components";
-import { ContextState, GenericIntent, injectionNames, SpecHelper, State } from "../../../src/assistant-source";
+import { GenericIntent, injectionNames, SpecHelper, State } from "../../../src/assistant-source";
 import { StateMachine } from "../../../src/components/state-machine/state-machine";
+import { createRequestScope } from "../../helpers/scope";
 import { ContextAState } from "../../support/mocks/states/context/context-a";
 import { ContextCState } from "../../support/mocks/states/context/context-c";
 import { contextStateNames, currentStateInstance, currentStateName, intentHistory, stateNameToTransitionTo } from "../../support/util/context-test-callback";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
-import { createRequestScope } from "../../support/util/setup";
+import { ThisContext } from "../../this-context";
 
-interface CurrentThisContext {
+interface CurrentThisContext extends ThisContext {
   specHelper: SpecHelper;
   stateMachine: StateMachine;
-  container: Container;
   getContextStates: () => Promise<Array<{ instance: State.Required; name: string }>>;
   doStateTransitions: (states: string[]) => Promise<void>;
 }
 
 describe("state context decorators", function() {
   beforeEach(async function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+
     this.doStateTransitions = async (states: string[]) => {
       for (const state of states) {
         await this.stateMachine.transitionTo(state);
       }
     };
 
-    configureI18nLocale(this.container, false);
+    configureI18nLocale(this.assistantJs.container, false);
     createRequestScope(this.specHelper);
-    this.stateMachine = this.container.inversifyInstance.get<StateMachine>(injectionNames.current.stateMachine);
-    this.getContextStates = this.container.inversifyInstance.get<() => Promise<Array<{ instance: State.Required; name: string }>>>(
-      injectionNames.current.contextStatesProvider
-    );
+    this.stateMachine = this.inversify.get<StateMachine>(injectionNames.current.stateMachine);
+    this.getContextStates = this.inversify.get<() => Promise<Array<{ instance: State.Required; name: string }>>>(injectionNames.current.contextStatesProvider);
   });
 
   describe("stayInContext decorator", function() {

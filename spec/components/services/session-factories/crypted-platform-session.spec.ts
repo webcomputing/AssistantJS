@@ -2,7 +2,7 @@ import { injectionNames } from "../../../../src/assistant-source";
 import { CryptedPlatformSession } from "../../../../src/components/services/session-factories/crypted-platform-session";
 import { OptionalExtractions } from "../../../../src/components/unifier/public-interfaces";
 import { BasicSessionHandable } from "../../../../src/components/unifier/response-handler";
-import { createRequestScope } from "../../../support/util/setup";
+import { createRequestScope } from "../../../helpers/scope";
 import { ThisContext } from "../../../this-context";
 
 interface CurrentThisContext extends ThisContext {
@@ -17,9 +17,11 @@ interface CurrentThisContext extends ThisContext {
 
 describe("CryptedPlatformSession", function() {
   beforeEach(async function(this: CurrentThisContext) {
-    createRequestScope(this.specHelper); // bind handler without proxy to make spy possible
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
+    // Bind handler without proxy to make spy possible
+    createRequestScope(this.specHelper);
 
-    this.handler = this.container.inversifyInstance.get(injectionNames.current.responseHandler);
+    this.handler = this.inversify.get(injectionNames.current.responseHandler);
 
     this.extractionData = { sessionData: null };
     this.createSession = () => new CryptedPlatformSession(this.extractionData, this.handler);

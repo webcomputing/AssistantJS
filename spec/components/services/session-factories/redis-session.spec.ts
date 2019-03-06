@@ -1,10 +1,9 @@
 import * as fakeRedis from "fakeredis";
-import { Component, Container } from "inversify-components";
 import { RedisClient } from "redis";
-import { Configuration } from "../../../../src/components/services/private-interfaces";
 import { RedisSession } from "../../../../src/components/services/session-factories/redis-session";
+import { ThisContext } from "../../../this-context";
 
-interface CurrentThisContext {
+interface CurrentThisContext extends ThisContext {
   session: RedisSession;
   redisInstance: RedisClient;
 }

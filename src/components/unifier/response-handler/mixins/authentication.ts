@@ -8,9 +8,6 @@ import { BasicAnswerTypes } from "../handler-types";
 export class AuthenticationMixin<MergedAnswerTypes extends BasicAnswerTypes> extends BasicHandler<MergedAnswerTypes>
   implements OptionalHandlerFeatures.Authentication {
   public setUnauthenticated(): this {
-    this.failIfInactive();
-
-    this.promises.shouldAuthenticate = { resolver: true };
-    return this;
+    return this.setResolverAndReturnThis("shouldAuthenticate", true);
   }
 }

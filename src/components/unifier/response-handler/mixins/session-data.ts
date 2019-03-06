@@ -14,11 +14,7 @@ export class SessionDataMixin<MergedAnswerTypes extends BasicAnswerTypes> extend
    * or use another SessionStorage like Redis. And it has some more features.
    */
   public setSessionData(sessionData: MergedAnswerTypes["sessionData"] | Promise<MergedAnswerTypes["sessionData"]>): this {
-    this.failIfInactive();
-
-    this.promises.sessionData = { resolver: sessionData };
-
-    return this;
+    return this.setResolverAndReturnThis("sessionData", sessionData);
   }
 
   /**

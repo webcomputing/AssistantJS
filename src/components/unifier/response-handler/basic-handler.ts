@@ -1,7 +1,9 @@
 import { inject, injectable } from "inversify";
+import { merge } from "lodash";
 import { injectionNames } from "../../../injection-names";
 import { RequestContext, ResponseCallback } from "../../root/public-interfaces";
-import { MinimalRequestExtraction } from "../public-interfaces";
+import { KillSessionPromise } from "../../services/public-interfaces";
+import { MinimalRequestExtraction, OptionallyPromise } from "../public-interfaces";
 import { BasicAnswerTypes, BasicHandable, ResponseHandlerExtensions, UnsupportedFeatureSupportForHandables } from "./handler-types";
 
 /**
@@ -48,12 +50,12 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
        * 3.) Promise of intermediate Object which is given to the thenMap-function
        * 4.) intermediate Object which is given to the thenMap-function
        */
-      resolver: Promise<MergedAnswerTypes[key]> | MergedAnswerTypes[key] | Promise<any> | any;
+      resolver: OptionallyPromise<MergedAnswerTypes[key] | any>;
 
       /**
        * function to build the final object from an intermediate object
        */
-      thenMap?: (value: any) => MergedAnswerTypes[key] | Promise<MergedAnswerTypes[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
+      thenMap?: (value: any) => OptionallyPromise<MergedAnswerTypes[key]>; // todo conditional type when it is possible to reference the type of the property "resolver"
     }
   } = {} as any;
 
@@ -86,7 +88,7 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   constructor(
     @inject(injectionNames.current.requestContext) private requestContext: RequestContext,
     @inject(injectionNames.current.extraction) private extraction: MinimalRequestExtraction,
-    @inject(injectionNames.current.killSessionService) private killSession: () => Promise<void>,
+    @inject(injectionNames.current.killSessionService) private killSession: KillSessionPromise,
     @inject(injectionNames.current.responseHandlerExtensions)
     private responseHandlerExtensions: ResponseHandlerExtensions<MergedAnswerTypes, BasicHandable<MergedAnswerTypes>>
   ) {
@@ -112,14 +114,21 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
 
     await this.resolveResults();
 
-    // everything was sent successfully
-    this.isSent = true;
-
     // default http status code 200 or resolved status code
     const httpStatusCode = this.results.httpStatusCode ? this.results.httpStatusCode : 200;
 
-    // give results to the specific handler
-    this.responseCallback(JSON.stringify(this.getBody(this.results)), this.getHeaders(), httpStatusCode);
+    // give results to the specific handler and resolve json
+    const handlerJSON = this.getBody(this.results);
+
+    // append handler json with possible custom attributes
+    const responseJSON = merge({ ...handlerJSON }, this.results.appendedJSON ? this.results.appendedJSON : {});
+
+    // Send using assistantjs response callbacḱ
+    this.responseCallback(JSON.stringify(responseJSON), this.getHeaders(), httpStatusCode);
+
+    // everything was sent successfully
+    this.isSent = true;
+
     if (this.results.shouldSessionEnd) {
       await this.killSession();
     }
@@ -141,37 +150,43 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
   }
 
   public setEndSession(): this {
-    this.failIfInactive();
-
-    this.promises.shouldSessionEnd = { resolver: true };
-    return this;
+    return this.setResolverAndReturnThis("shouldSessionEnd", true);
   }
 
-  public endSessionWith(text: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
-    this.failIfInactive();
-
-    this.promises.shouldSessionEnd = { resolver: true };
-    this.prompt(text);
-
-    return this;
+  public endSessionWith(text: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
+    this.setEndSession();
+    return this.prompt(text);
   }
 
-  public setHttpStatusCode(httpStatusCode: MergedAnswerTypes["httpStatusCode"] | Promise<MergedAnswerTypes["httpStatusCode"]>): this {
-    this.promises.httpStatusCode = { resolver: httpStatusCode };
-
-    return this;
+  public setHttpStatusCode(httpStatusCode: OptionallyPromise<MergedAnswerTypes["httpStatusCode"]>): this {
+    return this.setResolverAndReturnThis("httpStatusCode", httpStatusCode);
   }
 
-  public prompt(inputText: MergedAnswerTypes["voiceMessage"]["text"] | Promise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
-    this.failIfInactive();
+  public prompt(inputText: OptionallyPromise<MergedAnswerTypes["voiceMessage"]["text"]>): this {
+    return this.setResolverAndReturnThis("voiceMessage", inputText, this.createPromptAnswer);
+  }
 
-    // add a thenMap function to build the correct object from the simple strings
-    this.promises.voiceMessage = {
-      resolver: Promise.resolve(inputText),
-      thenMap: this.createPromptAnswer,
-    };
+  public setAppendedJSON(appendedJSON: OptionallyPromise<MergedAnswerTypes["appendedJSON"]>): this {
+    return this.setResolverAndReturnThis("appendedJSON", appendedJSON);
+  }
 
-    return this;
+  public async resolveAnswerField<AnswerTypeKey extends keyof MergedAnswerTypes>(
+    answerType: AnswerTypeKey
+  ): Promise<MergedAnswerTypes[AnswerTypeKey] | undefined> {
+    // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
+    const resolver = this.promises[answerType];
+
+    if (resolver) {
+      // resolve the final or intermediate result
+      const currentValue = await Promise.resolve(resolver.resolver);
+
+      // remap the intermediate Results, when an thenMap function is present
+      if (resolver.thenMap) {
+        return Promise.resolve<any>(resolver.thenMap.bind(this)(currentValue));
+      }
+
+      return currentValue;
+    }
   }
 
   public unsupportedFeature(methodName: string | number | symbol, ...args: any[]): void {
@@ -231,25 +246,25 @@ export class BasicHandler<MergedAnswerTypes extends BasicAnswerTypes> implements
     }
     // resolve all intermediate and final results from the Promises and build an Array of new Promises
     // and fill the results array
-    const concurrentProcesses = promiseKeys.map(async (key: string) => {
-      const currentKey = key as keyof BasicAnswerTypes; // we have to set the type here to 'BasicAnswerTypes', as if we set the type to 'B' the type of the const resolver is wrong
-      // get resolver and check if the resolver is not 'undefined' (should not be possible, but the type requests it)
-      const resolver = this.promises[currentKey];
-      if (resolver) {
-        // resolve the final or intermediate result
-        const currentValue = await Promise.resolve(resolver.resolver);
-        // remap the intermediate Results, when an thenMap function is present
-        if (resolver.thenMap) {
-          const finalResult = await Promise.resolve(resolver.thenMap.bind(this)(currentValue));
-          this.results[currentKey] = finalResult;
-        } else {
-          // here are only final results
-          this.results[currentKey] = currentValue;
-        }
-      }
+    const concurrentProcesses = promiseKeys.map(async key => {
+      this.results[key] = await this.resolveAnswerField(key as keyof MergedAnswerTypes);
     });
+
     // wait for all Prmises at once, after this
     await Promise.all(concurrentProcesses);
+  }
+
+  /** Sets resolver to given value and return this. Checks if response handler is still active using failIfInactive(). */
+  protected setResolverAndReturnThis<AnswerKey extends keyof MergedAnswerTypes>(
+    answerKey: AnswerKey,
+    resolver: OptionallyPromise<MergedAnswerTypes[AnswerKey] | any>,
+    thenMap?: (value: any) => OptionallyPromise<MergedAnswerTypes[AnswerKey]>
+  ) {
+    this.failIfInactive();
+
+    this.promises[answerKey] = { resolver, thenMap };
+
+    return this;
   }
 
   /**

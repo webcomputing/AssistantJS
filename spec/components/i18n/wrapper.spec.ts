@@ -1,31 +1,27 @@
-import { injectable } from "inversify";
-import { Container } from "inversify-components";
-import { componentInterfaces } from "../../../src/components/i18n/component-interfaces";
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "../../../src/components/i18n/interpolation-resolver";
 import { arraySplitter } from "../../../src/components/i18n/plugins/array-returns-sample.plugin";
 import { I18nextWrapper } from "../../../src/components/i18n/wrapper";
 import { injectionNames } from "../../../src/injection-names";
-import { SpecHelper } from "../../../src/spec-helper";
 import { configureI18nLocale } from "../../support/util/i18n-configuration";
+import { ThisContext } from "../../this-context";
 
-interface CurrentThisContext {
-  container: Container;
+interface CurrentThisContext extends ThisContext {
   wrapper: I18nextWrapper;
-  specHelper: SpecHelper;
 }
 describe("I18nWrapper", function() {
   const expectedTranslations = ["hello my name", "hi my name", "welcome my name"];
 
   beforeEach(function(this: CurrentThisContext) {
+    this.specHelper.prepareSpec(this.defaultSpecOptions);
     // Remove emitting of warnings
     this.specHelper.bindSpecLogger("error");
 
-    configureI18nLocale(this.container, false);
+    configureI18nLocale(this.assistantJs.container, false);
   });
 
   describe("with returnOnlySample = true", function() {
-    beforeEach(function() {
-      this.wrapper = this.container.inversifyInstance.get(injectionNames.i18nWrapper);
+    beforeEach(function(this: CurrentThisContext) {
+      this.wrapper = this.inversify.get(injectionNames.i18nWrapper);
     });
 
     describe("translation function", function() {
@@ -35,7 +31,7 @@ describe("I18nWrapper", function() {
     });
 
     describe("missingInterpolationHandler", function() {
-      beforeEach(function() {
+      beforeEach(function(this: CurrentThisContext) {
         spyOn(this.wrapper.instance.options, "missingInterpolationHandler").and.callThrough();
       });
 
@@ -53,8 +49,8 @@ describe("I18nWrapper", function() {
 
   describe("with returnOnlySample = false", function(this: CurrentThisContext) {
     describe("translation function", function() {
-      it("returns all available options", function() {
-        this.wrapper = this.container.inversifyInstance.get(injectionNames.i18nSpecWrapper);
+      it("returns all available options", function(this: CurrentThisContext) {
+        this.wrapper = this.inversify.get(injectionNames.i18nSpecWrapper);
         expect(this.wrapper.instance.t("templateSyntaxSmall", { name: "my name" })).toEqual(expectedTranslations.join(arraySplitter));
       });
     });
