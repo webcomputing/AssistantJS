@@ -60,7 +60,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
 
-    // Register all bindings of all registered AssistantJS component
+    // Bind all AssistantJS root scope component
     setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
@@ -97,7 +97,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
 
-    // Register all bindings of all registered AssistantJS component
+    // Bind all AssistantJS root scope components
     setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
