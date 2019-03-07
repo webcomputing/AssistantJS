@@ -12,7 +12,6 @@
     "inversify": "4.1.1",
     "reflect-metadata": "^0.1.12",
     "express": "^4.16.2",
-    "path": "^0.12.7",
     "redis": "^2.8.0",
     "fakeredis": "^2.0.0"
   },
