@@ -8,7 +8,7 @@ export class AssistantJSSetup {
     this.container = container;
   }
 
-  public async run(app: MainApplication) {
+  public run(app: MainApplication) {
     this.container.setMainApplication(app);
     return this.container.runMain();
   }

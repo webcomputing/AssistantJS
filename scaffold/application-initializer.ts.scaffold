@@ -107,7 +107,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     );
 
     // Let's get started!
-    await setups.assistantJs.run(serverApplication);
+    setups.assistantJs.run(serverApplication);
     return setups.assistantJs;
   }
 

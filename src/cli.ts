@@ -173,7 +173,7 @@ export function cli(argv, resolvedApplicationInitializer) {
     .command("generate")
     .alias("g")
     .description("Generates all platform configurations")
-    .action(async () => grabInitializer().runGenerator());
+    .action(() => grabInitializer().runGenerator());
 
   // Register new command
   commander
