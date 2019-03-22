@@ -1,6 +1,6 @@
 {
   "name": "assistant-source",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "TypeScript framework to build cross-platform voice applications (alexa, google home, ...). Write once, run anywhere!",
   "keywords": [
     "alexa",
