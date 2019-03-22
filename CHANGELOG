@@ -3,6 +3,7 @@ version 0.5.0
 - adds resolveAnswerField() to basic response handler: This allows you to get the currently stored value of any response handler field 
 - adds option to UniferConfiguration that allows to change the way how request extractors are found.
 - adds option to pass component's defaultConfiguration a function that returns a new configuration object
+- passes list of components to except from autobind to inversify-components
 
 version 0.4.1
 - fixes typing of StayInContextCallback and ClearContextCallback
