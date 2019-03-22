@@ -1,3 +1,6 @@
+version 0.4.2
+- passes list of components to except from autobind to inversify-components
+
 version 0.4.1
 - fixes typing of StayInContextCallback and ClearContextCallback
 - fixes two scaffolding errors
