@@ -194,12 +194,15 @@ export namespace PlatformGenerator {
   /** Represents an user specified entity */
   export interface CustomEntityMapping {
     /** Allowed values of this entity set */
-    [type: string]: Array<{
-      /** Reference value for the custom entity */
-      value: string;
-      /** Synonyms that map to the reference value */
-      synonyms?: string[];
-    }>;
+    [type: string]: Entry[];
+  }
+
+  /** Represent an entry record with the mapping between synonyms and custom entities */
+  interface Entry {
+    /** Reference value for the custom entity */
+    value: string;
+    /** Synonyms that map to the reference value */
+    synonyms?: string[];
   }
 }
 
