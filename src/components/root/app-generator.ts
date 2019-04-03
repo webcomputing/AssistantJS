@@ -1,8 +1,8 @@
+import * as fs from "fs";
 import { Container, MainApplication } from "inversify-components";
+import * as path from "path";
 import { componentInterfaces } from "./private-interfaces";
 import { CLIGeneratorExtension } from "./public-interfaces";
-
-import * as fs from "fs";
 
 // This class is the main application thread. Therefore it acts like a singleton!
 export class GeneratorApplication implements MainApplication {
@@ -18,7 +18,15 @@ export class GeneratorApplication implements MainApplication {
   public async execute(container: Container): Promise<void> {
     this.container = container;
     this.buildNr = Date.now();
-    this.buildDir = this.baseDir + "/" + this.buildNr;
+    this.buildDir = path.join(this.baseDir, `${this.buildNr}`);
+
+    /**
+     * Check if the base directory exists and recreate it if it's not found.
+     * Generally assistant new should create this directory.
+     */
+    if (!fs.existsSync(this.baseDir)) {
+      fs.mkdirSync(this.baseDir);
+    }
 
     // Create directory for current build
     fs.mkdirSync(this.buildDir);
