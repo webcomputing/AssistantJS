@@ -160,23 +160,29 @@ export namespace PlatformGenerator {
     getUtterancesFor(language: string): { [intent: string]: string[] };
   }
 
+  /** Generic interface for multi lingual instances */
+  export interface Multilingual<T> {
+    /** Contains instance of T for each language */
+    [language: string]: T;
+  }
+
   /** Extension interface to implement a platform generator */
   export interface Extension {
     /**
      * Is called if user wants to generate build on your platform (can be async, see return value)
-     * @param {string} langauge langauge to build in
+     * @param {string} languages all languages which should be build
      * @param {string} buildDir path of the build directory
-     * @param {IntentConfiguration[]} intentConfiguration Mapping of intent, utterances and entities
-     * @param {EntityMapping} entityMapping Mapping of entity types and names
-     * @param {CustomEntity} entityMapping Mapping of entity types and names
+     * @param {Multilingual<IntentConfiguration[]>} intentConfiguration Mapping of intent, utterances and entities for each language
+     * @param {EntityMapping} entityMapping Mapping of entity types and names for each language
+     * @param {Multilingual<CustomEntity>} entityMapping Mapping of entity types and names for each language
      * @return {void|Promise<void>}
      */
     execute(
-      language: string,
+      languages: string[],
       buildDir: string,
-      intentConfigurations: IntentConfiguration[],
+      intentConfigurations: Multilingual<IntentConfiguration[]>,
       entityMapping: EntityMapping,
-      customEntities: CustomEntityMapping
+      customEntities: Multilingual<CustomEntityMapping>
     ): void | Promise<void>;
   }
 
@@ -188,12 +194,15 @@ export namespace PlatformGenerator {
   /** Represents an user specified entity */
   export interface CustomEntityMapping {
     /** Allowed values of this entity set */
-    [type: string]: Array<{
-      /** Reference value for the custom entity */
-      value: string;
-      /** Synonyms that map to the reference value */
-      synonyms?: string[];
-    }>;
+    [type: string]: Entry[];
+  }
+
+  /** Represent an entry record with the mapping between synonyms and custom entities */
+  interface Entry {
+    /** Reference value for the custom entity */
+    value: string;
+    /** Synonyms that map to the reference value */
+    synonyms?: string[];
   }
 }
 
@@ -213,7 +222,7 @@ export interface RequestExtractor<ComponentConfiguration = {}> {
    * Extracts information out of request. The minimum set of information to extract is described by MinimalRequestExtraction.
    * @param {RequestContext} context Request context to extract information from
    * @return {Promise<MinimalRequestExtract>} Set of request information, has to fulfill MinimalRequestExtraction, but can also contain additional information.
-   *   See also OptionalExtration interface for more information.
+   *   See also OptionalExtraction interface for more information.
    */
   extract(context: RequestContext): Promise<MinimalRequestExtraction>;
 }
@@ -472,7 +481,7 @@ export type OptionallyPromise<T> = T | Promise<T>;
 /** Implements logic to load utterances and custom entities from i18n files */
 export interface LocalesLoader {
   /** Returns all utterance templates for all languages */
-  getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } };
+  getUtteranceTemplates(): PlatformGenerator.Multilingual<{ [intent: string]: string[] }>;
   /** Returns all custom entity mappings for all languages */
-  getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping };
+  getCustomEntities(): PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping>;
 }

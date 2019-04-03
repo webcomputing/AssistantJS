@@ -47,9 +47,10 @@ export class AssistantJSSetup {
 
   /**
    * @param autoConfigure If set to true, calls this.configure() afterwards
+   * @param {string[]} [except] Optionally give list of components to except from autobind
    */
-  public autobind(autoConfigure = true) {
-    this.container.componentRegistry.autobind(this.container.inversifyInstance);
+  public autobind(autoConfigure = true, except: string[] = []) {
+    this.container.componentRegistry.autobind(this.container.inversifyInstance, except);
     if (autoConfigure) this.configure();
   }
 }

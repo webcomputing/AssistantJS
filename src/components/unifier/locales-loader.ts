@@ -12,8 +12,8 @@ export class LocalesLoader implements ILocalesLoader {
   private configuration: Configuration.Runtime;
 
   // For caching values read from file system
-  private utterances?: { [language: string]: { [intent: string]: string[] } };
-  private entities?: { [language: string]: PlatformGenerator.CustomEntityMapping };
+  private utterances?: PlatformGenerator.Multilingual<{ [intent: string]: string[] }>;
+  private entities?: PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping>;
 
   constructor(
     @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>,
@@ -25,7 +25,7 @@ export class LocalesLoader implements ILocalesLoader {
   /**
    * Return the user defined utterance templates for each language found in locales folder
    */
-  public getUtteranceTemplates(): { [language: string]: { [intent: string]: string[] } } {
+  public getUtteranceTemplates(): PlatformGenerator.Multilingual<{ [intent: string]: string[] }> {
     if (this.utterances) {
       // Use cached data
       return this.utterances;
@@ -51,7 +51,7 @@ export class LocalesLoader implements ILocalesLoader {
   /**
    * Return the user defined entities for each language found in locales folder
    */
-  public getCustomEntities(): { [language: string]: PlatformGenerator.CustomEntityMapping } {
+  public getCustomEntities(): PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping> {
     if (this.entities) {
       // Use cached data
       return this.entities;
