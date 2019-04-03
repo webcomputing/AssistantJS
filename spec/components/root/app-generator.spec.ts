@@ -26,6 +26,8 @@ interface CurrentThisContext extends ThisContext {
   }>;
 }
 
+const { mkdirSync, existsSync } = fs;
+
 describe("GeneratorApplication", function() {
   beforeEach(async function(this: CurrentThisContext) {
     this.specHelper.prepareSpec({});
@@ -57,6 +59,10 @@ describe("GeneratorApplication", function() {
   afterEach(function() {
     /** Cleanup the mocked date */
     jasmine.clock().uninstall();
+
+    /** Reset fs spy objects */
+    (fs as any).mkdirSync = mkdirSync;
+    (fs as any).existsSync = existsSync;
   });
 
   describe("#execute", function() {

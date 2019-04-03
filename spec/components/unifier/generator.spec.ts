@@ -364,7 +364,7 @@ describe("Generator", function() {
               await this.getGenerator().execute(this.params.buildDirectory);
             });
 
-            it("will not permutes any custom entities", async function(this: CurrentThisContext) {
+            it("will not permute any custom entities", async function(this: CurrentThisContext) {
               expect(this.platformGenerator.execute).toHaveBeenCalledWith(
                 ...this.createArgumentsForExecute({
                   intentConfigurations: {
