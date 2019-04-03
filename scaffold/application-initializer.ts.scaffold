@@ -3,7 +3,9 @@ import {
   AssistantJSSetup,
   FilterSetup,
   ServerApplication,
-  StateMachineSetup
+  StateMachineSetup,
+  DeploymentApplication,
+  GeneratorApplication
 } from "assistant-source";
 import componentConfiguration from "./config/components";
 import { MainApplication } from "inversify-components";
@@ -83,13 +85,12 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
   /**
    * Execute Application within the AssistantJS container scope
-   * @param ApplicationClass Class of @type {DeploymentApplication} or @type {GeneratorApplication}
+   * @param ApplicationClass Class of @type {MainApplication}
    * @param buildTimeStamp Path to the global build directory like '{rootDir}/builds'
    * @returns A current AssistantJS instance 
    */
   public async runApplication(
-    ApplicationClass: (new (...args: any[]) => MainApplication)
-      
+    ApplicationClass: (new (...args: any[]) => MainApplication),
     buildTimeStamp: number
   ) {
     ApplicationInitializer.printUnhandledRejections();
@@ -107,7 +108,7 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
     );
 
     // Let's get started!
-    setups.assistantJs.run(serverApplication);
+    await setups.assistantJs.run(serverApplication);
     return setups.assistantJs;
   }
 

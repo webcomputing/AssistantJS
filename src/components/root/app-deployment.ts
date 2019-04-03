@@ -14,6 +14,6 @@ export class DeploymentApplication {
   public async execute(container: Container): Promise<void> {
     // Get all bound deployments and execute them
     const deployments = container.inversifyInstance.getAll<CLIDeploymentExtension>(componentInterfaces.deployments);
-    await Promise.all(deployments.map(async deployment => deployment.execute(`${this.buildDir}/${this.buildTimeStamp}`)));
+    await Promise.all(deployments.map(deployment => deployment.execute(`${this.buildDir}/${this.buildTimeStamp}`)));
   }
 }
