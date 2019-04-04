@@ -1,3 +1,5 @@
+import merge = require("lodash/merge");
+
 import * as fs from "fs";
 import { inject, injectable } from "inversify";
 import { Component, getMetaInjectionName } from "inversify-components";
@@ -12,6 +14,8 @@ import { LocalesLoader as ILocalesLoader, PlatformGenerator } from "./public-int
 
 @injectable()
 export class LocalesLoader implements ILocalesLoader {
+  private static loadableExtensions = Object.keys(require.extensions).map(ext => ext.replace(/\.([a-z]+)$/i, "$1"));
+
   private configuration: Configuration.Runtime;
 
   // For caching values read from file system
@@ -55,7 +59,22 @@ export class LocalesLoader implements ILocalesLoader {
       return this.locales;
     }
 
-    return (this.locales = LocalesLoader.requireDir(this.configuration.utterancePath || path.join(process.cwd(), "js", "config", "locales")));
+    // Part `rootPath` and the relative path to locales
+    const utterancePath = path.relative(process.cwd(), this.configuration.utterancePath);
+    const rootPath = process.cwd();
+
+    // Load built locales such as TypeScript files in build folder
+    const builtLocales = fs.existsSync(path.join(rootPath, "js", utterancePath))
+      ? LocalesLoader.requireDir(path.join(rootPath, "js", utterancePath))
+      : undefined;
+
+    // Load unbuilt files such as JSON
+    const unbuiltLocales = LocalesLoader.requireDir(path.join(rootPath, utterancePath));
+
+    // Merge both while prioritizing unbuilt, so when testing the lastest TypeScript file outdoes built JavaScript files
+    this.locales = unbuiltLocales === undefined && builtLocales === undefined ? undefined : merge(builtLocales, unbuiltLocales);
+
+    return this.locales;
   }
 
   /**
@@ -94,7 +113,7 @@ export class LocalesLoader implements ILocalesLoader {
           return fs.existsSync(`${withoutExtension}.ts`);
         }
       },
-      extensions: ["ts", "js", "json"],
+      extensions: LocalesLoader.loadableExtensions,
       visit: (obj, filepath, fn) => {
         let result = obj.default || obj[LocalesLoader.camelcase(path.basename(fn, path.extname(fn)))];
 
