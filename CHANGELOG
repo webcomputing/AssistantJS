@@ -4,6 +4,7 @@ version 0.5.0
 - adds option to UniferConfiguration that allows to change the way how request extractors are found.
 - adds option to pass component's defaultConfiguration a function that returns a new configuration object
 - passes list of components to except from autobind to inversify-components
+- loads all TypeScript, JavaScript and JSON files from locales directory, if not i18next backend is configured
 
 version 0.4.1
 - fixes typing of StayInContextCallback and ClearContextCallback

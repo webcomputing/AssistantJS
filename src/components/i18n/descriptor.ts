@@ -5,6 +5,7 @@ import { arraySplitter } from "./plugins/array-returns-sample.plugin";
 import { Configuration } from "./private-interfaces";
 
 import { injectionNames, Logger } from "../../assistant-source";
+import { LocalesLoader } from "../unifier/public-interfaces";
 import { I18nContext } from "./context";
 import { InterpolationResolver as InterpolationResolverImpl } from "./interpolation-resolver";
 import { InterpolationResolver, TranslateHelper, TranslateHelperFactory, TranslateValuesFor } from "./public-interfaces";
@@ -37,6 +38,7 @@ export const descriptor: ComponentDescriptor<Configuration.Defaults> = {
           return new I18nextWrapper(
             context.container.get<Component<Configuration.Runtime>>(getMetaInjectionName("core:i18n")),
             context.container.get<Logger>(injectionNames.logger),
+            context.container.get<LocalesLoader>(injectionNames.localesLoader),
             false
           );
         })

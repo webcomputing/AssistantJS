@@ -47,6 +47,7 @@
     "lodash": "^4.17.11",
     "redis": "2.8.0",
     "reflect-metadata": "^0.1.12",
+    "require-directory": "^2.1.1",
     "resolve": "^1.8.1",
     "rxjs": "^5.5.11"
   },

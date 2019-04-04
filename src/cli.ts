@@ -10,6 +10,7 @@ import * as commander from "commander";
 // Import node.js filesystem module
 import * as fs from "fs";
 import { Component } from "inversify-components";
+import * as path from "path";
 import { AssistantJSApplicationInitializer } from "./components/joined-interfaces";
 
 // Get package.json data
@@ -63,6 +64,8 @@ export function cli(argv, resolvedApplicationInitializer) {
       "config",
       "config/locales",
       "config/locales/en",
+      "config/locales/en/translation",
+      "config/locales/en/utterances",
       "spec",
       "spec/app",
       "spec/app/states",
@@ -104,10 +107,21 @@ export function cli(argv, resolvedApplicationInitializer) {
       fs.closeSync(fs.openSync(projectPath + touchableFile, "w"));
     });
 
-    // Create empty json files
-    ["config/locales/en/translation.json", "config/locales/en/utterances.json"].forEach(filePath => {
+    // Create base TypesScript files
+    ["config/locales/en/translation/main-state.ts"].forEach(filePath => {
       console.log("Creating " + filePath + "..");
-      fs.writeFileSync(projectPath + filePath, "{}");
+      fs.writeFileSync(
+        projectPath + filePath,
+        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = {};`
+      );
+    });
+
+    ["config/locales/en/utterances/invokeGenericIntent.ts"].forEach(filePath => {
+      console.log("Creating " + filePath + "..");
+      fs.writeFileSync(
+        projectPath + filePath,
+        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = [];`
+      );
     });
   };
 
