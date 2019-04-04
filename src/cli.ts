@@ -108,19 +108,14 @@ export function cli(argv, resolvedApplicationInitializer) {
     });
 
     // Create base TypesScript files
-    ["config/locales/en/translation/main-state.ts"].forEach(filePath => {
+    [
+      { filePath: "config/locales/en/translation/main-state.ts", exportString: "{}" },
+      { filePath: "config/locales/en/utterances/invokeGenericIntent.ts", exportString: "[]" },
+    ].forEach(({ filePath, exportString }) => {
       console.log("Creating " + filePath + "..");
       fs.writeFileSync(
         projectPath + filePath,
-        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = {};`
-      );
-    });
-
-    ["config/locales/en/utterances/invokeGenericIntent.ts"].forEach(filePath => {
-      console.log("Creating " + filePath + "..");
-      fs.writeFileSync(
-        projectPath + filePath,
-        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = [];`
+        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = ${exportString};`
       );
     });
   };

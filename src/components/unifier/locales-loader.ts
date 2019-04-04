@@ -29,21 +29,21 @@ export class LocalesLoader implements ILocalesLoader {
    * Return the user defined utterance templates for each language found in locales folder
    */
   public getUtteranceTemplates(): PlatformGenerator.Multilingual<{ [intent: string]: string[] }> {
-    return Object.entries(this.getLocales() || {}).reduce((utterances, [lang, locale]) => ({ ...utterances, [lang]: locale.utterances }), {});
+    return this.extractNamespace("utterances");
   }
 
   /**
    * Return the user defined entities for each language found in locales folder
    */
   public getCustomEntities(): PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping> {
-    return Object.entries(this.getLocales() || {}).reduce((entities, [lang, locale]) => ({ ...entities, [lang]: locale.entities }), {});
+    return this.extractNamespace("entities");
   }
 
   /**
    * Return the user defined translations for each language found in locales folder
    */
   public getTranslations() {
-    return Object.entries(this.getLocales() || {}).reduce((translations, [lang, locale]) => ({ ...translations, [lang]: locale.translation }), {});
+    return this.extractNamespace("translation");
   }
 
   /**
@@ -56,6 +56,14 @@ export class LocalesLoader implements ILocalesLoader {
     }
 
     return (this.locales = LocalesLoader.requireDir(this.configuration.utterancePath || path.join(process.cwd(), "js", "config", "locales")));
+  }
+
+  /**
+   * Extract namespace from result of `getLocales`.
+   * @param {string} ns Namespace to be extracted from locales
+   */
+  private extractNamespace(ns: string): PlatformGenerator.Multilingual<any> {
+    return Object.entries(this.getLocales() || {}).reduce((namespace, [lang, locale]) => ({ ...namespace, [lang]: locale[ns] }), {});
   }
 
   /**
