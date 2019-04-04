@@ -103,32 +103,39 @@ export class LocalesLoader implements ILocalesLoader {
     }
 
     return requireDir(module, path.relative(__dirname, absolutePath), {
-      exclude: (absPath, filename) => {
-        // Logic to prioritize .ts before .js before .json
-        const withoutExtension = absPath.slice(0, -path.extname(filename).length);
-        if (path.extname(filename) === ".json") {
-          return fs.existsSync(`${withoutExtension}.ts`) || fs.existsSync(`${withoutExtension}.js`);
-        }
-        if (path.extname(filename) === ".js") {
-          return fs.existsSync(`${withoutExtension}.ts`);
-        }
-      },
       extensions: LocalesLoader.loadableExtensions,
-      visit: (obj, filepath, fn) => {
-        let result = obj.default || obj[LocalesLoader.camelcase(path.basename(fn, path.extname(fn)))];
-
-        // If there's a directory with the same name as the file, it's merged but can be overridden by the current file
-        const filenameAsDirname = path.join(path.dirname(filepath), path.basename(filepath, path.extname(__filename)));
-        if (fs.existsSync(filenameAsDirname) && fs.statSync(filenameAsDirname).isDirectory()) {
-          result = { ...LocalesLoader.requireDir(filenameAsDirname), ...result };
-        }
-
-        // Extract only one object from the module: either that one with the camelcase filename as the file or default
-        return result;
-      },
-      rename: fn => {
-        return LocalesLoader.camelcase(fn);
-      },
+      exclude: absPath => LocalesLoader.hasShadowingFile(absPath),
+      visit: (obj, filepath) => LocalesLoader.mergeDirectories(obj, filepath),
+      rename: fn => LocalesLoader.camelcase(fn),
     });
+  }
+
+  private static mergeDirectories(obj, absPath) {
+    const fn = path.basename(absPath);
+
+    // Extract only `default` or, if not available, object with camelcased name of file
+    let result = obj.default || obj[LocalesLoader.camelcase(path.basename(fn, path.extname(fn)))];
+
+    // If there's a directory with the same name as the file, it's merged but can be overridden by the current file
+    const filenameAsDirname = path.join(path.dirname(absPath), path.basename(absPath, path.extname(__filename)));
+    if (fs.existsSync(filenameAsDirname) && fs.statSync(filenameAsDirname).isDirectory()) {
+      result = { ...LocalesLoader.requireDir(filenameAsDirname), ...result };
+    }
+
+    // Extract only one object from the module: either that one with the camelcase filename as the file or default
+    return result;
+  }
+
+  private static hasShadowingFile(absPath: string) {
+    const filename = path.basename(absPath);
+
+    // Logic to prioritize .ts before .js before .json
+    const withoutExtension = absPath.slice(0, -path.extname(filename).length);
+    if (path.extname(filename) === ".json") {
+      return fs.existsSync(`${withoutExtension}.ts`) || fs.existsSync(`${withoutExtension}.js`);
+    }
+    if (path.extname(filename) === ".js") {
+      return fs.existsSync(`${withoutExtension}.ts`);
+    }
   }
 }
