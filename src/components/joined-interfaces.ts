@@ -30,10 +30,13 @@ export interface AssistantJSApplicationInitializer {
   runServer(port?: number): AssistantJSSetup;
 
   /** Called via cli command "assistant generate" */
-  runGenerator(): AssistantJSSetup;
+  runGenerator(buildTimeStamp?: number): Promise<AssistantJSSetup>;
 
   /** Creates a ready-to-use AssistantJSSetup instance */
   createAssistantJsSetup(): AssistantJSSetup;
+
+  /** Called via cli command "assistant deploy" */
+  runProviderDeployment(buildTimeStamp: number): Promise<AssistantJSSetup>;
 }
 
 /** Session keys used by AssistantJS for internal purposes */

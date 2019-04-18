@@ -6,6 +6,7 @@ export const componentInterfaces = {
   generator: Symbol("generator"),
   loggerMiddleware: Symbol("logger-middleware"),
   eventHandler: Symbol("event-handler"),
+  deployments: Symbol("deployments"),
 };
 
 export namespace Configuration {

@@ -49,7 +49,17 @@ export interface ContextDeriver {
 /** Interface to fulfill to register a generator (called via cli: "assistant g") */
 export interface CLIGeneratorExtension {
   /**
-   * Called if user users cli "assistant g" command
+   * Called if user used cli "assistant g" command
+   * @param {string} buildPath Path to build directory
+   * @return {void|Promise<void>}
+   */
+  execute(buildPath: string): void | Promise<void>;
+}
+
+/** Interface to fulfill to register a deployment (called via cli: "assistant deploy") */
+export interface CLIDeploymentExtension {
+  /**
+   * Called if user used cli "assistant deploy" command
    * @param {string} buildPath Path to build directory
    * @return {void|Promise<void>}
    */

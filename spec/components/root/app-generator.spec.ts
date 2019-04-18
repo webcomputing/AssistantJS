@@ -47,7 +47,7 @@ describe("GeneratorApplication", function() {
     (fs as any).existsSync = this.spy.existsSync;
 
     /** Create an instance of the GeneratorApplication */
-    this.generatorApplication = new GeneratorApplication(this.baseDir);
+    this.generatorApplication = new GeneratorApplication(this.baseDir, this.buildTimestamp.getTime());
 
     /** Create a spy on the used CLIGeneratorExtension */
     this.generatorExtension = this.assistantJs.container.inversifyInstance.getAll<CLIGeneratorExtension>(componentInterfaces.generator)[0];
@@ -84,7 +84,7 @@ describe("GeneratorApplication", function() {
       });
 
       it("creates the base directory", async function(this: CurrentThisContext) {
-        expect(this.spy.mkdirSync!).toHaveBeenCalledWith(this.baseDir);
+        expect(this.spy.mkdirSync!).toHaveBeenCalledWith(path.join(this.baseDir, this.buildTimestamp.getTime().toString()));
       });
     });
 

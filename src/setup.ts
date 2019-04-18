@@ -10,7 +10,7 @@ export class AssistantJSSetup {
 
   public run(app: MainApplication) {
     this.container.setMainApplication(app);
-    this.container.runMain();
+    return this.container.runMain();
   }
 
   /** Returns true if internal components have already been registered */

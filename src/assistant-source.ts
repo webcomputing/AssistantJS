@@ -12,6 +12,7 @@ export * from "./components/joined-interfaces";
 export { AssistantJSSetup } from "./setup";
 export { ServerApplication } from "./components/root/app-server";
 export { GeneratorApplication } from "./components/root/app-generator";
+export { DeploymentApplication } from "./components/root/app-deployment";
 export { GenericRequestHandler } from "./components/root/generic-request-handler";
 export { defaultBunyan } from "./components/root/default-bunyan";
 export { StateMachineSetup } from "./components/state-machine/state-intent-setup";
