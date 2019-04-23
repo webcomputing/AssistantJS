@@ -221,6 +221,21 @@ describe("EntityDictionary", function() {
         });
       });
 
+      describe("extraction contains similar value", function() {
+        beforeEach(function(this: CurrentThisContext) {
+          createRequestScope(
+            this.specHelper,
+            this.createExtraction({
+              color: "Orange",
+            })
+          );
+        });
+
+        it("returns the correct reference value", function(this: CurrentThisContext) {
+          expect(this.getEntityDictionary().get("color")).toBe("orange");
+        });
+      });
+
       describe("extraction contains unsupported synonym or entity variation", function() {
         beforeEach(function(this: CurrentThisContext) {
           createRequestScope(

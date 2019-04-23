@@ -88,7 +88,9 @@ export class EntityDictionary implements EntityDictionaryInterface {
 
       if (typeof closestSynonym !== "undefined") {
         // Find entity variation that contains the closest synonym
-        const matchedEntity = this.customEntities[name].find(ch => !!closestSynonym && !!ch.synonyms && ch.synonyms.indexOf(closestSynonym) !== -1);
+        const matchedEntity = this.customEntities[name].find(
+          ch => (!!closestSynonym && (!!ch.synonyms && ch.synonyms.indexOf(closestSynonym) !== -1)) || ch.value === closestSynonym
+        );
 
         if (typeof matchedEntity !== "undefined") {
           return matchedEntity.value;

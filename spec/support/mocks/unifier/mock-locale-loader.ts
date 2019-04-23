@@ -23,6 +23,9 @@ export class LocalesLoaderMock implements LocalesLoader {
             value: "yellow",
             synonyms: ["canary", "flaxen", "corn", "bumblebee", "amber", "blonde"],
           },
+          {
+            value: "orange",
+          },
         ],
       },
     };
