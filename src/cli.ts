@@ -48,8 +48,8 @@ export function cli(argv, resolvedApplicationInitializer) {
   /** Initializes new assistantjs project (prototyped currently) */
   const createProject = function(name: string) {
     // Path to new project
-    const projectPath = process.cwd() + "/" + name + "/";
-    const scaffoldDir = __dirname + "/../scaffold/";
+    const projectPath = `${path.resolve(name)}/`;
+    const scaffoldDir = `${path.join(__dirname, "/../scaffold")}/`;
 
     // Create directories
     console.log("Creating project directory..");
@@ -72,7 +72,7 @@ export function cli(argv, resolvedApplicationInitializer) {
       "spec/helpers",
       "spec/support",
     ].forEach(directory => {
-      console.log("Creating " + directory + "..");
+      console.log(`Creating ${directory} ..`);
       fs.mkdirSync(projectPath + directory);
     });
 
@@ -97,22 +97,22 @@ export function cli(argv, resolvedApplicationInitializer) {
 
     // Copy templates!
     copyInstructions.forEach(copyInstruction => {
-      console.log("Creating " + copyInstruction[1] + "..");
-      copyAndReplace(name, scaffoldDir + copyInstruction[0] + ".scaffold", projectPath + copyInstruction[1]);
+      console.log(`Creating ${copyInstruction[1]} ..`);
+      copyAndReplace(name, `${scaffoldDir}${copyInstruction[0]}.scaffold`, projectPath + copyInstruction[1]);
     });
 
     // Create empty files
     ["builds/.keep"].forEach(touchableFile => {
-      console.log("Touching " + touchableFile + "..");
+      console.log(`Touching ${touchableFile} ..`);
       fs.closeSync(fs.openSync(projectPath + touchableFile, "w"));
     });
 
     // Create base TypesScript files
     [
       { filePath: "config/locales/en/translation/main-state.ts", exportString: "{}" },
-      { filePath: "config/locales/en/utterances/invokeGenericIntent.ts", exportString: "[]" },
+      { filePath: "config/locales/en/utterances/invoke-generic-intent.ts", exportString: "[]" },
     ].forEach(({ filePath, exportString }) => {
-      console.log("Creating " + filePath + "..");
+      console.log(`Creating ${filePath} ...`);
       fs.writeFileSync(
         projectPath + filePath,
         `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = ${exportString};`
