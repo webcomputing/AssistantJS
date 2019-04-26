@@ -102,7 +102,7 @@ describe("LocalesLoader", function() {
       });
     });
 
-    it("prioritizes JS files over JSON files", function(this: CurrentThisContext) {
+    fit("prioritizes JS files over JSON and TS over JS and JSON files", function(this: CurrentThisContext) {
       const entities = this.localesLoader.getCustomEntities();
       const utterances = this.localesLoader.getUtteranceTemplates();
 
