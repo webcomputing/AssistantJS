@@ -14,8 +14,10 @@ import { LocalesLoader as ILocalesLoader, PlatformGenerator } from "./public-int
 
 @injectable()
 export class LocalesLoader implements ILocalesLoader {
+  // An array with all extensions that can be loaded by the current environment (e.g. [ts, tsx, js, json, node] for ts-node)
   private static loadableExtensions = Object.keys(require.extensions).map(ext => ext.replace(/\.([a-z]+)$/i, "$1"));
 
+  // Current configuration for "unifier" component
   private configuration: Configuration.Runtime;
 
   // For caching values read from file system
@@ -55,7 +57,8 @@ export class LocalesLoader implements ILocalesLoader {
    */
   public getLocales(): PlatformGenerator.Multilingual<{ translation: any; entities: any; utterances: any }> | undefined {
     if (this.locales !== undefined) {
-      // Use cached data
+      // Use cached data, which is loaded once per instance of LocalesLoader to be able to update changed data, but
+      // on the other hand not excessively read data from files for each function call.
       return this.locales;
     }
 
