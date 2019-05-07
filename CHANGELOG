@@ -48,6 +48,7 @@ version 0.4.0
 - adds possibility to use platform sessions, for example session system of alexa or google assistant, and makes platform sessions the default session storage
 - introduces @filter decorator, which works like a beforeIntentHook, but is made specifically for state redirections (which should be the most common use case for hooks)
 - minor changes and improvements    
+- add CLI command 'assistant deploy'. Allows you to publish your voice application configuration to all registered platforms.
 
 version 0.3.2
 - fixes intent configuration in generator. Entities will be mapped with utterances only once. (@denselmann)

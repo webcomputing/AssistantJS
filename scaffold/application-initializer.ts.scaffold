@@ -1,6 +1,15 @@
-import { AssistantJSApplicationInitializer, AssistantJSSetup, FilterSetup, GeneratorApplication, ServerApplication, StateMachineSetup } from "assistant-source";
+import {
+  AssistantJSApplicationInitializer,
+  AssistantJSSetup,
+  FilterSetup,
+  ServerApplication,
+  StateMachineSetup,
+  DeploymentApplication,
+  GeneratorApplication
+} from "assistant-source";
 import componentConfiguration from "./config/components";
-
+import { MainApplication } from "inversify-components";
+import * as path from "path"
 /**
  * This is AssistantJS's main entrance into your application. With the help of this ApplicationInitializer class, you help AssistantJS
  * to initialize your application for starting the server, generating configuration files or running specs.
@@ -52,6 +61,8 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
 
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
+
+    // Bind all AssistantJS root scope component
     setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
@@ -63,18 +74,41 @@ export class ApplicationInitializer implements AssistantJSApplicationInitializer
   }
 
   /** Called via cli command "assistant generate" */
-  public runGenerator() {
+  public async runGenerator(buildTimeStamp: number = Date.now()) {
+    return this.runApplication(GeneratorApplication, buildTimeStamp);
+  }
+
+  /** Called via cli command "assistant deploy" */
+  public async runProviderDeployment(buildTimeStamp: number = Date.now()) {
+    return this.runApplication(DeploymentApplication, buildTimeStamp);
+  }
+
+  /**
+   * Execute Application within the AssistantJS container scope
+   * @param ApplicationClass Class of @type {MainApplication}
+   * @param buildTimeStamp Path to the global build directory like '{rootDir}/builds'
+   * @returns A current AssistantJS instance 
+   */
+  public async runApplication(
+    ApplicationClass: (new (...args: any[]) => MainApplication),
+    buildTimeStamp: number
+  ) {
     ApplicationInitializer.printUnhandledRejections();
 
     // Create and prepare setup instances
     const setups = this.createAndPrepareSetups();
+
+    // Bind all AssistantJS root scope components
     setups.assistantJs.autobind();
 
     // Create ServerApplication instance - you might want to pass your own express instance here!
-    const serverApplication = new GeneratorApplication(`${process.cwd()}/builds`);
+    const serverApplication = new ApplicationClass(
+      path.join(process.cwd(), "builds"),
+      buildTimeStamp
+    );
 
     // Let's get started!
-    setups.assistantJs.run(serverApplication);
+    await setups.assistantJs.run(serverApplication);
     return setups.assistantJs;
   }
 
