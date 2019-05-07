@@ -484,4 +484,8 @@ export interface LocalesLoader {
   getUtteranceTemplates(): PlatformGenerator.Multilingual<{ [intent: string]: string[] }>;
   /** Returns all custom entity mappings for all languages */
   getCustomEntities(): PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping>;
+  /** Returns all translations for all languages */
+  getTranslations(): PlatformGenerator.Multilingual<{}>;
+  /** Returns all locales for all languages */
+  getLocales(): PlatformGenerator.Multilingual<{}> | undefined;
 }

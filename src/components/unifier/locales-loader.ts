@@ -1,22 +1,31 @@
+import merge = require("lodash/merge");
+
 import * as fs from "fs";
 import { inject, injectable } from "inversify";
 import { Component, getMetaInjectionName } from "inversify-components";
 import * as path from "path";
+import * as requireDir from "require-directory";
+
 import { injectionNames } from "../../injection-names";
+import { I18nConfiguration } from "../i18n/public-interfaces";
 import { Logger } from "../root/public-interfaces";
 import { Configuration } from "./private-interfaces";
 import { LocalesLoader as ILocalesLoader, PlatformGenerator } from "./public-interfaces";
 
 @injectable()
 export class LocalesLoader implements ILocalesLoader {
+  // An array with all extensions that can be loaded by the current environment (e.g. [ts, tsx, js, json, node] for ts-node)
+  private static loadableExtensions = Object.keys(require.extensions).map(ext => ext.replace(/\.([a-z]+)$/i, "$1"));
+
+  // Current configuration for "unifier" component
   private configuration: Configuration.Runtime;
 
   // For caching values read from file system
-  private utterances?: PlatformGenerator.Multilingual<{ [intent: string]: string[] }>;
-  private entities?: PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping>;
+  private locales?: PlatformGenerator.Multilingual<{ translation: any; entities: any; utterances: any }>;
 
   constructor(
     @inject(getMetaInjectionName("core:unifier")) componentMeta: Component<Configuration.Runtime>,
+    @inject(getMetaInjectionName("core:i18n")) private i18nComponentMeta: Component<I18nConfiguration>,
     @inject(injectionNames.logger) private logger: Logger
   ) {
     this.configuration = componentMeta.configuration;
@@ -26,79 +35,110 @@ export class LocalesLoader implements ILocalesLoader {
    * Return the user defined utterance templates for each language found in locales folder
    */
   public getUtteranceTemplates(): PlatformGenerator.Multilingual<{ [intent: string]: string[] }> {
-    if (this.utterances) {
-      // Use cached data
-      return this.utterances;
-    }
-
-    const utterances = {};
-    const utterancesDir = this.configuration.utterancePath;
-
-    if (!fs.existsSync(utterancesDir)) {
-      this.logger.info(`No utterances were loaded because directory is not accessible: ${utterancesDir}`);
-      return {};
-    }
-
-    const languages = fs.readdirSync(utterancesDir);
-    languages.forEach(language => {
-      const utterancePath = path.join(utterancesDir, language, "/utterances.js");
-      utterances[language] = this.loadJsOrJson(utterancePath);
-    });
-
-    return (this.utterances = utterances);
+    return this.extractNamespace("utterances");
   }
 
   /**
    * Return the user defined entities for each language found in locales folder
    */
   public getCustomEntities(): PlatformGenerator.Multilingual<PlatformGenerator.CustomEntityMapping> {
-    if (this.entities) {
-      // Use cached data
-      return this.entities;
-    }
-
-    const entities = {};
-    const localesDir = this.configuration.utterancePath;
-
-    if (!fs.existsSync(localesDir)) {
-      this.logger.info(`No custom entities were loaded because directory is not accessible: ${localesDir}`);
-      return {};
-    }
-
-    const languages = fs.readdirSync(localesDir);
-    languages.forEach(language => {
-      const entitiesPath = path.join(localesDir, language, "entities.js");
-      entities[language] = this.loadJsOrJson(entitiesPath);
-    });
-
-    return (this.entities = entities);
+    return this.extractNamespace("entities");
   }
 
   /**
-   * Loader for JS modules or JSON files. Tries to load a JS module first, then a JSON file.
+   * Return the user defined translations for each language found in locales folder
    */
-  private loadJsOrJson(src: string) {
-    const cwdRelativePath = path.relative(process.cwd(), src);
-    const builtSource = path.join("js", cwdRelativePath);
-
-    const ext = path.extname(cwdRelativePath);
-    const jsSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".js");
-    const jsonSrc = cwdRelativePath.replace(new RegExp(`${ext}$`), "").concat(".json");
-
-    // Load JS module with priority before JSON, because it could also load a JSON of same name
-    const file = this.getFirstExisting(jsSrc, path.join("js", jsSrc), jsonSrc, path.join("js", jsonSrc));
-
-    if (file !== undefined) {
-      return require(file);
-    }
+  public getTranslations() {
+    return this.extractNamespace("translation");
   }
 
-  private getFirstExisting(...paths: string[]) {
-    for (const p of paths) {
-      const absolutP = path.isAbsolute(p) ? p : path.resolve(p);
-      if (fs.existsSync(absolutP)) {
-        return absolutP;
-      }
+  /**
+   * Return the user defined locales for each language
+   */
+  public getLocales(): PlatformGenerator.Multilingual<{ translation: any; entities: any; utterances: any }> | undefined {
+    if (this.locales !== undefined) {
+      // Use cached data, which is loaded once per instance of LocalesLoader to be able to update changed data, but
+      // on the other hand not excessively read data from files for each function call.
+      return this.locales;
+    }
+
+    // Part `rootPath` and the relative path to locales
+    const utterancePath = path.relative(process.cwd(), this.configuration.utterancePath);
+    const rootPath = process.cwd();
+
+    // Load built locales such as TypeScript files in build folder
+    const builtLocales = fs.existsSync(path.join(rootPath, "js", utterancePath))
+      ? LocalesLoader.requireDir(path.join(rootPath, "js", utterancePath))
+      : undefined;
+
+    // Load unbuilt files such as JSON
+    const unbuiltLocales = LocalesLoader.requireDir(path.join(rootPath, utterancePath));
+
+    // Merge both while prioritizing unbuilt, so when testing the lastest TypeScript file outdoes built JavaScript files
+    this.locales = unbuiltLocales === undefined && builtLocales === undefined ? undefined : merge(builtLocales, unbuiltLocales);
+
+    return this.locales;
+  }
+
+  /**
+   * Extract namespace from result of `getLocales`.
+   * @param {string} ns Namespace to be extracted from locales
+   */
+  private extractNamespace(ns: string): PlatformGenerator.Multilingual<any> {
+    return Object.entries(this.getLocales() || {}).reduce((namespace, [lang, locale]) => ({ ...namespace, [lang]: locale[ns] }), {});
+  }
+
+  /**
+   * Returns camelcase of input string
+   */
+  private static camelcase(input: string) {
+    return input.replace(/[\-]+([a-s])/gi, (m, c) => c.toUpperCase());
+  }
+
+  /**
+   * Recursively requires locales from a given directory
+   */
+  private static requireDir(p: string) {
+    const absolutePath = path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+
+    if (!fs.existsSync(absolutePath)) {
+      return undefined;
+    }
+
+    return requireDir(module, path.relative(__dirname, absolutePath), {
+      extensions: LocalesLoader.loadableExtensions,
+      exclude: absPath => LocalesLoader.hasShadowingFile(absPath),
+      visit: (obj, filepath) => LocalesLoader.mergeDirectories(obj, filepath),
+      rename: fn => LocalesLoader.camelcase(fn),
+    });
+  }
+
+  private static mergeDirectories(obj, absPath) {
+    const fn = path.basename(absPath);
+
+    // Extract only `default` or, if not available, object with camelcased name of file
+    let result = obj.default || obj[LocalesLoader.camelcase(path.basename(fn, path.extname(fn)))];
+
+    // If there's a directory with the same name as the file, it's merged but can be overridden by the current file
+    const filenameAsDirname = path.join(path.dirname(absPath), path.basename(absPath, path.extname(__filename)));
+    if (fs.existsSync(filenameAsDirname) && fs.statSync(filenameAsDirname).isDirectory()) {
+      result = { ...LocalesLoader.requireDir(filenameAsDirname), ...result };
+    }
+
+    // Extract only one object from the module: either that one with the camelcase filename as the file or default
+    return result;
+  }
+
+  private static hasShadowingFile(absPath: string) {
+    const filename = path.basename(absPath);
+
+    // Logic to prioritize .ts before .js before .json
+    const withoutExtension = absPath.slice(0, -path.extname(filename).length);
+    if (path.extname(filename) === ".json") {
+      return fs.existsSync(`${withoutExtension}.ts`) || fs.existsSync(`${withoutExtension}.js`);
+    }
+    if (path.extname(filename) === ".js") {
+      return fs.existsSync(`${withoutExtension}.ts`);
     }
   }
 }

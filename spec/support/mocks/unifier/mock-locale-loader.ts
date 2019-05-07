@@ -27,4 +27,12 @@ export class LocalesLoaderMock implements LocalesLoader {
       },
     };
   }
+
+  public getTranslations() {
+    return {};
+  }
+
+  public getLocales() {
+    return undefined;
+  }
 }

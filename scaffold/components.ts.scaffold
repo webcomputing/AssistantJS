@@ -17,10 +17,12 @@ const configuration: AssistantJSConfiguration = {
   "core:i18n": {
     // This is basically the i18next configuration. Check out https://www.i18next.com/ for more information!
     i18nextAdditionalConfiguration: {
-      // This entry is needed and tells i18next where to find your language files.
-      backend: {
-        loadPath: process.cwd() + "/config/locales/{{lng}}/{{ns}}.json",
-      },
+      // Translation resources are automatically loaded from path given in `UnifierConfiguration#utterancePath`, but may be overridden here.
+      // resources: {}
+      // Alternatively you can give a path to a folder with JSON files that can be loaded by i18next
+      // backend: {
+      //   loadPath: process.cwd() + "/config/locales/{{lng}}/{{ns}}.json",
+      // },
       lngs: ["en"],
       fallbackLng: "en",
       // If you encouter problems with i18next, change this to true

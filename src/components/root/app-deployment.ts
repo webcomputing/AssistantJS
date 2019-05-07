@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { Container } from "inversify-components";
+import * as path from "path";
 import { componentInterfaces } from "./private-interfaces";
 import { CLIDeploymentExtension } from "./public-interfaces";
 
@@ -14,6 +15,6 @@ export class DeploymentApplication {
   public async execute(container: Container): Promise<void> {
     // Get all bound deployments and execute them
     const deployments = container.inversifyInstance.getAll<CLIDeploymentExtension>(componentInterfaces.deployments);
-    await Promise.all(deployments.map(deployment => deployment.execute(`${this.buildDir}/${this.buildTimeStamp}`)));
+    await Promise.all(deployments.map(deployment => deployment.execute(path.join(this.buildDir, this.buildTimeStamp.toString()))));
   }
 }

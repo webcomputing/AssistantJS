@@ -2,14 +2,13 @@ import * as fs from "fs";
 import { Component, getMetaInjectionName } from "inversify-components";
 import { resolve } from "path";
 import { LocalesLoader, UnifierConfiguration } from "../../../src/assistant-source";
-import { Configuration } from "../../../src/components/unifier/private-interfaces";
 import { injectionNames } from "../../../src/injection-names";
 import { ThisContext } from "../../this-context";
 
 // tslint:disable no-var-requires
 const deUtterances = require("../../support/mocks/i18n/locale/de/utterances.json");
-const enUtterances = require("../../support/mocks/i18n/locale/en/utterances.js");
-const deEntities = require("../../support/mocks/i18n/locale/de/entities.json");
+const enUtterances = require("../../support/mocks/i18n/locale/en/utterances.ts");
+const { default: deEntities } = require("../../support/mocks/i18n/locale/de/entities.ts");
 const enEntities = require("../../support/mocks/i18n/locale/en/entities.js");
 // tslint:enable no-var-requires
 
@@ -102,7 +101,7 @@ describe("LocalesLoader", function() {
       });
     });
 
-    it("prioritizes JS files over JSON files", function(this: CurrentThisContext) {
+    it("prioritizes JS files over JSON and TS over JS and JSON files", function(this: CurrentThisContext) {
       const entities = this.localesLoader.getCustomEntities();
       const utterances = this.localesLoader.getUtteranceTemplates();
 
@@ -121,7 +120,7 @@ describe("LocalesLoader", function() {
     });
   });
 
-  describe("getUtteranceTemplates", function() {
+  describe("#getUtteranceTemplates", function() {
     it("loads all utterance templates of all languages from file system", function(this: CurrentThisContext) {
       const utterances = this.localesLoader.getUtteranceTemplates();
 
@@ -133,7 +132,7 @@ describe("LocalesLoader", function() {
     });
   });
 
-  describe("getCustomEntities", function() {
+  describe("#getCustomEntities", function() {
     it("loads all custom entities of all languages from file system", function(this: CurrentThisContext) {
       const entities = this.localesLoader.getCustomEntities();
 

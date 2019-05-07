@@ -4,6 +4,7 @@ version 0.5.0
 - adds option to UniferConfiguration that allows to change the way how request extractors are found.
 - adds option to pass component's defaultConfiguration a function that returns a new configuration object
 - passes list of components to except from autobind to inversify-components
+- Loads all TypeScript, JavaScript and JSON files from locales directory, if i18next backend is not configured. `.ts` files shadow `.js` files, `.js` files shadow `.json` files. The folder/file structure is resembled in the final locales object, while the filenames are camelcased, i.e. a folder `main-state` will be a key `mainState`, which will contain all content from that folder. If LocalesLoader finds an ES6 default export or an export the same name as the camelcased file name, only this is taken from the file. In any other case, everything is exported. Files and folders of the same name are merged. An example can be found [here](https://gist.github.com/baflo/b88e636948b6b57c3f07af2672088961).
 
 version 0.4.1
 - fixes typing of StayInContextCallback and ClearContextCallback

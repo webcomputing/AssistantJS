@@ -1,12 +1,18 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import { Component, getMetaInjectionName } from "inversify-components";
 import { Configuration } from "./private-interfaces";
 
 import * as i18next from "i18next";
 import * as i18nextBackend from "i18next-sync-fs-backend";
-import { inject, injectable, multiInject, optional } from "inversify";
+import { inject, injectable } from "inversify";
 import { injectionNames } from "../../injection-names";
 import { Logger } from "../root/public-interfaces";
 
+import * as requireDir from "require-directory";
+
+import { LocalesLoader } from "../unifier/public-interfaces";
 import { TEMPORARY_INTERPOLATION_END, TEMPORARY_INTERPOLATION_START } from "./interpolation-resolver";
 import { arraySplitter, processor } from "./plugins/array-returns-sample.plugin";
 import { processor as templateProcessor } from "./plugins/parse-template-language.plugin";
@@ -25,6 +31,7 @@ export class I18nextWrapper {
   constructor(
     @inject(getMetaInjectionName("core:i18n")) componentMeta: Component<Configuration.Runtime>,
     @inject(injectionNames.logger) logger: Logger,
+    @inject(injectionNames.localesLoader) localesLoader: LocalesLoader,
     returnOnlySample = true
   ) {
     this.component = componentMeta;
@@ -36,7 +43,10 @@ export class I18nextWrapper {
     }
 
     this.instance = Object.assign(Object.create(Object.getPrototypeOf(this.configuration.i18nextInstance)), this.configuration.i18nextInstance);
+
     const i18nextConfiguration = {
+      // If locales are found in `UnifierConfiguration#utterancePath`, pre-populate resources with them. May be overridden by `I18NConfiguration#backend`.
+      ...{ resources: localesLoader.getLocales() },
       ...{ initImmediate: false, missingInterpolationHandler: this.onInterpolationMissing.bind(this) },
       ...this.configuration.i18nextAdditionalConfiguration,
     };

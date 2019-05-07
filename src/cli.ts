@@ -10,6 +10,7 @@ import * as commander from "commander";
 // Import node.js filesystem module
 import * as fs from "fs";
 import { Component } from "inversify-components";
+import * as path from "path";
 import { AssistantJSApplicationInitializer } from "./components/joined-interfaces";
 
 // Get package.json data
@@ -51,8 +52,8 @@ export function cli(argv, resolvedApplicationInitializer) {
   /** Initializes new assistantjs project (prototyped currently) */
   const createProject = function(name: string) {
     // Path to new project
-    const projectPath = process.cwd() + "/" + name + "/";
-    const scaffoldDir = __dirname + "/../scaffold/";
+    const projectPath = `${path.resolve(name)}/`;
+    const scaffoldDir = `${path.join(__dirname, "/../scaffold")}/`;
 
     // Create directories
     console.log("Creating project directory..");
@@ -67,13 +68,15 @@ export function cli(argv, resolvedApplicationInitializer) {
       "config",
       "config/locales",
       "config/locales/en",
+      "config/locales/en/translation",
+      "config/locales/en/utterances",
       "spec",
       "spec/app",
       "spec/app/states",
       "spec/helpers",
       "spec/support",
     ].forEach(directory => {
-      console.log("Creating " + directory + "..");
+      console.log(`Creating ${directory} ..`);
       fs.mkdirSync(projectPath + directory);
     });
 
@@ -98,20 +101,26 @@ export function cli(argv, resolvedApplicationInitializer) {
 
     // Copy templates!
     copyInstructions.forEach(copyInstruction => {
-      console.log("Creating " + copyInstruction[1] + "..");
-      copyAndReplace(name, scaffoldDir + copyInstruction[0] + ".scaffold", projectPath + copyInstruction[1]);
+      console.log(`Creating ${copyInstruction[1]} ..`);
+      copyAndReplace(name, `${scaffoldDir}${copyInstruction[0]}.scaffold`, projectPath + copyInstruction[1]);
     });
 
     // Create empty files
     ["builds/.keep"].forEach(touchableFile => {
-      console.log("Touching " + touchableFile + "..");
+      console.log(`Touching ${touchableFile} ..`);
       fs.closeSync(fs.openSync(projectPath + touchableFile, "w"));
     });
 
-    // Create empty json files
-    ["config/locales/en/translation.json", "config/locales/en/utterances.json"].forEach(filePath => {
-      console.log("Creating " + filePath + "..");
-      fs.writeFileSync(projectPath + filePath, "{}");
+    // Create base TypesScript files
+    [
+      { filePath: "config/locales/en/translation/main-state.ts", exportString: "{}" },
+      { filePath: "config/locales/en/utterances/invoke-generic-intent.ts", exportString: "[]" },
+    ].forEach(({ filePath, exportString }) => {
+      console.log(`Creating ${filePath} ...`);
+      fs.writeFileSync(
+        projectPath + filePath,
+        `export const ${path.basename(filePath, path.extname(filePath)).replace(/[\-]+([a-z])/gi, (m, c) => c.toUpperCase())} = ${exportString};`
+      );
     });
   };
 

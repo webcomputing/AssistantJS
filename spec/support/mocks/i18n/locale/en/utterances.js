@@ -1,3 +1,3 @@
 module.exports = {
-  testIntent: ["This is a test", "A second test utterances"],
-};
+  "this should be shadowed by utterances.ts": true
+}
